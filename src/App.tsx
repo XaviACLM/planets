@@ -44,7 +44,8 @@ function App() {
 					</label>
 				)}
 			</div>
-			<ZodiacWheel />
+			
+			<ZodiacWheel showLabels={showLabels}/>
 			
 		</div>
 	)

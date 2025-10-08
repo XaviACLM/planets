@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Observer, Body, Equator, GeoVector } from "astronomy-engine";
 
+import { ConditionalRender } from "./ConditionalRender"
+
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
 import geminiSymbol from "./assets/zodiac-symbols/Gemini.png"
@@ -42,7 +44,7 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel() {
+function ZodiacWheel({ showLabels }: {showLabels: boolean}) {
 	
 	const radius = 35; // percent of viewport
 	const symbolRadius = 40;
@@ -154,27 +156,29 @@ function ZodiacWheel() {
 					);
 				})}
 				
-				{zodiac.map((symbol, i) => {
-					const a = ((2*i-1)/24) * 2 * Math.PI +0.01;
-					const x = 50 + sectorRadius * Math.cos(a);
-					const y = 50 + sectorRadius * Math.sin(a);
-					const r = (a * 180) / Math.PI + 180;
-					return (
-						<text
-							key={i}
-							x={x}
-							y={y}
-							width={symbolSize}
-							height={symbolSize}
-							fontSize="1.5"
-							fontWeight="bold"
-							transform={`rotate(${r}, ${x}, ${y})`}
-							style={{filter:"invert(1)", fontVariant: "small-caps"}}
-						>
-							{symbol}
-						</text>
-					);
-				})}
+				<ConditionalRender condition={showLabels}>
+					{zodiac.map((symbol, i) => {
+						const a = ((2*i-1)/24) * 2 * Math.PI +0.01;
+						const x = 50 + sectorRadius * Math.cos(a);
+						const y = 50 + sectorRadius * Math.sin(a);
+						const r = (a * 180) / Math.PI + 180;
+						return (
+							<text
+								key={i}
+								x={x}
+								y={y}
+								width={symbolSize}
+								height={symbolSize}
+								fontSize="1.5"
+								fontWeight="bold"
+								transform={`rotate(${r}, ${x}, ${y})`}
+								style={{filter:"invert(1)", fontVariant: "small-caps"}}
+							>
+								{symbol}
+							</text>
+						);
+					})}
+				</ConditionalRender>
 				
 				{bodies.map((body, i) => {
 					const a = bodyAngles.get(body);
@@ -195,27 +199,29 @@ function ZodiacWheel() {
 					);
 				})}
 				
-				{bodies.map((body, i) => {
-					const a = bodyAngles.get(body);
-					const x = 50 + planetRadius * Math.cos(a);
-					const y = 50 + planetRadius * Math.sin(a);
-					const r = (a * 180) / Math.PI + 180;
-					return (
-						<text
-							key={i}
-							x={x+0.6+symbolSize/2}
-							y={y+0.6}
-							width={symbolSize}
-							height={symbolSize}
-							fontSize="1.5"
-							fontWeight="bold"
-							transform={`rotate(${r}, ${x}, ${y})`}
-							style={{filter:"invert(1)", fontVariant: "small-caps"}}
-						>
-							{body}
-						</text>
-					);
-				})}
+				<ConditionalRender condition={showLabels}>
+					{bodies.map((body, i) => {
+						const a = bodyAngles.get(body);
+						const x = 50 + planetRadius * Math.cos(a);
+						const y = 50 + planetRadius * Math.sin(a);
+						const r = (a * 180) / Math.PI + 180;
+						return (
+							<text
+								key={i}
+								x={x+0.6+symbolSize/2}
+								y={y+0.6}
+								width={symbolSize}
+								height={symbolSize}
+								fontSize="1.5"
+								fontWeight="bold"
+								transform={`rotate(${r}, ${x}, ${y})`}
+								style={{filter:"invert(1)", fontVariant: "small-caps"}}
+							>
+								{body}
+							</text>
+						);
+					})}
+				</ConditionalRender>
 				
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = ((2*i-1)/24) * 2 * Math.PI;
