@@ -206,7 +206,7 @@ print(c)
 
 # right, that worked. so we know that we can compute the minimum em to a regular arrangement with:
 
-def em_distance_with_known_basis(a1: List[float], a2: List[float], i1:int, i2:int, n:int):
+def em_distance_with_known_basis(a1: List[float], a2: List[float], i1:int, i2:int, n:int) -> float:
     #print(n,i1,i2)
     #assert abs(a1[i1%n]-a2[i2%n])<1e-10
     assert len(a1)==len(a2)==n
@@ -217,7 +217,7 @@ def em_distance_with_known_basis(a1: List[float], a2: List[float], i1:int, i2:in
         d += distance(a1[i1a], a2[i2a])
     return d
 
-def min_em_distance_to_regular(arrangement: List[float], n:int):
+def min_em_distance_to_regular(arrangement: List[float], n:int) -> float:
     assert len(arrangement) == n
 
     distances = []
@@ -326,8 +326,8 @@ class Node(Enum):
     SUN = 0
     MOON = 1
     ASCENDANT = 2
-    MOON_ASCENDING = 3
-    MOON_DESCENDING = 4
+    LUNAR_ASCENDING = 3
+    LUNAR_DESCENDING = 4
     MERCURY = 5
     MARS = 6
     VENUS = 7
@@ -345,7 +345,13 @@ class Aspect:
     percentile: float
 
     
-def find_aspects(positions: Dict[Node, float], threshold_pairs: float = 0.99, threshold_grands: float = 0.999) -> List[Aspect]:
+def find_aspects(
+    positions: Dict[Node, float],
+    threshold_pairs: float = 0.95,
+    threshold_grand_trines: float = 0.99,
+    threshold_grand_squares: float = 0.995,
+    threshold_grand_sextiles: float = 0.999
+) -> List[Aspect]:
 
     # threshold from 0 to 1, discards everything with lower quantile
     
@@ -354,25 +360,28 @@ def find_aspects(positions: Dict[Node, float], threshold_pairs: float = 0.99, th
     for n1, n2 in combinations(Node, 2):
         p1, p2 = positions[n1], positions[n2]
         d = distance(p1, p2)
-        if d<pi*(1-threshold_pairs): # 90th percentile conjunction
+        if d<pi*(1-threshold_pairs):
             aspects.append(Aspect(AspectType.CONJUNCTION, (n1, n2), d, 100*(1-d/pi)))
-        elif abs(d-pi/3)<pi*(1-threshold_pairs): # 90th percentile sextile
+        if abs(d-pi/3)<pi*(1-threshold_pairs):
             aspects.append(Aspect(AspectType.SEXTILE, (n1, n2), abs(d-pi/3), 100*(1-abs(d-pi/3)/pi)))
-        elif abs(d-pi/2)<pi*(1-threshold_pairs): # 90th percentile square
+        if abs(d-pi/2)<pi*(1-threshold_pairs):
             aspects.append(Aspect(AspectType.SQUARE, (n1, n2), abs(d-pi/2), 100*(1-abs(d-pi/2)/pi)))
-        elif abs(d-pi*2/3)<pi*(1-threshold_pairs): # 90th percentile trine
+        if abs(d-pi*2/3)<pi*(1-threshold_pairs):
             aspects.append(Aspect(AspectType.TRINE, (n1, n2), abs(d-pi*2/3), 100*(1-abs(d-pi*2/3)/pi)))
-        elif abs(d-pi)<pi*(1-threshold_pairs): # 90th percentile opposition
+        if abs(d-pi)<pi*(1-threshold_pairs):
             aspects.append(Aspect(AspectType.OPPOSITION, (n1, n2), abs(d-pi), 100*(1-abs(d-pi)/pi)))
+
+    threshold_grands = [None, None, None, threshold_grand_trines, threshold_grand_squares, None, threshold_grand_sextiles]
+    aspect_grands = [None, None, None, AspectType.GRAND_TRINE, AspectType.GRAND_SQUARE, None, AspectType.GRAND_SEXTILE]
 
     for n in [3, 4, 6]:
         for node_subset in combinations(Node, n):
             positions_subset = [positions[node] for node in node_subset]
             error = min_em_distance_to_regular(positions_subset, n)
             quantile = find_quantile(error, n)
-            if quantile > threshold_grands:
+            if quantile > threshold_grands[n]:
                 aspects.append(Aspect(
-                    [None, None, None, AspectType.GRAND_TRINE, AspectType.GRAND_SQUARE, None, AspectType.GRAND_SEXTILE][n],
+                    aspect_grands[n],
                     node_subset,
                     error,
                     quantile*100
@@ -386,8 +395,8 @@ fake_positions = {
     Node.SUN: 1,
     Node.MOON: 2,
     Node.ASCENDANT: 3,
-    Node.MOON_ASCENDING: 4,
-    Node.MOON_DESCENDING: 5,
+    Node.LUNAR_ASCENDING: 4,
+    Node.LUNAR_DESCENDING: 5,
     Node.MERCURY: 6,
     Node.MARS: 7,
     Node.VENUS: 8,
@@ -401,8 +410,8 @@ fake_positions = {
     Node.SUN: 1.1,
     Node.MOON: 2,
     Node.ASCENDANT: 3.3,
-    Node.MOON_ASCENDING: 4.7,
-    Node.MOON_DESCENDING: 5.1,
+    Node.LUNAR_ASCENDING: 4.7,
+    Node.LUNAR_DESCENDING: 5.1,
     Node.MERCURY: 6,
     Node.MARS: 7.3,
     Node.VENUS: 8.7,
@@ -413,7 +422,5 @@ fake_positions = {
     Node.SATURN: 13.1
 }
 
-for aspect in find_aspects(fake_positions, 0.95, 0.995):
+for aspect in find_aspects(fake_positions):
     print(aspect)
-
-# the threshold should probably be more agressive for grands. it doesn't make sense that they'd come up as much as the 2-element ones. in fact, we might do best to have a set maximum on the error - maybe a teeny bit lenient.
