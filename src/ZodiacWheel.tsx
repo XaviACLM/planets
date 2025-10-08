@@ -223,6 +223,25 @@ function ZodiacWheel({ showLabels }: {showLabels: boolean}) {
 					})}
 				</ConditionalRender>
 				
+				/*
+				a notion of impressiveness: vs n points distributed randomly, if we were to compute their error wrt being an n-gon (sth sth minimal transport), at what percentile is this particular configuration?
+				
+				sth sth minimal transport isn't obvious, is it? 
+				the transports will be in order. easy to prove
+				
+				wait, but that implies working through all possible permutations. no bueno!
+				we should restrict ourselves to some maximum supremum distance
+				should make it easier to enumerate candidates, then
+				
+				or something like it...
+				somewhat straightforward to enumerate all 6 element subsequences
+				now do the same but during exploration put some constraints on distances between the elements
+				but what constraints?
+				some parts of this idea don't sit well with me. i wouldn't want to discard
+				a perfect-except-for-one grand sextile, but this would.
+				can we keep, during exploration, a prelimiary "minimum error"? and discard above a certain error, below a certain impressiveness?
+				*/
+				
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = ((2*i-1)/24) * 2 * Math.PI;
 					const endA = ((2*i+1)/24) * 2 * Math.PI;
