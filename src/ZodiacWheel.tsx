@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { ConditionalRender } from "./ConditionalRender"
 import { Node, NodeToBody } from './astro.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
