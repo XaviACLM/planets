@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Body, GeoVector } from "astronomy-engine";
 
 import ZodiacWheel from './ZodiacWheel'
-import { Node, NodeToBody, findAspects } from './astro.ts'
+import { Node, NodeToBody, findAspects, type Aspect } from './astro.ts'
 
 
 function App() {
@@ -11,6 +11,7 @@ function App() {
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [showLabels, setShowLabels] = useState<boolean>(true);
 	const [nodeAngles, setNodeAngles] = useState<Map<Node, number> | null>(null);
+	const [aspects, setAspects] = useState<Aspect[] | null>(null);
 	
 	
 	const correct_for_aberration = true;
@@ -28,7 +29,14 @@ function App() {
 			tempNodeAngles.set(node, Math.atan2(v.y, v.x));
 		}
 			
+		tempNodeAngles.set(Node.ASCENDANT, 1);
+		tempNodeAngles.set(Node.LUNAR_ASCENDING, 2);
+		tempNodeAngles.set(Node.LUNAR_DESCENDING, 3);
+			
 		setNodeAngles(tempNodeAngles);
+		
+		setAspects(findAspects(tempNodeAngles));
+		
 	}, []);
 	
 	return (
@@ -70,7 +78,7 @@ function App() {
 				)}
 			</div>
 			
-			<ZodiacWheel showLabels={showLabels} nodeAngles={nodeAngles}/>
+			<ZodiacWheel showLabels={showLabels} nodeAngles={nodeAngles} aspects={aspects}/>
 			
 		</div>
 	)

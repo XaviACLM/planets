@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Node, NodeToBody } from './astro.ts'
+import { Node, NodeToBody, type Aspect, AspectKind} from './astro.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
@@ -42,16 +42,22 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngles: Map<Node, number>}) {
+function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
+	showLabels: boolean,
+	nodeAngles: Map<Node, number>,
+	aspects: Aspect[]
+}) {
 	
 	const radius = 35; // percent of viewport
 	const symbolRadius = 40;
 	const hoveredSymbolRadius = 42;
 	const sectorRadius = 45;
 	const planetRadius = 30;
+	const aspectRadius = 20;
 	
 	const symbolSize = 4;
 	const strokeWidthPrimary = 0.15;
+	const strokeWidthSecondary = 0.1;
 	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
@@ -95,6 +101,10 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 				style={{ width: "100%", height: "100%" }}
 			>
 				<circle cx="50%" cy="50%" r={radius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={radius-0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
+				
+				<circle cx="50%" cy="50%" r={aspectRadius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
 				
 				<image
 					key={-1}
@@ -206,6 +216,33 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 							>
 								{node}
 							</text>
+						);
+					})
+				}
+				
+				{aspects != null && 
+					aspects.map((aspect, i) => {
+						
+						if (aspect.nodes.length > 2) {
+							return null;
+						}
+						
+						const as: number[] = aspect.nodes.map( (node) => nodeAngles.get(node));
+						const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
+						const ys: number[] = as.map( (a) => 50 + aspectRadius * Math.sin(a));
+						
+						const pathData = [
+							`M ${xs[0]} ${ys[0]}`,
+							`L ${xs[1]} ${ys[1]}`,
+							`Z`
+						].join(" ");
+						return (
+							<path
+								key={i}
+								d={pathData}
+								stroke="white"
+								strokeWidth={strokeWidthSecondary}
+							/>
 						);
 					})
 				}

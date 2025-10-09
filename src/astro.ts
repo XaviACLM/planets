@@ -22,6 +22,8 @@ export function emDistanceWithKnownBasis(
 	n: number
 ): number {
 	let d = 0;
+	if (i1 < 0) {i1 = n+i1}
+	if (i2 < 0) {i2 = n+i2}
 	for (let i = 0; i < n; i++) {
 		const i1a = (i1 + i) % n;
 		const i2a = (i2 + i) % n;
@@ -104,7 +106,7 @@ export const NodeToBody: Partial<Record<Node, Body>> = {
 	[Node.PLUTO]: Body.Pluto,
 };
 
-export enum AspectType {
+export enum AspectKind {
 	CONJUNCTION = 0,
 	SEXTILE = 1,
 	SQUARE = 2,
@@ -116,14 +118,14 @@ export enum AspectType {
 }
 
 export interface Aspect {
-	type: AspectType;
-	positions: Node[];
+	kind: AspectKind;
+	nodes: Node[];
 	error: number;
 	percentile: number;
 }
 
 export function findAspects(
-	positions: Record<Node, number>,
+	positions: Map<Node, number>,
 	thresholdPairs: number = 0.95,
 	thresholdGrandTrines: number = 0.99,
 	thresholdGrandSquares: number = 0.995,
@@ -133,53 +135,52 @@ export function findAspects(
 
 	const PI = Math.PI;
 
-	// Pairwise aspects
-	const nodes = Object.values(Node).filter(v => typeof v === "number") as Node[];
+	const nodes = Object.values(Node).filter(v => typeof v === "string") as Node[];
 
 	for (let i = 0; i < nodes.length; i++) {
 		for (let j = i + 1; j < nodes.length; j++) {
 			const n1 = nodes[i];
 			const n2 = nodes[j];
-			const p1 = positions[n1];
-			const p2 = positions[n2];
+			const p1 = positions.get(n1);
+			const p2 = positions.get(n2);
 			const d = distance(p1, p2);
 
 			if (d < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectType.CONJUNCTION,
-					positions: [n1, n2],
+					type: AspectKind.CONJUNCTION,
+					nodes: [n1, n2],
 					error: d,
 					percentile: 100 * (1 - d / PI),
 				});
 			}
 			if (Math.abs(d - PI / 3) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectType.SEXTILE,
-					positions: [n1, n2],
+					type: AspectKind.SEXTILE,
+					nodes: [n1, n2],
 					error: Math.abs(d - PI / 3),
 					percentile: 100 * (1 - Math.abs(d - PI / 3) / PI),
 				});
 			}
 			if (Math.abs(d - PI / 2) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectType.SQUARE,
-					positions: [n1, n2],
+					type: AspectKind.SQUARE,
+					nodes: [n1, n2],
 					error: Math.abs(d - PI / 2),
 					percentile: 100 * (1 - Math.abs(d - PI / 2) / PI),
 				});
 			}
 			if (Math.abs(d - (2 * PI) / 3) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectType.TRINE,
-					positions: [n1, n2],
+					type: AspectKind.TRINE,
+					nodes: [n1, n2],
 					error: Math.abs(d - (2 * PI) / 3),
 					percentile: 100 * (1 - Math.abs(d - (2 * PI) / 3) / PI),
 				});
 			}
 			if (Math.abs(d - PI) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectType.OPPOSITION,
-					positions: [n1, n2],
+					type: AspectKind.OPPOSITION,
+					nodes: [n1, n2],
 					error: Math.abs(d - PI),
 				percentile: 100 * (1 - Math.abs(d - PI) / PI),
 				});
@@ -193,10 +194,10 @@ export function findAspects(
 		6: thresholdGrandSextiles,
 	};
 
-	const aspectGrands: Record<number, AspectType | null> = {
-		3: AspectType.GRAND_TRINE,
-		4: AspectType.GRAND_SQUARE,
-		6: AspectType.GRAND_SEXTILE,
+	const aspectGrands: Record<number, AspectKind | null> = {
+		3: AspectKind.GRAND_TRINE,
+		4: AspectKind.GRAND_SQUARE,
+		6: AspectKind.GRAND_SEXTILE,
 	};
 
 	const combinations = <T>(arr: T[], k: number): T[][] => {
@@ -213,13 +214,13 @@ export function findAspects(
 		const aspectType = aspectGrands[n];
 
 		for (const subset of combinations(nodes, n)) {
-			const positionsSubset = subset.map(node => positions[node]);
+			const positionsSubset = subset.map(node => positions.get(node));
 			const error = minEmDistanceToRegular(positionsSubset, n);
 			const quantile = findQuantile(error, n);
 			if (quantile > t) {
 				aspects.push({
 					type: aspectType,
-					positions: subset,
+					nodes: subset,
 					error,
 					percentile: quantile * 100,
 				});
