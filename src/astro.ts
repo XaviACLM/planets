@@ -74,19 +74,19 @@ export function findQuantile(d: number, n: number): number {
 }
 
 export enum Node {
-	SUN = 0,
-	MOON = 1,
-	ASCENDANT = 2,
-	LUNAR_ASCENDING = 3,
-	LUNAR_DESCENDING = 4,
-	MERCURY = 5,
-	MARS = 6,
-	VENUS = 7,
-	JUPITER = 8,
-	NEPTUNE = 9,
-	PLUTO = 10,
-	URANUS = 11,
-	SATURN = 12,
+	SUN = "Sun",
+	MOON = "Moon",
+	ASCENDANT = "Ascendant",
+	LUNAR_ASCENDING = "Lunar ↑",
+	LUNAR_DESCENDING = "Lunar ↓",
+	MERCURY = "Mercury",
+	MARS = "Mars",
+	VENUS = "Venus",
+	JUPITER = "Jupiter",
+	NEPTUNE = "Neptune",
+	PLUTO = "Pluto",
+	URANUS = "Uranus",
+	SATURN = "Saturn",
 }
 
 import { Body } from "astronomy-engine";

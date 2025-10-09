@@ -22,15 +22,14 @@ function App() {
 	// TODO compute aspects
 	useEffect(() => {
 		const tempNodeAngles = new Map<Node, number>();
-		
+			
 		for ( const [node, body] of Object.entries(NodeToBody)) {
 			const v = GeoVector(body, new Date(), correct_for_aberration);
 			tempNodeAngles.set(node, Math.atan2(v.y, v.x));
 		}
-		
+			
 		setNodeAngles(tempNodeAngles);
-	})
-	
+	}, []);
 	
 	return (
 		<div style={{ position: "relative", height: "100vh" }}>

@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { Body, GeoVector } from "astronomy-engine";
-
 import { ConditionalRender } from "./ConditionalRender"
 import { Node, NodeToBody } from './astro.ts'
 
@@ -56,9 +54,6 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 	const symbolSize = 4;
 	const strokeWidthPrimary = 0.15;
 	
-	const correct_for_aberration = true;
-	
-	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
 		[Zodiac.Taurus, taurusSymbol],
@@ -74,29 +69,22 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 		[Zodiac.Pisces, piscesSymbol]
 	]);
 	
-	const bodySymbols = new Map<Body, string>([
-		[Body.Sun, sunSymbol],
-		[Body.Moon, moonSymbol],
-		[Body.Mercury, mercurySymbol],
-		[Body.Venus, venusSymbol],
-		[Body.Mars, marsSymbol],
-		[Body.Jupiter, jupiterSymbol],
-		[Body.Saturn, saturnSymbol],
-		[Body.Uranus, uranusSymbol],
-		[Body.Neptune, neptuneSymbol],
-		[Body.Pluto, plutoSymbol]
+	const nodeSymbols = new Map<Node, string>([
+		[Node.SUN, sunSymbol],
+		[Node.MOON, moonSymbol],
+		[Node.MERCURY, mercurySymbol],
+		[Node.VENUS, venusSymbol],
+		[Node.MARS, marsSymbol],
+		[Node.JUPITER, jupiterSymbol],
+		[Node.SATURN, saturnSymbol],
+		[Node.URANUS, uranusSymbol],
+		[Node.NEPTUNE, neptuneSymbol],
+		[Node.PLUTO, plutoSymbol]
 	]);
 	
-	const zodiac: Body[] = Array.from(zodiacSymbols.keys());
-	const bodies: Body[] = Array.from(bodySymbols.keys());
-	
-	const bodyAngles = new Map<Body, number>();
-	
-	for (let body of bodies) {
-		const v = GeoVector(body, new Date(), correct_for_aberration);
-		bodyAngles.set(body, Math.atan2(v.y, v.x));
-	}
-	
+	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
+	// TODO remove this when we have all nodes
+	const nodes: Node[] = Array.from(nodeSymbols.keys());
 	
 	const [hovered, setHovered] = React.useState<number | null>(null);
 	
@@ -154,8 +142,8 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 					);
 				})}
 				
-				<ConditionalRender condition={showLabels}>
-					{zodiac.map((symbol, i) => {
+				{showLabels && 
+					zodiac.map((symbol, i) => {
 						const a = ((2*i-1)/24) * 2 * Math.PI +0.01;
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 + sectorRadius * Math.sin(a);
@@ -175,31 +163,33 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 								{symbol}
 							</text>
 						);
-					})}
-				</ConditionalRender>
+					})
+				}
 				
-				{bodies.map((body, i) => {
-					const a = bodyAngles.get(body);
-					const x = 50 + planetRadius * Math.cos(a);
-					const y = 50 + planetRadius * Math.sin(a);
-					const r = (a * 180) / Math.PI + 90;
-					return (
-						<image
-							key={i}
-							href={bodySymbols.get(body)}
-							x={x-symbolSize/2}
-							y={y-symbolSize/2}
-							width={symbolSize}
-							height={symbolSize}
-							transform={`rotate(${r}, ${x}, ${y})`}
-							style={{filter:"invert(1)"}}
-						/>
-					);
-				})}
+				{nodeAngles != null && 
+					nodes.map((node, i) => {
+						const a = nodeAngles.get(node);
+						const x = 50 + planetRadius * Math.cos(a);
+						const y = 50 + planetRadius * Math.sin(a);
+						const r = (a * 180) / Math.PI + 90;
+						return (
+							<image
+								key={i}
+								href={nodeSymbols.get(node)}
+								x={x-symbolSize/2}
+								y={y-symbolSize/2}
+								width={symbolSize}
+								height={symbolSize}
+								transform={`rotate(${r}, ${x}, ${y})`}
+								style={{filter:"invert(1)"}}
+							/>
+						);
+					})
+				}
 				
-				<ConditionalRender condition={showLabels}>
-					{bodies.map((body, i) => {
-						const a = bodyAngles.get(body);
+				{nodeAngles != null && showLabels && 
+					nodes.map((node, i) => {
+						const a = nodeAngles.get(node);
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 + planetRadius * Math.sin(a);
 						const r = (a * 180) / Math.PI + 180;
@@ -215,12 +205,12 @@ function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngle
 								transform={`rotate(${r}, ${x}, ${y})`}
 								style={{filter:"invert(1)", fontVariant: "small-caps"}}
 							>
-								{body}
+								{node}
 							</text>
 						);
-					})}
-				</ConditionalRender>
-				
+					})
+				}
+
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = ((2*i-1)/24) * 2 * Math.PI;
 					const endA = ((2*i+1)/24) * 2 * Math.PI;
