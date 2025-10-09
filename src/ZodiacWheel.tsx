@@ -58,6 +58,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 	const symbolSize = 4;
 	const strokeWidthPrimary = 0.15;
 	const strokeWidthSecondary = 0.1;
+	const strokeWidthTertiary = 0.05;
 	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
@@ -106,6 +107,10 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 				<circle cx="50%" cy="50%" r={aspectRadius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
 				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
 				
+				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
+				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
+				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
+
 				<image
 					key={-1}
 					href={earthSymbol}

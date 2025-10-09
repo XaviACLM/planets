@@ -79,8 +79,8 @@ export enum Node {
 	SUN = "Sun",
 	MOON = "Moon",
 	ASCENDANT = "Ascendant",
-	LUNAR_ASCENDING = "Lunar ↑",
-	LUNAR_DESCENDING = "Lunar ↓",
+	LUNAR_ASCENDING = "Lunar Ascending",
+	LUNAR_DESCENDING = "Lunar Descending",
 	MERCURY = "Mercury",
 	MARS = "Mars",
 	VENUS = "Venus",
@@ -107,14 +107,14 @@ export const NodeToBody: Partial<Record<Node, Body>> = {
 };
 
 export enum AspectKind {
-	CONJUNCTION = 0,
-	SEXTILE = 1,
-	SQUARE = 2,
-	TRINE = 3,
-	OPPOSITION = 4,
-	GRAND_SEXTILE = 5,
-	GRAND_SQUARE = 6,
-	GRAND_TRINE = 7,
+	CONJUNCTION = "Conjunction",
+	SEXTILE = "Sextile",
+	SQUARE = "Square",
+	TRINE = "Trine",
+	OPPOSITION = "Opposition",
+	GRAND_SEXTILE = "Grand Sextile",
+	GRAND_SQUARE = "Grand Square",
+	GRAND_TRINE = "Grand Trine",
 }
 
 export interface Aspect {
@@ -147,7 +147,7 @@ export function findAspects(
 
 			if (d < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectKind.CONJUNCTION,
+					kind: AspectKind.CONJUNCTION,
 					nodes: [n1, n2],
 					error: d,
 					percentile: 100 * (1 - d / PI),
@@ -155,7 +155,7 @@ export function findAspects(
 			}
 			if (Math.abs(d - PI / 3) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectKind.SEXTILE,
+					kind: AspectKind.SEXTILE,
 					nodes: [n1, n2],
 					error: Math.abs(d - PI / 3),
 					percentile: 100 * (1 - Math.abs(d - PI / 3) / PI),
@@ -163,7 +163,7 @@ export function findAspects(
 			}
 			if (Math.abs(d - PI / 2) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectKind.SQUARE,
+					kind: AspectKind.SQUARE,
 					nodes: [n1, n2],
 					error: Math.abs(d - PI / 2),
 					percentile: 100 * (1 - Math.abs(d - PI / 2) / PI),
@@ -171,7 +171,7 @@ export function findAspects(
 			}
 			if (Math.abs(d - (2 * PI) / 3) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectKind.TRINE,
+					kind: AspectKind.TRINE,
 					nodes: [n1, n2],
 					error: Math.abs(d - (2 * PI) / 3),
 					percentile: 100 * (1 - Math.abs(d - (2 * PI) / 3) / PI),
@@ -179,7 +179,7 @@ export function findAspects(
 			}
 			if (Math.abs(d - PI) < PI * (1 - thresholdPairs)) {
 				aspects.push({
-					type: AspectKind.OPPOSITION,
+					kind: AspectKind.OPPOSITION,
 					nodes: [n1, n2],
 					error: Math.abs(d - PI),
 				percentile: 100 * (1 - Math.abs(d - PI) / PI),
@@ -219,7 +219,7 @@ export function findAspects(
 			const quantile = findQuantile(error, n);
 			if (quantile > t) {
 				aspects.push({
-					type: aspectType,
+					kind: aspectType,
 					nodes: subset,
 					error,
 					percentile: quantile * 100,

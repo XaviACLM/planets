@@ -1,0 +1,56 @@
+.aspect-menu {
+    padding: 0.5rem;
+    overflow-y: auto;
+    height: 100vh;
+    background: black;
+	color: white;
+    
+	scrollbar-width: none;
+    //scrollbar-color: #666 black;
+}
+
+.aspect-item {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    cursor: pointer;
+}
+
+.aspect-item:hover {
+    background-color: #222;
+    transition: background-color .3s ease-in-out;
+}
+
+.aspect-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 2rem;
+}
+
+.node-icons {
+    display: flex;
+    margin-right: 1rem;
+}
+
+.node-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.25rem;
+}
+
+.aspect-values {
+    flex-grow: 1;
+    text-align: right;
+	font-size: 0.7em;
+    margin-right: 0.5rem;
+}
+
+.delete-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    //color: red;
+    color: white;
+	padding: 0;
+    font-size: 1rem;
+}

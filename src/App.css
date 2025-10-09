@@ -1,0 +1,20 @@
+.app-container {
+	display: flex;
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+.sidebar {
+	width: 340px;
+	flex-shrink: 0;
+}
+
+.wheel-area {
+	flex: 1;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+}
