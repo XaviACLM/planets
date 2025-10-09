@@ -1,10 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+import { Body, GeoVector } from "astronomy-engine";
+
 import ZodiacWheel from './ZodiacWheel'
+import { Node, NodeToBody, findAspects } from './astro.ts'
+
 
 function App() {
 	
-	const [menuOpen, setMenuOpen] = useState(false);
-	const [showLabels, setShowLabels] = useState(true);
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	const [showLabels, setShowLabels] = useState<boolean>(true);
+	const [nodeAngles, setNodeAngles] = useState<Map<Node, number> | null>(null);
+	
+	
+	const correct_for_aberration = true;
+	
+	// TODO find ascendant (position), lunar ascending, lunar descending
+	// TODO menu on the side
+	
+	// compute positions
+	// TODO compute aspects
+	useEffect(() => {
+		const tempNodeAngles = new Map<Node, number>();
+		
+		for ( const [node, body] of Object.entries(NodeToBody)) {
+			const v = GeoVector(body, new Date(), correct_for_aberration);
+			tempNodeAngles.set(node, Math.atan2(v.y, v.x));
+		}
+		
+		setNodeAngles(tempNodeAngles);
+	})
+	
 	
 	return (
 		<div style={{ position: "relative", height: "100vh" }}>
@@ -45,7 +71,7 @@ function App() {
 				)}
 			</div>
 			
-			<ZodiacWheel showLabels={showLabels}/>
+			<ZodiacWheel showLabels={showLabels} nodeAngles={nodeAngles}/>
 			
 		</div>
 	)

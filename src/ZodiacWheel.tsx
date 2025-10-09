@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { Observer, Body, Equator, GeoVector } from "astronomy-engine";
+import { Body, GeoVector } from "astronomy-engine";
 
 import { ConditionalRender } from "./ConditionalRender"
+import { Node, NodeToBody } from './astro.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
@@ -44,7 +45,7 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel({ showLabels }: {showLabels: boolean}) {
+function ZodiacWheel({ showLabels, nodeAngles }: {showLabels: boolean, nodeAngles: Map<Node, number>}) {
 	
 	const radius = 35; // percent of viewport
 	const symbolRadius = 40;
@@ -57,9 +58,6 @@ function ZodiacWheel({ showLabels }: {showLabels: boolean}) {
 	
 	const correct_for_aberration = true;
 	
-	// todo find ascendant (position), lunar ascending, lunar descending
-	// todo aspects (conjunction, opposition, sextile, square, trine)
-	// ...with a nice menu on the side
 	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
@@ -222,25 +220,6 @@ function ZodiacWheel({ showLabels }: {showLabels: boolean}) {
 						);
 					})}
 				</ConditionalRender>
-				
-				/*
-				a notion of impressiveness: vs n points distributed randomly, if we were to compute their error wrt being an n-gon (sth sth minimal transport), at what percentile is this particular configuration?
-				
-				sth sth minimal transport isn't obvious, is it? 
-				the transports will be in order. easy to prove
-				
-				wait, but that implies working through all possible permutations. no bueno!
-				we should restrict ourselves to some maximum supremum distance
-				should make it easier to enumerate candidates, then
-				
-				or something like it...
-				somewhat straightforward to enumerate all 6 element subsequences
-				now do the same but during exploration put some constraints on distances between the elements
-				but what constraints?
-				some parts of this idea don't sit well with me. i wouldn't want to discard
-				a perfect-except-for-one grand sextile, but this would.
-				can we keep, during exploration, a prelimiary "minimum error"? and discard above a certain error, below a certain impressiveness?
-				*/
 				
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = ((2*i-1)/24) * 2 * Math.PI;

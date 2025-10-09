@@ -122,13 +122,6 @@ export interface Aspect {
 	percentile: number;
 }
 
-// src/utils/aspects.ts
-import { Node, AspectType, Aspect } from "../types/astro";
-import { distance, minEmDistanceToRegular } from "./geometry";
-import { findQuantile } from "./percentiles";
-
-
-
 export function findAspects(
 	positions: Record<Node, number>,
 	thresholdPairs: number = 0.95,
@@ -194,7 +187,6 @@ export function findAspects(
 		}
 	}
 
-	// Grand aspects
 	const thresholdGrands: Record<number, number | null> = {
 		3: thresholdGrandTrines,
 		4: thresholdGrandSquares,
@@ -219,7 +211,6 @@ export function findAspects(
 	for (const n of [3, 4, 6]) {
 		const t = thresholdGrands[n];
 		const aspectType = aspectGrands[n];
-		if (!t || !aspectType) continue;
 
 		for (const subset of combinations(nodes, n)) {
 			const positionsSubset = subset.map(node => positions[node]);
