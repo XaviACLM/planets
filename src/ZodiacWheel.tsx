@@ -26,6 +26,9 @@ import saturnSymbol from "./assets/body-symbols/Saturn.png"
 import sunSymbol from "./assets/body-symbols/Sun.png"
 import uranusSymbol from "./assets/body-symbols/Uranus.png"
 import venusSymbol from "./assets/body-symbols/Venus.png"
+import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
+import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
+import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
 
 enum Zodiac{
   Aries = 'Aries',
@@ -85,7 +88,10 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 		[Node.SATURN, saturnSymbol],
 		[Node.URANUS, uranusSymbol],
 		[Node.NEPTUNE, neptuneSymbol],
-		[Node.PLUTO, plutoSymbol]
+		[Node.PLUTO, plutoSymbol],
+		[Node.ASCENDANT, ascendantSymbol],
+		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
+		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 	
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
@@ -186,6 +192,9 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 + planetRadius * Math.sin(a);
 						const r = (a * 180) / Math.PI + 90;
+						if ( showLabels && node === Node.ASCENDANT ) {
+							return null;
+						}
 						return (
 							<image
 								key={i}
@@ -207,10 +216,16 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 + planetRadius * Math.sin(a);
 						const r = (a * 180) / Math.PI + 180;
+						var nodeName = node;
+						if ( node === Node.LUNAR_ASCENDING ) {
+							nodeName = "Lunar ⬆";
+						} else if ( node === Node.LUNAR_DESCENDING ) {
+							nodeName = "Lunar ⬇";
+						}
 						return (
 							<text
 								key={i}
-								x={x+0.6+symbolSize/2}
+								x={node === Node.ASCENDANT ? x-0.3-symbolSize/2 : x+0.6+symbolSize/2}
 								y={y+0.6}
 								width={symbolSize}
 								height={symbolSize}
@@ -219,7 +234,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 								transform={`rotate(${r}, ${x}, ${y})`}
 								style={{filter:"invert(1)", fontVariant: "small-caps"}}
 							>
-								{node}
+								{nodeName}
 							</text>
 						);
 					})
