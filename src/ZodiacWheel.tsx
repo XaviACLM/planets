@@ -52,12 +52,13 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 	highlightedAspect: Aspect | null
 }) {
 	
-	const radius = 35; // percent of viewport
-	const symbolRadius = 40;
-	const hoveredSymbolRadius = 42;
 	const sectorRadius = 45;
+	const hoveredSymbolRadius = 42;
+	const symbolRadius = 40;
+	const radius = 35; // percent of viewport
 	const planetRadius = 30;
 	const aspectRadius = 20;
+	const planetRadiusNoLabels = (radius + aspectRadius)/2;
 	
 	const symbolSize = 4;
 	const strokeWidthPrimary = 0.15;
@@ -145,6 +146,22 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					);
 				})}
 				
+				{Array.from({ length: 12 }).map((_, i) => {
+					const a = ((2*i+1)/24) * 2 * Math.PI;
+					return (
+						<line
+							key={i}
+							x1={50 + (radius - 3) * Math.cos(a)}
+							y1={50 + (radius - 3) * Math.sin(a)}
+							x2={50 + (aspectRadius + 3) * Math.cos(a)}
+							y2={50 + (aspectRadius + 3) * Math.sin(a)}
+							stroke="white"
+							strokeWidth={strokeWidthTertiary}
+							
+						/>
+					);
+				})}
+				
 				{zodiac.map((symbol, i) => {
 					const a = (i/12) * 2 * Math.PI;
 					const x = 50 + symbolRadius * Math.cos(a);
@@ -191,8 +208,9 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 				{nodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = nodeAngles.get(node);
-						const x = 50 + planetRadius * Math.cos(a);
-						const y = 50 + planetRadius * Math.sin(a);
+						const rad = showLabels ? planetRadius : planetRadiusNoLabels;
+						const x = 50 + rad * Math.cos(a);
+						const y = 50 + rad * Math.sin(a);
 						const r = (a * 180) / Math.PI + 90;
 						if ( showLabels && node === Node.ASCENDANT ) {
 							return null;
