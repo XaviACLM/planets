@@ -137,10 +137,79 @@ export function findAspects(
 
 	const nodes = Object.values(Node).filter(v => typeof v === "string") as Node[];
 
+	const grandAspectPairs = new Set<string>();
+	const sextileTrines = new Set<string>();
+
+
+	const thresholdGrands: Record<number, number | null> = {
+		3: thresholdGrandTrines,
+		4: thresholdGrandSquares,
+		6: thresholdGrandSextiles,
+	};
+
+	const aspectGrands: Record<number, AspectKind | null> = {
+		3: AspectKind.GRAND_TRINE,
+		4: AspectKind.GRAND_SQUARE,
+		6: AspectKind.GRAND_SEXTILE,
+	};
+
+	const combinations = <T>(arr: T[], k: number): T[][] => {
+		if (k === 0) return [[]];
+		if (arr.length < k) return [];
+		const [head, ...tail] = arr;
+		const withHead = combinations(tail, k - 1).map(c => [head, ...c]);
+		const withoutHead = combinations(tail, k);
+		return [...withHead, ...withoutHead];
+	};
+
+	// 6 before 3 to fill sextileTrines
+	for (const n of [6, 4, 3]) {
+		const t = thresholdGrands[n];
+		const aspectType = aspectGrands[n];
+
+		for (const subset of combinations(nodes, n)) {
+			const positionsSubset = subset.map(node => positions.get(node));
+			const error = minEmDistanceToRegular(positionsSubset, n);
+			const quantile = findQuantile(error, n);
+			if (quantile > t) {
+				if ( n == 3 ){
+					//this check could go outside but probably faster here since rarely false
+					if ( sextileTrines.has(subset.sort().join("/")) ) {
+						continue;
+					}
+				}
+				aspects.push({
+					kind: aspectType,
+					nodes: subset,
+					error,
+					percentile: quantile * 100,
+				});
+				for ( let i = 0; i < n-1; i++){
+					for ( let j =i + 1; j < n; j++){
+						grandAspectPairs.add([subset[i], subset[j]].sort().join("/"));
+					}
+				}
+				if ( n == 6 ) {
+					const [n1, n2, n3, n4, n5, n6] = subset.sort((na, nb) => positions.get(na) - positions.get(nb))
+					sextileTrines.add([n1,n3,n5].sort().join("/"));
+					sextileTrines.add([n2,n4,n6].sort().join("/"));
+				}
+			}
+		}
+	}
+	
+	aspects.sort((a, b) => b.percentile - a.percentile);
+
+
 	for (let i = 0; i < nodes.length; i++) {
 		for (let j = i + 1; j < nodes.length; j++) {
 			const n1 = nodes[i];
 			const n2 = nodes[j];
+			
+			if ( grandAspectPairs.has( [n1, n2].sort().join("/"))) {
+				continue;
+			}
+			
 			const p1 = positions.get(n1);
 			const p2 = positions.get(n2);
 			const d = distance(p1, p2);
@@ -183,46 +252,6 @@ export function findAspects(
 					nodes: [n1, n2],
 					error: Math.abs(d - PI),
 				percentile: 100 * (1 - Math.abs(d - PI) / PI),
-				});
-			}
-		}
-	}
-
-	const thresholdGrands: Record<number, number | null> = {
-		3: thresholdGrandTrines,
-		4: thresholdGrandSquares,
-		6: thresholdGrandSextiles,
-	};
-
-	const aspectGrands: Record<number, AspectKind | null> = {
-		3: AspectKind.GRAND_TRINE,
-		4: AspectKind.GRAND_SQUARE,
-		6: AspectKind.GRAND_SEXTILE,
-	};
-
-	const combinations = <T>(arr: T[], k: number): T[][] => {
-		if (k === 0) return [[]];
-		if (arr.length < k) return [];
-		const [head, ...tail] = arr;
-		const withHead = combinations(tail, k - 1).map(c => [head, ...c]);
-		const withoutHead = combinations(tail, k);
-		return [...withHead, ...withoutHead];
-	};
-
-	for (const n of [3, 4, 6]) {
-		const t = thresholdGrands[n];
-		const aspectType = aspectGrands[n];
-
-		for (const subset of combinations(nodes, n)) {
-			const positionsSubset = subset.map(node => positions.get(node));
-			const error = minEmDistanceToRegular(positionsSubset, n);
-			const quantile = findQuantile(error, n);
-			if (quantile > t) {
-				aspects.push({
-					kind: aspectType,
-					nodes: subset,
-					error,
-					percentile: quantile * 100,
 				});
 			}
 		}
