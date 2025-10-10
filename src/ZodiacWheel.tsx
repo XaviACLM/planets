@@ -45,10 +45,11 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
+function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 	showLabels: boolean,
-	nodeAngles: Map<Node, number>,
-	aspects: Aspect[]
+	nodeAngles: Map<Node, number> | null,
+	aspects: Aspect[] | null,
+	highlightedAspect: Aspect | null
 }) {
 	
 	const radius = 35; // percent of viewport
@@ -62,6 +63,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 	const strokeWidthPrimary = 0.15;
 	const strokeWidthSecondary = 0.1;
 	const strokeWidthTertiary = 0.05;
+	const blurBaseWidth = 2;
 	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
@@ -93,7 +95,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
-	
+
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
 	// TODO remove this when we have all nodes
 	const nodes: Node[] = Array.from(nodeSymbols.keys());
@@ -243,7 +245,6 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 				{aspects != null && 
 					aspects.map((aspect, i) => {
 						
-						
 						const as: number[] = aspect.nodes
 						.map( (node) => nodeAngles.get(node))
 						.map( (a) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
@@ -288,15 +289,46 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 							].join(" ");
 						}
 						
-						return (
-							<path
-								key={i}
-								d={pathData}
-								fill="none"
-								stroke="white"
-								strokeWidth={strokeWidthSecondary}
-							/>
-						);
+						if ( aspect == highlightedAspect ) {
+							return (
+								<>
+								<path
+									key={-1}
+									d={pathData}
+									fill="none"
+									stroke="white"
+									strokeWidth={blurBaseWidth}
+									filter="url(#path-glow)"
+									opacity={0}
+									style={{ transition: 'opacity 0.6s ease' }}
+									ref={node => {
+										if (node) {
+											requestAnimationFrame(() => {
+												node.style.opacity = 1;
+											});
+										 }
+									}}
+								/>
+								<path
+									key={i}
+									d={pathData}
+									fill="none"
+									stroke="white"
+									strokeWidth={strokeWidthPrimary}
+								/>
+								</>
+							);
+						} else {
+							return (
+								<path
+									key={i}
+									d={pathData}
+									fill="none"
+									stroke="white"
+									strokeWidth={strokeWidthSecondary}
+								/>
+							);
+						}
 					})
 				}
 
@@ -345,10 +377,17 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 					);
 				})}
 				<defs>
+					// the radial gradient is from deepseek - I don't understand it too well.
 					<radialGradient id="hoverGradient" cx="50%" cy="50%" r={sectorRadius+"%"} gradientUnits="userSpaceOnUse">
 						<stop offset="35%" stopColor="rgba(255,255,255,0.9)"/>
 						<stop offset="100%" stopColor="rgba(255,255,255,0)"/>
 					</radialGradient>
+					<filter id="path-glow" x="-400%" y="-400%" width="800%" height="800%">
+						<feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+						<feMerge>
+							<feMergeNode in="blur"/>
+						</feMerge>
+					</filter>
 				</defs>
 			</svg>
 		</div>

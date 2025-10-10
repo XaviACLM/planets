@@ -17,13 +17,8 @@ function App() {
 	const [aspects, setAspects] = useState<Aspect[] | null>(null);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
-	
 	const correct_for_aberration = true;
-	
-	// TODO find ascendant (position), lunar ascending, lunar descending
-	// TODO menu on the side
-	
-	// compute positions & aspects
+
 	useEffect(() => {
 		const tempNodeAngles = new Map<Node, number>();
 			
@@ -48,7 +43,7 @@ function App() {
 			<div className="sidebar">
 				<AspectMenu
 					aspects={aspects}
-					onHover={(aspect) => setHighlightedAspect(aspect)}
+					onHover={(aspect) => {setHighlightedAspect(aspect)}}
 					onDelete={(aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 				/>
 			</div>
@@ -93,52 +88,9 @@ function App() {
 					showLabels={showLabels}
 					nodeAngles={nodeAngles}
 					aspects={aspects}
+				highlightedAspect={highlightedAspect}
 				/>
 			</div>
-			
-		</div>
-	)
-	
-	return (
-		<div style={{ position: "relative", height: "100vh" }}>
-			<div
-				style={{
-					position: "absolute",
-					top: "1rem",
-					right: "1rem",
-					background: "black",
-					padding: "0.5rem",
-					color: "white",
-					border: "1px solid white",
-					borderRadius: "0.5rem"
-				}}
-			>
-				<button
-					onClick = {() => {setMenuOpen(!menuOpen)}}
-					style={{
-						//position:"absolute",
-						top: "0rem",
-						right: "0rem",
-						color: "white",
-						background: "black",
-					}}
-				>
-					☰
-				</button>
-				
-				{menuOpen && (
-					<label>
-						<input
-							type="checkbox"
-							checked={showLabels}
-							onChange={() => setShowLabels(!showLabels)}
-						/>
-						Show labels
-					</label>
-				)}
-			</div>
-			
-			<ZodiacWheel showLabels={showLabels} nodeAngles={nodeAngles} aspects={aspects}/>
 			
 		</div>
 	)

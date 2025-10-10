@@ -84,8 +84,8 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 						key={index}
 						className="aspect-item"
 						//todo
-						onMouseEnter={() => onHover(aspect)}
-						onMouseLeave={() => onHover(null)}
+						onMouseEnter={() => {onHover(aspect)}}
+						onMouseLeave={() => {onHover(null)}}
 					>
 						{/* aspect type icon */}
 						<img
