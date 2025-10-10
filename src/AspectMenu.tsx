@@ -25,6 +25,8 @@ import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
 import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
 import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
 
+import dotSymbol from "./assets/general-symbols/Dot.png"
+
 import "./AspectMenu.css";
 
 function AspectMenu({ aspects, onDelete, onHover }: {
@@ -102,6 +104,17 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 									key={i}
 									src={nodeSymbols.get(node)}
 									alt={node}
+									width={symbolSize}
+									height={symbolSize}
+									className="node-icon"
+									style={{filter:"invert(1)"}}
+								/>
+							))}
+							{Array.from({length: 6-aspect.nodes.length}).map((_, i) => (
+								<img
+									key={i+6}
+									src={dotSymbol}
+									alt={"bals"}
 									width={symbolSize}
 									height={symbolSize}
 									className="node-icon"
