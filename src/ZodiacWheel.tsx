@@ -108,9 +108,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 	const [hovered, setHovered] = React.useState<number | null>(null);
 	
 	const adjustedNodeAngles = React.useMemo(() => {
-		console.log(1);
 		if ( nodeAngles === null ) return null;
-		console.log(2);
 		
 		const adjustedPositions = spreadIcons(
 			Array.from(nodeAngles.values()), minimumIconSpace
@@ -122,8 +120,6 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 		});
 		return adjustedMap;
 	}, [nodeAngles]);
-	
-	console.log("test", adjustedNodeAngles);
 	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
@@ -242,6 +238,14 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						if ( showLabels && node === Node.ASCENDANT ) {
 							return null;
 						}
+						
+						let filter: string;
+						if (highlightedAspect != null && highlightedAspect.nodes.includes(node)) {
+							filter = "url(#shadow)";
+						} else {
+							filter = "url(#shadowAndInverted)";
+						}
+						
 						return (
 							<image
 								key={i}
@@ -251,7 +255,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 								width={symbolSize}
 								height={symbolSize}
 								transform={`rotate(${r}, ${x}, ${y})`}
-								style={{filter:"invert(1)"}}
+								filter={filter}
 							/>
 						);
 					})
@@ -369,7 +373,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						
 						if ( aspect == highlightedAspect ) {
 							return (
-								<div key={-1}>
+								<g key={`aspect-group-${i}`}>
 									<path
 										key={-1}
 										d={pathData}
@@ -394,7 +398,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 										stroke="white"
 										strokeWidth={strokeWidthPrimary}
 									/>
-								</div>
+								</g>
 							);
 						} else {
 							return (
@@ -456,7 +460,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					);
 				})}
 				<defs>
-					// the radial gradient is from deepseek - I don't understand it too well.
+					// this radial gradient is from deepseek - I don't understand it too well.
 					<radialGradient id="hoverGradient" cx="50%" cy="50%" r={sectorRadius+"%"} gradientUnits="userSpaceOnUse">
 						<stop offset="35%" stopColor="rgba(255,255,255,0.9)"/>
 						<stop offset="100%" stopColor="rgba(255,255,255,0)"/>
@@ -466,6 +470,14 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						<feMerge>
 							<feMergeNode in="blur"/>
 						</feMerge>
+					</filter>
+					<filter id="shadow" x="-200%" y="-200%" width="400%" height="400%">
+						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
+						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
+						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
+					</filter>
+					<filter id="shadowAndInverted">
+						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
 					</filter>
 				</defs>
 			</svg>
