@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Node, NodeToBody, type Aspect, AspectKind} from './astro.ts'
 
+import { spreadIcons } from './util.ts'
+
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
 import geminiSymbol from "./assets/zodiac-symbols/Gemini.png"
@@ -60,6 +62,8 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 	const aspectRadius = 20;
 	const planetRadiusNoLabels = (radius + aspectRadius)/2;
 	
+	const minimumIconSpace = 0.12; // radial
+	
 	const symbolSize = 4;
 	const strokeWidthPrimary = 0.15;
 	const strokeWidthSecondary = 0.1;
@@ -103,6 +107,24 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 	
 	const [hovered, setHovered] = React.useState<number | null>(null);
 	
+	const adjustedNodeAngles = React.useMemo(() => {
+		console.log(1);
+		if ( nodeAngles === null ) return null;
+		console.log(2);
+		
+		const adjustedPositions = spreadIcons(
+			Array.from(nodeAngles.values()), minimumIconSpace
+		);
+		
+		const adjustedMap = new Map<Node, number>();
+		nodes.forEach((node, index) => {
+			adjustedMap.set(node, adjustedPositions[index]);
+		});
+		return adjustedMap;
+	}, [nodeAngles]);
+	
+	console.log("test", adjustedNodeAngles);
+	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
 			<svg
@@ -130,6 +152,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					style={{filter:"invert(1)"}}
 				/>
 				
+				{/*Outer zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
 					const a = ((2*i+1)/24) * 2 * Math.PI;
 					return (
@@ -146,6 +169,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					);
 				})}
 				
+				{/*Inner zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
 					const a = ((2*i+1)/24) * 2 * Math.PI;
 					return (
@@ -162,6 +186,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					);
 				})}
 				
+				{/*Zodiac symbols*/}
 				{zodiac.map((symbol, i) => {
 					const a = (i/12) * 2 * Math.PI;
 					const x = 50 + symbolRadius * Math.cos(a);
@@ -181,6 +206,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					);
 				})}
 				
+				{/*Zodiac labels*/}
 				{showLabels && 
 					zodiac.map((symbol, i) => {
 						const a = ((2*i-1)/24) * 2 * Math.PI +0.01;
@@ -205,9 +231,10 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					})
 				}
 				
-				{nodeAngles != null && 
+				{/*Node symbols*/}
+				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
-						const a = nodeAngles.get(node);
+						const a = adjustedNodeAngles.get(node);
 						const rad = showLabels ? planetRadius : planetRadiusNoLabels;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 + rad * Math.sin(a);
@@ -230,9 +257,41 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					})
 				}
 				
-				{nodeAngles != null && showLabels && 
+				{/*Node adjusted placement indicators*/}
+				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = nodeAngles.get(node);
+						const adjA = adjustedNodeAngles.get(node);
+						const d = Math.abs(a - adjA) % (2*Math.PI)
+						if (d < minimumIconSpace/2) { return null; }
+						
+						const r1 = showLabels ? aspectRadius + 2 : planetRadiusNoLabels - symbolSize/2;
+						const r2 = aspectRadius + 0.5;
+						const x1 = 50 + r1 * Math.cos(adjA);
+						const y1 = 50 + r1 * Math.sin(adjA);
+						const x2 = 50 + r2 * Math.cos(a);
+						const y2 = 50 + r2 * Math.sin(a);
+						const pathData = [
+							`M ${x1} ${y1}`,
+							`L ${x2} ${y2}`,
+							`Z`
+						].join(" ");
+						return (
+							<path
+								key={i}
+								d={pathData}
+								fill="none"
+								stroke="white"
+								strokeWidth={strokeWidthTertiary}
+							/>
+						);
+					})
+				}
+				
+				{/*Node labels*/}
+				{adjustedNodeAngles != null && showLabels && 
+					nodes.map((node, i) => {
+						const a = adjustedNodeAngles.get(node);
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 + planetRadius * Math.sin(a);
 						const r = (a * 180) / Math.PI + 180;
@@ -260,6 +319,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					})
 				}
 				
+				{/*Aspects*/}
 				{aspects != null && 
 					aspects.map((aspect, i) => {
 						
@@ -309,32 +369,32 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						
 						if ( aspect == highlightedAspect ) {
 							return (
-								<>
-								<path
-									key={-1}
-									d={pathData}
-									fill="none"
-									stroke="white"
-									strokeWidth={blurBaseWidth}
-									filter="url(#path-glow)"
-									opacity={0}
-									style={{ transition: 'opacity 0.6s ease' }}
-									ref={node => {
-										if (node) {
-											requestAnimationFrame(() => {
-												node.style.opacity = 1;
-											});
-										 }
-									}}
-								/>
-								<path
-									key={i}
-									d={pathData}
-									fill="none"
-									stroke="white"
-									strokeWidth={strokeWidthPrimary}
-								/>
-								</>
+								<div key={-1}>
+									<path
+										key={-1}
+										d={pathData}
+										fill="none"
+										stroke="white"
+										strokeWidth={blurBaseWidth}
+										filter="url(#path-glow)"
+										opacity={0}
+										style={{ transition: 'opacity 0.6s ease' }}
+										ref={node => {
+											if (node) {
+												requestAnimationFrame(() => {
+													node.style.opacity = 1;
+												});
+											 }
+										}}
+									/>
+									<path
+										key={i}
+										d={pathData}
+										fill="none"
+										stroke="white"
+										strokeWidth={strokeWidthPrimary}
+									/>
+								</div>
 							);
 						} else {
 							return (
@@ -350,6 +410,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					})
 				}
 
+				{/*Zodiac symbol highlighting*/}
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = ((2*i-1)/24) * 2 * Math.PI;
 					const endA = ((2*i+1)/24) * 2 * Math.PI;
