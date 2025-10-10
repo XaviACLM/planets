@@ -243,23 +243,56 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects }: {
 				{aspects != null && 
 					aspects.map((aspect, i) => {
 						
-						if (aspect.nodes.length > 2) {
-							return null;
-						}
 						
-						const as: number[] = aspect.nodes.map( (node) => nodeAngles.get(node));
+						const as: number[] = aspect.nodes
+						.map( (node) => nodeAngles.get(node))
+						.map( (a) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
+						.sort();
 						const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
 						const ys: number[] = as.map( (a) => 50 + aspectRadius * Math.sin(a));
 						
-						const pathData = [
-							`M ${xs[0]} ${ys[0]}`,
-							`L ${xs[1]} ${ys[1]}`,
-							`Z`
-						].join(" ");
+						let pathData: string;
+						
+						if (aspect.nodes.length == 2) {
+							pathData = [
+								`M ${xs[0]} ${ys[0]}`,
+								`L ${xs[1]} ${ys[1]}`,
+								`Z`
+							].join(" ");
+						} else if (aspect.nodes.length == 3) {
+							pathData = [
+								`M ${xs[0]} ${ys[0]}`,
+								`L ${xs[1]} ${ys[1]}`,
+								`L ${xs[2]} ${ys[2]}`,
+								`L ${xs[0]} ${ys[0]}`,
+								`Z`
+							].join(" ");
+						} else if (aspect.nodes.length == 4) {
+							pathData = [
+								`M ${xs[0]} ${ys[0]}`,
+								`L ${xs[1]} ${ys[1]}`,
+								`L ${xs[2]} ${ys[2]}`,
+								`L ${xs[3]} ${ys[3]}`,
+								`L ${xs[0]} ${ys[0]}`,
+								`Z`
+							].join(" ");
+						} else if (aspect.nodes.length == 6) {
+							pathData = [
+								`M ${xs[0]} ${ys[0]}`,
+								`L ${xs[3]} ${ys[3]}`,
+								`M ${xs[1]} ${ys[1]}`,
+								`L ${xs[4]} ${ys[4]}`,
+								`M ${xs[2]} ${ys[2]}`,
+								`L ${xs[5]} ${ys[5]}`,
+								`Z`
+							].join(" ");
+						}
+						
 						return (
 							<path
 								key={i}
 								d={pathData}
+								fill="none"
 								stroke="white"
 								strokeWidth={strokeWidthSecondary}
 							/>
