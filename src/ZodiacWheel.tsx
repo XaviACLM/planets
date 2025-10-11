@@ -115,7 +115,7 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 		);
 		
 		const adjustedMap = new Map<Node, number>();
-		nodes.forEach((node, index) => {
+		Array.from(nodeAngles.keys()).forEach((node, index) => {
 			adjustedMap.set(node, adjustedPositions[index]);
 		});
 		return adjustedMap;
