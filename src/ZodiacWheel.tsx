@@ -425,28 +425,28 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					
 					const innerStart = {
 						x: 50 + radius * Math.cos(startA),
-						y: 50 + radius * Math.sin(startA)
+						y: 50 - radius * Math.sin(startA)
 					}
 					const innerEnd = {
 						x: 50 + radius * Math.cos(endA),
-						y: 50 + radius * Math.sin(endA)
+						y: 50 - radius * Math.sin(endA)
 					}
 					const outerStart = {
 						x: 50 + sectorRadius * Math.cos(startA),
-						y: 50 + sectorRadius * Math.sin(startA)
+						y: 50 - sectorRadius * Math.sin(startA)
 					}
 					const outerEnd = {
 						x: 50 + sectorRadius * Math.cos(endA),
-						y: 50 + sectorRadius * Math.sin(endA)
+						y: 50 - sectorRadius * Math.sin(endA)
 					}
 
 					const largeArc = endA - startA > Math.PI ? 1 : 0;
 					
 					const pathData = [
 						`M ${innerStart.x} ${innerStart.y}`,
-						`A ${radius} ${radius} 0 ${largeArc} 1 ${innerEnd.x} ${innerEnd.y}`,
+						`A ${radius} ${radius} 0 ${largeArc} 0 ${innerEnd.x} ${innerEnd.y}`,
 						`L ${outerEnd.x} ${outerEnd.y}`,
-						`A ${sectorRadius} ${sectorRadius} 0 ${largeArc} 0 ${outerStart.x} ${outerStart.y}`,
+						`A ${sectorRadius} ${sectorRadius} 0 ${largeArc} 1 ${outerStart.x} ${outerStart.y}`,
 						`Z`
 					].join(" ");
 					
