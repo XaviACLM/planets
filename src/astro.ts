@@ -1,6 +1,6 @@
 import { normalizeAngleRad } from './util.ts'
 
-import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime } from "astronomy-engine";
+import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
 export function distance(p1: number, p2: number): number {
 	const twoPi = 2 * Math.PI;
@@ -283,14 +283,22 @@ function getLunarNodes(date: Date): {ascending: number, descending: number}{
 	return { ascending, descending }
 }
 
+function getAxialTilt(date: Date): number {
+	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
+	const eclPole = Ecliptic(vecPole);
+	const obliquity = Math.acos(eclPole.vec.z);
+	console.log(obliquity);
+	return obliquity;
+	
+}
+
 function getAscendant(date: Date, latitudeDeg: number, longitudeDeg: number): number {
 	const gstHours = SiderealTime(date);
 	const lstHours = gstHours + longitudeDeg / 15.0;
 	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
 	const theta = lstHoursNorm * Math.PI / 12
 	
-	// todo do this better
-	const epsRad = 23.43 * Math.PI / 180.0;
+	const epsRad = getAxialTilt(date);
 		
 	const phi = latitudeDeg * Math.PI/180;
 	

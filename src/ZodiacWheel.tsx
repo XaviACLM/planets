@@ -241,9 +241,9 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						
 						let filter: string;
 						if (highlightedAspect != null && highlightedAspect.nodes.includes(node)) {
-							filter = "url(#shadow)";
-						} else {
 							filter = "url(#shadowAndInverted)";
+						} else {
+							filter = "url(#shadow)";
 						}
 						
 						return (
@@ -301,9 +301,9 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						const r = -(a * 180) / Math.PI + 180;
 						var nodeName = node;
 						if ( node === Node.LUNAR_ASCENDING ) {
-							nodeName = "Lunar ⬆";
+							nodeName = "Lunar ▲";
 						} else if ( node === Node.LUNAR_DESCENDING ) {
-							nodeName = "Lunar ⬇";
+							nodeName = "Lunar ▼";
 						}
 						return (
 							<text
@@ -475,12 +475,12 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 							<feMergeNode in="blur"/>
 						</feMerge>
 					</filter>
-					<filter id="shadow" x="-200%" y="-200%" width="400%" height="400%">
+					<filter id="shadowAndInverted" x="-200%" y="-200%" width="400%" height="400%">
 						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
 						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
 						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
 					</filter>
-					<filter id="shadowAndInverted">
+					<filter id="shadow">
 						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
 					</filter>
 				</defs>
