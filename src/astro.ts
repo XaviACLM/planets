@@ -1,3 +1,7 @@
+import { normalizeAngleRad } from './util.ts'
+
+import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime } from "astronomy-engine";
+
 export function distance(p1: number, p2: number): number {
 	const twoPi = 2 * Math.PI;
 	p1 = ((p1 % twoPi) + twoPi) % twoPi;
@@ -90,8 +94,6 @@ export enum Node {
 	URANUS = "Uranus",
 	SATURN = "Saturn",
 }
-
-import { Body } from "astronomy-engine";
 
 export const NodeToBody: Partial<Record<Node, Body>> = {
 	[Node.SUN]: Body.Sun,
@@ -260,4 +262,62 @@ export function findAspects(
 	aspects.sort((a, b) => b.percentile - a.percentile);
 
 	return aspects;
+}
+
+function getLunarNodes(date: Date): {ascending: number, descending: number}{
+	const s = GeoMoonState(date);
+	
+	const r = { x: s.x, y: s.y, z: s.z };
+	const v = { x: s.vx, y: s.vy, z: s.vz };
+	const h = {
+		x: r.y * v.z - r.z * v.y,
+		y: r.z * v.x - r.x * v.z,
+		z: r.x * v.y - r.y * v.x,
+		t: MakeTime(date)
+	};
+	
+	const hEcl = Ecliptic(h).vec; // { x, y, z } in ecliptic frame
+	const omega = Math.atan2(hEcl.x, -hEcl.y) - 15/360*2*Math.PI;
+	const ascending = normalizeAngleRad(omega);
+	const descending = normalizeAngleRad(omega + Math.PI);
+	return { ascending, descending }
+}
+
+function getAscendant(date: Date, latitudeDeg: number, longitudeDeg: number): number {
+	const gstHours = SiderealTime(date);
+	const lstHours = gstHours + longitudeDeg / 15.0;
+	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
+	const theta = lstHoursNorm * Math.PI / 12
+	
+	// todo do this better
+	const epsRad = 23.43 * Math.PI / 180.0;
+		
+	const phi = latitudeDeg * Math.PI/180;
+	
+	const x = Math.cos(theta);
+	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
+	const lambda = normalizeAngleRad(Math.atan2(x,y)-Math.PI/12);
+	return lambda;
+}
+
+export function getNodePositions(date: Date, latitudeDeg: number, longitudeDeg: number): Map<Node, number> {
+	
+	const correctForAberration = true;
+	
+	const nodeAngles = new Map<Node, number>();
+		
+	for ( const [node, body] of Object.entries(NodeToBody)) {
+		const eqj = GeoVector(body, new Date(), correctForAberration)
+		const etc = Ecliptic(eqj);
+		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
+	}
+	
+	const lunarNodes = getLunarNodes(date);
+	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
+	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
+	
+	const ascendant = getAscendant(date, latitudeDeg, longitudeDeg);
+	nodeAngles.set(Node.ASCENDANT, ascendant);
+	
+	return nodeAngles;
 }

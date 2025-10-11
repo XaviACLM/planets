@@ -43,3 +43,9 @@ export function spreadIcons(
 
 	return finalPositions;
 }
+
+export function normalizeAngleRad(a: number) {
+  // normalize to [0, 2π)
+  const twoPi = 2*Math.PI;
+  return ((a % twoPi) + twoPi) % twoPi;
+}
