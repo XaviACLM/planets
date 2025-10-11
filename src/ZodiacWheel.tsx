@@ -186,8 +186,8 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 				{zodiac.map((symbol, i) => {
 					const a = (i/12) * 2 * Math.PI;
 					const x = 50 + symbolRadius * Math.cos(a);
-					const y = 50 + symbolRadius * Math.sin(a);
-					const r = (a * 180) / Math.PI + 90;
+					const y = 50 - symbolRadius * Math.sin(a);
+					const r = -(a * 180) / Math.PI + 90;
 					return (
 						<image
 							key={i}
@@ -205,10 +205,10 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 				{/*Zodiac labels*/}
 				{showLabels && 
 					zodiac.map((symbol, i) => {
-						const a = ((2*i-1)/24) * 2 * Math.PI +0.01;
+						const a = ((2*i+1)/24) * 2 * Math.PI - 0.01;
 						const x = 50 + sectorRadius * Math.cos(a);
-						const y = 50 + sectorRadius * Math.sin(a);
-						const r = (a * 180) / Math.PI + 180;
+						const y = 50 - sectorRadius * Math.sin(a);
+						const r = -(a * 180) / Math.PI + 180;
 						return (
 							<text
 								key={i}
@@ -233,8 +233,8 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						const a = adjustedNodeAngles.get(node);
 						const rad = showLabels ? planetRadius : planetRadiusNoLabels;
 						const x = 50 + rad * Math.cos(a);
-						const y = 50 + rad * Math.sin(a);
-						const r = (a * 180) / Math.PI + 90;
+						const y = 50 - rad * Math.sin(a);
+						const r = -(a * 180) / Math.PI + 90;
 						if ( showLabels && node === Node.ASCENDANT ) {
 							return null;
 						}
@@ -272,9 +272,9 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 						const r1 = showLabels ? aspectRadius + 2 : planetRadiusNoLabels - symbolSize/2;
 						const r2 = aspectRadius + 0.5;
 						const x1 = 50 + r1 * Math.cos(adjA);
-						const y1 = 50 + r1 * Math.sin(adjA);
+						const y1 = 50 - r1 * Math.sin(adjA);
 						const x2 = 50 + r2 * Math.cos(a);
-						const y2 = 50 + r2 * Math.sin(a);
+						const y2 = 50 - r2 * Math.sin(a);
 						const pathData = [
 							`M ${x1} ${y1}`,
 							`L ${x2} ${y2}`,
@@ -297,8 +297,8 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node);
 						const x = 50 + planetRadius * Math.cos(a);
-						const y = 50 + planetRadius * Math.sin(a);
-						const r = (a * 180) / Math.PI + 180;
+						const y = 50 - planetRadius * Math.sin(a);
+						const r = -(a * 180) / Math.PI + 180;
 						var nodeName = node;
 						if ( node === Node.LUNAR_ASCENDING ) {
 							nodeName = "Lunar ⬆";
@@ -327,12 +327,16 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 				{aspects != null && 
 					aspects.map((aspect, i) => {
 						
+						if ( aspect.kind == AspectKind.CONJUNCTION ) {
+							return null;
+						}
+						
 						const as: number[] = aspect.nodes
 						.map( (node) => nodeAngles.get(node))
 						.map( (a) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
 						.sort();
 						const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
-						const ys: number[] = as.map( (a) => 50 + aspectRadius * Math.sin(a));
+						const ys: number[] = as.map( (a) => 50 - aspectRadius * Math.sin(a));
 						
 						let pathData: string;
 						
