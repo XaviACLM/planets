@@ -287,7 +287,6 @@ function getAxialTilt(date: Date): number {
 	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
 	const eclPole = Ecliptic(vecPole);
 	const obliquity = Math.acos(eclPole.vec.z);
-	console.log(obliquity);
 	return obliquity;
 	
 }

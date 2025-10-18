@@ -1,0 +1,56 @@
+.city-selector {
+	position: relative;
+	width: 100%;
+	color: black;
+	font-family: "Noto Sans", sans-serif;
+}
+
+.city-input {
+	width: 100%;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid white;
+	color: white;
+	padding: 4px 0;
+	outline: none;
+	color: white;
+	font-size: 12px;
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+.dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background: black;
+	border-top: 1px solid #333;
+	z-index: 10;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.dropdown-item {
+	padding: 0px 4px;
+	border-bottom: 1px solid #222;
+	cursor: pointer;
+	color: white;
+	font-size: 12px;
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+.dropdown-item:hover {
+	background: #111;
+}
+
+.dropdown-loading {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	color: #777;
+	font-size: 0.8rem;
+	padding-top: 4px;
+}

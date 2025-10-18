@@ -3,8 +3,11 @@ import { useState, useEffect } from 'react'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import { Node, NodeToBody, findAspects, type Aspect, getNodePositions } from './astro.ts'
+import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
+import { CitySelector } from './CitySelector'
 
 import "./App.css";
+
 
 function App() {
 	
@@ -30,35 +33,44 @@ function App() {
 	}, []);
 	
 	return (
-		<div className="app-container" style={{ position: "relative", height: "100vh" }}>
-			<div className="sidebar">
-				<AspectMenu
-					aspects={aspects}
-					onHover={(aspect) => {setHighlightedAspect(aspect)}}
-					onDelete={(aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
-				/>
-			</div>
-			<div className="wheel-area">
-				<div
-					style={{
-						position: "absolute",
-						top: "1rem",
-						right: "1rem",
-						background: "black",
-						padding: "0.5rem",
-						color: "white",
-						border: "1px solid white",
-						borderRadius: "0.5rem"
-					}}
-				>
-					<button
+		<div className="app-container">
+			<aside className="sidebar left-sidebar">
+				<div className="module">
+					<CitySelector onSelect={(city) => {
+						console.log(city.cityName, city.latitude, city.longitude);
+					}} />
+				</div>
+				<div className="module module-aspects">
+					<div className="aspect-menu">
+						<AspectMenu
+							aspects={aspects}
+							onHover={(aspect) => {setHighlightedAspect(aspect)}}
+							onDelete={(aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
+						/>
+					</div>
+				</div>
+				<div className="module">
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+					Left module 3
+				</div>
+			</aside>
+			
+			<main className="wheel-area">
+				<div className="floating-menu">
+					<button className="floating-menu-button"
 						onClick = {() => {setMenuOpen(!menuOpen)}}
-						style={{
-							top: "0rem",
-							right: "0rem",
-							color: "white",
-							background: "black",
-						}}
 					>
 						☰
 					</button>
@@ -74,17 +86,21 @@ function App() {
 						</label>
 					)}
 				</div>
-			
 				<ZodiacWheel
 					showLabels={showLabels}
 					nodeAngles={nodeAngles}
 					aspects={aspects}
-				highlightedAspect={highlightedAspect}
+					highlightedAspect={highlightedAspect}
 				/>
-			</div>
+			</main>
 			
+			<aside className="sidebar right-sidebar">
+				<div className="module">Right module 1</div>
+				<div className="module">Right module 2</div>
+			</aside>
 		</div>
 	)
+	
 }
 
 export default App

@@ -1,20 +1,61 @@
+* {
+  box-sizing: border-box; /* makes height/width include padding+border */
+}
+
 .app-container {
 	display: flex;
 	height: 100vh;
 	width: 100vw;
-	overflow: hidden;
-}
-
-.sidebar {
-	width: 330px;
-	flex-shrink: 0;
+	overflow: hidden; /*no scrolling on page itself*/
+	background: #000;
 }
 
 .wheel-area {
-	flex: 1;
+	flex: 1 1 auto;
 	position: relative;
 	display: flex;
-	justify-content: center;
 	align-items: center;
+	justify-content: center;
 	overflow: hidden;
+}
+
+.floating-menu {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	background: black;
+	padding: 0.5rem;
+	color: white;
+	border: 1px solid white;
+	borderRadius: 0.5rem;
+}
+
+.floating-menu-button {
+	top: 0rem;
+	right: 0rem;
+	color: white;
+	background: black;
+}
+
+.sidebar {
+	width: 360px;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 8px;
+	background: black;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.module {
+	width: 100%;
+	background: black;
+	border: 1px solid red;
+	border-radius: 0px;
+	padding: 0px;
+	color: white;
 }
