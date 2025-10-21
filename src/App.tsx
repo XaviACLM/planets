@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import { Node, NodeToBody, findAspects, type Aspect, getNodePositions } from './astro.ts'
+import { Node, NodeToBody, findAspects, type Aspect, getNodePositions, getNodePositionsWithoutLocation } from './astro.ts'
 import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
+import { type CityData, barcelonaCityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 
 import "./App.css";
@@ -16,29 +17,37 @@ function App() {
 	const [nodeAngles, setNodeAngles] = useState<Map<Node, number> | null>(null);
 	const [aspects, setAspects] = useState<Aspect[] | null>(null);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
+	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
 	
-	const correct_for_aberration = true;
-
 	useEffect(() => {
 		const date = new Date();
 		
 		const latitudeDeg = 41.3874;
 		const longitudeDeg = 2.1686;
 		
-		const tempNodeAngles = getNodePositions(date, latitudeDeg, longitudeDeg);
+		let tempNodeAngles;
+		if (selectedCity != null) {
+			tempNodeAngles = getNodePositions(date, selectedCity.latitude, selectedCity.longitude);
+		} else {
+			tempNodeAngles = getNodePositionsWithoutLocation(date);
+			console.log(tempNodeAngles);
+		}
 		const tempAspects = findAspects(tempNodeAngles);
 		
 		setNodeAngles(tempNodeAngles);
 		setAspects(tempAspects);
-	}, []);
+	}, [selectedCity]);
 	
 	return (
 		<div className="app-container">
 			<aside className="sidebar left-sidebar">
 				<div className="module">
-					<CitySelector onSelect={(city) => {
-						console.log(city.cityName, city.latitude, city.longitude);
-					}} />
+					<CitySelector
+						startingQueryText={selectedCity}
+						onSelect={(city) => {
+							setSelectedCity(city);
+						}}
+					/>
 				</div>
 				<div className="module module-aspects">
 					<div className="aspect-menu">

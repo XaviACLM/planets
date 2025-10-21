@@ -1,21 +1,28 @@
 import { useState, useEffect, useRef, FC } from "react";
-import { type SearchResult, CitySearchEngine } from "./CitySearchEngine.ts"
+import { type CityData, CitySearchEngine } from "./CitySearchEngine.ts"
 
 import "./CitySelector.css";
 
 interface CitySelectorProps {
-	onSelect: (city: SearchResult) => void;
+	onSelect: (city: CityData) => void;
 }
 
-export function CitySelector({onSelect}: CitySelectorProps) {
+export function CitySelector({startingQueryText, onSelect}: [CityData | null, CitySelectorProps]) {
 	const [ query, setQuery ] = useState<string>("");
-	const [ results, setResults ] = useState<SearchResult[]>([]);
+	const [ results, setResults ] = useState<CityData[]>([]);
 	const [ isLoading, setIsLoading ] = useState<boolean>(false);
-	const [ selected, setSelected ] = useState<SearchResult | null>(null);
+	const [ selected, setSelected ] = useState<CityData | null>(null);
 	const cseRef = useRef<CitySearchEngine|null>(null);
 	
 	useEffect(() => {
 		cseRef.current = new CitySearchEngine();
+	}, []);
+	
+	// 
+	useEffect(() => {
+		if (startingQueryText != null) {
+			setQuery(startingQueryText.cityName+", "+startingQueryText.stateName+", "+startingQueryText.countryName);
+		}
 	}, []);
 	
 	useEffect(() => {
@@ -35,11 +42,11 @@ export function CitySelector({onSelect}: CitySelectorProps) {
 		return () => clearTimeout(timeout);
 	}, [query]);
 	
-	const handleSelect = (searchResult: SearchResult) => {
-		setSelected(searchResult);
-		setQuery(searchResult.cityName+", "+searchResult.stateName+", "+searchResult.countryName); // todo fix
+	const handleSelect = (cityData: CityData) => {
+		setSelected(cityData);
+		setQuery(cityData.cityName+", "+cityData.stateName+", "+cityData.countryName);
 		setResults([]);
-		onSelect(searchResult);
+		onSelect(cityData);
 	};
 	
 	return (

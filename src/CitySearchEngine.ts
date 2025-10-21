@@ -8,7 +8,7 @@ interface City {
   pop: string;
 }
 
-interface SearchResult {
+interface CityData {
   countryName: string;
   stateName: string;
   cityName: string;
@@ -18,6 +18,15 @@ interface SearchResult {
 }
 
 import citiesData from './assets/city-data/cities.json';
+
+export const barcelonaCityData: CityData = {
+	countryName: "Spain",
+	stateName: "Catalunya",
+	cityName: "Barcelona",
+	latitude: 41.38879,
+	longitude: 2.15899,
+	population: 1621537
+};
 
 export class CitySearchEngine {
   private citiesData: City[];
@@ -43,8 +52,8 @@ export class CitySearchEngine {
   searchCities(
     cityPattern: RegExp, 
     maxMatches: number = 10
-  ): SearchResult[] {
-    const matches: SearchResult[] = [];
+  ): CityData[] {
+    const matches: CityData[] = [];
 
     for (const city of this.sortedCities) {
       if (cityPattern.test(city.name)) {
@@ -63,7 +72,7 @@ export class CitySearchEngine {
 	return matches;
   }
 
-  searchCity(cityPattern: RegExp): SearchResult | null {
+  searchCity(cityPattern: RegExp): CityData | null {
     const results = this.searchCities(cityPattern, 1);
     return results.length > 0 ? results[0] : null;
   }

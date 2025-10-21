@@ -95,6 +95,19 @@ export enum Node {
 	SATURN = "Saturn",
 }
 
+const visibleNodes: Node[] = [
+	Node.SUN,
+	Node.MOON,
+	Node.MERCURY,
+	Node.MARS,
+	Node.VENUS,
+	Node.JUPITER,
+	Node.NEPTUNE,
+	Node.PLUTO,
+	Node.URANUS,
+	Node.SATURN
+]
+
 export const NodeToBody: Partial<Record<Node, Body>> = {
 	[Node.SUN]: Body.Sun,
 	[Node.MOON]: Body.Moon,
@@ -137,7 +150,10 @@ export function findAspects(
 
 	const PI = Math.PI;
 
-	const nodes = Object.values(Node).filter(v => typeof v === "string") as Node[];
+	const nodes = visibleNodes;//Object.values(Node).filter(v => typeof v === "string") as Node[];
+	console.log("nodes is");
+	console.log(nodes);
+	console.log("that was nodes");
 
 	const grandAspectPairs = new Set<string>();
 	const sextileTrines = new Set<string>();
@@ -325,6 +341,25 @@ export function getNodePositions(date: Date, latitudeDeg: number, longitudeDeg: 
 	
 	const ascendant = getAscendant(date, latitudeDeg, longitudeDeg);
 	nodeAngles.set(Node.ASCENDANT, ascendant);
+	
+	return nodeAngles;
+}
+
+export function getNodePositionsWithoutLocation(date: Date): Map<Node, number> {
+	
+	const correctForAberration = true;
+	
+	const nodeAngles = new Map<Node, number>();
+		
+	for ( const [node, body] of Object.entries(NodeToBody)) {
+		const eqj = GeoVector(body, new Date(), correctForAberration)
+		const etc = Ecliptic(eqj);
+		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
+	}
+	
+	const lunarNodes = getLunarNodes(date);
+	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
+	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
 	
 	return nodeAngles;
 }

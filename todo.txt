@@ -1,0 +1,45 @@
+NON-COMPLEX CHANGES
+
+find iss
+draw iss (show/hide) 
+iss pissing (subtle)
+flipping text/symbols to be right side up (always in-place)
+todo option to use meeus polynomial for lunar nodes (=> less local perturbation)
+mouseover a node shows only aspects incident on that node
+toggle uranus drawing. similar options for other?
+fadein for aspect node highlight
+glow for ascendant text in label mode
+draw actual constellations
+editable date/hour
+extra nodes (lilith, midheaven, part of fortune, ...)
+
+CHANGES IN THE MODEL
+
+ought to decide on some sensible data structure for positions +// aspects - possibly also settings +// visual settings
+adjust quantiles wrt existing nodes, dates
+more aspects (kites, T-Squares, fingers, ...) + subaspect relationship
+houses + config for houses
+parallels and contraparallels (requires new diagram)
+astrology for aliens
+for houses and parallels: pluto obliquity toggle
+
+XX modules
+XX a better computation for obliquity
+XX editable position
+XX a more visible text arrow for lunar nodes
+XX think of some other way to represent/highlight conjunction. mb just don't draw a line at all?
+XX flip everything so we draw the zodiac counterclockwise
+XX change ascendant icon to As.
+XX find ascendant (requires position) 
+XX find lunar nodes
+XX avoid overlap
+XX fix aspect highlighting, stopped working (?)
+XX further aspect highlighting (nodes)
+XX move planets a bit down if labels are off
+XX aspect hover/highlight
+XX remove sub-aspects
+XX draw grand aspects
+XX draw ascendant (...)
+XX draw lunar nodes (...)
+XX aspect menu infill
+XX change sextile symbol
