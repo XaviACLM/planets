@@ -111,7 +111,8 @@ function computeLunarNodesMeeus(date: Date): Map<Node, number> {
 	// Meeus Ch. 47: mean longitude of ascending node of lunar orbit
 	const omega = 125.04452 - 1934.136261 * t + 0.0020708 * t*t + (t*t*t)/450000; // small correction
 
-	const ascending = omega/360*2*Math.PI;
+	const ascending = (omega)/360*2*Math.PI;
+	console.log(omega);
 	
 	return new Map <Node, number>([
 		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
@@ -133,7 +134,7 @@ function computeLunarNodesExact(date: Date): Map<Node, number>{
 	};
 	
 	const hEcl = Ecliptic(h).vec; // { x, y, z } in ecliptic frame
-	const omega = Math.atan2(hEcl.x, -hEcl.y) - 15/360*2*Math.PI;
+	const omega = Math.atan2(hEcl.x, -hEcl.y);
 	return new Map <Node, number>([
 		[Node.LUNAR_ASCENDING, normalizeAngleRad(omega)],
 		[Node.LUNAR_DESCENDING, normalizeAngleRad(omega + Math.PI)]
@@ -171,7 +172,7 @@ function computeAscendant(date: Date, surfacePos: SurfacePosition): number {
 	
 	const x = Math.cos(theta);
 	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
-	const lambda = normalizeAngleRad(Math.atan2(x,y)-Math.PI/12);
+	const lambda = normalizeAngleRad(Math.atan2(x,y));
 	return lambda;
 }
 
@@ -198,7 +199,7 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	for ( const [node, body] of Object.entries(NodeToBody)) {
 		const eqj = GeoVector(body, new Date(), correctForAberration)
 		const etc = Ecliptic(eqj);
-		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
+		nodeAngles.set(node, (etc.elon)/360*2*Math.PI);
 	}
 	
 	return nodeAngles;

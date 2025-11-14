@@ -101,7 +101,13 @@ function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}:
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 	
-	const nodeAngles = zodiacPositions.getNodePositions();
+	const nodeAngles = React.useMemo(() => {
+		const nodeAngles = new Map<Node, number>();
+		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
+			nodeAngles.set(node, position - Math.PI/12);
+		})
+		return nodeAngles;
+	}, [zodiacPositions]);
 
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
 	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
