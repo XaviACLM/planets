@@ -47,9 +47,9 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
+function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}: {
 	showLabels: boolean,
-	nodeAngles: Map<Node, number> | null,
+	zodiacPositions: Map<Node, number> | null,
 	aspects: Aspect[] | null,
 	highlightedAspect: Aspect | null
 }) {
@@ -100,8 +100,8 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
-
-	console.log(nodeAngles);
+	
+	const nodeAngles = zodiacPositions.getNodePositions();
 
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
 	const nodes: Zodiac[] = Array.from(nodeAngles.keys());

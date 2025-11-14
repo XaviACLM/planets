@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import { Node, NodeToBody, findAspects, type Aspect, getNodePositions, getNodePositionsWithoutLocation } from './aspects.ts'
+import { findAspects, type Aspect } from './aspects.ts'
+import { HouseSystem, LunarNodeMode, ZodiacPositions } from './astro.ts'
 import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
 import { type CityData, barcelonaCityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -38,19 +39,20 @@ function App() {
 	// useMemo -> nodePositions, bodyNodes[], pointNodes[]
 	// within zodiacWheel, keep the useMemo -> adjustedNodePositions
 	
-	const { nodeAngles, aspects } = useMemo<Map<Node, number> | null>(() => {
+	const { zodiacPositions, aspects } = useMemo<Map<Node, number> | null>(() => {
 		const date = new Date();
 		
+		let zodiacPositions;
 		let tempNodeAngles;
 		if (selectedCity != null) {
-			tempNodeAngles = getNodePositions(date, selectedCity.latitude, selectedCity.longitude);
+			zodiacPositions = ZodiacPositions.create(date, selectedCity, LunarNodeMode.MEAN, HouseSystem.PLACIDUS);
 		} else {
-			tempNodeAngles = getNodePositionsWithoutLocation(date);
+			zodiacPositions = ZodiacPositions.create(date, null, LunarNodeMode.MEAN, HouseSystem.PLACIDUS);
 		}
-		const tempAspects = findAspects(tempNodeAngles);
+		const tempAspects = findAspects(zodiacPositions._nodePositions);
 		
 		return {
-			nodeAngles: tempNodeAngles,
+			zodiacPositions: zodiacPositions,
 			aspects: tempAspects
 		}
 	}, [selectedCity]);
@@ -114,7 +116,7 @@ function App() {
 				</div>
 				<ZodiacWheel
 					showLabels={showLabels}
-					nodeAngles={nodeAngles}
+					zodiacPositions={zodiacPositions}
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}
 				/>

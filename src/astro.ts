@@ -109,9 +109,9 @@ function computeLunarNodesMeeus(date: Date): Map<Node, number> {
 	const t = (jd - 2451545.0) / 36525.0;
 
 	// Meeus Ch. 47: mean longitude of ascending node of lunar orbit
-	const omega = 125.04452 - 1934.136261 * T + 0.0020708 * T*T + (T*T*T)/450000; // small correction
+	const omega = 125.04452 - 1934.136261 * t + 0.0020708 * t*t + (t*t*t)/450000; // small correction
 
-	const ascending = ascending/360*2*Math.PI;
+	const ascending = omega/360*2*Math.PI;
 	
 	return new Map <Node, number>([
 		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
@@ -207,13 +207,13 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
-		...computerLunarNodes(date, lunarNodeMode)
+		...computeLunarNodes(date, lunarNodeMode)
 	]);
 }
 
 function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
 	return new Map<Node, number>([
-		...(new Map<Node, number>([Node.ASCENDANT, computeAscendant(date, surfacePos)])),
+		...(new Map<Node, number>([[Node.ASCENDANT, computeAscendant(date, surfacePos)]])),
 	]);
 }
 
@@ -221,10 +221,10 @@ function computeHouseCuspPositions(date: Date, surfacePos: SurfacePosition, hous
 	//TODO
 }
 
-function computeAllNodePositions(date: Date, surfacePos: SurfacePosition, lunarNodeMode: LunarNodeMode, houseSystem: HouseSystem): Map<Node, number>{
+function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, lunarNodeMode: LunarNodeMode, houseSystem: HouseSystem): Map<Node, number>{
 	return new Map<Node, number>([
 		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode),
-		...computeAllNodePositionsWithSurfacePosition(date, surfacePos, houseSystem)
+		...computeAllNodePositionsWithSurfacePosition(date, surfacePosition, houseSystem)
 	]);
 	return allNodes
 }
@@ -247,7 +247,6 @@ interface ZodiacPositionsConstructorArgs {
 
 export class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
-	private readonly _constructorArgs: ZodiacPositionsConstructorArgs;
 	
 	public readonly date: Date;
 	public readonly surfacePosition: SurfacePosition | null;
@@ -262,8 +261,8 @@ export class ZodiacPositions {
 		
 		if (config.nodePositions) {
 			this._nodePositions = config.nodePositions;
-		} else if (config.surfacePosition !== null) {
-			this._nodePositions = computeAllNodePositions(this.date, this.surfacePos, this.lunarNodeMode, this.houseSystem);
+		} else if (this.surfacePosition !== null) {
+			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.houseSystem);
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
 		}
@@ -303,9 +302,6 @@ export class ZodiacPositions {
 		return this.copyWith({lunarNodeMode: newMode, nodePositions: newNodePositions});
 	}
 	
-	public getNodePositionsOfType(nodeType: NodeType): Map<Node, number>{
-	}
-	
 	public changeHouseSystem(newSystem: HouseSystem){
 		if (newSystem == this.houseSystem) {
 			return;
@@ -313,5 +309,9 @@ export class ZodiacPositions {
 		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem);
 		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newHouseCuspPositions]);
 		return this.copyWith({nodePositions: newNodePositions});
+	}
+	
+	public getNodePositions(): Map<Node, number>{
+		return this._nodePositions;
 	}
 }
