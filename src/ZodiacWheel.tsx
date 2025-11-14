@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Node, NodeToBody, type Aspect, AspectKind} from './astro.ts'
+import { Node, NodeToBody, type Aspect, AspectKind} from './aspects.ts'
 
 import { spreadIcons } from './util.ts'
 
@@ -101,9 +101,10 @@ function ZodiacWheel({ showLabels, nodeAngles, aspects, highlightedAspect}: {
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 
+	console.log(nodeAngles);
+
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
-	// TODO remove this when we have all nodes
-	const nodes: Node[] = Array.from(nodeSymbols.keys());
+	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
 	
 	const [hovered, setHovered] = React.useState<number | null>(null);
 	

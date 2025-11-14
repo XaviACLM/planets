@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import { Node, NodeToBody, findAspects, type Aspect, getNodePositions, getNodePositionsWithoutLocation } from './astro.ts'
+import { Node, NodeToBody, findAspects, type Aspect, getNodePositions, getNodePositionsWithoutLocation } from './aspects.ts'
 import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
 import { type CityData, barcelonaCityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -14,28 +14,45 @@ function App() {
 	
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [showLabels, setShowLabels] = useState<boolean>(true);
-	const [nodeAngles, setNodeAngles] = useState<Map<Node, number> | null>(null);
-	const [aspects, setAspects] = useState<Aspect[] | null>(null);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
 	
-	useEffect(() => {
+	// keeps zodiacPositions (from the stuff we're doing over at astro2)
+	// and something from config
+	// zodiacPositions always knows where EVERY node is, selected or not
+	//  except for the location-dependent ones, if location is null
+	//  updatable: lunar nodes might change btw true/mean, house cusps depend on house system
+	//  also updated if date or location changes
+	
+	// config options:
+	//  that affect node positions in zodiacPositions:
+	//   true/mean (geometric/meeus) lunar nodes
+	//   house system
+	//  that affect the zodiacWheel itself:
+	//   a toggle for each and every node
+	//  i'm not that sure - these affects aspects, but where will those end up living?
+	//   for each aspect, a slider of how many physical nodes it needs to count
+	//   a multi-toggle for each aspect: never - btw bodies - allow 1 point - allow any points w 1 body
+	
+	// from zodiacPositions and the config (that affects zodiacWheel)
+	// useMemo -> nodePositions, bodyNodes[], pointNodes[]
+	// within zodiacWheel, keep the useMemo -> adjustedNodePositions
+	
+	const { nodeAngles, aspects } = useMemo<Map<Node, number> | null>(() => {
 		const date = new Date();
-		
-		const latitudeDeg = 41.3874;
-		const longitudeDeg = 2.1686;
 		
 		let tempNodeAngles;
 		if (selectedCity != null) {
 			tempNodeAngles = getNodePositions(date, selectedCity.latitude, selectedCity.longitude);
 		} else {
 			tempNodeAngles = getNodePositionsWithoutLocation(date);
-			console.log(tempNodeAngles);
 		}
 		const tempAspects = findAspects(tempNodeAngles);
 		
-		setNodeAngles(tempNodeAngles);
-		setAspects(tempAspects);
+		return {
+			nodeAngles: tempNodeAngles,
+			aspects: tempAspects
+		}
 	}, [selectedCity]);
 	
 	return (

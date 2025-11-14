@@ -1,5 +1,5 @@
 import React from "react";
-import { Node, AspectKind, type Aspect } from './astro.ts';
+import { Node, AspectKind, type Aspect } from './aspects.ts';
 
 import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
 import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
@@ -61,10 +61,6 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
-	
-	//console.log(aspects[0].kind);
-	//console.log(aspectSymbols.get(AspectKind.SQUARE));
-	//console.log(aspectSymbols.get(aspects[0].kind));
 	
 	const symbolSize = 20;
 	

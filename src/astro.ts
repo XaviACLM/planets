@@ -2,285 +2,125 @@ import { normalizeAngleRad } from './util.ts'
 
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
-export function distance(p1: number, p2: number): number {
-	const twoPi = 2 * Math.PI;
-	p1 = ((p1 % twoPi) + twoPi) % twoPi;
-	p2 = ((p2 % twoPi) + twoPi) % twoPi;
-
-	const d = Math.abs(p1 - p2);
-	return Math.min(d, twoPi - d);
-}
-
-export function regularArrangement(n: number, phase: number): number[] {
-	const twoPi = 2 * Math.PI;
-	phase = ((phase % (twoPi / n)) + (twoPi / n)) % (twoPi / n);
-
-	return Array.from({ length: n }, (_, i) => (twoPi * i) / n + phase);
-}
-
-export function emDistanceWithKnownBasis(
-	a1: number[],
-	a2: number[],
-	i1: number,
-	i2: number,
-	n: number
-): number {
-	let d = 0;
-	if (i1 < 0) {i1 = n+i1}
-	if (i2 < 0) {i2 = n+i2}
-	for (let i = 0; i < n; i++) {
-		const i1a = (i1 + i) % n;
-		const i2a = (i2 + i) % n;
-		d += distance(a1[i1a], a2[i2a]);
-	}
-	return d;
-}
-
-export function minEmDistanceToRegular(arrangement: number[], n: number): number {
-	const twoPi = 2 * Math.PI;
-	const distances: number[] = [];
-
-	for (let i = 0; i < arrangement.length; i++) {
-		const p = arrangement[i];
-		const phase = ((p % (twoPi / n)) + (twoPi / n)) % (twoPi / n);
-		const rotatedArrangement = regularArrangement(n, phase);
-		const ri = Math.floor(p / (twoPi / n));
-		const d = emDistanceWithKnownBasis(arrangement, rotatedArrangement, i, ri, n);
-		distances.push(d);
-	}
-
-	return Math.min(...distances);
-}
-
-export const percentiles: Record<string, Record<string, number>> = {'2': {'10': 2.82492183405002, '20': 2.512041226571723, '30': 2.196411448548795, '40': 1.8833191534301896, '50': 1.569921378032447, '60': 1.2565291282897997, '70': 0.943533088305391, '80': 0.6289363773733934, '90': 0.31426461359944025, '91': 0.28295033258869606, '92': 0.2515173548879527, '93': 0.2198807155608602, '94': 0.18836926606823035, '95': 0.156681304618711, '96': 0.12505089992205187, '97': 0.09376445765856845, '98': 0.06261846817645944, '99': 0.030974986598556242, '99.1': 0.027730709593221547, '99.2': 0.024610971758071365, '99.3': 0.021292932878626214, '99.4': 0.01830529033281625, '99.5': 0.015244978397931597, '99.6': 0.012309232548422422, '99.7': 0.009199138048033184, '99.8': 0.006261577693059683, '99.9': 0.0030901848856057512, '99.91': 0.0027720456600333065, '99.92': 0.002437166039547911, '99.93': 0.00215310303920635, '99.94': 0.0018285670722661962, '99.95': 0.0015746806831060528, '99.96': 0.0012591241475501391, '99.97': 0.0009524308855546337, '99.98': 0.0006672645240300978, '99.99': 0.0003276868002454192}, '3': {'10': 3.0433980889212435, '20': 2.5663016323864913, '30': 2.202845884191832, '40': 1.98801913665014, '50': 1.815081392549216, '60': 1.623343087799249, '70': 1.4059043377043596, '80': 1.1466470558154458, '90': 0.8115627097763858, '91': 0.7699958135339398, '92': 0.7255806614732099, '93': 0.6788806715105213, '94': 0.6296097321664045, '95': 0.5745558614550759, '96': 0.5140696466163157, '97': 0.4456329036665362, '98': 0.36326532020019453, '99': 0.2553297808209758, '99.1': 0.2416539062470937, '99.2': 0.22790125078946266, '99.3': 0.21458409285450064, '99.4': 0.19846511792718619, '99.5': 0.1816169971798196, '99.92': 0.07326885358201485, '99.93': 0.06882048558514198, '99.94': 0.0638312549184959, '99.95': 0.058498528643549985,'99.96': 0.05368625534037133, '99.97': 0.04652398288526749, '99.98': 0.038326443743930017, '99.99': 0.025862032539675894}, '4': {'10': 3.9688370515063665, '20': 3.366192207397342, '30': 2.953952825302361, '40': 2.646158770106605, '50': 2.3777607525037605, '60': 2.123381297800478, '70': 1.8702420189090312, '80': 1.606233836129107, '90': 1.2740754773747365, '91': 1.2298418954913422, '92': 1.182766245072856, '93': 1.1304085360141483, '94': 1.0741913727443777, '95': 1.011725679942291, '96': 0.939552870925971, '97': 0.8548837011422066, '98': 0.7454112479134012, '99': 0.5923037906530073, '99.1': 0.5719726816038473, '99.2': 0.5502923150442507, '99.3': 0.5255723352180417, '99.4': 0.4991385603366061, '99.5': 0.4689258108271657, '99.6': 0.4367472810938051, '99.7': 0.39619422850092784, '99.8': 0.34753838589917463, '99.9': 0.2757971182914186, '99.91': 0.2646780346879165, '99.92': 0.25416998306586214, '99.93': 0.24294073388148685, '99.94': 0.23240263630500624, '99.95': 0.21876192560498597, '99.96': 0.2032878359611795, '99.97': 0.18271250779903936, '99.98': 0.1609410282549268, '99.99': 0.1277382351705474}, '6': {'10': 4.861979942391542, '20': 4.165824147541702, '30': 3.7050527406016895, '40': 3.3430431451880844, '50': 3.0316183170212065, '60': 2.7436445212860034, '70': 2.46340007805307, '80': 2.1664567198443647, '90': 1.8032908060598274, '91': 1.7581808252833215, '92': 1.7105679094026873, '93': 1.6576819941120893, '94': 1.601416904121481, '95': 1.5390897157787307, '96': 1.4667360484390772, '97': 1.379112684234093, '98': 1.2705770909966823, '99': 1.1033306952679172, '99.1': 1.0792459662262117, '99.2': 1.0536308331925373, '99.3': 1.0252700011827163, '99.4': 0.9951440299783612, '99.5': 0.960482623760968, '99.6': 0.9168232482962224, '99.7': 0.8660127685300232, '99.8': 0.8015203693709417, '99.9': 0.6976027753857931, '99.91': 0.6824202124925003, '99.92': 0.666886200704681, '99.93': 0.6509126734912764, '99.94': 0.6352925787636964, '99.95': 0.6113891098888175, '99.96': 0.5843961138596394, '99.97': 0.5524004297143547, '99.98': 0.5130397320937039, '99.99': 0.4444125711664664}}
-
-export function findQuantile(d: number, n: number): number {
-	const table = percentiles[String(n)];
-
-	const percentileItems = Object.entries(table).sort(
-		([a], [b]) => parseFloat(a) - parseFloat(b)
-	);
-
-	for (let i = 0; i < percentileItems.length; i++) {
-		const [percentile, pd] = percentileItems[i];
-		if (pd < d) {
-			if (i === 0) {
-				return 0.0;
-			}
-			const [lowerPercentile, lowerPd] = percentileItems[i - 1];
-			const f = (d - pd) / (lowerPd - pd);
-			const est =
-				parseFloat(percentile) +
-				(parseFloat(lowerPercentile) - parseFloat(percentile)) * f;
-			return est / 100;
-		}
-	}
-
-	return 99.99 / 100;
-}
-
 export enum Node {
+	// bodies
 	SUN = "Sun",
 	MOON = "Moon",
-	ASCENDANT = "Ascendant",
-	LUNAR_ASCENDING = "Lunar Ascending",
-	LUNAR_DESCENDING = "Lunar Descending",
 	MERCURY = "Mercury",
-	MARS = "Mars",
 	VENUS = "Venus",
+	MARS = "Mars",
 	JUPITER = "Jupiter",
+	SATURN = "Saturn",
+	URANUS = "Uranus",
 	NEPTUNE = "Neptune",
 	PLUTO = "Pluto",
-	URANUS = "Uranus",
-	SATURN = "Saturn",
-}
-
-const visibleNodes: Node[] = [
-	Node.SUN,
-	Node.MOON,
-	Node.MERCURY,
-	Node.MARS,
-	Node.VENUS,
-	Node.JUPITER,
-	Node.NEPTUNE,
-	Node.PLUTO,
-	Node.URANUS,
-	Node.SATURN
-]
-
-export const NodeToBody: Partial<Record<Node, Body>> = {
-	[Node.SUN]: Body.Sun,
-	[Node.MOON]: Body.Moon,
-	[Node.MERCURY]: Body.Mercury,
-	[Node.VENUS]: Body.Venus,
-	[Node.MARS]: Body.Mars,
-	[Node.JUPITER]: Body.Jupiter,
-	[Node.SATURN]: Body.Saturn,
-	[Node.URANUS]: Body.Uranus,
-	[Node.NEPTUNE]: Body.Neptune,
-	[Node.PLUTO]: Body.Pluto,
-};
-
-export enum AspectKind {
-	CONJUNCTION = "Conjunction",
-	SEXTILE = "Sextile",
-	SQUARE = "Square",
-	TRINE = "Trine",
-	OPPOSITION = "Opposition",
-	GRAND_SEXTILE = "Grand Sextile",
-	GRAND_SQUARE = "Grand Square",
-	GRAND_TRINE = "Grand Trine",
-}
-
-export interface Aspect {
-	kind: AspectKind;
-	nodes: Node[];
-	error: number;
-	percentile: number;
-}
-
-export function findAspects(
-	positions: Map<Node, number>,
-	thresholdPairs: number = 0.95,
-	thresholdGrandTrines: number = 0.99,
-	thresholdGrandSquares: number = 0.995,
-	thresholdGrandSextiles: number = 0.999
-): Aspect[] {
-	const aspects: Aspect[] = [];
-
-	const PI = Math.PI;
-
-	const nodes = visibleNodes;//Object.values(Node).filter(v => typeof v === "string") as Node[];
-	console.log("nodes is");
-	console.log(nodes);
-	console.log("that was nodes");
-
-	const grandAspectPairs = new Set<string>();
-	const sextileTrines = new Set<string>();
-
-
-	const thresholdGrands: Record<number, number | null> = {
-		3: thresholdGrandTrines,
-		4: thresholdGrandSquares,
-		6: thresholdGrandSextiles,
-	};
-
-	const aspectGrands: Record<number, AspectKind | null> = {
-		3: AspectKind.GRAND_TRINE,
-		4: AspectKind.GRAND_SQUARE,
-		6: AspectKind.GRAND_SEXTILE,
-	};
-
-	const combinations = <T>(arr: T[], k: number): T[][] => {
-		if (k === 0) return [[]];
-		if (arr.length < k) return [];
-		const [head, ...tail] = arr;
-		const withHead = combinations(tail, k - 1).map(c => [head, ...c]);
-		const withoutHead = combinations(tail, k);
-		return [...withHead, ...withoutHead];
-	};
-
-	// 6 before 3 to fill sextileTrines
-	for (const n of [6, 4, 3]) {
-		const t = thresholdGrands[n];
-		const aspectType = aspectGrands[n];
-
-		for (const subset of combinations(nodes, n)) {
-			const positionsSubset = subset.map(node => positions.get(node));
-			const error = minEmDistanceToRegular(positionsSubset, n);
-			const quantile = findQuantile(error, n);
-			if (quantile > t) {
-				if ( n == 3 ){
-					//this check could go outside but probably faster here since rarely false
-					if ( sextileTrines.has(subset.sort().join("/")) ) {
-						continue;
-					}
-				}
-				aspects.push({
-					kind: aspectType,
-					nodes: subset,
-					error,
-					percentile: quantile * 100,
-				});
-				for ( let i = 0; i < n-1; i++){
-					for ( let j =i + 1; j < n; j++){
-						grandAspectPairs.add([subset[i], subset[j]].sort().join("/"));
-					}
-				}
-				if ( n == 6 ) {
-					const [n1, n2, n3, n4, n5, n6] = subset.sort((na, nb) => positions.get(na) - positions.get(nb))
-					sextileTrines.add([n1,n3,n5].sort().join("/"));
-					sextileTrines.add([n2,n4,n6].sort().join("/"));
-				}
-			}
-		}
-	}
 	
-	aspects.sort((a, b) => b.percentile - a.percentile);
-
-
-	for (let i = 0; i < nodes.length; i++) {
-		for (let j = i + 1; j < nodes.length; j++) {
-			const n1 = nodes[i];
-			const n2 = nodes[j];
-			
-			if ( grandAspectPairs.has( [n1, n2].sort().join("/"))) {
-				continue;
-			}
-			
-			const p1 = positions.get(n1);
-			const p2 = positions.get(n2);
-			const d = distance(p1, p2);
-
-			if (d < PI * (1 - thresholdPairs)) {
-				aspects.push({
-					kind: AspectKind.CONJUNCTION,
-					nodes: [n1, n2],
-					error: d,
-					percentile: 100 * (1 - d / PI),
-				});
-			}
-			if (Math.abs(d - PI / 3) < PI * (1 - thresholdPairs)) {
-				aspects.push({
-					kind: AspectKind.SEXTILE,
-					nodes: [n1, n2],
-					error: Math.abs(d - PI / 3),
-					percentile: 100 * (1 - Math.abs(d - PI / 3) / PI),
-				});
-			}
-			if (Math.abs(d - PI / 2) < PI * (1 - thresholdPairs)) {
-				aspects.push({
-					kind: AspectKind.SQUARE,
-					nodes: [n1, n2],
-					error: Math.abs(d - PI / 2),
-					percentile: 100 * (1 - Math.abs(d - PI / 2) / PI),
-				});
-			}
-			if (Math.abs(d - (2 * PI) / 3) < PI * (1 - thresholdPairs)) {
-				aspects.push({
-					kind: AspectKind.TRINE,
-					nodes: [n1, n2],
-					error: Math.abs(d - (2 * PI) / 3),
-					percentile: 100 * (1 - Math.abs(d - (2 * PI) / 3) / PI),
-				});
-			}
-			if (Math.abs(d - PI) < PI * (1 - thresholdPairs)) {
-				aspects.push({
-					kind: AspectKind.OPPOSITION,
-					nodes: [n1, n2],
-					error: Math.abs(d - PI),
-				percentile: 100 * (1 - Math.abs(d - PI) / PI),
-				});
-			}
-		}
-	}
-
-	aspects.sort((a, b) => b.percentile - a.percentile);
-
-	return aspects;
+	// angles
+	ASCENDANT = "Ascendant",
+	//MIDHEAVEN = "Midheaven",
+	//IMMUM_COELI = "Immum Coeli",
+	//PART_OF_FORTUNE = "Part of Fortune",
+	
+	//lunar
+	LUNAR_ASCENDING = "Lunar Ascending",
+	LUNAR_DESCENDING = "Lunar Descending",
+	//LUNAR_APOGEE = "Lunar Apogee", //lilith
+	//LUNAR_PERIGEE = "Lunar Perigee",
+	
+	// missing:
+	// secondadry angles: anti/vertex, east/west points
+	// arabic parts: of spirit, of love, of marriage...
+	// fictive/transneptunian: cupido, hades, zeus...
+	// uranian: uranian cupido, uranian hades...
+	// house cusps
+	
+	// minor bodies
+	//CERES = "Ceres",
+	//PALLAS = "Pallas",
+	//JUNO = "Juno",
+	//VESTA = "Vesta",
+	//CHIRON = "Chiron",
 }
 
-function getLunarNodes(date: Date): {ascending: number, descending: number}{
+export enum NodeType {
+	BODY = "Body",
+	POINT = "Point",
+	HOUSE_CUSP = "House Cusp",
+}
+
+const nodeTypes: Record<Node, NodeType> = {
+	[Node.SUN] : NodeType.BODY,
+	[Node.MOON] : NodeType.BODY,
+	[Node.MERCURY] : NodeType.BODY,
+	[Node.VENUS] : NodeType.BODY,
+	[Node.MARS] : NodeType.BODY,
+	[Node.JUPITER] : NodeType.BODY,
+	[Node.SATURN] : NodeType.BODY,
+	[Node.URANUS] : NodeType.BODY,
+	[Node.NEPTUNE] : NodeType.BODY,
+	[Node.PLUTO] : NodeType.BODY,
+	
+	[Node.ASCENDANT] : NodeType.POINT,
+	//[Node.MIDHEAVEN] : NodeType.POINT,
+	//[Node.IMMUM_COELI] : NodeType.POINT,
+	//[Node.PART_OF_FORTUNE] : NodeType.POINT,
+	
+	[Node.LUNAR_ASCENDING] : NodeType.POINT,
+	[Node.LUNAR_DESCENDING] : NodeType.POINT,
+	//[Node.LUNAR_APOGEE] : NodeType.POINT,
+	//[Node.LUNAR_PERIGEE] : NodeType.POINT,
+}
+
+const nodeDependsOnLocation: Record<Node, boolean> = {
+	[Node.SUN] : false,
+	[Node.MOON] : false,
+	[Node.MERCURY] : false,
+	[Node.VENUS] : false,
+	[Node.MARS] : false,
+	[Node.JUPITER] : false,
+	[Node.SATURN] : false,
+	[Node.URANUS] : false,
+	[Node.NEPTUNE] : false,
+	[Node.PLUTO] : false,
+	
+	[Node.ASCENDANT] : true,
+	//[Node.MIDHEAVEN] : true,
+	//[Node.IMMUM_COELI] : true,
+	//[Node.PART_OF_FORTUNE] : true,
+	
+	[Node.LUNAR_ASCENDING] : false,
+	[Node.LUNAR_DESCENDING] : false,
+	//[Node.LUNAR_APOGEE] : false,
+	//[Node.LUNAR_PERIGEE] : false,
+}
+
+export interface SurfacePosition {
+	latitude: number;
+	longitude: number
+}
+
+export enum LunarNodeMode {
+	EXACT = "Exact", //geometric
+	MEAN = "Mean", //meeus
+}
+
+function computeLunarNodesMeeus(date: Date): Map<Node, number> {
+	const jd = (date.getTime() / 86400000) + 2440587.5; // Unix ms -> JD
+	const t = (jd - 2451545.0) / 36525.0;
+
+	// Meeus Ch. 47: mean longitude of ascending node of lunar orbit
+	const omega = 125.04452 - 1934.136261 * T + 0.0020708 * T*T + (T*T*T)/450000; // small correction
+
+	const ascending = ascending/360*2*Math.PI;
+	
+	return new Map <Node, number>([
+		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
+		[Node.LUNAR_DESCENDING, normalizeAngleRad(ascending + Math.PI)]
+	]);
+}
+
+function computeLunarNodesExact(date: Date): Map<Node, number>{
+	
 	const s = GeoMoonState(date);
 	
 	const r = { x: s.x, y: s.y, z: s.z };
@@ -294,12 +134,22 @@ function getLunarNodes(date: Date): {ascending: number, descending: number}{
 	
 	const hEcl = Ecliptic(h).vec; // { x, y, z } in ecliptic frame
 	const omega = Math.atan2(hEcl.x, -hEcl.y) - 15/360*2*Math.PI;
-	const ascending = normalizeAngleRad(omega);
-	const descending = normalizeAngleRad(omega + Math.PI);
-	return { ascending, descending }
+	return new Map <Node, number>([
+		[Node.LUNAR_ASCENDING, normalizeAngleRad(omega)],
+		[Node.LUNAR_DESCENDING, normalizeAngleRad(omega + Math.PI)]
+	]);
+	
 }
 
-function getAxialTilt(date: Date): number {
+function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+	if (lunarNodeMode == LunarNodeMode.MEAN) {
+		return computeLunarNodesMeeus(date);
+	} else {
+		return computeLunarNodesExact(date);
+	}
+}
+
+function computeAxialTilt(date: Date): number {
 	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
 	const eclPole = Ecliptic(vecPole);
 	const obliquity = Math.acos(eclPole.vec.z);
@@ -307,13 +157,15 @@ function getAxialTilt(date: Date): number {
 	
 }
 
-function getAscendant(date: Date, latitudeDeg: number, longitudeDeg: number): number {
+function computeAscendant(date: Date, surfacePos: SurfacePosition): number {
+	const latitudeDeg = surfacePos.latitude;
+	const longitudeDeg = surfacePos.longitude;
 	const gstHours = SiderealTime(date);
 	const lstHours = gstHours + longitudeDeg / 15.0;
 	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
 	const theta = lstHoursNorm * Math.PI / 12
 	
-	const epsRad = getAxialTilt(date);
+	const epsRad = computeAxialTilt(date);
 		
 	const phi = latitudeDeg * Math.PI/180;
 	
@@ -323,7 +175,21 @@ function getAscendant(date: Date, latitudeDeg: number, longitudeDeg: number): nu
 	return lambda;
 }
 
-export function getNodePositions(date: Date, latitudeDeg: number, longitudeDeg: number): Map<Node, number> {
+// for the astronomy engine
+const NodeToBody: Partial<Record<Node, Body>> = {
+	[Node.SUN]: Body.Sun,
+	[Node.MOON]: Body.Moon,
+	[Node.MERCURY]: Body.Mercury,
+	[Node.VENUS]: Body.Venus,
+	[Node.MARS]: Body.Mars,
+	[Node.JUPITER]: Body.Jupiter,
+	[Node.SATURN]: Body.Saturn,
+	[Node.URANUS]: Body.Uranus,
+	[Node.NEPTUNE]: Body.Neptune,
+	[Node.PLUTO]: Body.Pluto,
+};
+
+function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	
 	const correctForAberration = true;
 	
@@ -334,32 +200,118 @@ export function getNodePositions(date: Date, latitudeDeg: number, longitudeDeg: 
 		const etc = Ecliptic(eqj);
 		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
 	}
-	
-	const lunarNodes = getLunarNodes(date);
-	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
-	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
-	
-	const ascendant = getAscendant(date, latitudeDeg, longitudeDeg);
-	nodeAngles.set(Node.ASCENDANT, ascendant);
 	
 	return nodeAngles;
 }
 
-export function getNodePositionsWithoutLocation(date: Date): Map<Node, number> {
+function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+	return new Map<Node, number>([
+		...computePhysicalNodePositions(date),
+		...computerLunarNodes(date, lunarNodeMode)
+	]);
+}
+
+function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
+	return new Map<Node, number>([
+		...(new Map<Node, number>([Node.ASCENDANT, computeAscendant(date, surfacePos)])),
+	]);
+}
+
+function computeHouseCuspPositions(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
+	//TODO
+}
+
+function computeAllNodePositions(date: Date, surfacePos: SurfacePosition, lunarNodeMode: LunarNodeMode, houseSystem: HouseSystem): Map<Node, number>{
+	return new Map<Node, number>([
+		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode),
+		...computeAllNodePositionsWithSurfacePosition(date, surfacePos, houseSystem)
+	]);
+	return allNodes
+}
+
+export enum HouseSystem {
+	WHOLE_SIGN = "Whole Sign",
+	CARTER_POLI_EQUATORIAL = "Carter-Poli Equatorial",
+	CAMPANUS = "Campanus",
+	ALCABITIUS = "Alcabitius",
+	PLACIDUS = "Placidus"
+}
+
+interface ZodiacPositionsConstructorArgs {
+	date: Date;
+	surfacePosition: SurfacePosition | null;
+	lunarNodeMode: LunarNodeMode;
+	houseSystem: HouseSystem;
+	nodePositions?: Map<Node, number>
+}
+
+export class ZodiacPositions {
+	private readonly _nodePositions: Map<Node, number>;
+	private readonly _constructorArgs: ZodiacPositionsConstructorArgs;
 	
-	const correctForAberration = true;
+	public readonly date: Date;
+	public readonly surfacePosition: SurfacePosition | null;
+	public readonly lunarNodeMode: LunarNodeMode;
+	public readonly houseSystem: HouseSystem;
 	
-	const nodeAngles = new Map<Node, number>();
+	constructor( config: ZodiacPositionsConstructorArgs ){
+		this.surfacePosition = config.surfacePosition;
+		this.date = config.date;
+		this.lunarNodeMode = config.lunarNodeMode;
+		this.houseSystem = config.houseSystem;
 		
-	for ( const [node, body] of Object.entries(NodeToBody)) {
-		const eqj = GeoVector(body, new Date(), correctForAberration)
-		const etc = Ecliptic(eqj);
-		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
+		if (config.nodePositions) {
+			this._nodePositions = config.nodePositions;
+		} else if (config.surfacePosition !== null) {
+			this._nodePositions = computeAllNodePositions(this.date, this.surfacePos, this.lunarNodeMode, this.houseSystem);
+		} else {
+			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
+		}
 	}
 	
-	const lunarNodes = getLunarNodes(date);
-	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
-	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
+	static create(
+		date: Date,
+		surfacePosition: SurfacePosition | null,
+		lunarNodeMode: LunarNodeMode,
+		houseSystem: HouseSystem,
+	): ZodiacPositions {
+		return new ZodiacPositions({
+			date,
+			surfacePosition,
+			lunarNodeMode,
+			houseSystem
+		});
+	}
 	
-	return nodeAngles;
+	private copyWith( updates: Partial<ZodiacPositionsConstructorArgs> ): ZodiacPositions {
+		return new ZodiacPositions({
+			date: this.date,
+			surfacePosition: this.surfacePosition,
+			lunarNodeMode: this.lunarNodeMode,
+			houseSystem: this.housesSystem,
+			nodePositions: this._nodePositions,
+			...updates
+		});
+	}
+
+	public changeLunarNodesMode(newMode: LunarNodeMode){
+		if (newMode == this.lunarNodeMode) {
+			return this;
+		}
+		const newLunarNodePositions = computeLunarNodes(this.date, newMode);
+		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newLunarNodePositions]);
+		return this.copyWith({lunarNodeMode: newMode, nodePositions: newNodePositions});
+	}
+	
+	public getNodePositionsOfType(nodeType: NodeType): Map<Node, number>{
+	}
+	
+	public changeHouseSystem(newSystem: HouseSystem){
+		if (newSystem == this.houseSystem) {
+			return;
+		}
+		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem);
+		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newHouseCuspPositions]);
+		return this.copyWith({nodePositions: newNodePositions});
+	}
 }
