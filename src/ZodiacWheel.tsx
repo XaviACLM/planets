@@ -70,6 +70,8 @@ function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}:
 	const strokeWidthTertiary = 0.05;
 	const blurBaseWidth = 2;
 	
+	const flipText = true;
+	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],
 		[Zodiac.Taurus, taurusSymbol],
@@ -216,16 +218,18 @@ function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}:
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 - sectorRadius * Math.sin(a);
 						const r = -(a * 180) / Math.PI + 180;
+						const flip = (r>90 || r<-90) && flipText;
 						return (
 							<text
 								key={i}
 								x={x}
-								y={y}
+								y={flip ? y+1 : y}
 								width={symbolSize}
 								height={symbolSize}
 								fontSize="1.5"
 								fontWeight="bold"
-								transform={`rotate(${r}, ${x}, ${y})`}
+								textAnchor={flip ? "end" : "start"}
+								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
 								style={{filter:"invert(1)", fontVariant: "small-caps"}}
 							>
 								{symbol}
@@ -306,22 +310,28 @@ function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}:
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 - planetRadius * Math.sin(a);
 						const r = -(a * 180) / Math.PI + 180;
+						const flip = (r>90 || r<-90) && flipText;
 						var nodeName = node;
 						if ( node === Node.LUNAR_ASCENDING ) {
 							nodeName = "Lunar ▲";
 						} else if ( node === Node.LUNAR_DESCENDING ) {
 							nodeName = "Lunar ▼";
 						}
+						let px = node === Node.ASCENDANT ? x : x;
+						if ( node == Node.ASCENDANT) {
+							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;//x = x-0.9-symbolSize;
+						}
 						return (
 							<text
 								key={i}
-								x={node === Node.ASCENDANT ? x-0.3-symbolSize/2 : x+0.6+symbolSize/2}
+								x={flip ? px-0.6-symbolSize/2 : px+0.6+symbolSize/2}
 								y={y+0.6}
 								width={symbolSize}
 								height={symbolSize}
 								fontSize="1.5"
 								fontWeight="bold"
-								transform={`rotate(${r}, ${x}, ${y})`}
+								textAnchor={flip ? "end" : "start"}
+								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
 								style={{filter:"invert(1)", fontVariant: "small-caps"}}
 							>
 								{nodeName}
