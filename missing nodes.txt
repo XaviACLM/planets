@@ -1,0 +1,48 @@
+Midheaven
+Immum Coeli
+how to compute: with the astrology engine
+
+Vertex
+Anti-Vertex
+East Point
+Aries Point
+how to compute: with the astrology engine
+
+Black Moon Lilith
+Selene
+how to compute: with the astrology engine / meeus polynomials
+
+Ceres
+Pallas
+Juno
+Vesta
+Chiron
+Eris
+Haumea
+Makemake
+Sedna
+how to compute: unsure? I don't think these are contemplated in astrology-engine. Can we approximate them with a simple formula based on some sufficiently precise data?
+
+Pars Fortunae
+Pars Spiritus
+Pars Veneris / Amor (Love)
+Pars Junonis (Marriage)
+Pars Mercurii / Minerva (Career)
+There's a ton more of these.
+how to compute: their definitions are always ascendant + (some planet) - (some other planet), in angles along the ecliptic
+
+Hypothetical / trans-neptunian:
+cupido, hades, zeus, krnoss, apollon, admetos, vulcanus, poseidon
+how to compute: easy but it's unclear if there are universal agreed-upon definitions for them
+e.g. cupido = 0.6*saturn + 0.4*jupiter (angle along the ecliptic)
+
+Regulus
+Aldebaran
+Antares
+Spica
+Sirius
+there's a few of these, but not all stars matter. Generally one only cares about bright stars near the ecliptic: the 15 behenian fixed stars and the 4 royal stars of persia.
+how to compute: fixed positions. Would be weird to include them in the start chart, though, just use a separate table for conjunctions with luminary nodes (do other aspects matter or is it just conjunctions?) (deepseek says oppositions can also be important sometimes)
+
+
+North Node and South Node are also called Dragon's Head and Dragon's Tail
