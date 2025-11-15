@@ -47,8 +47,9 @@ enum Zodiac{
   Pisces = 'Pisces'
 }
 
-function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}: {
+function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlightedAspect}: {
 	showLabels: boolean,
+	flipText: boolean,
 	zodiacPositions: Map<Node, number> | null,
 	aspects: Aspect[] | null,
 	highlightedAspect: Aspect | null
@@ -69,8 +70,6 @@ function ZodiacWheel({ showLabels, zodiacPositions, aspects, highlightedAspect}:
 	const strokeWidthSecondary = 0.1;
 	const strokeWidthTertiary = 0.05;
 	const blurBaseWidth = 2;
-	
-	const flipText = true;
 	
 	const zodiacSymbols = new Map<Zodiac, string>([
 		[Zodiac.Aries, ariesSymbol],

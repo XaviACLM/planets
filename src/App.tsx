@@ -13,8 +13,12 @@ import "./App.css";
 
 function App() {
 	
-	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	// config
 	const [showLabels, setShowLabels] = useState<boolean>(true);
+	const [flipText, setFlipText] = useState<boolean>(true);
+	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
+	
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
 	
@@ -45,9 +49,9 @@ function App() {
 		let zodiacPositions;
 		let tempNodeAngles;
 		if (selectedCity != null) {
-			zodiacPositions = ZodiacPositions.create(date, selectedCity, LunarNodeMode.MEAN, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(date, selectedCity, lunarNodeMode, HouseSystem.PLACIDUS);
 		} else {
-			zodiacPositions = ZodiacPositions.create(date, null, LunarNodeMode.MEAN, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(date, null, lunarNodeMode, HouseSystem.PLACIDUS);
 		}
 		const tempAspects = findAspects(zodiacPositions._nodePositions);
 		
@@ -55,7 +59,7 @@ function App() {
 			zodiacPositions: zodiacPositions,
 			aspects: tempAspects
 		}
-	}, [selectedCity]);
+	}, [selectedCity, lunarNodeMode]);
 	
 	return (
 		<div className="app-container">
@@ -66,6 +70,11 @@ function App() {
 						onSelect={(city) => {
 							setSelectedCity(city);
 						}}
+					/>
+					<input
+						aria-label="Date and time"
+						type="datetime-local" 
+						style={{filter:"invert(1)", fontVariant: "small-caps"}}
 					/>
 				</div>
 				<div className="module module-aspects">
@@ -104,6 +113,7 @@ function App() {
 					</button>
 					
 					{menuOpen && (
+						<div>
 						<label>
 							<input
 								type="checkbox"
@@ -112,10 +122,35 @@ function App() {
 							/>
 							Show labels
 						</label>
+						<label>
+							<input
+								type="checkbox"
+								checked={flipText}
+								onChange={() => setFlipText(!flipText)}
+							/>
+							Keep text right-side-up
+						</label>
+						<div className="toggle-switch">
+							<span>Lunar node calculation mode:</span>
+							<button
+								className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
+								onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
+							>
+								Mean
+							</button>
+							<button
+								className={`toggle-option ${lunarNodeMode === LunarNodeMode.TRUE ? 'active' : ''}`}
+								onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
+							>
+								True
+							</button>
+						</div>
+						</div>
 					)}
 				</div>
 				<ZodiacWheel
 					showLabels={showLabels}
+					flipText={flipText}
 					zodiacPositions={zodiacPositions}
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}

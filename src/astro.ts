@@ -100,7 +100,7 @@ export interface SurfacePosition {
 }
 
 export enum LunarNodeMode {
-	EXACT = "Exact", //geometric
+	TRUE = "True", //geometric
 	MEAN = "Mean", //meeus
 }
 
