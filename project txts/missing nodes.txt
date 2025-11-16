@@ -33,7 +33,7 @@ how to compute: their definitions are always ascendant + (some planet) - (some o
 
 Hypothetical / trans-neptunian:
 cupido, hades, zeus, krnoss, apollon, admetos, vulcanus, poseidon
-how to compute: easy but it's unclear if there are universal agreed-upon definitions for them
+how to compute: easy but it's unclear if there are universal agreed-upon definitions for them - "hamburg school/witte system"
 e.g. cupido = 0.6*saturn + 0.4*jupiter (angle along the ecliptic)
 
 Regulus

@@ -1,0 +1,81 @@
+whole sign houses: rising sign (where the ascendant is) is first house. next to rise is second house. etc
+equal houses: each house is 30 degrees along the ecliptic. ascendant is first house cusp and continues from there
+porphyry houses: note ASC -> IC -> DSC -> MC -> ASC along the ecliptic. Divide each stretch equally into 3 - that's the 12 houses in order.
+
+
+in christian astrology, pages 33 and 151, lily points out that house cusps do not delimit houses, but rather are like (own addition) cusps of the houses which sweep along the ecliptic. Thus the start of a house precedes the cusp by 5 degrees. "This traditional view of house cusps derives from consdering the cusp as the most powerful point of a house's influence."
+
+space systems
+
+meridian: divide celestial sphere into 30 degree slices along the equator, from north to south pole (of the equator). Starts at the meridian and goes in the usual direction.
+morinus: Not really a space division system! Start with the construction of the meridian. Note the points along which it divides the equator. Project those to the ecliptic along the ecliptic pole (meridian would be the same with the equatorial pole)
+regiomontanus: first consider the prime vertical: great circle going through zenith (point of sky right above observer) and points on the horizon due west and east (perpendicular to prime meridian? which also crosses zenith). ok, we actually just needed its poles, so the points due north and south along the horizon. Now construct the meridian. Well, alright? That's just the meridian and note the two intersections with the horizon. Note now the point where the meridian intersects the equator: starting from there, divide the equator into 30 degree slices. Project these onto the ecliptic, along the direction towards the south pole. This means this one also isn't a real space division system. Makes ascendant the 1st house cusp, mc the 10th, ¿etc?
+campanus: Like regiomontanus, but you just divide the whole sky into 30 degree slices. Asc 1st MC 10th etc (seems odd that this would be true for both)
+zenith / horizontal houses: Divide the horizon into 30 degree slices. Project these divisions along the corresponding zenith-nadir (opp of zenith) great circle to the ecliptic. True spatial division. Starts at the meridian and goes in the usual direction.
+
+space systems issues with planetary latitude, where a node's house may change when projected to the ecliptic. analogous to the question about pluto and parallels.
+maybe I'm wrong about which of these are true spatial divisions? Ultimately you just need to be specific about what the poles are (is). Morinus would be ecliptic, regiomontanus would be NS.
+space systems always involve picking a great circle out of the significant ones (equator, meridian, prime vertical, horizon), dividing it into 30 degree slices, and projecting them onto the ecliptic - along the poles of the ecliptic, horizon, equator, prime vertical and meridian. 20 choices. plus a phase term and a 12-cycle (but asc is always in first house... i think)
+meridian is (equator, equator)
+morinus is (equator, ecliptic)
+regiomontanus is (equator, prime vertical)
+campanus is (prime vertical, prime vertical)
+zenith / horizontal houses is (horizon, horizon)
+let's figure out the phase term. we just need to specify one single point that is a house cusp. Analogous (mod parity) to specifying one single great circle to intersect with the ecliptic.
+meridian: meridian - ecliptic intersection
+morinus: intersect the meridian with the equator, project that to the ecliptic
+regiomontanus: same as morinus
+campanus: merididan - ecliptic intersection
+zenith: meridian - ecliptic.
+"nice" spatial division only happens when (x, x), i.e. meridian, campanus and zenith. But there's nothing preventing you, in morinus and regiomontanus, from forgetting the original construction, and just keeping the intersections w the ecliptic and poles along which you projected, and that's a valid spatial division all the same.
+
+Let's think a bit. Ascendant is the intersection of the horizon and the ecliptic. I'm not thinking very hard, but I see no a priori reason why it would be a house cusp unless you specifically start dividing there, which can't be the case, since zenith is the only spatial system that mentions the horizon at all. What am I missing? Well, let's think more about it later.
+
+time systems
+
+alcabitius: as best I can tell, this is literally the same as porphyry. maybe i'm wrong because i'm assuming things move at a fixed speed around the ecliptic? Yes, that's probably the case. Here's what's actually going on. At time of birth, note how long it takes for the point that is the ascendant to move to the position of MC. Consider pausing at 1/3rd of that transit (by time), and 2/3rds. Note the points in the sky that are the MC. These points in the original time are the 12th and 11th house cusps. Same idea but IC->ASC instead of ASC->MC gives the third and second cusps (ASC is first). etc.
+placidus: sort of like the converse of alcabitius. note time for position that is ASC to be come MC, trisect that time. Note position that is ASC, run forward 1/3 time, note position, that ecliptic angle is the 12th house cusp. or not - i think i got something wrong, because [ https://www.uraniatrust.org/astrology/astronomy-of-houses ] seems to imply you need an iterative computation to figure this out. Oh but later it gives another explanation that makes it sound like exactly what I said. huh?? I get that the "note ecliptic angle" (perhaps wrt ascendant?) is a bit weird but it seems easy. am i missing something? also unclear how it works on other quadrants, but the picture seems to suggest that its always ASC/DSC -> MC/IC
+koch: take MC -> ASC (going backwards in time), trisect that, run forwardd 1/3rd, current ASC position in the sky is 12th house cusp. Etc. unclear how it works for other quadrants but drawing seems to suggest its always MC/IC -> ASC/DSC
+topocentric: 
+
+ASC and thus DSC are always on the leftmost and rightmost point of the chart. Bc of the orientation, MC is always on the upper side, vise versa IC.
+anglo system is where you distort everything st ASC, IC, DSC, MC are at 90 degree angles.
+
+some more stuff: https://radixpro.com/project-houses/house-systems/ (holy shit there's a lot)
+
+also whats that deal with sidereal vs tropical
+
+
+TODO (the real ones, before v1)
+midheaven + immum coeli (icons too), descendant
+connect the datetime widget to the actual thing
+rotate s.t. ascendant-descendant are horizontal
+(don't actually include IC and DSC yet, wait until we can toggle that sort of stuff)
+house systems: at least the major ones, with a selector in the config, with a toggle option for 5º pre-sweep (will just change how they are drawn, for now)
+rework aspects:
+	standarize how aspects are represented (always normalized angles, always in the same order starting from the lowest absolute angle)
+	write a function that given an aspect lists its sub-aspects
+	[NOT YET] stretchy subaspect menu
+	rewrite the actual search funs:
+		during aspect search, use this function to avoid including sub-aspects
+		include a param for how many non-luminaries are allowed (for now lock at 1)
+		include some new aspects (icons too):
+			or maybe don't - these will clutter things up a lot before we have a toggle system. mb we can hack up a crude toggle system and hardcode it to sth for now
+			binary: quincunx (150º), semi-sextile (30º), quintile (72º), semi-square (45º), sesquiquadrate (135º), biquintile (144º), septile (2rad/7)
+			multiple:
+				T-Square / Tau Square: (a square minus 1 point),
+				kite (a grand trine w a point in opposition to one of the vertices, like 4/6ths of a grand sextile)
+				yod (finger of god/finger of fate): 3 points, 60º - 150º - 150º
+				mystic rectangle: a grand sextile with 2 opposite points missing. or: 2 oppositions at trines/sextiles to one another.
+	compute every time the nodes change (but throw away computation if they change again)
+	change st. error is shown in degrees
+	possibly just forget the quantiles for now (would have to depend on aspect kind, qt of non-luminaires in aspect, and qts of luminaires and non-luminaires in zodiac)
+	toggle for colorcoding
+part of fortune, black moon lilith + selene	
+
+
+
+
+
+obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F
+on a related note remember lunar asc / dsc are sometimes called dragon's head / tail

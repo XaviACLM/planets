@@ -151,11 +151,11 @@ function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, 
 }
 
 function computeAxialTilt(date: Date): number {
+	// in radians
 	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
 	const eclPole = Ecliptic(vecPole);
 	const obliquity = Math.acos(eclPole.vec.z);
 	return obliquity;
-	
 }
 
 function computeAscendant(date: Date, surfacePos: SurfacePosition): number {
