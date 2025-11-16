@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
+import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
-import { HouseSystem, LunarNodeMode, ZodiacPositions } from './astro.ts'
+import { LunarNodeMode, ZodiacPositions } from './astro.ts'
 import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
 import { type CityData, barcelonaCityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -49,9 +50,9 @@ function App() {
 		let zodiacPositions;
 		let tempNodeAngles;
 		if (selectedCity != null) {
-			zodiacPositions = ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, HouseSystem.PORPHYRY);
 		} else {
-			zodiacPositions = ZodiacPositions.create(selectedDate, null, lunarNodeMode, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(selectedDate, null, lunarNodeMode, HouseSystem.PORPHYRY);
 		}
 		const tempAspects = findAspects(zodiacPositions._nodePositions);
 		

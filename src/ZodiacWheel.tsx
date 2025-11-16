@@ -139,7 +139,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 	
-	const { offset, nodeAngles } = useMemo<Map<Node, number> | null>(() => {
+	const { offset, nodeAngles, houseCuspAngles } = useMemo<Map<Node, number> | null>(() => {
 		
 		const offset = zodiacPositions.hasSurfacePosition() ?
 			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
@@ -153,7 +153,8 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		
 		return {
 			offset: offset,
-			nodeAngles: nodeAngles 
+			nodeAngles: nodeAngles,
+			houseCuspAngles: zodiacPositions.getHouseCuspPositions()
 		}
 	}, [zodiacPositions]);
 	
@@ -222,15 +223,14 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Inner zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = (i/12) * 2 * Math.PI - offset;
-					//const a = (i/12) * 2 * Math.PI + offset + Math.PI/12;
+					const a = houseCuspAngles ? houseCuspAngles[i] + offset : (i/12) * 2 * Math.PI - offset;
 					return (
 						<line
 							key={i}
 							x1={50 + (radius - 3) * Math.cos(a)}
-							y1={50 + (radius - 3) * Math.sin(a)}
+							y1={50 - (radius - 3) * Math.sin(a)}
 							x2={50 + (aspectRadius + 3) * Math.cos(a)}
-							y2={50 + (aspectRadius + 3) * Math.sin(a)}
+							y2={50 - (aspectRadius + 3) * Math.sin(a)}
 							stroke="white"
 							strokeWidth={strokeWidthTertiary}
 							

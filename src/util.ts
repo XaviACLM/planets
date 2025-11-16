@@ -45,7 +45,17 @@ export function spreadIcons(
 }
 
 export function normalizeAngleRad(a: number) {
-  // normalize to [0, 2π)
-  const twoPi = 2*Math.PI;
-  return ((a % twoPi) + twoPi) % twoPi;
+	// normalize to [0, 2π)
+	const twoPi = 2*Math.PI;
+	return ((a % twoPi) + twoPi) % twoPi;
+}
+
+export function interpolateAngles(coeff:number, a1: number, a2: number) {
+	// goes a1 -> a2, coeff 0 -> 1
+	// assumes a1 and a2 are already normalized
+	if (a1 < a2) {
+		return (1-coeff) * a1 + coeff * a2 
+	} else {
+		return normalizeAngleRad((1-coeff) * a1 + coeff * (a2 + 2*Math.PI)); 
+	}
 }

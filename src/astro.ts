@@ -1,5 +1,7 @@
 import { normalizeAngleRad } from './util.ts'
 
+import { computeHouseCuspPositions } from './houses.ts'
+
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
 export enum Node {
@@ -231,21 +233,16 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
-		...computePhysicalNodePositions(date),
+		//...computePhysicalNodePositions(date),
 		...computeLunarNodes(date, lunarNodeMode)
 	]);
 }
 
-function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
+function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
 	return new Map<Node, number>([
-		//...(new Map<Node, number>([[Node.ASCENDANT, computeAscendant(date, surfacePos)]])),
-		...computeAscendantAndDescendant(date, surfacePos),
-		...computeMCIC(date, surfacePos),
+		...computeAscendantAndDescendant(date, surfacePosition),
+		...computeMCIC(date, surfacePosition),
 	]);
-}
-
-function computeHouseCuspPositions(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
-	//TODO
 }
 
 function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, lunarNodeMode: LunarNodeMode, houseSystem: HouseSystem): Map<Node, number>{
@@ -274,6 +271,7 @@ interface ZodiacPositionsConstructorArgs {
 
 export class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
+	private readonly _houseCuspPositions: Map<Node, number> | null;
 	
 	public readonly date: Date;
 	public readonly surfacePosition: SurfacePosition | null;
@@ -290,8 +288,10 @@ export class ZodiacPositions {
 			this._nodePositions = config.nodePositions;
 		} else if (this.surfacePosition !== null) {
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.houseSystem);
+			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions);
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
+			this._houseCuspPositions = null;
 		}
 	}
 	
@@ -333,20 +333,28 @@ export class ZodiacPositions {
 		if (newSystem == this.houseSystem) {
 			return;
 		}
-		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem);
+		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions);
 		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newHouseCuspPositions]);
 		return this.copyWith({nodePositions: newNodePositions});
-	}
-	
-	public getNodePositions(): Map<Node, number>{
-		return this._nodePositions;
 	}
 	
 	public hasSurfacePosition(): boolean{
 		return this.surfacePosition !== null;
 	}
 	
+	public getNodePositions(): Map<Node, number>{
+		return this._nodePositions;
+	}
+	
 	public getNodePosition(node: Node): number{
 		return this._nodePositions.get(node);
+	}
+	
+	public getHouseCuspPositions(): number[12]{
+		return this._houseCuspPositions;
+	}
+	
+	public getHouseCuspPosition(i: number): number{
+		return this._houseCuspPositions[i];
 	}
 }
