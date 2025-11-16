@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect, useMemo } from 'react'
 
 import { AspectKind } from './aspects.ts'
 import { Node } from './astro.ts'
@@ -139,18 +139,25 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 	
-	const offset = -Math.PI/12;
-	
-	const nodeAngles = React.useMemo(() => {
+	const { offset, nodeAngles } = useMemo<Map<Node, number> | null>(() => {
+		
+		const offset = zodiacPositions.hasSurfacePosition() ?
+			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
+			: -Math.PI/12;
+		
 		// this is vestigial, but it will be useful in the future to implement anglo style
 		const nodeAngles = new Map<Node, number>();
 		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
 			nodeAngles.set(node, position + offset);
 		})
-		return nodeAngles;
-	}, [zodiacPositions, offset]);
+		
+		return {
+			offset: offset,
+			nodeAngles: nodeAngles 
+		}
+	}, [zodiacPositions]);
 	
-	const adjustedNodeAngles = React.useMemo(() => {
+	const adjustedNodeAngles = useMemo(() => {
 		if ( nodeAngles === null ) return null;
 		
 		const adjustedPositions = spreadIcons(
@@ -167,7 +174,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
 	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
 	
-	const [hovered, setHovered] = React.useState<number | null>(null);
+	const [hovered, setHovered] = useState<number | null>(null);
 	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
@@ -198,7 +205,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Outer zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = (i/12) * 2 * Math.PI + offset;
+					const a = (i/12) * 2 * Math.PI - offset;
 					return (
 						<line
 							key={i}
@@ -215,7 +222,8 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Inner zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = (i/12) * 2 * Math.PI + offset;
+					const a = (i/12) * 2 * Math.PI - offset;
+					//const a = (i/12) * 2 * Math.PI + offset + Math.PI/12;
 					return (
 						<line
 							key={i}
