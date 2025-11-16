@@ -17,6 +17,7 @@ function App() {
 	// config
 	const [showLabels, setShowLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
+	const [housePresweep, setHousePresweep] = useState<boolean>(true);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -133,6 +134,14 @@ function App() {
 							/>
 							Keep text right-side-up
 						</label>
+						<label>
+							<input
+								type="checkbox"
+								checked={housePresweep}
+								onChange={() => setHousePresweep(!housePresweep)}
+							/>
+							House pre-sweep
+						</label>
 						<div className="toggle-switch">
 							<span>Lunar node calculation mode:</span>
 							<button
@@ -154,6 +163,7 @@ function App() {
 				<ZodiacWheel
 					showLabels={showLabels}
 					flipText={flipText}
+					housePresweep={housePresweep}
 					zodiacPositions={zodiacPositions}
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}
