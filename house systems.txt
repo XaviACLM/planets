@@ -76,6 +76,9 @@ XX connect the datetime widget to the actual thing
 XX rotate s.t. ascendant-descendant are horizontal
 XX (don't actually include IC and DSC yet, wait until we can toggle that sort of stuff)
 house systems: at least the major ones, with a selector in the config, with a toggle option for 5º pre-sweep (will just change how they are drawn, for now)
+	XX initial setup
+	all the gd house systems + config options
+	ensure labels don't show if they coincide with main axes (does this matter? they're out of the way...)
 rework aspects:
 	standarize how aspects are represented (always normalized angles, always in the same order starting from the lowest absolute angle)
 	write a function that given an aspect lists its sub-aspects

@@ -50,6 +50,11 @@ export function normalizeAngleRad(a: number) {
 	return ((a % twoPi) + twoPi) % twoPi;
 }
 
+export function normalizeAngleDeg(a: number) {
+	// normalize to [0, 2π)
+	return ((a % 360) + 360) % 360;
+}
+
 export function interpolateAngles(coeff:number, a1: number, a2: number) {
 	// goes a1 -> a2, coeff 0 -> 1
 	// assumes a1 and a2 are already normalized

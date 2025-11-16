@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { AspectKind } from './aspects.ts'
 import { Node } from './astro.ts'
 
-import { spreadIcons } from './util.ts'
+import { spreadIcons, normalizeAngleDeg } from './util.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
@@ -221,7 +221,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 					);
 				})}
 				
-				{/*Inner zodiac sector separators*/}
+				{/*House separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
 					const a = houseCuspAngles ? houseCuspAngles[i] + offset : (i/12) * 2 * Math.PI - offset;
 					return (
@@ -237,6 +237,35 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 						/>
 					);
 				})}
+				
+				{/*House cusp labels*/}
+				{zodiacPositions.hasSurfacePosition() &&
+					Array.from({ length: 12 }).map((_, i) => {
+						const a = houseCuspAngles[i] + offset;
+						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
+						const flip = (r>90 && r<270) && flipText;
+						const adj = flip ? 0.01 : -0.01; //perfect alignment w/ house separators
+						const x = 50 + (radius-1) * Math.cos(a+adj);
+						const y = 50 - (radius-1) * Math.sin(a+adj);
+						const cuspName = "H"+String(i+1)
+						return (
+							<text
+								key={i}
+								x={x}
+								y={y+0.6}
+								width={symbolSize}
+								height={symbolSize}
+								fontSize="1"
+								fontWeight="bold"
+								textAnchor={flip ? "end" : "start"}
+								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
+								style={{filter:"invert(1)", fontVariant: "small-caps"}}
+							>
+								{cuspName}
+							</text>
+						);
+					})
+				}
 				
 				{/*Zodiac symbols*/}
 				{zodiac.map((symbol, i) => {
@@ -264,8 +293,8 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset;
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 - sectorRadius * Math.sin(a);
-						const r = -(a * 180) / Math.PI + 180;
-						const flip = (r>90 || r<-90) && flipText;
+						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
+						const flip = (r>90 && r<270) && flipText;
 						return (
 							<text
 								key={i}
@@ -356,8 +385,8 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 						const a = adjustedNodeAngles.get(node);
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 - planetRadius * Math.sin(a);
-						const r = -(a * 180) / Math.PI + 180;
-						const flip = (r>90 || r<-90) && flipText;
+						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
+						const flip = (r>90 && r<270) && flipText;
 						var nodeName = node;
 						if ( nodeShortName[node] ) {
 							nodeName = nodeShortName[node];
@@ -386,7 +415,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				}
 				
 				{/*Aspects*/}
-				{aspects != null && 
+				{aspects != null &&
 					aspects.map((aspect, i) => {
 						
 						if ( aspect.kind == AspectKind.CONJUNCTION ) {

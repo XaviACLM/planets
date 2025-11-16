@@ -233,7 +233,7 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
-		//...computePhysicalNodePositions(date),
+		...computePhysicalNodePositions(date),
 		...computeLunarNodes(date, lunarNodeMode)
 	]);
 }
