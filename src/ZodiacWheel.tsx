@@ -225,7 +225,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 				{Array.from({ length: 12 }).map((_, i) => {
 					let a;
 					if (houseCuspAngles) {
-						if (housePresweep) { a = houseCuspAngles[i] + offset + Math.PI/36 // 5 degree presweep
+						if (housePresweep) { a = houseCuspAngles[i] + offset - Math.PI/36 // 5 degree presweep
 						} else { a = houseCuspAngles[i] + offset; }
 					} else { a = (i/12) * 2 * Math.PI - offset; }
 					return (
@@ -249,10 +249,10 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 						return (
 							<line
 								key={i}
-								x1={50 + (radius - 1.5) * Math.cos(a + Math.PI/36/2)}
-								y1={50 - (radius - 1.5) * Math.sin(a + Math.PI/36/2)}
-								x2={50 + (radius - 3) * Math.cos(a + Math.PI/36 )}
-								y2={50 - (radius - 3) * Math.sin(a + Math.PI/36 )}
+								x1={50 + (radius - 1.5) * Math.cos(a - Math.PI/36/2)}
+								y1={50 - (radius - 1.5) * Math.sin(a - Math.PI/36/2)}
+								x2={50 + (radius - 3) * Math.cos(a - Math.PI/36 )}
+								y2={50 - (radius - 3) * Math.sin(a - Math.PI/36 )}
 								stroke="white"
 								strokeWidth={strokeWidthTertiary}
 								

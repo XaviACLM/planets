@@ -77,9 +77,11 @@ XX rotate s.t. ascendant-descendant are horizontal
 XX (don't actually include IC and DSC yet, wait until we can toggle that sort of stuff)
 house systems: at least the major ones, with a selector in the config, with a toggle option for 5º pre-sweep (will just change how they are drawn, for now)
 	XX initial setup
-	presweep
+	XX presweep
 	all the gd house systems + config options
-	ensure labels don't show if they coincide with main axes (does this matter? they're out of the way...)
+		equal houses and whole houses to make sure switching works
+		regiomontanus, make that generic for space-based, add krusinsky and regiomontanus
+		time-based (ugh)
 rework aspects:
 	standarize how aspects are represented (always normalized angles, always in the same order starting from the lowest absolute angle)
 	write a function that given an aspect lists its sub-aspects
@@ -100,14 +102,10 @@ rework aspects:
 	possibly just forget the quantiles for now (would have to depend on aspect kind, qt of non-luminaires in aspect, and qts of luminaires and non-luminaires in zodiac)
 	toggle for colorcoding
 part of fortune, black moon lilith + selene	
-
-implementing houses. Let's start with the easiest (whole sign) to make sure that works
-then equal_houses and porphyry to make sure switching works
-then regiomontanus and turn that into a generic method for the space-based, then krusinsky and regiomontanus
-then the time-based (uuuugh)
+change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
+change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
 
 
-
-
+note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F
 on a related note remember lunar asc / dsc are sometimes called dragon's head / tail

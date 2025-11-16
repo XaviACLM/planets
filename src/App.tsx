@@ -17,14 +17,33 @@ function App() {
 	// config
 	const [showLabels, setShowLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
-	const [housePresweep, setHousePresweep] = useState<boolean>(true);
+	const [housePresweep, setHousePresweep] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
+	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
 	
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
 	const [selectedDate, setSelectedDate] = useState(new Date());
+	
+	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));
+	
+	const aspects = useMemo(() => {
+		return findAspects(zodiacPositions.getNodePositions());
+	}, [zodiacPositions])
+	
+	useEffect(() => {
+		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));
+	}, [selectedCity, selectedDate])
+	
+	useEffect(() => {
+		setZodiacPositions(zodiacPositions.changeHouseSystem(selectedHouseSystem));
+	}, [selectedHouseSystem])
+	
+	useEffect(() => {
+		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
+	}, [lunarNodeMode])
 	
 	// keeps zodiacPositions (from the stuff we're doing over at astro2)
 	// and something from config
@@ -46,22 +65,6 @@ function App() {
 	// from zodiacPositions and the config (that affects zodiacWheel)
 	// useMemo -> nodePositions, bodyNodes[], pointNodes[]
 	// within zodiacWheel, keep the useMemo -> adjustedNodePositions
-	
-	const { zodiacPositions, aspects } = useMemo<Map<Node, number> | null>(() => {
-		let zodiacPositions;
-		let tempNodeAngles;
-		if (selectedCity != null) {
-			zodiacPositions = ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, HouseSystem.PORPHYRY);
-		} else {
-			zodiacPositions = ZodiacPositions.create(selectedDate, null, lunarNodeMode, HouseSystem.PORPHYRY);
-		}
-		const tempAspects = findAspects(zodiacPositions._nodePositions);
-		
-		return {
-			zodiacPositions: zodiacPositions,
-			aspects: tempAspects
-		}
-	}, [selectedCity, selectedDate, lunarNodeMode]);
 	
 	return (
 		<div className="app-container">
@@ -118,45 +121,67 @@ function App() {
 					
 					{menuOpen && (
 						<div>
-						<label>
-							<input
-								type="checkbox"
-								checked={showLabels}
-								onChange={() => setShowLabels(!showLabels)}
-							/>
-							Show labels
-						</label>
-						<label>
-							<input
-								type="checkbox"
-								checked={flipText}
-								onChange={() => setFlipText(!flipText)}
-							/>
-							Keep text right-side-up
-						</label>
-						<label>
-							<input
-								type="checkbox"
-								checked={housePresweep}
-								onChange={() => setHousePresweep(!housePresweep)}
-							/>
-							House pre-sweep
-						</label>
-						<div className="toggle-switch">
-							<span>Lunar node calculation mode:</span>
-							<button
-								className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
-								onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
+							<label>
+								<input
+									type="checkbox"
+									checked={showLabels}
+									onChange={() => setShowLabels(!showLabels)}
+								/>
+								Show labels
+							</label>
+							<hr/>
+							<label>
+								<input
+									type="checkbox"
+									checked={flipText}
+									onChange={() => setFlipText(!flipText)}
+								/>
+								Keep text right-side-up
+							</label>
+							<hr/>
+							<label>
+								<input
+									type="checkbox"
+									checked={housePresweep}
+									onChange={() => setHousePresweep(!housePresweep)}
+								/>
+								House pre-sweep
+							</label>
+							<hr/>
+							<div className="toggle-switch">
+								<span>Lunar node calculation mode:</span>
+								<button
+									className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
+									onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
+								>
+									Mean
+								</button>
+								<button
+									className={`toggle-option ${lunarNodeMode === LunarNodeMode.TRUE ? 'active' : ''}`}
+									onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
+								>
+									True
+								</button>
+							</div>
+							<hr/>
+							<select
+								value={selectedHouseSystem}
+								onChange={(e) => setSelectedHouseSystem(e.target.value)}
+								style={{
+									backgroundColor: "black",
+									color: "white",
+									border: "1px solid white",
+									padding: "8px 12px",
+									borderRadius: "4px",
+									outline: "none",
+								}}
 							>
-								Mean
-							</button>
-							<button
-								className={`toggle-option ${lunarNodeMode === LunarNodeMode.TRUE ? 'active' : ''}`}
-								onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
-							>
-								True
-							</button>
-						</div>
+								{Object.values(HouseSystem).map(system =>(
+									<option key={system} value={system}>
+										{system}
+									</option>
+								))}
+							</select>
 						</div>
 					)}
 				</div>

@@ -266,7 +266,8 @@ interface ZodiacPositionsConstructorArgs {
 	surfacePosition: SurfacePosition | null;
 	lunarNodeMode: LunarNodeMode;
 	houseSystem: HouseSystem;
-	nodePositions?: Map<Node, number>
+	nodePositions?: Map<Node, number>;
+	houseCuspPositions?: Map<Node, number>
 }
 
 export class ZodiacPositions {
@@ -286,6 +287,7 @@ export class ZodiacPositions {
 		
 		if (config.nodePositions) {
 			this._nodePositions = config.nodePositions;
+			this._houseCuspPositions = config.houseCuspPositions;
 		} else if (this.surfacePosition !== null) {
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.houseSystem);
 			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions);
@@ -314,13 +316,14 @@ export class ZodiacPositions {
 			date: this.date,
 			surfacePosition: this.surfacePosition,
 			lunarNodeMode: this.lunarNodeMode,
-			houseSystem: this.housesSystem,
+			houseSystem: this.houseSystem,
 			nodePositions: this._nodePositions,
+			houseCuspPositions: this._houseCuspPositions,
 			...updates
 		});
 	}
 
-	public changeLunarNodesMode(newMode: LunarNodeMode){
+	public changeLunarNodeMode(newMode: LunarNodeMode){
 		if (newMode == this.lunarNodeMode) {
 			return this;
 		}
@@ -334,8 +337,7 @@ export class ZodiacPositions {
 			return;
 		}
 		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions);
-		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newHouseCuspPositions]);
-		return this.copyWith({nodePositions: newNodePositions});
+		return this.copyWith({houseCuspPositions: newHouseCuspPositions});
 	}
 	
 	public hasSurfacePosition(): boolean{

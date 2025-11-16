@@ -31,6 +31,41 @@ export enum HouseSystem {
 	ALCABITIUS = "Alcabitius",
 }
 
+function computeWholeSignCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	const idx = Math.floor(angles.asc/(Math.PI/6));
+	return [
+		normalizeAngleRad(idx*Math.PI/6),
+		normalizeAngleRad((idx+1)*Math.PI/6),
+		normalizeAngleRad((idx+2)*Math.PI/6),
+		normalizeAngleRad((idx+3)*Math.PI/6),
+		normalizeAngleRad((idx+4)*Math.PI/6),
+		normalizeAngleRad((idx+5)*Math.PI/6),
+		normalizeAngleRad((idx+6)*Math.PI/6),
+		normalizeAngleRad((idx+7)*Math.PI/6),
+		normalizeAngleRad((idx+8)*Math.PI/6),
+		normalizeAngleRad((idx+9)*Math.PI/6),
+		normalizeAngleRad((idx+10)*Math.PI/6),
+		normalizeAngleRad((idx+11)*Math.PI/6),
+	];
+}
+
+function computeEqualHousesCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	return [
+		angles.asc,
+		angles.asc + Math.PI/6,
+		angles.asc + 2*Math.PI/6,
+		angles.asc + 3*Math.PI/6,
+		angles.asc + 4*Math.PI/6,
+		angles.asc + 5*Math.PI/6,
+		angles.asc + 6*Math.PI/6, //dsc
+		angles.asc + 7*Math.PI/6,
+		angles.asc + 8*Math.PI/6,
+		angles.asc + 9*Math.PI/6,
+		angles.asc + 10*Math.PI/6,
+		angles.asc + 11*Math.PI/6,
+	];
+}
+
 function computePorphyryCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
 	return [
 		angles.asc,
@@ -56,9 +91,13 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 		ic: knownNodes.get(Node.IMUM_COELI)
 	}
 	switch (houseSystem) {
+		case HouseSystem.WHOLE_SIGN:
+			return computeWholeSignCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.EQUAL_HOUSES:
+			return computeEqualHousesCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.PORPHYRY:
 			return computePorphyryCuspPositions(date, surfacePosition, angles);
 		default:
-			console.log("something wrong with house computation dispatch");
+			console.log("something wrong with house computation dispatch:", houseSystem);
 	}
 }
