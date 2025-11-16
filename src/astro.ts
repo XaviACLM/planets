@@ -17,8 +17,9 @@ export enum Node {
 	
 	// angles
 	ASCENDANT = "Ascendant",
-	//MIDHEAVEN = "Midheaven",
-	//IMMUM_COELI = "Immum Coeli",
+	DESCENDANT = "Descendant",
+	MIDHEAVEN = "Midheaven",
+	IMUM_COELI = "Imum Coeli",
 	//PART_OF_FORTUNE = "Part of Fortune",
 	
 	//lunar
@@ -61,8 +62,9 @@ const nodeTypes: Record<Node, NodeType> = {
 	[Node.PLUTO] : NodeType.BODY,
 	
 	[Node.ASCENDANT] : NodeType.POINT,
-	//[Node.MIDHEAVEN] : NodeType.POINT,
-	//[Node.IMMUM_COELI] : NodeType.POINT,
+	[Node.DESCENDANT] : NodeType.POINT,
+	[Node.MIDHEAVEN] : NodeType.POINT,
+	[Node.IMUM_COELI] : NodeType.POINT,
 	//[Node.PART_OF_FORTUNE] : NodeType.POINT,
 	
 	[Node.LUNAR_ASCENDING] : NodeType.POINT,
@@ -84,8 +86,9 @@ const nodeDependsOnLocation: Record<Node, boolean> = {
 	[Node.PLUTO] : false,
 	
 	[Node.ASCENDANT] : true,
-	//[Node.MIDHEAVEN] : true,
-	//[Node.IMMUM_COELI] : true,
+	[Node.DESCENDANT] : true,
+	[Node.MIDHEAVEN] : true,
+	[Node.IMUM_COELI] : true,
 	//[Node.PART_OF_FORTUNE] : true,
 	
 	[Node.LUNAR_ASCENDING] : false,
@@ -112,7 +115,6 @@ function computeLunarNodesMeeus(date: Date): Map<Node, number> {
 	const omega = 125.04452 - 1934.136261 * t + 0.0020708 * t*t + (t*t*t)/450000; // small correction
 
 	const ascending = (omega)/360*2*Math.PI;
-	console.log(omega);
 	
 	return new Map <Node, number>([
 		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
@@ -158,7 +160,25 @@ function computeAxialTilt(date: Date): number {
 	return obliquity;
 }
 
-function computeAscendant(date: Date, surfacePos: SurfacePosition): number {
+function computeMCIC(date: Date, surfacePos: SurfacePosition): number {
+	const latitudeDeg = surfacePos.latitude;
+	const longitudeDeg = surfacePos.longitude;
+	const gstHours = SiderealTime(date);
+	const lstHours = gstHours + longitudeDeg / 15.0;
+	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
+	const theta = lstHoursNorm * Math.PI / 12
+	
+	const epsRad = computeAxialTilt(date);
+	
+	const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
+	
+	return new Map <Node, number>([
+		[Node.MIDHEAVEN, normalizeAngleRad(mc)],
+		[Node.IMUM_COELI, normalizeAngleRad(mc + Math.PI)]
+	]);
+}
+
+function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): number {
 	const latitudeDeg = surfacePos.latitude;
 	const longitudeDeg = surfacePos.longitude;
 	const gstHours = SiderealTime(date);
@@ -172,8 +192,12 @@ function computeAscendant(date: Date, surfacePos: SurfacePosition): number {
 	
 	const x = Math.cos(theta);
 	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
-	const lambda = normalizeAngleRad(Math.atan2(x,y));
-	return lambda;
+	const lambda = Math.atan2(x,y);
+	
+	return new Map <Node, number>([
+		[Node.ASCENDANT, normalizeAngleRad(lambda)],
+		[Node.DESCENDANT, normalizeAngleRad(lambda + Math.PI)]
+	]);
 }
 
 // for the astronomy engine
@@ -214,7 +238,9 @@ function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode
 
 function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePos: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
 	return new Map<Node, number>([
-		...(new Map<Node, number>([[Node.ASCENDANT, computeAscendant(date, surfacePos)]])),
+		//...(new Map<Node, number>([[Node.ASCENDANT, computeAscendant(date, surfacePos)]])),
+		...computeAscendantAndDescendant(date, surfacePos),
+		...computeMCIC(date, surfacePos),
 	]);
 }
 

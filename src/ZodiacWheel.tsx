@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Node, NodeToBody, type Aspect, AspectKind} from './aspects.ts'
+import { AspectKind } from './aspects.ts'
+import { Node } from './astro.ts'
 
 import { spreadIcons } from './util.ts'
 
@@ -29,6 +30,9 @@ import sunSymbol from "./assets/body-symbols/Sun.png"
 import uranusSymbol from "./assets/body-symbols/Uranus.png"
 import venusSymbol from "./assets/body-symbols/Venus.png"
 import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
+import descendantSymbol from "./assets/body-symbols/Descendant.png"
+import midheavenSymbol from "./assets/body-symbols/Midheaven.png"
+import imumCoeliSymbol from "./assets/body-symbols/Imum Coeli.png"
 import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
 import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
 
@@ -45,6 +49,36 @@ enum Zodiac{
   Capricorn = 'Capricorn',
   Aquarius = 'Aquarius',
   Pisces = 'Pisces'
+}
+
+const nodeSymbolHideable: Record<Node, boolean> = {
+	[Node.SUN] : false,
+	[Node.MOON] : false,
+	[Node.MERCURY] : false,
+	[Node.VENUS] : false,
+	[Node.MARS] : false,
+	[Node.JUPITER] : false,
+	[Node.SATURN] : false,
+	[Node.URANUS] : false,
+	[Node.NEPTUNE] : false,
+	[Node.PLUTO] : false,
+	
+	[Node.ASCENDANT] : true,
+	[Node.DESCENDANT] : true,
+	[Node.MIDHEAVEN] : true,
+	[Node.IMUM_COELI] : true,
+	//[Node.PART_OF_FORTUNE] : false,
+	
+	[Node.LUNAR_ASCENDING] : false,
+	[Node.LUNAR_DESCENDING] : false,
+	//[Node.LUNAR_APOGEE] : false,
+	//[Node.LUNAR_PERIGEE] : false,
+}
+
+const nodeShortName: Record<Node, String> = {
+	[Node.LUNAR_ASCENDING] : "Lunar ▲",
+	[Node.LUNAR_DESCENDING] : "Lunar ▼",
+	//[Node.PART_OF_FORTUNE] : "Fortuna",
 }
 
 function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlightedAspect}: {
@@ -98,6 +132,9 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		[Node.NEPTUNE, neptuneSymbol],
 		[Node.PLUTO, plutoSymbol],
 		[Node.ASCENDANT, ascendantSymbol],
+		[Node.DESCENDANT, descendantSymbol],
+		[Node.MIDHEAVEN, midheavenSymbol],
+		[Node.IMUM_COELI, imumCoeliSymbol],
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
@@ -245,7 +282,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = -(a * 180) / Math.PI + 90;
-						if ( showLabels && node === Node.ASCENDANT ) {
+						if ( showLabels && nodeSymbolHideable[node] ) {
 							return null;
 						}
 						
@@ -311,14 +348,12 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 						const r = -(a * 180) / Math.PI + 180;
 						const flip = (r>90 || r<-90) && flipText;
 						var nodeName = node;
-						if ( node === Node.LUNAR_ASCENDING ) {
-							nodeName = "Lunar ▲";
-						} else if ( node === Node.LUNAR_DESCENDING ) {
-							nodeName = "Lunar ▼";
+						if ( nodeShortName[node] ) {
+							nodeName = nodeShortName[node];
 						}
-						let px = node === Node.ASCENDANT ? x : x;
-						if ( node == Node.ASCENDANT) {
-							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;//x = x-0.9-symbolSize;
+						let px = x;
+						if ( nodeSymbolHideable[node] ) {
+							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
 						}
 						return (
 							<text
