@@ -482,8 +482,8 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 
 				{/*Zodiac symbol highlighting*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const startA = ((2*i-1)/24) * 2 * Math.PI;
-					const endA = ((2*i+1)/24) * 2 * Math.PI;
+					const startA = (i/12) * 2 * Math.PI + offset;
+					const endA = ((i+1)/12) * 2 * Math.PI + offset;
 					
 					const innerStart = {
 						x: 50 + radius * Math.cos(startA),

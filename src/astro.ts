@@ -289,9 +289,7 @@ export class ZodiacPositions {
 		if (config.nodePositions) {
 			this._nodePositions = config.nodePositions;
 		} else if (this.surfacePosition !== null) {
-			console.log("calling function that will tell me where the ascendant is");
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.houseSystem);
-			console.log("done");
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
 		}
