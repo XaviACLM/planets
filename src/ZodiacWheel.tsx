@@ -139,18 +139,16 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
 	]);
 	
+	const offset = -Math.PI/12;
+	
 	const nodeAngles = React.useMemo(() => {
+		// this is vestigial, but it will be useful in the future to implement anglo style
 		const nodeAngles = new Map<Node, number>();
 		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
-			nodeAngles.set(node, position - Math.PI/12);
+			nodeAngles.set(node, position + offset);
 		})
 		return nodeAngles;
-	}, [zodiacPositions]);
-
-	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
-	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
-	
-	const [hovered, setHovered] = React.useState<number | null>(null);
+	}, [zodiacPositions, offset]);
 	
 	const adjustedNodeAngles = React.useMemo(() => {
 		if ( nodeAngles === null ) return null;
@@ -165,6 +163,11 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 		});
 		return adjustedMap;
 	}, [nodeAngles]);
+
+	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
+	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
+	
+	const [hovered, setHovered] = React.useState<number | null>(null);
 	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
@@ -195,7 +198,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Outer zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = ((2*i+1)/24) * 2 * Math.PI;
+					const a = (i/12) * 2 * Math.PI + offset;
 					return (
 						<line
 							key={i}
@@ -212,7 +215,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Inner zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = ((2*i+1)/24) * 2 * Math.PI;
+					const a = (i/12) * 2 * Math.PI + offset;
 					return (
 						<line
 							key={i}
@@ -229,7 +232,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				
 				{/*Zodiac symbols*/}
 				{zodiac.map((symbol, i) => {
-					const a = (i/12) * 2 * Math.PI;
+					const a = (i/12) * 2 * Math.PI + offset + Math.PI/12;
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = -(a * 180) / Math.PI + 90;
@@ -250,7 +253,7 @@ function ZodiacWheel({ showLabels, flipText, zodiacPositions, aspects, highlight
 				{/*Zodiac labels*/}
 				{showLabels && 
 					zodiac.map((symbol, i) => {
-						const a = ((2*i+1)/24) * 2 * Math.PI - 0.01;
+						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset;
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 - sectorRadius * Math.sin(a);
 						const r = -(a * 180) / Math.PI + 180;

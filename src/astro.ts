@@ -341,4 +341,8 @@ export class ZodiacPositions {
 	public getNodePositions(): Map<Node, number>{
 		return this._nodePositions;
 	}
+	
+	public getNodePosition(node: Node): number{
+		return this._nodePositions[node];
+	}
 }
