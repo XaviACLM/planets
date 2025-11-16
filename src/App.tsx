@@ -20,7 +20,9 @@ function App() {
 	
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
+	
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
+	const [selectedDate, setSelectedDate] = useState(new Date());
 	
 	// keeps zodiacPositions (from the stuff we're doing over at astro2)
 	// and something from config
@@ -44,14 +46,12 @@ function App() {
 	// within zodiacWheel, keep the useMemo -> adjustedNodePositions
 	
 	const { zodiacPositions, aspects } = useMemo<Map<Node, number> | null>(() => {
-		const date = new Date();
-		
 		let zodiacPositions;
 		let tempNodeAngles;
 		if (selectedCity != null) {
-			zodiacPositions = ZodiacPositions.create(date, selectedCity, lunarNodeMode, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, HouseSystem.PLACIDUS);
 		} else {
-			zodiacPositions = ZodiacPositions.create(date, null, lunarNodeMode, HouseSystem.PLACIDUS);
+			zodiacPositions = ZodiacPositions.create(selectedDate, null, lunarNodeMode, HouseSystem.PLACIDUS);
 		}
 		const tempAspects = findAspects(zodiacPositions._nodePositions);
 		
@@ -59,7 +59,7 @@ function App() {
 			zodiacPositions: zodiacPositions,
 			aspects: tempAspects
 		}
-	}, [selectedCity, lunarNodeMode]);
+	}, [selectedCity, selectedDate, lunarNodeMode]);
 	
 	return (
 		<div className="app-container">
@@ -75,6 +75,8 @@ function App() {
 						aria-label="Date and time"
 						type="datetime-local" 
 						style={{filter:"invert(1)", fontVariant: "small-caps"}}
+						value={selectedDate.toISOString().slice(0,16)}
+						onChange={(e) => setSelectedDate(new Date(e.target.value))}
 					/>
 				</div>
 				<div className="module module-aspects">
