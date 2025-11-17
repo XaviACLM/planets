@@ -81,10 +81,11 @@ const nodeShortName: Record<Node, String> = {
 	//[Node.PART_OF_FORTUNE] : "Fortuna",
 }
 
-function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, aspects, highlightedAspect}: {
+function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, aspects, highlightedAspect}: {
 	showLabels: boolean,
 	flipText: boolean,
 	housePresweep: boolean,
+	rotateSymbols: boolean,
 	zodiacPositions: Map<Node, number> | null,
 	aspects: Aspect[] | null,
 	highlightedAspect: Aspect | null
@@ -294,7 +295,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 					const a = (i/12) * 2 * Math.PI + offset + Math.PI/12;
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
-					const r = -(a * 180) / Math.PI + 90;
+					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
 					return (
 						<image
 							key={i}
@@ -343,7 +344,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
-						const r = -(a * 180) / Math.PI + 90;
+						const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
 						if ( showLabels && nodeSymbolHideable[node] ) {
 							return null;
 						}

@@ -18,6 +18,7 @@ function App() {
 	const [showLabels, setShowLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [housePresweep, setHousePresweep] = useState<boolean>(false);
+	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
 	
@@ -134,6 +135,15 @@ function App() {
 								House pre-sweep
 							</label>
 							<hr/>
+							<label>
+								<input
+									type="checkbox"
+									checked={rotateSymbols}
+									onChange={() => setRotateSymbols(!rotateSymbols)}
+								/>
+								Rotate symbols
+							</label>
+							<hr/>
 							<div className="toggle-switch">
 								<span>Lunar node calculation mode:</span>
 								<button
@@ -175,6 +185,7 @@ function App() {
 					showLabels={showLabels}
 					flipText={flipText}
 					housePresweep={housePresweep}
+					rotateSymbols={rotateSymbols}
 					zodiacPositions={zodiacPositions}
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}
