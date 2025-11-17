@@ -25,7 +25,7 @@ function App() {
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
-	const [selectedCity, setSelectedCity] = useState<cityData|null>(null); //null
+	const [selectedCity, setSelectedCity] = useState<cityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
 	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));

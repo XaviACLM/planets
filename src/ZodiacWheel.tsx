@@ -296,6 +296,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
+					const translateY = hovered === i ? -2 : 0;
 					return (
 						<image
 							key={i}
@@ -304,8 +305,13 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 							y={y-symbolSize/2}
 							width={symbolSize}
 							height={symbolSize}
-							transform={`rotate(${r}, ${x}, ${y}) translate(0, ${hovered === i ? -2 : 0})`}
-							style={{ transition: "transform 0.5s ease", filter:"invert(1)"}}
+							//transform={`rotate(${r}, ${x}, ${y}) translate(0, ${translateY})`}
+							style={{
+								transition: "transform 0.5s ease",
+								filter:"invert(1)",
+								transform: `rotate(${r}deg) translateY(${translateY}px)`,
+								transformOrigin: `${x}px ${y}px`
+							}}
 						/>
 					);
 				})}
