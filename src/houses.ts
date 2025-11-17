@@ -2,7 +2,7 @@ import { normalizeAngleRad, interpolateAngles } from './util.ts'
 
 import { Node, type SurfacePosition } from './astro.ts'
 
-import { RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL } from "astronomy-engine";
+import { RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 
 export interface AxisAngles {
 	asc: number;
@@ -84,9 +84,13 @@ interface vec3 {
 	z: numer
 }
 
+function normVec(v: vec3): number {
+	return Math.sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
+}
+
 function normalize(v: vec3): vec3 {
-	const r = Math.sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
-	return {x:v.x/r, y:v.y/r, z:v.y/r};
+	const r = normVec(v);
+	return {x:v.x/r, y:v.y/r, z:v.z/r};
 }
 
 function dot(v: vec3, w: vec3): number {
@@ -101,28 +105,31 @@ function cross(v: vec3, w: vec3): vec3 {
 	return {
 		x: v.y*w.z - v.z*w.y,
 		y: v.z*w.x - v.x*w.z,
-		z: v.z*w.y - v.y*w.x
+		z: v.x*w.y - v.y*w.x
 	}
 }
 
 function cardinals(date: Date, surfacePosition: SurfacePosition) {
-	const rot = Rotation_HOR_EQJ(date, surfacePosition);
+	const astroTime = new AstroTime(date);
+	const obs = new Observer(surfacePosition.latitude, surfacePosition.longitude, 0); //height
+	const rot = Rotation_HOR_EQJ(astroTime, obs);
 	const N = normalize(RotateVector(rot, {x:1, y:0, z:0}));
-	const W = normalize(RotateVector(rot, {x:0, y:1, z:0}));
+	const E = normalize(RotateVector(rot, {x:0, y:1, z:0}));
 	const zenith = normalize(RotateVector(rot, {x:0, y:0, z:1}));
 	const S = flipVec(N);
-	const E = flipVec(W);
+	const W = flipVec(E);
 	const nadir = flipVec(zenith);
 	return {N, S, E, W, zenith, nadir};
 }
 
 function greatCircles(date: Date, surfacePosition: SurfacePosition) {
+	const astroTime = new AstroTime(date);
 	const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), {x:0, y:0, z:1}));
-	const equator = {x:0, y:0, z:1};
+	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),{x:0, y:0, z:1}));
 	const {N, E, zenith} = cardinals(date, surfacePosition);
-	const primeVertical = normalize(cross(zenith,E));
-	const meridian = normalize(cross(zenith,N));
-	const horizon = normalize(cross(N, E));
+	const primeVertical = N;
+	const meridian = E;
+	const horizon = zenith;
 	return {ecliptic, equator, primeVertical, meridian, horizon};
 }
 
@@ -130,9 +137,6 @@ function ascendantDescendant(date: Date, surfacePosition: SurfacePosition) {
 	// this is not the same as the axisAngles: this is full position in the celestial sphere, that is just angle along the ecliptic
 	const {ecliptic, horizon} = greatCircles(date, surfacePosition);
 	const asc = normalize(cross(horizon, ecliptic));
-	console.log("ecliptic", ecliptic);
-	console.log("horizon", horizon);
-	console.log("asc", asc);
 	const dsc = flipVec(asc);
 	return {asc, dsc};
 }
@@ -157,20 +161,9 @@ function twelvePoints(circle: vec3, p: vec3): vec3[] {
 }
 
 function projectPoint(q: vec3, circle: vec3, center: vec3): vec3 {
-	//const f = dot(circle, q);
-	//const pq = {
-	//	x: q.x - circle.x*f,
-	//	y: q.y - circle.y*f,
-	//	z: q.z - circle.z*f
-	//};
-	//const p = normalize(pq);
-	//return dot(p, center) >= 0 ? p : flipVec(p);
-	const lambda = dot(center, circle)/dot(q, circle);
-	return normalize({
-		x:q.x + lambda*center.x,
-		y:q.y + lambda*center.y,
-		z:q.z + lambda*center.z,
-	});
+	const qcCircle = normalize(cross(q, center));
+	const intersection = normalize(cross(qcCircle, circle));
+	return intersection;
 }
 
 function projectPoints(qs: Vec3[], circle: vec3, center: vec3): vec3[] {
@@ -194,11 +187,11 @@ function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosit
 	const kpts = twelvePoints(kCircle, asc);
 	const {ecliptic, equator} = greatCircles(date, surfacePosition);
 	const epts = projectPoints(kpts, ecliptic, equator); //project from equatorial poles to ecliptic
-	console.log("asc",asc);
-	console.log("kpts",kpts);
-	console.log("ecliptic",ecliptic);
-	console.log("equator",equator);
-	console.log("epts",epts);
+	console.log("asc_json ='", JSON.stringify(asc),"'");
+	console.log("kpts_json ='", JSON.stringify(kpts),"'");
+	console.log("ecliptic_json ='", JSON.stringify(ecliptic),"'");
+	console.log("equator_json ='", JSON.stringify(equator),"'");
+	console.log("epts_json ='", JSON.stringify(epts),"'");
 	return computeEclipticAngles(epts);
 }
 
