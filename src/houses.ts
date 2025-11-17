@@ -18,11 +18,14 @@ export enum HouseSystem {
 	
 	KRUSINSKY = "Krusinsky",
 	REGIOMONTANUS = "Regiomontanus",
+	MERIDIAN = "Meridian",
+	MORINUS = "Morinus",
+	CAMPANUS = "Campanus",
+	ZENITH_HORIZONTAL = "Zenith / Horizontal",
 	
 	PLACIDUS = "Placidus",
 	TOPOCENTRIC = "Topocentric",
 	KOCH = "Koch",
-	CAMPANUS = "Campanus",
 	ALCABITIUS = "Alcabitius",
 }
 
@@ -187,12 +190,23 @@ function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosit
 	const kpts = twelvePoints(kCircle, asc);
 	const {ecliptic, equator} = greatCircles(date, surfacePosition);
 	const epts = projectPoints(kpts, ecliptic, equator); //project from equatorial poles to ecliptic
-	console.log("asc_json ='", JSON.stringify(asc),"'");
-	console.log("kpts_json ='", JSON.stringify(kpts),"'");
-	console.log("ecliptic_json ='", JSON.stringify(ecliptic),"'");
-	console.log("equator_json ='", JSON.stringify(equator),"'");
-	console.log("epts_json ='", JSON.stringify(epts),"'");
+	//console.log("asc_json ='", JSON.stringify(asc),"'");
+	//console.log("kpts_json ='", JSON.stringify(kpts),"'");
+	//console.log("ecliptic_json ='", JSON.stringify(ecliptic),"'");
+	//console.log("equator_json ='", JSON.stringify(equator),"'");
+	//console.log("epts_json ='", JSON.stringify(epts),"'");
 	return computeEclipticAngles(epts);
+}
+
+function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	const {N} = cardinals(date, surfacePosition);
+	const {meridian, equator, ecliptic} = greatCircles(date, surfacePosition);
+	const intersection = normalize(cross(meridian, equator));
+	const kpts = twelvePoints(equator, intersection);
+	const epts = projectPoints(kpts, ecliptic, N);
+	const a = computeEclipticAngles(epts);
+	console.log(a.slice(3).concat(a.slice(0,3)));
+	return a.slice(3).concat(a.slice(0,3));
 }
 
 export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[12]{
@@ -211,6 +225,8 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 			return computePorphyryCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.KRUSINSKY:
 			return computeKrusinskyCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.REGIOMONTANUS:
+			return computeRegiomontanusCuspPositions(date, surfacePosition, angles);
 		default:
 			console.log("something wrong with house computation dispatch:", houseSystem);
 	}
