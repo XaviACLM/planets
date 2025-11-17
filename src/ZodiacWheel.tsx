@@ -93,9 +93,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 	const hoveredSymbolRadius = 42;
 	const symbolRadius = 40;
 	const radius = 35; // percent of viewport
-	const planetRadius = 30;
-	const aspectRadius = 20;
-	const planetRadiusNoLabels = (radius + aspectRadius)/2;
+	const aspectRadius = showLabels ? 20 : 25;
+	const planetRadius = showLabels ? 30 : (radius+aspectRadius)/2;
 	
 	const minimumIconSpace = 0.12; // radial
 	
@@ -341,7 +340,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node);
-						const rad = showLabels ? planetRadius : planetRadiusNoLabels;
+						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = -(a * 180) / Math.PI + 90;

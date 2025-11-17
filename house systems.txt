@@ -103,10 +103,10 @@ rework aspects:
 	possibly just forget the quantiles for now (would have to depend on aspect kind, qt of non-luminaires in aspect, and qts of luminaires and non-luminaires in zodiac)
 	toggle for colorcoding
 part of fortune, black moon lilith + selene	
-change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
+XX change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
 XX change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
 option to not rotate any of the symbols / 90 snaps (iykyk)
-when show labels is off, inner aspect circle expands
+XX when show labels is off, inner aspect circle expands
 
 note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F
