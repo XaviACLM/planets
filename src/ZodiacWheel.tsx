@@ -371,18 +371,15 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 					})
 				}
 				
-				{/*Node adjusted placement indicators*/}
+				{/*Node original placement indicators*/}
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = nodeAngles.get(node);
-						const adjA = adjustedNodeAngles.get(node);
-						const d = Math.abs(a - adjA) % (2*Math.PI)
-						if (d < minimumIconSpace/2) { return null; }
 						
-						const r1 = showLabels ? aspectRadius + 2 : planetRadiusNoLabels - symbolSize/2;
+						const r1 = aspectRadius + 1.25;
 						const r2 = aspectRadius + 0.5;
-						const x1 = 50 + r1 * Math.cos(adjA);
-						const y1 = 50 - r1 * Math.sin(adjA);
+						const x1 = 50 + r1 * Math.cos(a);
+						const y1 = 50 - r1 * Math.sin(a);
 						const x2 = 50 + r2 * Math.cos(a);
 						const y2 = 50 - r2 * Math.sin(a);
 						const pathData = [
@@ -396,7 +393,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, zodiacPositions, asp
 								d={pathData}
 								fill="none"
 								stroke="white"
-								strokeWidth={strokeWidthTertiary}
+								strokeWidth={strokeWidthPrimary}
 							/>
 						);
 					})
