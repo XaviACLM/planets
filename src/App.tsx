@@ -45,26 +45,12 @@ function App() {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
 	
-	// keeps zodiacPositions (from the stuff we're doing over at astro2)
-	// and something from config
-	// zodiacPositions always knows where EVERY node is, selected or not
-	//  except for the location-dependent ones, if location is null
-	//  updatable: lunar nodes might change btw true/mean, house cusps depend on house system
-	//  also updated if date or location changes
-	
 	// config options:
-	//  that affect node positions in zodiacPositions:
-	//   true/mean (geometric/meeus) lunar nodes
-	//   house system
 	//  that affect the zodiacWheel itself:
 	//   a toggle for each and every node
 	//  i'm not that sure - these affects aspects, but where will those end up living?
 	//   for each aspect, a slider of how many physical nodes it needs to count
 	//   a multi-toggle for each aspect: never - btw bodies - allow 1 point - allow any points w 1 body
-	
-	// from zodiacPositions and the config (that affects zodiacWheel)
-	// useMemo -> nodePositions, bodyNodes[], pointNodes[]
-	// within zodiacWheel, keep the useMemo -> adjustedNodePositions
 	
 	return (
 		<div className="app-container">

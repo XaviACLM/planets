@@ -79,7 +79,7 @@ house systems: at least the major ones, with a selector in the config, with a to
 	XX initial setup
 	XX presweep
 	all the gd house systems + config options
-		equal houses and whole houses to make sure switching works
+		XX equal houses and whole houses to make sure switching works
 		regiomontanus, make that generic for space-based, add krusinsky and regiomontanus
 		time-based (ugh)
 rework aspects:
