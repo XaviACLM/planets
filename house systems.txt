@@ -25,7 +25,7 @@ let's figure out the phase term. we just need to specify one single point that i
 meridian: meridian - ecliptic intersection
 morinus: intersect the meridian with the equator, project that to the ecliptic
 regiomontanus: same as morinus
-campanus: merididan - ecliptic intersection
+campanus: meridian - ecliptic intersection
 zenith: meridian - ecliptic.
 "nice" spatial division only happens when (x, x), i.e. meridian, campanus and zenith. But there's nothing preventing you, in morinus and regiomontanus, from forgetting the original construction, and just keeping the intersections w the ecliptic and poles along which you projected, and that's a valid spatial division all the same.
 
@@ -80,7 +80,8 @@ house systems: at least the major ones, with a selector in the config, with a to
 	XX presweep
 	all the gd house systems + config options
 		XX equal houses and whole houses to make sure switching works
-		regiomontanus, make that generic for space-based, add krusinsky and regiomontanus
+		XX regiomontanus, make that generic for space-based, add krusinsky and regiomontanus
+		XX the other space-based for good measure
 		time-based (ugh)
 rework aspects:
 	standarize how aspects are represented (always normalized angles, always in the same order starting from the lowest absolute angle)
@@ -103,8 +104,9 @@ rework aspects:
 	toggle for colorcoding
 part of fortune, black moon lilith + selene	
 change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
-change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
-
+XX change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
+option to not rotate any of the symbols / 90 snaps (iykyk)
+when show labels is off, inner aspect circle expands
 
 note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F

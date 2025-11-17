@@ -112,7 +112,7 @@ function cross(v: vec3, w: vec3): vec3 {
 	}
 }
 
-function cardinals(date: Date, surfacePosition: SurfacePosition) {
+function cardinalsAndCirclesAndAscDsc(date: Date, surfacePosition: SurfacePosition) {
 	const astroTime = new AstroTime(date);
 	const obs = new Observer(surfacePosition.latitude, surfacePosition.longitude, 0); //height
 	const rot = Rotation_HOR_EQJ(astroTime, obs);
@@ -122,32 +122,16 @@ function cardinals(date: Date, surfacePosition: SurfacePosition) {
 	const S = flipVec(N);
 	const W = flipVec(E);
 	const nadir = flipVec(zenith);
-	return {N, S, E, W, zenith, nadir};
-}
-
-function greatCircles(date: Date, surfacePosition: SurfacePosition) {
-	const astroTime = new AstroTime(date);
 	const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), {x:0, y:0, z:1}));
+	const ecN = ecliptic;
 	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),{x:0, y:0, z:1}));
-	const {N, E, zenith} = cardinals(date, surfacePosition);
+	const eqN = equator;
 	const primeVertical = N;
 	const meridian = E;
 	const horizon = zenith;
-	return {ecliptic, equator, primeVertical, meridian, horizon};
-}
-
-function ascendantDescendant(date: Date, surfacePosition: SurfacePosition) {
-	// this is not the same as the axisAngles: this is full position in the celestial sphere, that is just angle along the ecliptic
-	const {ecliptic, horizon} = greatCircles(date, surfacePosition);
-	const asc = normalize(cross(horizon, ecliptic));
+	const asc = normalize(cross(ecliptic, horizon));
 	const dsc = flipVec(asc);
-	return {asc, dsc};
-}
-
-function krusinskyCircle(date: Date, surfacePosition: SurfacePosition): vec3 {
-	const {asc} = ascendantDescendant(date, surfacePosition);
-	const {zenith} = cardinals(date, surfacePosition);
-	return normalize(cross(asc, zenith));
+	return {N, S, E, W, zenith, nadir, ecliptic, equator, primeVertical, meridian, horizon, asc, dsc, eqN, ecN};
 }
 
 function advanceAlongCircle(p: vec3, circle: vec3, angle: number): vec3 {
@@ -184,29 +168,64 @@ function computeEclipticAngles(ps: vec3[]): number[] {
 	return ps.map(p => computeEclipticAngle(p));
 }
 
+function cycleToStart(angles: number[], start: number): number[] {
+    const sorted = [...angles].sort((a, b) => a - b);
+    const i = sorted.findIndex((angle, idx) => angle < start && start < sorted[idx + 1]);
+    return i === -1 ? sorted : [...sorted.slice(i), ...sorted.slice(0, i)];
+}
+
+function computeSpaceBasedSystemCuspPositions(
+	date: Date,
+	surfacePosition: SurfacePosition,
+	startingCircle: vec3,
+	startingPoint: vec3,
+	projectionCenter: vec3
+): number[] {
+	const {ecliptic, asc} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const kpts = twelvePoints(startingCircle, startingPoint);
+	const epts = projectPoints(kpts, ecliptic, projectionCenter);
+	const angles = computeEclipticAngles(epts);
+	return cycleToStart(angles, computeEclipticAngle(asc));
+}
+
+// I am not completely sure about all that follow
+// descriptions for them are rather sparse, and i strongly suspect some secondary sources are inaccurate
+// one day - maybe - i will look for primary sources on all of these
 function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
-	const {asc} = ascendantDescendant(date, surfacePosition);
-	const kCircle = krusinskyCircle(date, surfacePosition);
-	const kpts = twelvePoints(kCircle, asc);
-	const {ecliptic, equator} = greatCircles(date, surfacePosition);
-	const epts = projectPoints(kpts, ecliptic, equator); //project from equatorial poles to ecliptic
-	//console.log("asc_json ='", JSON.stringify(asc),"'");
-	//console.log("kpts_json ='", JSON.stringify(kpts),"'");
-	//console.log("ecliptic_json ='", JSON.stringify(ecliptic),"'");
-	//console.log("equator_json ='", JSON.stringify(equator),"'");
-	//console.log("epts_json ='", JSON.stringify(epts),"'");
-	return computeEclipticAngles(epts);
+	const {asc, eqN, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const krusinskyCircle = normalize(cross(asc, zenith));
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, krusinskyCircle, asc, eqN);
 }
 
 function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
-	const {N} = cardinals(date, surfacePosition);
-	const {meridian, equator, ecliptic} = greatCircles(date, surfacePosition);
+	const {N, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const intersection = normalize(cross(meridian, equator)); 
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
+}
+
+function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const intersection = normalize(cross(meridian, equator)); 
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
+}
+
+function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	const {ecN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator));
-	const kpts = twelvePoints(equator, intersection);
-	const epts = projectPoints(kpts, ecliptic, N);
-	const a = computeEclipticAngles(epts);
-	console.log(a.slice(3).concat(a.slice(0,3)));
-	return a.slice(3).concat(a.slice(0,3));
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, ecN);
+}
+
+function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	// as described, identical to meridian
+	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const intersection = normalize(cross(meridian, equator));
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
+}
+
+function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	const {horizon, meridian, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const intersection = normalize(cross(meridian, horizon));
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, horizon, intersection, zenith);
 }
 
 export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[12]{
@@ -227,6 +246,14 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 			return computeKrusinskyCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.REGIOMONTANUS:
 			return computeRegiomontanusCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.MERIDIAN:
+			return computeMeridianCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.MORINUS:
+			return computeMorinusCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.CAMPANUS:
+			return computeCampanusCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.ZENITH_HORIZONTAL:
+			return computeZenithHorizontalCuspPositions(date, surfacePosition, angles);
 		default:
 			console.log("something wrong with house computation dispatch:", houseSystem);
 	}

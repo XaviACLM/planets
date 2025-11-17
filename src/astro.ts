@@ -337,7 +337,7 @@ export class ZodiacPositions {
 			return;
 		}
 		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions);
-		return this.copyWith({houseCuspPositions: newHouseCuspPositions});
+		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
 	}
 	
 	public hasSurfacePosition(): boolean{
