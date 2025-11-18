@@ -15,9 +15,10 @@ interface CityData {
   latitude: number;
   longitude: number;
   population: number;
+  timezone: string;
 }
 
-import citiesData from './assets/city-data/cities.json';
+import citiesData from './assets/city-data/cities_enriched.json';
 
 export const barcelonaCityData: CityData = {
 	countryName: "Spain",
@@ -25,7 +26,8 @@ export const barcelonaCityData: CityData = {
 	cityName: "Barcelona",
 	latitude: 41.38879,
 	longitude: 2.15899,
-	population: 1621537
+	population: 1621537,
+	timezone: "Europe/Paris",
 };
 
 export class CitySearchEngine {
@@ -45,7 +47,7 @@ export class CitySearchEngine {
       ['PH', 'Philippines'],
       ['AD', 'Andorra'],
       ['AE', 'United Arab Emirates'],
-      // ... add the rest as needed
+      // TODO add the rest
     ]);
   }
 
@@ -63,7 +65,8 @@ export class CitySearchEngine {
           cityName: city.name,
           latitude: parseFloat(city.lat),
           longitude: parseFloat(city.lon),
-          population: parseInt(city.pop)
+          population: parseInt(city.pop),
+		  timezone: city.timezone,
         });
 		if (matches.length >= maxMatches) break;
       }

@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 
-import { format } from 'date-fns';
-
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
+import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
 import { LunarNodeMode, ZodiacPositions } from './astro.ts'
@@ -48,6 +47,33 @@ function App() {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
 	
+	
+	const { offset, nodeAngles, houseCuspAngles } = useMemo<Map<Node, number> | null>(() => {
+		
+		const offset = zodiacPositions.hasSurfacePosition() ?
+			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
+			: -Math.PI/12;
+		
+		// this is vestigial, but it will be useful in the future to implement anglo style
+		const nodeAngles = new Map<Node, number>();
+		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
+			nodeAngles.set(node, position + offset);
+		})
+		
+		return {
+			offset: offset,
+			nodeAngles: nodeAngles,
+			houseCuspAngles: zodiacPositions.getHouseCuspPositions()
+		}
+	}, [zodiacPositions]);
+	
+	const currentTimezone = useMemo(() => {
+		if (selectedCity === null) {
+			return Intl.DateTimeFormat().resolvedOptions().timeZone;
+		}
+		return selectedCity.timezone;
+	}, [selectedCity]);
+	
 	// config options:
 	//  that affect the zodiacWheel itself:
 	//   a toggle for each and every node
@@ -69,8 +95,8 @@ function App() {
 						aria-label="Date and time"
 						type="datetime-local" 
 						style={{filter:"invert(1)", fontVariant: "small-caps"}}
-						value={format(selectedDate, "yyyy-MM-dd'T'HH:mm")}
-						onChange={(e) => setSelectedDate(new Date(e.target.value))}
+						value={toZonedTime(selectedDate, currentTimezone).toISOString().slice(0, 16)}
+						onChange={(e) => setSelectedDate(fromZonedTime(new Date(e.target.value), currentTimezone))}
 					/>
 				</div>
 				<div className="module module-aspects">

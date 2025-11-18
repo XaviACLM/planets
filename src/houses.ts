@@ -194,7 +194,7 @@ function computeSpaceBasedSystemCuspPositions(
 
 // I am not completely sure about all that follow
 // descriptions for them are rather sparse, and i strongly suspect some secondary sources are inaccurate
-// one day - maybe - i will look for primary sources on all of these
+// one day - maybe - i will look for primary sources on these
 function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
 	const {asc, eqN, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const krusinskyCircle = normalize(cross(asc, zenith));

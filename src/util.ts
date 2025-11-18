@@ -1,3 +1,20 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+export function toZonedTime(date, tz) {
+  const d = dayjs(date).tz(tz);
+  const offsetMs = (d.utcOffset()+0) * 60 * 1000;
+  return new Date(date.getTime() + offsetMs);
+}
+export function fromZonedTime(date, tz) {
+  const d = dayjs(date).tz(tz);
+  const offsetMs = (d.utcOffset() - 60) * 60 * 1000;
+  return new Date(date.getTime() - offsetMs);
+}
+
 export function spreadIcons(
 	positions: number[],
 	angularWidth: number,
