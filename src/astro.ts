@@ -17,34 +17,32 @@ export enum Node {
 	NEPTUNE = "Neptune",
 	PLUTO = "Pluto",
 	
-	// angles
+	// primary angles
 	ASCENDANT = "Ascendant",
 	DESCENDANT = "Descendant",
 	MIDHEAVEN = "Midheaven",
 	IMUM_COELI = "Imum Coeli",
 	
 	PART_OF_FORTUNE = "Part of Fortune",
-	PART_OF_SPIRIT = "Part of Spirit",
-	PART_OF_LOVE = "Part of Love",
-	PART_OF_MARRIAGE = "Part of Marriage",
-	PART_OF_NECESSITY = "Part of Necessity",
-	PART_OF_CAREER = "Part of Career",
-	PART_OF_COURAGE = "Part of Courage",
-	PART_OF_LONGEVITY = "Part of Longevity",
-	PART_OF_DEATH = "Part of Death",
+	//PART_OF_SPIRIT = "Part of Spirit",
+	//PART_OF_LOVE = "Part of Love",
+	//PART_OF_MARRIAGE = "Part of Marriage",
+	//PART_OF_NECESSITY = "Part of Necessity",
+	//PART_OF_CAREER = "Part of Career",
+	//PART_OF_COURAGE = "Part of Courage",
+	//PART_OF_LONGEVITY = "Part of Longevity",
+	//PART_OF_DEATH = "Part of Death",
 	
 	//lunar
 	LUNAR_ASCENDING = "Lunar Ascending",
 	LUNAR_DESCENDING = "Lunar Descending",
-	//LUNAR_APOGEE = "Lunar Apogee", //lilith
-	//LUNAR_PERIGEE = "Lunar Perigee",
+	LUNAR_APOGEE = "Lunar Apogee", //lilith
+	LUNAR_PERIGEE = "Lunar Perigee", // selene
 	
 	// missing:
-	// secondadry angles: anti/vertex, east/west points
-	// arabic parts: of spirit, of love, of marriage...
+	// secondary angles: anti/vertex, east/west points
 	// fictive/transneptunian: cupido, hades, zeus...
 	// uranian: uranian cupido, uranian hades...
-	// house cusps
 	
 	// minor bodies
 	//CERES = "Ceres",
@@ -89,8 +87,8 @@ const nodeTypes: Record<Node, NodeType> = {
 	
 	[Node.LUNAR_ASCENDING] : NodeType.POINT,
 	[Node.LUNAR_DESCENDING] : NodeType.POINT,
-	//[Node.LUNAR_APOGEE] : NodeType.POINT,
-	//[Node.LUNAR_PERIGEE] : NodeType.POINT,
+	[Node.LUNAR_APOGEE] : NodeType.POINT,
+	[Node.LUNAR_PERIGEE] : NodeType.POINT,
 }
 
 const nodeDependsOnLocation: Record<Node, boolean> = {
@@ -122,8 +120,8 @@ const nodeDependsOnLocation: Record<Node, boolean> = {
 	
 	[Node.LUNAR_ASCENDING] : false,
 	[Node.LUNAR_DESCENDING] : false,
-	//[Node.LUNAR_APOGEE] : false,
-	//[Node.LUNAR_PERIGEE] : false,
+	[Node.LUNAR_APOGEE] : false,
+	[Node.LUNAR_PERIGEE] : false,
 }
 
 export interface SurfacePosition {
@@ -134,6 +132,71 @@ export interface SurfacePosition {
 export enum LunarNodeMode {
 	TRUE = "True", //geometric
 	MEAN = "Mean", //meeus
+}
+
+function computeLunarApogeePerigeeMeeus(date: Date): Map<LunarPoint, number> {
+    const jd = (date.getTime() / 86400000) + 2440587.5;
+    const t = (jd - 2451545.0) / 36525.0;
+    
+    // again Meeus Ch. 47
+    const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
+    const perigee = (omega % 360) * Math.PI / 180;
+    
+    return new Map<LunarPoint, number>([
+        [Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
+        [Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
+    ]);
+}
+
+function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
+    const s = GeoMoonState(date);
+    
+    const GM = 398600.4418; // earth's gravitational parameter (km3/s2)
+    const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
+    const v = Math.sqrt(s.vx*s.vx + s.vy*s.vy + s.vz*s.vz);
+    const energy = (v*v)/2 - GM/r; // specific orbital energy)
+    const semiMajorAxis = -GM/(2*energy);
+    
+    // angular momentum
+    const h = {
+        x: s.y * s.vz - s.z * s.vy,
+        y: s.z * s.vx - s.x * s.vz,
+        z: s.x * s.vy - s.y * s.vx
+    };
+    const hMag = Math.sqrt(h.x*h.x + h.y*h.y + h.z*h.z);
+    
+    // eccentricity vector points toward perigee
+    const rVec = {x: s.x, y: s.y, z: s.z};
+    const vVec = {x: s.vx, y: s.vy, z: s.vz};
+    
+    // e = (v x h)/GM - r/mod(r)
+    const vxh = {
+        x: vVec.y * h.z - vVec.z * h.y,
+        y: vVec.z * h.x - vVec.x * h.z,
+        z: vVec.x * h.y - vVec.y * h.x
+    };
+    const eVec = {
+        x: vxh.x/GM - rVec.x/r,
+        y: vxh.y/GM - rVec.y/r,
+        z: vxh.z/GM - rVec.z/r
+    };
+    
+	
+    const eEcl = Ecliptic(eVec).vec;
+    const perigeeLon = Math.atan2(eEcl.y, eEcl.x);
+    
+    return new Map<LunarPoint, number>([
+        [LunarPoint.LUNAR_PERIGEE, normalizeAngleRad(perigeeLon)],
+        [LunarPoint.LUNAR_APOGEE, normalizeAngleRad(perigeeLon + Math.PI)]
+    ]);
+}
+
+function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+	if (lunarNodeMode == LunarNodeMode.MEAN) {
+		return computeLunarApogeePerigeeMeeus(date);
+	} else {
+		return computeLunarApogeePerigeeExact(date);
+	}
 }
 
 function computeLunarNodesMeeus(date: Date): Map<Node, number> {
@@ -296,7 +359,8 @@ function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node,
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
-		...computeLunarNodes(date, lunarNodeMode)
+		...computeLunarNodes(date, lunarNodeMode),
+		...computeLunarApogeePerigee(date, lunarNodeMode),
 	]);
 }
 

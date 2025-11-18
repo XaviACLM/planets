@@ -36,6 +36,8 @@ import imumCoeliSymbol from "./assets/body-symbols/Imum Coeli.png"
 import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
 import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
 import partOfFortuneSymbol from "./assets/body-symbols/Part of Fortune.png"
+import lunarApogeeSymbol from "./assets/body-symbols/Lilith.png"
+import lunarPerigeeSymbol from "./assets/body-symbols/Selene.png"
 
 enum Zodiac{
   Aries = 'Aries',
@@ -79,6 +81,8 @@ const nodeSymbolHideable: Record<Node, boolean> = {
 const nodeShortName: Record<Node, String> = {
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
 	[Node.LUNAR_DESCENDING] : "Lunar ▼",
+	[Node.LUNAR_APOGEE] : "Lilith",
+	[Node.LUNAR_PERIGEE] : "Selene",
 	[Node.PART_OF_FORTUNE] : "Fortuna",
 }
 
@@ -138,6 +142,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		[Node.IMUM_COELI, imumCoeliSymbol],
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
 		[Node.LUNAR_DESCENDING, lunarDescendingSymbol],
+		[Node.LUNAR_APOGEE, lunarApogeeSymbol],
+		[Node.LUNAR_PERIGEE, lunarPerigeeSymbol],
 		[Node.PART_OF_FORTUNE, partOfFortuneSymbol],
 	]);
 	

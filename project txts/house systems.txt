@@ -102,11 +102,13 @@ rework aspects:
 	change st. error is shown in degrees
 	possibly just forget the quantiles for now (would have to depend on aspect kind, qt of non-luminaires in aspect, and qts of luminaires and non-luminaires in zodiac)
 	toggle for colorcoding
-part of fortune, black moon lilith + selene	
+XX part of fortune
+XX black moon lilith + selene	
 XX change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
 XX change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
 XX option to not rotate any of the symbols / 90 snaps (iykyk)
 XX when show labels is off, inner aspect circle expands
+fix node spacer: things can bunch up around 0, looks like
 ensure datepicker timezone matches city
 change presweep look: one line, one dashed line
 
