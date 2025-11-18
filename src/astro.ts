@@ -178,23 +178,26 @@ function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
     const eVec = {
         x: vxh.x/GM - rVec.x/r,
         y: vxh.y/GM - rVec.y/r,
-        z: vxh.z/GM - rVec.z/r
+        z: vxh.z/GM - rVec.z/r,
+		t: MakeTime(date)
     };
     
 	
     const eEcl = Ecliptic(eVec).vec;
-    const perigeeLon = Math.atan2(eEcl.y, eEcl.x);
+    const omega = Math.atan2(eEcl.y, eEcl.x);
     
     return new Map<LunarPoint, number>([
-        [LunarPoint.LUNAR_PERIGEE, normalizeAngleRad(perigeeLon)],
-        [LunarPoint.LUNAR_APOGEE, normalizeAngleRad(perigeeLon + Math.PI)]
+        [Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
+        [Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
     ]);
 }
 
 function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
+		console.log(1);
 		return computeLunarApogeePerigeeMeeus(date);
 	} else {
+		console.log(2);
 		return computeLunarApogeePerigeeExact(date);
 	}
 }
