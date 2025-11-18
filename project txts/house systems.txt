@@ -112,6 +112,7 @@ XX fix node spacer: things can bunch up around 0, looks like
 XX fix: true lilith/selene crashes
 ensure datepicker timezone matches city
 XX change presweep look: one line, one dashed line
+sidereal vs tropical
 
 note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F

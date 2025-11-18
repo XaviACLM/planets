@@ -6,8 +6,6 @@ export function spreadIcons(
 	const n = positions.length;
 	
 	positions = positions.map(normalizeAngleRad);
-	
-	console.log(positions);
 
 	const sortedIndices = positions.map((_, index) => index)
 	.sort((a, b) => positions[a] - positions[b]);
@@ -44,9 +42,6 @@ export function spreadIcons(
 	sortedIndices.forEach((originalIndex, sortedIndex) => {
 		finalPositions[originalIndex] = adjusted[sortedIndex];
 	});
-	
-	console.log(angularWidth);
-	console.log(finalPositions.sort((a,b)=>a-b));
 
 	return finalPositions;
 }

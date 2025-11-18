@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 
+import { format } from 'date-fns';
+
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import { HouseSystem } from './houses.ts'
@@ -67,7 +69,7 @@ function App() {
 						aria-label="Date and time"
 						type="datetime-local" 
 						style={{filter:"invert(1)", fontVariant: "small-caps"}}
-						value={selectedDate.toISOString().slice(0,16)}
+						value={format(selectedDate, "yyyy-MM-dd'T'HH:mm")}
 						onChange={(e) => setSelectedDate(new Date(e.target.value))}
 					/>
 				</div>
