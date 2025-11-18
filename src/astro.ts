@@ -194,10 +194,8 @@ function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
 
 function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
-		console.log(1);
 		return computeLunarApogeePerigeeMeeus(date);
 	} else {
-		console.log(2);
 		return computeLunarApogeePerigeeExact(date);
 	}
 }

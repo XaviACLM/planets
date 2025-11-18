@@ -109,6 +109,7 @@ XX change the big useMemo in app - shouldn't depend on lunarNodeMode like that, 
 XX option to not rotate any of the symbols / 90 snaps (iykyk)
 XX when show labels is off, inner aspect circle expands
 fix node spacer: things can bunch up around 0, looks like
+XX fix: true lilith/selene crashes
 ensure datepicker timezone matches city
 change presweep look: one line, one dashed line
 

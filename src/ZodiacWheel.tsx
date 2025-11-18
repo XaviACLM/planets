@@ -257,13 +257,13 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 						return (
 							<line
 								key={i}
-								x1={50 + (radius - 1.5) * Math.cos(a - Math.PI/36/2)}
-								y1={50 - (radius - 1.5) * Math.sin(a - Math.PI/36/2)}
-								x2={50 + (radius - 3) * Math.cos(a - Math.PI/36 )}
-								y2={50 - (radius - 3) * Math.sin(a - Math.PI/36 )}
+								x1={50 + (aspectRadius + 3) * Math.cos(a)}
+								y1={50 - (aspectRadius + 3) * Math.sin(a)}
+								x2={50 + (radius - 3) * Math.cos(a)}
+								y2={50 - (radius - 3) * Math.sin(a)}
 								stroke="white"
 								strokeWidth={strokeWidthTertiary}
-								
+								strokeDasharray="0.2,0.5" // 5px dash, 5px gap
 							/>
 						);
 					})
