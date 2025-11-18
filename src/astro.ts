@@ -22,7 +22,16 @@ export enum Node {
 	DESCENDANT = "Descendant",
 	MIDHEAVEN = "Midheaven",
 	IMUM_COELI = "Imum Coeli",
-	//PART_OF_FORTUNE = "Part of Fortune",
+	
+	PART_OF_FORTUNE = "Part of Fortune",
+	PART_OF_SPIRIT = "Part of Spirit",
+	PART_OF_LOVE = "Part of Love",
+	PART_OF_MARRIAGE = "Part of Marriage",
+	PART_OF_NECESSITY = "Part of Necessity",
+	PART_OF_CAREER = "Part of Career",
+	PART_OF_COURAGE = "Part of Courage",
+	PART_OF_LONGEVITY = "Part of Longevity",
+	PART_OF_DEATH = "Part of Death",
 	
 	//lunar
 	LUNAR_ASCENDING = "Lunar Ascending",
@@ -67,7 +76,16 @@ const nodeTypes: Record<Node, NodeType> = {
 	[Node.DESCENDANT] : NodeType.POINT,
 	[Node.MIDHEAVEN] : NodeType.POINT,
 	[Node.IMUM_COELI] : NodeType.POINT,
-	//[Node.PART_OF_FORTUNE] : NodeType.POINT,
+	
+	[Node.PART_OF_FORTUNE] : NodeType.POINT,
+	[Node.PART_OF_SPIRIT] : NodeType.POINT,
+	[Node.PART_OF_LOVE] : NodeType.POINT,
+	[Node.PART_OF_MARRIAGE] : NodeType.POINT,
+	[Node.PART_OF_NECESSITY] : NodeType.POINT,
+	[Node.PART_OF_CAREER] : NodeType.POINT,
+	[Node.PART_OF_COURAGE] : NodeType.POINT,
+	[Node.PART_OF_LONGEVITY] : NodeType.POINT,
+	[Node.PART_OF_DEATH] : NodeType.POINT,
 	
 	[Node.LUNAR_ASCENDING] : NodeType.POINT,
 	[Node.LUNAR_DESCENDING] : NodeType.POINT,
@@ -91,7 +109,16 @@ const nodeDependsOnLocation: Record<Node, boolean> = {
 	[Node.DESCENDANT] : true,
 	[Node.MIDHEAVEN] : true,
 	[Node.IMUM_COELI] : true,
-	//[Node.PART_OF_FORTUNE] : true,
+	
+	[Node.PART_OF_FORTUNE] : true,
+	[Node.PART_OF_SPIRIT] : true,
+	[Node.PART_OF_LOVE] : true,
+	[Node.PART_OF_MARRIAGE] : true,
+	[Node.PART_OF_NECESSITY] : true,
+	[Node.PART_OF_CAREER] : true,
+	[Node.PART_OF_COURAGE] : true,
+	[Node.PART_OF_LONGEVITY] : true,
+	[Node.PART_OF_DEATH] : true,
 	
 	[Node.LUNAR_ASCENDING] : false,
 	[Node.LUNAR_DESCENDING] : false,
@@ -154,7 +181,7 @@ function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, 
 	}
 }
 
-function computeAxialTilt(date: Date): number {
+export function computeAxialTilt(date: Date): number {
 	// in radians
 	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
 	const eclPole = Ecliptic(vecPole);
@@ -231,6 +258,41 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	return nodeAngles;
 }
 
+function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node, number> {
+	const asc = nodePositions.get(Node.ASCENDANT);
+	const sun = nodePositions.get(Node.SUN);
+	const d = normalizeAngleRad(sun-asc);
+	const dayBirth = d > Math.PI;
+	const f = dayBirth ? 1 : -1;
+	//source: https://horoscopes.astro-seek.com/astrology-arabic-lots-list
+	// there's a bajillion of these. I see two ideas:
+	// - just the part of fortune. that's basic.
+	// - all of them, with some complicated filters to include them by source/category/etc.
+	// I don't think there's a midpoint between the two. 
+	// let's just leave the PoF for now and look into the other stuff later down the line.
+	
+	// oh, and this will depend on house cusps eventually, so we'll need to move things around a bit.
+	// this will probably go in its own file, anyway.
+	return new Map <Node, number>([
+		[Node.PART_OF_FORTUNE, asc + f*(nodePositions.get(Node.MOON) - nodePositions.get(Node.SUN))],
+		//[Node.PART_OF_SPIRIT, asc + f*(nodePositions.get(Node.SUN) - nodePositions.get(Node.MOON))],
+		//[Node.PART_OF_LOVE, asc + f*(nodePositions.get(Node.VENUS) - nodePositions.get(Node.SUN))],
+		//[Node.PART_OF_MARRIAGE, asc + f*(nodePositions.get(Node.DESCENDANT) - nodePositions.get(Node.VENUS))],
+		//[Node.PART_OF_NECESSITY, asc + f*(nodePositions.get(Node.SATURN) - nodePositions.get(Node.MOON))],
+		
+		//Dubious. Source notes same formula for parts of: commerce, communication, slaves 4b, vitality
+		//[Node.PART_OF_CAREER, asc + f*(nodePositions.get(Node.MERCURY) - nodePositions.get(Node.SUN))],
+		
+		// first source said courage = mars - sun. not in main source, equals:
+		// commerce (jacobson), conquest, deceit, destruction(jones), dignity B, enemies (olympiodorus B), fire, lost animal, passion, sowing, travel (firmicus), wheat
+		// okay.
+		// [Node.PART_OF_COURAGE, asc + f*(nodePositions.get(Node.MARS) - nodePositions.get(Node.SUN))],
+		
+		//[Node.PART_OF_LONGEVITY, asc + f*(nodePositions.get(Node.MOON) - nodePositions.get(Node.JUPITER))],
+		//[Node.PART_OF_DEATH, asc + f*(houseCusps[7] - nodePositions.get(Node.MOON))], //8th cusp
+	]);
+}
+
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
@@ -238,27 +300,17 @@ function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode
 	]);
 }
 
-function computeAllNodePositionsWithSurfacePosition(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem): Map<Node, number>{
-	return new Map<Node, number>([
+function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+	let nodePositions = new Map<Node, number>([
+		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode),
 		...computeAscendantAndDescendant(date, surfacePosition),
 		...computeMCIC(date, surfacePosition),
 	]);
-}
-
-function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, lunarNodeMode: LunarNodeMode, houseSystem: HouseSystem): Map<Node, number>{
-	return new Map<Node, number>([
-		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode),
-		...computeAllNodePositionsWithSurfacePosition(date, surfacePosition, houseSystem)
+	nodePositions = new Map<Node, number>([
+		...nodePositions,
+		...computeArabicPartPositions(nodePositions),
 	]);
-	return allNodes
-}
-
-export enum HouseSystem {
-	WHOLE_SIGN = "Whole Sign",
-	CARTER_POLI_EQUATORIAL = "Carter-Poli Equatorial",
-	CAMPANUS = "Campanus",
-	ALCABITIUS = "Alcabitius",
-	PLACIDUS = "Placidus"
+	return nodePositions;
 }
 
 interface ZodiacPositionsConstructorArgs {
@@ -289,7 +341,7 @@ export class ZodiacPositions {
 			this._nodePositions = config.nodePositions;
 			this._houseCuspPositions = config.houseCuspPositions;
 		} else if (this.surfacePosition !== null) {
-			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.houseSystem);
+			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode);
 			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions);
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);

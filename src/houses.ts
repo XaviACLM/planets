@@ -1,6 +1,6 @@
 import { normalizeAngleRad, interpolateAngles } from './util.ts'
 
-import { Node, type SurfacePosition } from './astro.ts'
+import { Node, type SurfacePosition, computeAxialTilt } from './astro.ts'
 
 import { RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 
@@ -80,6 +80,10 @@ function computePorphyryCuspPositions(date: Date, surfacePosition: SurfacePositi
 		interpolateAngles(2/3, angles.mc, angles.asc),
 	];
 }
+
+
+// space-based
+
 
 interface vec3 {
 	x: number;
@@ -228,6 +232,64 @@ function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: Surfa
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, horizon, intersection, zenith);
 }
 
+
+// time-based
+
+
+function eclipticToRA(eclipticLongitude: number, date: Date): number {
+	const epsilon = computeAxialTilt(date);
+    return Math.atan2(Math.sin(eclipticLongitude) * Math.cos(epsilon), Math.cos(eclipticLongitude));
+}
+
+function raToEcliptic(ra: number, date: Date): number {
+    const eps = computeAxialTilt(date);
+    return Math.atan2( Math.sin(ra) / Math.cos(eps), Math.cos(ra));
+}
+
+function interpolateRAByTime(f: number,raStart: number,raEnd: number,latitude: number,date: Date): number {
+	//TODO this is unfinished, currently equiv to porphyrius. Need to finish this function (the hard part) for time-based
+    let delta = raEnd - raStart;
+    delta = ((delta + Math.PI) % (2 * Math.PI)) - Math.PI;
+    return raStart + f * delta;
+}
+
+function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] {
+	const { asc, mc, dsc, ic } = angles;
+
+	const raAsc = eclipticToRA(asc, date);
+	const raMC = eclipticToRA(mc, date);
+	const raIC = eclipticToRA(ic, date);
+	const raDsc = eclipticToRA(dsc, date);
+
+	return [
+		asc,
+		raToEcliptic(interpolateRAByTime(2/3, raIC, raAsc, surfacePosition.latitude, date), date),
+		raToEcliptic(interpolateRAByTime(1/3, raIC, raAsc, surfacePosition.latitude, date), date),
+		ic,
+		raToEcliptic(interpolateRAByTime(2/3, raDsc, raIC, surfacePosition.latitude, date), date),
+		raToEcliptic(interpolateRAByTime(1/3, raDsc, raIC, surfacePosition.latitude, date), date),
+		dsc,
+		raToEcliptic(interpolateRAByTime(2/3, raMC, raDsc, surfacePosition.latitude, date), date),
+		raToEcliptic(interpolateRAByTime(1/3, raMC, raDsc, surfacePosition.latitude, date), date),
+		mc,
+		raToEcliptic(interpolateRAByTime(2/3, raAsc, raMC, surfacePosition.latitude, date), date),
+		raToEcliptic(interpolateRAByTime(1/3, raAsc, raMC, surfacePosition.latitude, date), date),
+	];
+}
+
+
+function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	return [1,2,3,4,5,6,7,8,9,10,11,12];
+}
+
+function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	return [1,2,3,4,5,6,7,8,9,10,11,12];
+}
+
+function computeAlcabitiusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	return [1,2,3,4,5,6,7,8,9,10,11,12];
+}
+
 export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[12]{
 	const angles = {
 		asc: knownNodes.get(Node.ASCENDANT),
@@ -254,6 +316,14 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 			return computeCampanusCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.ZENITH_HORIZONTAL:
 			return computeZenithHorizontalCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.PLACIDUS:
+			return computePlacidusCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.TOPOCENTRIC:
+			return computeTopocentricCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.KOCH:
+			return computeKochCuspPositions(date, surfacePosition, angles);
+		case HouseSystem.ALCABITIUS:
+			return computeAlcabitiusCuspPositions(date, surfacePosition, angles);
 		default:
 			console.log("something wrong with house computation dispatch:", houseSystem);
 	}

@@ -25,7 +25,7 @@ let's figure out the phase term. we just need to specify one single point that i
 meridian: meridian - ecliptic intersection
 morinus: intersect the meridian with the equator, project that to the ecliptic
 regiomontanus: same as morinus
-campanus: merididan - ecliptic intersection
+campanus: meridian - ecliptic intersection
 zenith: meridian - ecliptic.
 "nice" spatial division only happens when (x, x), i.e. meridian, campanus and zenith. But there's nothing preventing you, in morinus and regiomontanus, from forgetting the original construction, and just keeping the intersections w the ecliptic and poles along which you projected, and that's a valid spatial division all the same.
 
@@ -35,11 +35,26 @@ time systems
 
 alcabitius: as best I can tell, this is literally the same as porphyry. maybe i'm wrong because i'm assuming things move at a fixed speed around the ecliptic? Yes, that's probably the case. Here's what's actually going on. At time of birth, note how long it takes for the point that is the ascendant to move to the position of MC. Consider pausing at 1/3rd of that transit (by time), and 2/3rds. Note the points in the sky that are the MC. These points in the original time are the 12th and 11th house cusps. Same idea but IC->ASC instead of ASC->MC gives the third and second cusps (ASC is first). etc.
 placidus: sort of like the converse of alcabitius. note time for position that is ASC to be come MC, trisect that time. Note position that is ASC, run forward 1/3 time, note position, that ecliptic angle is the 12th house cusp. or not - i think i got something wrong, because [ https://www.uraniatrust.org/astrology/astronomy-of-houses ] seems to imply you need an iterative computation to figure this out. Oh but later it gives another explanation that makes it sound like exactly what I said. huh?? I get that the "note ecliptic angle" (perhaps wrt ascendant?) is a bit weird but it seems easy. am i missing something? also unclear how it works on other quadrants, but the picture seems to suggest that its always ASC/DSC -> MC/IC
-koch: take MC -> ASC (going backwards in time), trisect that, run forwardd 1/3rd, current ASC position in the sky is 12th house cusp. Etc. unclear how it works for other quadrants but drawing seems to suggest its always MC/IC -> ASC/DSC
-topocentric: 
+koch: take MC -> ASC (going backwards in time), trisect that, run forward 1/3rd, current ASC position in the sky is 12th house cusp. Etc. unclear how it works for other quadrants but drawing seems to suggest its always MC/IC -> ASC/DSC
+(wait, do these directions matter?)
+topocentric: "the tangents of the polar elevations of the intermediate houses correspond to one-third or two-thirds of the tangent of the polar elevation of the ascendant, i.e. the geographic latitude of the birth place". "the individual house cusps lie on great circles that intersect the celestial equator at intervals of 30º"
+a lot of this is very shaky. We'll just double check when we implement it. Relevant:
+https://www.astro.com/astrowiki/en/Topocentric_House_System
+https://www.astro.com/swisseph/sweph_ht_p.htm
 
 ASC and thus DSC are always on the leftmost and rightmost point of the chart. Bc of the orientation, MC is always on the upper side, vise versa IC.
 anglo system is where you distort everything st ASC, IC, DSC, MC are at 90 degree angles.
+
+about house system popularity: placidus 44%, topocentric 20%, koch 14%, Äqual - krusinsky - porphyrius - regiomontanus abt 4% apiece, ganzzeichen - campanus - alcabitius - etc.
+footnote clarifies äqual=equal and ganzzeichen=whole houses. 
+krusinsky: great circle through asc-dsc, zenith-nadir (is this one of the ones above?). split into 12 equal pieces starting at asc going in the usual direction. project along equatorial poles to the ecliptic.
+i think this isn't any one of the circles above. let's list all the relevant great circles we know.
+the equator, the equatorial poles (EqN, EqS)
+the ecliptic, the ecliptic poles (EcN, EqS)
+the horizon, the horizontal poles (zenith, nadir). Also E, W, N, S. All relative to a position on the surface.
+ASC/DSC are the intersections of the ecliptic with the horizon. need not be E/W, right? Yes: moving around EqN E/W changes wildly but ASC/DSC are stable.
+any pair of opposing points defines a great circle. so krusinsky depends on ASC-DSC + zenith-nadir, which isn't any of the great circles above.
+oh yeah the circles above. We also have the meridian (N-S + zenith-nadir, poles E-W) and the prime vertical (E-W, zenith-nadir, poles N-S)
 
 some more stuff: https://radixpro.com/project-houses/house-systems/ (holy shit there's a lot)
 
@@ -47,11 +62,27 @@ also whats that deal with sidereal vs tropical
 
 
 TODO (the real ones, before v1)
-midheaven + immum coeli (icons too), descendant
-connect the datetime widget to the actual thing
-rotate s.t. ascendant-descendant are horizontal
-(don't actually include IC and DSC yet, wait until we can toggle that sort of stuff)
+XX all the node icons
+all the aspect icons:
+	binaries might need a rework - as fractions? in the same order: 5/12, 1/12, 1/5, 1/8, 3/8, 2/5, 1/7
+	maybe do this for all the rest of the binaries - trines 1/3, squares 1/4, sextiles 1/6
+		toggle btw symbol and name
+	tau square: just a right-angle isosceles
+	kite: just a kite
+	yod: isosceles
+	mistic rectangle: a rectangle
+XX midheaven + immum coeli, descendant
+XX connect the datetime widget to the actual thing
+XX rotate s.t. ascendant-descendant are horizontal
+XX (don't actually include IC and DSC yet, wait until we can toggle that sort of stuff)
 house systems: at least the major ones, with a selector in the config, with a toggle option for 5º pre-sweep (will just change how they are drawn, for now)
+	XX initial setup
+	XX presweep
+	all the gd house systems + config options
+		XX equal houses and whole houses to make sure switching works
+		XX regiomontanus, make that generic for space-based, add krusinsky and regiomontanus
+		XX the other space-based for good measure
+		time-based (ugh)
 rework aspects:
 	standarize how aspects are represented (always normalized angles, always in the same order starting from the lowest absolute angle)
 	write a function that given an aspect lists its sub-aspects
@@ -72,10 +103,13 @@ rework aspects:
 	possibly just forget the quantiles for now (would have to depend on aspect kind, qt of non-luminaires in aspect, and qts of luminaires and non-luminaires in zodiac)
 	toggle for colorcoding
 part of fortune, black moon lilith + selene	
+XX change the displacement indicators - just a heavy tick at the true position (easy to read, looks nicer)
+XX change the big useMemo in app - shouldn't depend on lunarNodeMode like that, that should go through the other updater.
+XX option to not rotate any of the symbols / 90 snaps (iykyk)
+XX when show labels is off, inner aspect circle expands
+ensure datepicker timezone matches city
+change presweep look: one line, one dashed line
 
-
-
-
-
+note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F
 on a related note remember lunar asc / dsc are sometimes called dragon's head / tail

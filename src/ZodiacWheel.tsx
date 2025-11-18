@@ -35,6 +35,7 @@ import midheavenSymbol from "./assets/body-symbols/Midheaven.png"
 import imumCoeliSymbol from "./assets/body-symbols/Imum Coeli.png"
 import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
 import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
+import partOfFortuneSymbol from "./assets/body-symbols/Part of Fortune.png"
 
 enum Zodiac{
   Aries = 'Aries',
@@ -67,7 +68,7 @@ const nodeSymbolHideable: Record<Node, boolean> = {
 	[Node.DESCENDANT] : true,
 	[Node.MIDHEAVEN] : true,
 	[Node.IMUM_COELI] : true,
-	//[Node.PART_OF_FORTUNE] : false,
+	[Node.PART_OF_FORTUNE] : false,
 	
 	[Node.LUNAR_ASCENDING] : false,
 	[Node.LUNAR_DESCENDING] : false,
@@ -78,7 +79,7 @@ const nodeSymbolHideable: Record<Node, boolean> = {
 const nodeShortName: Record<Node, String> = {
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
 	[Node.LUNAR_DESCENDING] : "Lunar ▼",
-	//[Node.PART_OF_FORTUNE] : "Fortuna",
+	[Node.PART_OF_FORTUNE] : "Fortuna",
 }
 
 function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, aspects, highlightedAspect}: {
@@ -136,7 +137,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		[Node.MIDHEAVEN, midheavenSymbol],
 		[Node.IMUM_COELI, imumCoeliSymbol],
 		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
-		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
+		[Node.LUNAR_DESCENDING, lunarDescendingSymbol],
+		[Node.PART_OF_FORTUNE, partOfFortuneSymbol],
 	]);
 	
 	const { offset, nodeAngles, houseCuspAngles } = useMemo<Map<Node, number> | null>(() => {
@@ -305,7 +307,6 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 							y={y-symbolSize/2}
 							width={symbolSize}
 							height={symbolSize}
-							//transform={`rotate(${r}, ${x}, ${y}) translate(0, ${translateY})`}
 							style={{
 								transition: "transform 0.5s ease",
 								filter:"invert(1)",
