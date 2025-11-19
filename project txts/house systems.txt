@@ -110,10 +110,26 @@ XX option to not rotate any of the symbols / 90 snaps (iykyk)
 XX when show labels is off, inner aspect circle expands
 XX fix node spacer: things can bunch up around 0, looks like
 XX fix: true lilith/selene crashes
-ensure datepicker timezone matches city
+XX ensure datepicker timezone matches city
 XX change presweep look: one line, one dashed line
 sidereal vs tropical
 
 note: i'm not completely convinced i got presweep direction correct.
 obs: wiktionary appears to claim that there are separate symbols for the true black / white moons ( unnamed / artha ): https://en.wiktionary.org/wiki/%E2%AF%9E / https://en.wiktionary.org/wiki/%E2%AF%9F
 on a related note remember lunar asc / dsc are sometimes called dragon's head / tail
+
+
+
+NEW TODO
+let's just get it done and presentable for the cv and we'll worry about the actual hard parts (time-based house systems, aspects rework) later
+so, actual todo:
+hamburg school objects
+actual trans-neptunian (makemake, eris, etc) - if possible
+node selection menu
+stuff everything into the side menus, incl. config, remove debug bars
+
+LONG-TERM TODO
+contraparallel diagram
+fixed stars
+time-based house systems
+rework aspects

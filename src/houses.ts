@@ -242,11 +242,66 @@ function eclipticToRA(eclipticLongitude: number, date: Date): number {
 }
 
 function raToEcliptic(ra: number, date: Date): number {
-    const eps = computeAxialTilt(date);
-    return Math.atan2( Math.sin(ra) / Math.cos(eps), Math.cos(ra));
+    const epsilon = computeAxialTilt(date);
+    return Math.atan2( Math.sin(ra) / Math.cos(epsilon), Math.cos(ra));
 }
 
-function interpolateRAByTime(f: number,raStart: number,raEnd: number,latitude: number,date: Date): number {
+function isBetweenCCW(start: number, x: number, end: number): boolean {
+    const d = (x - start + 2 * Math.PI) % (2 * Math.PI);
+    const span = (end - start + 2 * Math.PI) % (2 * Math.PI);
+    return d <= span;
+}
+
+function interpolateRAByTime(
+    f: number,
+    raStart: number,
+    raEnd: number,
+    latitude: number,
+    date: Date
+): number {
+    const phi = latitude;
+    const eps = computeAxialTilt(date);
+
+    // Convert RA to ecliptic longitude
+    const lambdaStart = raToEcliptic(raStart, date);
+    const lambdaEnd = raToEcliptic(raEnd, date);
+
+    // Declination of start
+    const deltaStart = Math.asin(Math.sin(lambdaStart) * Math.sin(eps));
+
+    // Horizon formula
+    const t = -Math.tan(phi) * Math.tan(deltaStart);
+    if (Math.abs(t) > 1) throw new Error('No rise/circumpolar');
+
+    const Hstart = Math.acos(t);
+    const Htarget = (1 - f) * Hstart;
+
+    // Solve for target declination
+    let deltaTarget: number;
+    if (Math.abs(Math.tan(phi)) < 1e-12) {
+        // Equator limit
+        deltaTarget = Math.asin(Math.sin(deltaStart) * Math.cos(f * Hstart));
+    } else {
+        deltaTarget = Math.atan(-Math.cos(Htarget) / Math.tan(phi));
+    }
+
+    // Candidate ecliptic longitudes
+    const s = Math.sin(deltaTarget) / Math.sin(eps);
+    if (Math.abs(s) > 1) throw new Error('No ecliptic solution');
+    let lambda1 = Math.asin(s);
+    let lambda2 = Math.PI - lambda1;
+    lambda1 = normalizeAngle(lambda1);
+    lambda2 = normalizeAngle(lambda2);
+
+    // Pick candidate in Asc→MC sector
+    const lambdaChosen =
+        isBetweenCCW(lambdaStart, lambda1, lambdaEnd) ? lambda1 : lambda2;
+
+    // Convert back to RA
+    return normalizeAngle(eclipticToRA(lambdaChosen, date));
+}
+
+function interpolateRAByTimeLERP(f: number,raStart: number,raEnd: number,latitude: number,date: Date): number {
 	//TODO this is unfinished, currently equiv to porphyrius. Need to finish this function (the hard part) for time-based
     let delta = raEnd - raStart;
     delta = ((delta + Math.PI) % (2 * Math.PI)) - Math.PI;

@@ -263,7 +263,8 @@ function computeMCIC(date: Date, surfacePos: SurfacePosition): number {
 	
 	const epsRad = computeAxialTilt(date);
 	
-	const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
+	//const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
+	const mc = Math.atan2(Math.sin(theta)/Math.cos(epsRad), Math.cos(theta));
 	
 	return new Map <Node, number>([
 		[Node.MIDHEAVEN, normalizeAngleRad(mc)],
@@ -445,7 +446,8 @@ export class ZodiacPositions {
 			return this;
 		}
 		const newLunarNodePositions = computeLunarNodes(this.date, newMode);
-		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newLunarNodePositions]);
+		const newLilithSelenePositions = computeLunarApogeePerigee(this.date, newMode);
+		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newLunarNodePositions, ...newLilithSelenePositions]);
 		return this.copyWith({lunarNodeMode: newMode, nodePositions: newNodePositions});
 	}
 	

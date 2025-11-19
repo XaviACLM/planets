@@ -47,26 +47,6 @@ function App() {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
 	
-	
-	const { offset, nodeAngles, houseCuspAngles } = useMemo<Map<Node, number> | null>(() => {
-		
-		const offset = zodiacPositions.hasSurfacePosition() ?
-			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
-			: -Math.PI/12;
-		
-		// this is vestigial, but it will be useful in the future to implement anglo style
-		const nodeAngles = new Map<Node, number>();
-		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
-			nodeAngles.set(node, position + offset);
-		})
-		
-		return {
-			offset: offset,
-			nodeAngles: nodeAngles,
-			houseCuspAngles: zodiacPositions.getHouseCuspPositions()
-		}
-	}, [zodiacPositions]);
-	
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
 			return Intl.DateTimeFormat().resolvedOptions().timeZone;
