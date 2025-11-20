@@ -1,33 +1,7 @@
 import React from "react";
 import { Node, AspectKind, type Aspect } from './aspects.ts';
 
-import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
-import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
-import grandTrineSymbol from "./assets/aspect-symbols/Grand Trine.png"
-import conjunctionSymbol from "./assets/aspect-symbols/Conjunction.png"
-import oppositionSymbol from "./assets/aspect-symbols/Opposition.png"
-import sextileSymbol from "./assets/aspect-symbols/Sextile.png"
-import squareSymbol from "./assets/aspect-symbols/Square.png"
-import trineSymbol from "./assets/aspect-symbols/Trine.png"
-import parallelSymbol from "./assets/aspect-symbols/Parallel.png"
-import contraparallelSymbol from "./assets/aspect-symbols/Contraparallel.png"
-
-import earthSymbol from "./assets/body-symbols/Earth.png"
-import jupiterSymbol from "./assets/body-symbols/Jupiter.png"
-import marsSymbol from "./assets/body-symbols/Mars.png"
-import mercurySymbol from "./assets/body-symbols/Mercury.png"
-import moonSymbol from "./assets/body-symbols/Moon.png"
-import neptuneSymbol from "./assets/body-symbols/Neptune.png"
-import plutoSymbol from "./assets/body-symbols/Pluto.png"
-import saturnSymbol from "./assets/body-symbols/Saturn.png"
-import sunSymbol from "./assets/body-symbols/Sun.png"
-import uranusSymbol from "./assets/body-symbols/Uranus.png"
-import venusSymbol from "./assets/body-symbols/Venus.png"
-import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
-import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
-import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
-
-import dotSymbol from "./assets/general-symbols/Dot.png"
+import { nodeSymbols, aspectSymbols, dotSymbol } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
 
@@ -37,46 +11,10 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 	onHover: (aspect: Aspect | null) => void
 }) {
 	
-	const aspectSymbols = new Map<Node, string>([
-		[AspectKind.GRAND_SEXTILE, grandSextileSymbol],
-		[AspectKind.GRAND_SQUARE, grandSquareSymbol],
-		[AspectKind.GRAND_TRINE, grandTrineSymbol],
-		[AspectKind.CONJUNCTION, conjunctionSymbol],
-		[AspectKind.OPPOSITION, oppositionSymbol],
-		[AspectKind.SEXTILE, sextileSymbol],
-		[AspectKind.SQUARE, squareSymbol],
-		[AspectKind.TRINE, trineSymbol],
-		[AspectKind.PARALLEL, parallelSymbol],
-		[AspectKind.CONTRAPARALLEL, contraparallelSymbol],
-	]);
-	
-	const nodeSymbols = new Map<Node, string>([
-		[Node.SUN, sunSymbol],
-		[Node.MOON, moonSymbol],
-		[Node.MERCURY, mercurySymbol],
-		[Node.VENUS, venusSymbol],
-		[Node.MARS, marsSymbol],
-		[Node.JUPITER, jupiterSymbol],
-		[Node.SATURN, saturnSymbol],
-		[Node.URANUS, uranusSymbol],
-		[Node.NEPTUNE, neptuneSymbol],
-		[Node.PLUTO, plutoSymbol],
-		[Node.ASCENDANT, ascendantSymbol],
-		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
-		[Node.LUNAR_DESCENDING, lunarDescendingSymbol]
-	]);
-	
 	const symbolSize = 20;
 	
 	return (
 		<div className="aspect-menu">
-			<img
-				key = {-1}
-				src={earthSymbol}
-				width={symbolSize}
-				height={symbolSize}
-				//style={{filter:"invert(1)"}}
-			/>
 
 			{aspects != null &&
 				aspects.map((aspect, index) => (

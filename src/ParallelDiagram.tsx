@@ -1,62 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 
 import { AspectKind } from './aspects.ts'
-import { Node } from './astro.ts'
+import { Node } from './astroDefs.ts'
 
 import { spreadIcons, normalizeAngleDeg } from './util.ts'
 
-import earthSymbol from "./assets/body-symbols/Earth.png"
-import jupiterSymbol from "./assets/body-symbols/Jupiter.png"
-import marsSymbol from "./assets/body-symbols/Mars.png"
-import mercurySymbol from "./assets/body-symbols/Mercury.png"
-import moonSymbol from "./assets/body-symbols/Moon.png"
-import neptuneSymbol from "./assets/body-symbols/Neptune.png"
-import plutoSymbol from "./assets/body-symbols/Pluto.png"
-import saturnSymbol from "./assets/body-symbols/Saturn.png"
-import sunSymbol from "./assets/body-symbols/Sun.png"
-import uranusSymbol from "./assets/body-symbols/Uranus.png"
-import venusSymbol from "./assets/body-symbols/Venus.png"
-import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
-import descendantSymbol from "./assets/body-symbols/Descendant.png"
-import midheavenSymbol from "./assets/body-symbols/Midheaven.png"
-import imumCoeliSymbol from "./assets/body-symbols/Imum Coeli.png"
-import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
-import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
-import partOfFortuneSymbol from "./assets/body-symbols/Part of Fortune.png"
-import lunarApogeeSymbol from "./assets/body-symbols/Lilith.png"
-import lunarPerigeeSymbol from "./assets/body-symbols/Selene.png"
-
-const nodeSymbolHideable: Record<Node, boolean> = {
-	[Node.SUN] : false,
-	[Node.MOON] : false,
-	[Node.MERCURY] : false,
-	[Node.VENUS] : false,
-	[Node.MARS] : false,
-	[Node.JUPITER] : false,
-	[Node.SATURN] : false,
-	[Node.URANUS] : false,
-	[Node.NEPTUNE] : false,
-	[Node.PLUTO] : false,
-	
-	[Node.ASCENDANT] : true,
-	[Node.DESCENDANT] : true,
-	[Node.MIDHEAVEN] : true,
-	[Node.IMUM_COELI] : true,
-	[Node.PART_OF_FORTUNE] : false,
-	
-	[Node.LUNAR_ASCENDING] : false,
-	[Node.LUNAR_DESCENDING] : false,
-	[Node.LUNAR_APOGEE] : false,
-	[Node.LUNAR_PERIGEE] : false,
-}
-
-const nodeShortName: Record<Node, String> = {
-	[Node.LUNAR_ASCENDING] : "Lunar ▲",
-	[Node.LUNAR_DESCENDING] : "Lunar ▼",
-	[Node.LUNAR_APOGEE] : "Lilith",
-	[Node.LUNAR_PERIGEE] : "Selene",
-	[Node.PART_OF_FORTUNE] : "Fortuna",
-}
+import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, nodeShortName } from './astroGraphics.ts'
 
 // from the code in scripts, pulling simbad data
 const fixedStars: Record<String, number> = {
@@ -92,30 +41,8 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 	const strokeWidthTertiary = 0.1;
 	const symbolSize = 6;
 	const minimumIconSpace = 0.18; // radial
-	const pathSegments = 30;
+	const pathSegments = 50;
 	const waveAmplitude = 0.5;
-	
-	const nodeSymbols = new Map<Node, string>([
-		[Node.SUN, sunSymbol],
-		[Node.MOON, moonSymbol],
-		[Node.MERCURY, mercurySymbol],
-		[Node.VENUS, venusSymbol],
-		[Node.MARS, marsSymbol],
-		[Node.JUPITER, jupiterSymbol],
-		[Node.SATURN, saturnSymbol],
-		[Node.URANUS, uranusSymbol],
-		[Node.NEPTUNE, neptuneSymbol],
-		[Node.PLUTO, plutoSymbol],
-		[Node.ASCENDANT, ascendantSymbol],
-		[Node.DESCENDANT, descendantSymbol],
-		[Node.MIDHEAVEN, midheavenSymbol],
-		[Node.IMUM_COELI, imumCoeliSymbol],
-		[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
-		[Node.LUNAR_DESCENDING, lunarDescendingSymbol],
-		[Node.LUNAR_APOGEE, lunarApogeeSymbol],
-		[Node.LUNAR_PERIGEE, lunarPerigeeSymbol],
-		[Node.PART_OF_FORTUNE, partOfFortuneSymbol],
-	]);
 	
 	const { trueNodeAngles, adjustedNodeAngles } = useMemo<Map<Node, number> | null>(() => {
 		const nodeAngles = zodiacPositions.getNodePositions();
@@ -342,8 +269,9 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 									d={pathData}
 									fill="none"
 									stroke="white"
-									strokeWidth={isParallel ? strokeWidthSecondary : strokeWidthTertiary}
-									//strokeDasharray= {isParallel? "1,0" : "0.8px,1.6px"}
+									//a bit dubious, but much better visually
+									strokeWidth={isParallel ? strokeWidthSecondary : 0}
+									//strokeDasharray= {isParallel? "1,0" : "0.5px,3px"}
 								/>
 							);
 						}

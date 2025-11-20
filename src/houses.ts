@@ -1,6 +1,7 @@
 import { normalizeAngleRad, interpolateAngles } from './util.ts'
 
-import { Node, type SurfacePosition, computeAxialTilt } from './astro.ts'
+import { Node, type SurfacePosition } from './astroDefs.ts'
+import { computeAxialTilt } from './astro.ts'
 
 import { RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 

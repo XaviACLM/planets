@@ -4,21 +4,9 @@ import { computeHouseCuspPositions } from './houses.ts'
 
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
-export enum AstrologyMode {
-	TROPICAL = "Tropical",
-	SIDEREAL_LAHIRI = "Sidereal - Lahiri",
-	SIDEREAL_FAGAN_BRADLEY = "Sidereal - Fagan / Bradley",
-	SIDEREAL_RAMAN = "Sidereal - Raman",
-	SIDEREAL_KRISHNAMURTI = "Sidereal - Krishnamurti",
-	SIDEREAL_YUKTESHWAR = "Sidereal - Yukteshwar",
-	SIDEREAL_DE_LUCE = "Sidereal - De Luce",
-	SIDEREAL_HIPPARCHOS = "Sidereal - Hipparchos",
-	SIDEREAL_BABYLONIAN = "Sidereal - Babylonian",
-	SIDEREAL_HUBER = "Sidereal - Huber",
-	SIDEREAL_SURYASIDDHANTA = "Sidereal - Suryasiddhanta",
-	SIDEREAL_TRUE_CITRA = "Sidereal - True Citra",
-	SIDEREAL_TRUE_REVANTI = "Sidereal - True Revanti",
-}
+import { nodeToParams, orbitalLongitude } from './astroSmallObjects.ts'
+
+import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode } from './astroDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
@@ -37,136 +25,6 @@ const Ayanamsas: Record<AstrologyMode, number> = {
 	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
 	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
 	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
-}
-
-export enum Node {
-	// bodies
-	SUN = "Sun",
-	MOON = "Moon",
-	MERCURY = "Mercury",
-	VENUS = "Venus",
-	MARS = "Mars",
-	JUPITER = "Jupiter",
-	SATURN = "Saturn",
-	URANUS = "Uranus",
-	NEPTUNE = "Neptune",
-	PLUTO = "Pluto",
-	
-	// primary angles
-	ASCENDANT = "Ascendant",
-	DESCENDANT = "Descendant",
-	MIDHEAVEN = "Midheaven",
-	IMUM_COELI = "Imum Coeli",
-	
-	PART_OF_FORTUNE = "Part of Fortune",
-	//PART_OF_SPIRIT = "Part of Spirit",
-	//PART_OF_LOVE = "Part of Love",
-	//PART_OF_MARRIAGE = "Part of Marriage",
-	//PART_OF_NECESSITY = "Part of Necessity",
-	//PART_OF_CAREER = "Part of Career",
-	//PART_OF_COURAGE = "Part of Courage",
-	//PART_OF_LONGEVITY = "Part of Longevity",
-	//PART_OF_DEATH = "Part of Death",
-	
-	//lunar
-	LUNAR_ASCENDING = "Lunar Ascending",
-	LUNAR_DESCENDING = "Lunar Descending",
-	LUNAR_APOGEE = "Lunar Apogee", //lilith
-	LUNAR_PERIGEE = "Lunar Perigee", // selene
-	
-	// missing:
-	// secondary angles: anti/vertex, east/west points
-	// fictive/transneptunian: cupido, hades, zeus...
-	// uranian: uranian cupido, uranian hades...
-	
-	// minor bodies
-	//CERES = "Ceres",
-	//PALLAS = "Pallas",
-	//JUNO = "Juno",
-	//VESTA = "Vesta",
-	//CHIRON = "Chiron",
-}
-
-export enum NodeType {
-	BODY = "Body",
-	POINT = "Point",
-	HOUSE_CUSP = "House Cusp",
-}
-
-const nodeTypes: Record<Node, NodeType> = {
-	[Node.SUN] : NodeType.BODY,
-	[Node.MOON] : NodeType.BODY,
-	[Node.MERCURY] : NodeType.BODY,
-	[Node.VENUS] : NodeType.BODY,
-	[Node.MARS] : NodeType.BODY,
-	[Node.JUPITER] : NodeType.BODY,
-	[Node.SATURN] : NodeType.BODY,
-	[Node.URANUS] : NodeType.BODY,
-	[Node.NEPTUNE] : NodeType.BODY,
-	[Node.PLUTO] : NodeType.BODY,
-	
-	[Node.ASCENDANT] : NodeType.POINT,
-	[Node.DESCENDANT] : NodeType.POINT,
-	[Node.MIDHEAVEN] : NodeType.POINT,
-	[Node.IMUM_COELI] : NodeType.POINT,
-	
-	[Node.PART_OF_FORTUNE] : NodeType.POINT,
-	[Node.PART_OF_SPIRIT] : NodeType.POINT,
-	[Node.PART_OF_LOVE] : NodeType.POINT,
-	[Node.PART_OF_MARRIAGE] : NodeType.POINT,
-	[Node.PART_OF_NECESSITY] : NodeType.POINT,
-	[Node.PART_OF_CAREER] : NodeType.POINT,
-	[Node.PART_OF_COURAGE] : NodeType.POINT,
-	[Node.PART_OF_LONGEVITY] : NodeType.POINT,
-	[Node.PART_OF_DEATH] : NodeType.POINT,
-	
-	[Node.LUNAR_ASCENDING] : NodeType.POINT,
-	[Node.LUNAR_DESCENDING] : NodeType.POINT,
-	[Node.LUNAR_APOGEE] : NodeType.POINT,
-	[Node.LUNAR_PERIGEE] : NodeType.POINT,
-}
-
-const nodeDependsOnLocation: Record<Node, boolean> = {
-	[Node.SUN] : false,
-	[Node.MOON] : false,
-	[Node.MERCURY] : false,
-	[Node.VENUS] : false,
-	[Node.MARS] : false,
-	[Node.JUPITER] : false,
-	[Node.SATURN] : false,
-	[Node.URANUS] : false,
-	[Node.NEPTUNE] : false,
-	[Node.PLUTO] : false,
-	
-	[Node.ASCENDANT] : true,
-	[Node.DESCENDANT] : true,
-	[Node.MIDHEAVEN] : true,
-	[Node.IMUM_COELI] : true,
-	
-	[Node.PART_OF_FORTUNE] : true,
-	[Node.PART_OF_SPIRIT] : true,
-	[Node.PART_OF_LOVE] : true,
-	[Node.PART_OF_MARRIAGE] : true,
-	[Node.PART_OF_NECESSITY] : true,
-	[Node.PART_OF_CAREER] : true,
-	[Node.PART_OF_COURAGE] : true,
-	[Node.PART_OF_LONGEVITY] : true,
-	[Node.PART_OF_DEATH] : true,
-	
-	[Node.LUNAR_ASCENDING] : false,
-	[Node.LUNAR_DESCENDING] : false,
-	[Node.LUNAR_APOGEE] : false,
-	[Node.LUNAR_PERIGEE] : false,
-}
-
-export interface SurfacePosition {
-	latitude: number;
-	longitude: number
-}
-
-export enum LunarNodeMode {
-	TRUE = "True", //geometric
-	MEAN = "Mean", //meeus
 }
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<LunarPoint, number> {
@@ -330,7 +188,7 @@ function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition):
 }
 
 // for the astronomy engine
-const NodeToBody: Partial<Record<Node, Body>> = {
+const nodeToBody: Partial<Record<Node, Body>> = {
 	[Node.SUN]: Body.Sun,
 	[Node.MOON]: Body.Moon,
 	[Node.MERCURY]: Body.Mercury,
@@ -349,7 +207,7 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	
 	const nodeAngles = new Map<Node, number>();
 		
-	for ( const [node, body] of Object.entries(NodeToBody)) {
+	for ( const [node, body] of Object.entries(nodeToBody)) {
 		const eqj = GeoVector(body, new Date(), correctForAberration)
 		const etc = Ecliptic(eqj);
 		nodeAngles.set(node, (etc.elon)/360*2*Math.PI);
@@ -358,6 +216,17 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	return nodeAngles;
 }
 
+function computeSmallObjectPositions(date: Date): Map<Node, number> {
+	const nodeAngles = new Map<Node, number>();
+		
+	for ( const [node, params] of Object.entries(nodeToParams)) {
+		const lonDeg = orbitalLongitude(params, date);
+		nodeAngles.set(node, lonDeg*Math.PI/180);
+	}
+	
+	return nodeAngles;	
+}
+	
 function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node, number> {
 	const asc = nodePositions.get(Node.ASCENDANT);
 	const sun = nodePositions.get(Node.SUN);
@@ -396,6 +265,7 @@ function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node,
 function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
+		...computeSmallObjectPositions(date),
 		...computeLunarNodes(date, lunarNodeMode),
 		...computeLunarApogeePerigee(date, lunarNodeMode),
 	]);
