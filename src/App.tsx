@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import ParallelDiagram from './ParallelDiagram'
+import NodeSelector from './NodeSelector'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
@@ -24,12 +25,31 @@ function App() {
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<HouseSystem>(AstrologyMode.TROPICAL);
-	
+
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
+	
+	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(
+		new Set([
+			Node.SUN, Node.MOON, Node.MERCURY, Node.VENUS, Node.MARS,
+			Node.JUPITER, Node.SATURN, Node.ASCENDANT, Node.MIDHEAVEN
+		])
+	);
+
+	const handleNodeToggle = (node: Node) => {
+		setSelectedNodes(prev => {
+		const newSet = new Set(prev);
+		if (newSet.has(node)) {
+			newSet.delete(node);
+		} else {
+			newSet.add(node);
+		}
+			return newSet;
+		});
+	};
 	
 	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
 	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions()));
@@ -94,22 +114,6 @@ function App() {
 							onDelete={(aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 						/>
 					</div>
-				</div>
-				<div className="module">
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
-					Left module 3
 				</div>
 			</aside>
 			
@@ -227,14 +231,19 @@ function App() {
 			</main>
 			
 			<aside className="sidebar right-sidebar">
-				<div className="module">Right module 1</div>
-				<div className="module">Right module 2</div>
 				<div className="module">
 					<ParallelDiagram
 						showLabels={showLabels}
 						zodiacPositions={zodiacPositions}
 						aspects={aspects}
 						highlightedAspect={highlightedAspect}
+					/>
+				</div>
+				<div className="module">
+					<NodeSelector
+						selectedNodes={selectedNodes}
+						onNodeToggle={handleNodeToggle}
+						showLabels={showLabels}
 					/>
 				</div>
 			</aside>
