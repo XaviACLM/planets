@@ -19,7 +19,6 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 }) {
 	
 	const sectorRadius = 45;
-	const hoveredSymbolRadius = 42;
 	const symbolRadius = 40;
 	const radius = 35; // percent of viewport
 	const aspectRadius = showLabels ? 20 : 25;
@@ -72,7 +71,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
 	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
 	
-	const [hovered, setHovered] = useState<number | null>(null);
+	const [hoveredZodiac, setHoveredZodiac] = useState<number | null>(null);
 	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
@@ -193,7 +192,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-					const translateY = hovered === i ? -2 : 0;
+					const translateY = hoveredZodiac === i ? -2 : 0;
 					return (
 						<image
 							key={i}
@@ -243,6 +242,10 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node);
+						
+						const z = Math.floor((((a-offset-siderealOffset)*6/Math.PI)%12+12)%12);
+						console.log(z);
+						
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
@@ -252,10 +255,10 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 						}
 						
 						let filter: string;
-						if (highlightedAspect != null && highlightedAspect.nodes.includes(node)) {
+						if (z == hoveredZodiac || (highlightedAspect != null && highlightedAspect.nodes.includes(node))) {
 							filter = "url(#shadowAndInverted)";
 						} else {
-							filter = "url(#shadow)";
+							filter = "url(#invert)";
 						}
 						
 						return (
@@ -440,8 +443,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 
 				{/*Zodiac symbol highlighting*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const startA = (i/12) * 2 * Math.PI + offset;
-					const endA = ((i+1)/12) * 2 * Math.PI + offset;
+					const startA = (i/12) * 2 * Math.PI + offset + siderealOffset;
+					const endA = ((i+1)/12) * 2 * Math.PI + offset + siderealOffset;
 					
 					const innerStart = {
 						x: 50 + radius * Math.cos(startA),
@@ -475,10 +478,10 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 							key={i}
 							d={pathData}
 							fill="url(#hoverGradient)"
-							fillOpacity={hovered === i ? 1 : 0}
+							fillOpacity={hoveredZodiac === i ? 1 : 0}
 							stroke="none"
-							onMouseEnter={() => setHovered(i)}
-							onMouseLeave={() => setHovered(null)}
+							onMouseEnter={() => setHoveredZodiac(i)}
+							onMouseLeave={() => setHoveredZodiac(null)}
 							style={{ transition: "fill-opacity 0.6s ease" }}
 						/>
 					);
@@ -500,7 +503,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
 						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
 					</filter>
-					<filter id="shadow">
+					<filter id="invert">
 						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
 					</filter>
 				</defs>
