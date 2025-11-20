@@ -87,3 +87,14 @@ export function interpolateAngles(coeff:number, a1: number, a2: number) {
 		return normalizeAngleRad((1-coeff) * a1 + coeff * (a2 + 2*Math.PI)); 
 	}
 }
+
+export function sawtoothSine(x: number): number{
+	// takes a normalized angle in radians
+	if (x < Math.PI/2) {
+		return x;
+	} else if (x < 3*Math.PI/2) {
+		return Math.PI - x;
+	} else {
+		return x - 2*Math.PI;
+	}
+}

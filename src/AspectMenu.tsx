@@ -9,6 +9,8 @@ import oppositionSymbol from "./assets/aspect-symbols/Opposition.png"
 import sextileSymbol from "./assets/aspect-symbols/Sextile.png"
 import squareSymbol from "./assets/aspect-symbols/Square.png"
 import trineSymbol from "./assets/aspect-symbols/Trine.png"
+import parallelSymbol from "./assets/aspect-symbols/Parallel.png"
+import contraparallelSymbol from "./assets/aspect-symbols/Contraparallel.png"
 
 import earthSymbol from "./assets/body-symbols/Earth.png"
 import jupiterSymbol from "./assets/body-symbols/Jupiter.png"
@@ -44,6 +46,8 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 		[AspectKind.SEXTILE, sextileSymbol],
 		[AspectKind.SQUARE, squareSymbol],
 		[AspectKind.TRINE, trineSymbol],
+		[AspectKind.PARALLEL, parallelSymbol],
+		[AspectKind.CONTRAPARALLEL, contraparallelSymbol],
 	]);
 	
 	const nodeSymbols = new Map<Node, string>([

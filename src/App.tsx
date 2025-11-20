@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
+import ParallelDiagram from './ParallelDiagram'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
@@ -204,6 +205,14 @@ function App() {
 			<aside className="sidebar right-sidebar">
 				<div className="module">Right module 1</div>
 				<div className="module">Right module 2</div>
+				<div className="module">
+					<ParallelDiagram
+						showLabels={showLabels}
+						zodiacPositions={zodiacPositions}
+						aspects={aspects}
+						highlightedAspect={highlightedAspect}
+					/>
+				</div>
 			</aside>
 		</div>
 	)

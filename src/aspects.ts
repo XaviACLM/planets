@@ -1,4 +1,4 @@
-import { normalizeAngleRad } from './util.ts'
+import { normalizeAngleRad, sawtoothSine } from './util.ts'
 
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
@@ -130,6 +130,8 @@ export enum AspectKind {
 	GRAND_SEXTILE = "Grand Sextile",
 	GRAND_SQUARE = "Grand Square",
 	GRAND_TRINE = "Grand Trine",
+	PARALLEL = "Parallel",
+	CONTRAPARALLEL = "Contraparallel",
 }
 
 export interface Aspect {
@@ -215,20 +217,41 @@ export function findAspects(
 	
 	aspects.sort((a, b) => b.percentile - a.percentile);
 
-
 	for (let i = 0; i < nodes.length; i++) {
 		for (let j = i + 1; j < nodes.length; j++) {
 			const n1 = nodes[i];
 			const n2 = nodes[j];
 			
-			if ( grandAspectPairs.has( [n1, n2].sort().join("/"))) {
-				continue;
-			}
+			//first the parallels
+			// 2 nodes are parallel if their distance to the equinox is equal (signed, unsigned for contra)
+			// if p1 and pi-p2 are both equal and positive
+			// if p1-pi and 2pi-p2 are both equal and positive
+			// also check that it's not a conjunction...
+			// okay, let's go slow.
+			// 
+			// skip this whole block if p1 and p2 are close within tolerance.
+			// calculate signed distance to the ecliptic. 
 			
+			// that's literally just the sine, numbnuts (we don't care about accuracy)
+			// if the two sines are close within tolerance: parallel
+			// neg of one is close to the other within tolerance: contraparallel
+			// but i dislike that sine may squish tolerances. I want a sawtoothy function.
+			// x btw 0 and pi/2
+			// pi-x btw pi/2 and 3pi/2
+			// x-3pi/2 btw 3pi/2 and 2pi
+			// that should work. alrighteee
+			//
+			// if p1 is < pi:
+			//   if p2 is also < pi:
+			//     might be parallel. check p1 is within tol to pi-p2
+			//   if p2 is > pi:
+			//     might be contraparallel. compare pi-
+			
+			// first check conjunctions (these will never be caught by grand aspect pairs)
 			const p1 = positions.get(n1);
 			const p2 = positions.get(n2);
 			const d = distance(p1, p2);
-
+			
 			if (d < PI * (1 - thresholdPairs)) {
 				aspects.push({
 					kind: AspectKind.CONJUNCTION,
@@ -236,7 +259,37 @@ export function findAspects(
 					error: d,
 					percentile: 100 * (1 - d / PI),
 				});
+				// if nodes are in conjunction, no other aspect is valid
+				// (definitionally, for contra/parallels)
+				continue;
 			}
+			
+			// then check parallels.
+			const s1 = sawtoothSine(p1);
+			const s2 = sawtoothSine(p2);
+			const dp = Math.abs(Math.abs(s1)-Math.abs(s2));
+			
+			if (dp < PI * (1 - thresholdPairs)) {
+				const polarity = Math.sign(s1) == Math.sign(s2);
+				console.log(n1, n2);
+				console.log(p1, p2);
+				console.log(s1, s2);
+				console.log(dp);
+				console.log("");
+				aspects.push({
+					kind: polarity ? AspectKind.PARALLEL : AspectKind.CONTRAPARALLEL,
+					nodes: [n1, n2],
+					error: dp,
+					percentile: 100 * (1 - dp / PI),
+				});
+			}
+			
+			// then, before the standard binary aspects, check they aren't already in a grand aspect
+			if ( grandAspectPairs.has( [n1, n2].sort().join("/"))) {
+				continue;
+			}
+
+			// then the standard binary aspects
 			if (Math.abs(d - PI / 3) < PI * (1 - thresholdPairs)) {
 				aspects.push({
 					kind: AspectKind.SEXTILE,

@@ -263,7 +263,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 								y2={50 - (radius - 3) * Math.sin(a)}
 								stroke="white"
 								strokeWidth={strokeWidthTertiary}
-								strokeDasharray="0.2,0.5" // 5px dash, 5px gap
+								strokeDasharray="0.2,0.5"
 							/>
 						);
 					})
@@ -433,8 +433,6 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 								key={i}
 								x={flip ? px-0.6-symbolSize/2 : px+0.6+symbolSize/2}
 								y={y+0.6}
-								width={symbolSize}
-								height={symbolSize}
 								fontSize="1.5"
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
@@ -451,7 +449,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{aspects != null &&
 					aspects.map((aspect, i) => {
 						
-						if ( aspect.kind == AspectKind.CONJUNCTION ) {
+						if ( [AspectKind.CONJUNCTION, AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL].includes(aspect.kind) ) {
 							return null;
 						}
 						
