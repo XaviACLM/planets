@@ -49,6 +49,7 @@
 .node-item:active, 
 .node-item:focus-visible {
   border-radius: 0;
+  border-color: #333;
 }
 
 .node-label {

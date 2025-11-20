@@ -35,7 +35,10 @@ function App() {
 	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(
 		new Set([
 			Node.SUN, Node.MOON, Node.MERCURY, Node.VENUS, Node.MARS,
-			Node.JUPITER, Node.SATURN, Node.ASCENDANT, Node.MIDHEAVEN
+			Node.JUPITER, Node.SATURN, Node.URANUS, Node.NEPTUNE, Node.PLUTO,
+			Node.ASCENDANT, Node.DESCENDANT, Node.MIDHEAVEN, Node.IMUM_COELI,
+			Node.LUNAR_ASCENDING, Node.LUNAR_APOGEE, Node.PART_OF_FORTUNE,
+			Node.CERES, Node.ERIS
 		])
 	);
 
@@ -225,6 +228,7 @@ function App() {
 					housePresweep={housePresweep}
 					rotateSymbols={rotateSymbols}
 					zodiacPositions={zodiacPositions}
+					selectedNodes={selectedNodes}
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}
 				/>

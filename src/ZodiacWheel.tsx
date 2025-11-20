@@ -7,15 +7,17 @@ import { spreadIcons, normalizeAngleDeg } from './util.ts'
 
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName } from './astroGraphics.ts'
 
-function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, aspects, highlightedAspect}: {
+function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
 	showLabels: boolean,
 	flipText: boolean,
 	housePresweep: boolean,
 	rotateSymbols: boolean,
 	zodiacPositions: Map<Node, number> | null,
+	selectedNodes: Set<Node>,
 	aspects: Aspect[] | null,
 	highlightedAspect: Aspect | null
 }) {
+	
 	const sectorRadius = 45;
 	const hoveredSymbolRadius = 42;
 	const symbolRadius = 40;
@@ -40,7 +42,9 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		// this is vestigial, but it will be useful in the future to implement anglo style
 		const nodeAngles = new Map<Node, number>();
 		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
-			nodeAngles.set(node, position + offset);
+			if (selectedNodes.has(node)) {
+				nodeAngles.set(node, position + offset);
+			}
 		})
 		
 		return {
@@ -49,7 +53,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 			houseCuspAngles: zodiacPositions.getHouseCuspPositions(),
 			siderealOffset: zodiacPositions.siderealOffset,
 		}
-	}, [zodiacPositions]);
+	}, [zodiacPositions, selectedNodes]);
 	
 	const adjustedNodeAngles = useMemo(() => {
 		if ( nodeAngles === null ) return null;
@@ -340,6 +344,10 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 					aspects.map((aspect, i) => {
 						
 						if ( [AspectKind.CONJUNCTION, AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL].includes(aspect.kind) ) {
+							return null;
+						}
+						
+						if (!aspect.nodes.every(node => nodeAngles.has(node))){
 							return null;
 						}
 						

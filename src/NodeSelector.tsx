@@ -1,9 +1,7 @@
-// NodeSelector.tsx
 import React from 'react';
 import { Node } from './astroDefs';
-import { nodeSymbols } from './astroGraphics';
+import { nodeSymbols, nodeShortName } from './astroGraphics';
 
-// Define categories for organization
 const NODE_CATEGORIES = [
   {
     name: 'Main Bodies',
@@ -70,7 +68,7 @@ const NodeSelector: React.FC<NodeSelectorProps> = ({
                   title={node}
                 >
                   {showLabels ? (
-                    <span className="node-label">{getShortName(node)}</span>
+                    <span className="node-label">{nodeShortName[node] || node}</span>
                   ) : (
                     symbol && <img src={symbol} alt={node} className="node-symbol" />
                   )}
@@ -83,22 +81,5 @@ const NodeSelector: React.FC<NodeSelectorProps> = ({
     </div>
   );
 };
-
-// Helper function to get shorter names for display
-function getShortName(node: Node): string {
-  const shortNames: Partial<Record<Node, string>> = {
-    [Node.IMUM_COELI]: 'IC',
-    [Node.PART_OF_FORTUNE]: 'Fortune',
-    [Node.LUNAR_ASCENDING]: 'L.Asc',
-    [Node.LUNAR_DESCENDING]: 'L.Des',
-    [Node.LUNAR_APOGEE]: 'Lilith',
-    [Node.LUNAR_PERIGEE]: 'Selene',
-    [Node.ASCENDANT]: 'ASC',
-    [Node.DESCENDANT]: 'DSC',
-    [Node.MIDHEAVEN]: 'MC'
-  };
-  
-  return shortNames[node] || node;
-}
 
 export default NodeSelector;
