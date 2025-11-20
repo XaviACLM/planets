@@ -121,15 +121,10 @@ on a related note remember lunar asc / dsc are sometimes called dragon's head / 
 
 
 NEW TODO
-let's just get it done and presentable for the cv and we'll worry about the actual hard parts (time-based house systems, aspects rework) later
-so, actual todo:
-hamburg school objects
-actual trans-neptunian (makemake, eris, etc) - if possible
-node selection menu
-stuff everything into the side menus, incl. config, remove debug bars
+make the config a bit nicer - put it somewhere?
 
 LONG-TERM TODO
-contraparallel diagram
-fixed stars
+hamburg school objects
+better fixed stars (conjunction)
 time-based house systems
 rework aspects

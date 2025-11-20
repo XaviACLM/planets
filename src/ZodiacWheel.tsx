@@ -242,10 +242,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node);
-						
 						const z = Math.floor((((a-offset-siderealOffset)*6/Math.PI)%12+12)%12);
-						console.log(z);
-						
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);

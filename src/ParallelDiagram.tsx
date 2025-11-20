@@ -131,15 +131,20 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 						const y = 100 * a / Math.PI - 50;
 						const x = 50 + waveAmplitude * 50 * Math.sin(a) + (left ? -symbolSize : symbolSize);
 						
+						console.log(node);
+						
 						if ( showLabels && nodeSymbolHideable[node] ) {
 							return null;
 						}
 						
+						console.log(1);
+						
 						let filter: string;
+						//this only works bc the filters are getting implicitly imported from ZodiacWheel.tsx
 						if (highlightedAspect != null && highlightedAspect.nodes.includes(node)) {
 							filter = "url(#shadowAndInverted)";
 						} else {
-							filter = "url(#shadow)";
+							filter = "url(#invert)";
 						}
 						
 						return (
