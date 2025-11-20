@@ -239,6 +239,7 @@ function App() {
 					<ParallelDiagram
 						showLabels={showLabels}
 						zodiacPositions={zodiacPositions}
+						selectedNodes={selectedNodes}
 						aspects={aspects}
 						highlightedAspect={highlightedAspect}
 					/>

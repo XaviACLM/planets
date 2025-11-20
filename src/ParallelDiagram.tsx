@@ -28,9 +28,10 @@ const fixedStars: Record<String, number> = {
 	["Fomalhaut"] : 333.856, //not behenian, but royal
 }
 
-function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspect}: {
+function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
 	showLabels: boolean,
 	zodiacPositions: Map<Node, number> | null,
+	selectedNodes: Set<Node>,
 	aspects: Aspect[] | null,
 	highlightedAspect: Aspect | null
 }) {
@@ -45,7 +46,13 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 	const waveAmplitude = 0.5;
 	
 	const { trueNodeAngles, adjustedNodeAngles } = useMemo<Map<Node, number> | null>(() => {
-		const nodeAngles = zodiacPositions.getNodePositions();
+		
+		const nodeAngles = new Map<Node, number>();
+		zodiacPositions.getNodePositions().forEach((position, node) => {
+			if (selectedNodes.has(node)) {
+				nodeAngles.set(node, position);
+			}
+		})
 		
 		const adjustedPositions = spreadIcons(
 			Array.from(nodeAngles.values()), minimumIconSpace
@@ -56,10 +63,10 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 		});
 		
 		return {
-			trueNodeAngles: zodiacPositions.getNodePositions(),
+			trueNodeAngles: nodeAngles,
 			adjustedNodeAngles: adjustedMap
 		};
-	}, [zodiacPositions]);
+	}, [zodiacPositions, selectedNodes]);
 
 	const nodes: Node[] = Array.from(adjustedNodeAngles.keys());
 	//684+20
@@ -219,6 +226,11 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 						}
 						
 						const [n1, n2] = aspect.nodes;
+						
+						if (!selectedNodes.has(n1) || !selectedNodes.has(n2)) {
+							return null;
+						}
+						
 						const a1 = trueNodeAngles.get(n1);
 						const a2 = trueNodeAngles.get(n2);
 						
