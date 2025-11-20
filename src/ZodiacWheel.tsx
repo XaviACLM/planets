@@ -74,8 +74,8 @@ const nodeSymbolHideable: Record<Node, boolean> = {
 	
 	[Node.LUNAR_ASCENDING] : false,
 	[Node.LUNAR_DESCENDING] : false,
-	//[Node.LUNAR_APOGEE] : false,
-	//[Node.LUNAR_PERIGEE] : false,
+	[Node.LUNAR_APOGEE] : false,
+	[Node.LUNAR_PERIGEE] : false,
 }
 
 const nodeShortName: Record<Node, String> = {

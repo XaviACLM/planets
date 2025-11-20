@@ -30,9 +30,10 @@ function App() {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
 	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));
-	
-	const aspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions());
+	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions()));
+
+	useEffect(() => {
+		setAspects(findAspects(zodiacPositions.getNodePositions()));
 	}, [zodiacPositions])
 	
 	useEffect(() => {

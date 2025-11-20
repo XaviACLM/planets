@@ -5,14 +5,14 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export function toZonedTime(date, tz) {
-  const d = dayjs(date).tz(tz);
-  const offsetMs = (d.utcOffset()+0) * 60 * 1000;
-  return new Date(date.getTime() + offsetMs);
+	const d = dayjs(date).tz(tz);
+	const offsetMs = (d.utcOffset()+0) * 60 * 1000;
+	return new Date(date.getTime() + offsetMs);
 }
 export function fromZonedTime(date, tz) {
-  const d = dayjs(date).tz(tz);
-  const offsetMs = (d.utcOffset() - 60) * 60 * 1000;
-  return new Date(date.getTime() - offsetMs);
+	const d = dayjs(date).tz(tz);
+	const offsetMs = (d.utcOffset() - 60) * 60 * 1000;
+	return new Date(date.getTime() - offsetMs);
 }
 
 export function spreadIcons(
@@ -36,17 +36,22 @@ export function spreadIcons(
 		for (let i = 0; i < n; i++) {
 			const nextIdx = (i + 1) % n;
 
-			// Handle circular wrapping - calculate the gap between current and next icon
 			let gap = (adjusted[nextIdx] - adjusted[i] + 2 * Math.PI) % (2 * Math.PI);
 
-			// If icons overlap, push them apart
 			if (gap < angularWidth) {
 				const overlap = angularWidth - gap;
 				const pushAmount = overlap / 2;
+				
+				const prevIdx = (i - 1 + n) % n;
+				const nextNextIdx = (nextIdx + 1) % n;
+				const maxBackwardPush = (adjusted[i] - adjusted[prevIdx] + 2 * Math.PI) % (2 * Math.PI);
+				const maxForwardPush = (adjusted[nextNextIdx] - adjusted[nextIdx] + 2 * Math.PI) % (2 * Math.PI);
+				const forwardPush = Math.min(pushAmount, maxForwardPush);
+				const backwardPush = Math.min(pushAmount, maxBackwardPush);
 
 				// Push both icons away from each other
-				adjusted[i] = (adjusted[i] - pushAmount + 2 * Math.PI) % (2 * Math.PI);
-				adjusted[nextIdx] = (adjusted[nextIdx] + pushAmount) % (2 * Math.PI);
+				adjusted[i] = (adjusted[i] - backwardPush + 2 * Math.PI) % (2 * Math.PI);
+				adjusted[nextIdx] = (adjusted[nextIdx] + forwardPush) % (2 * Math.PI);
 				moved = true;
 			}
 		}
@@ -54,7 +59,6 @@ export function spreadIcons(
 		if (!moved) break;
 	}
 
-	// Restore original order
 	const finalPositions: number[] = new Array(n);
 	sortedIndices.forEach((originalIndex, sortedIndex) => {
 		finalPositions[originalIndex] = adjusted[sortedIndex];
@@ -64,13 +68,13 @@ export function spreadIcons(
 }
 
 export function normalizeAngleRad(a: number) {
-	// normalize to [0, 2π)
+	// normalize to [0, 2pi)
 	const twoPi = 2*Math.PI;
 	return ((a % twoPi) + twoPi) % twoPi;
 }
 
 export function normalizeAngleDeg(a: number) {
-	// normalize to [0, 2π)
+	// normalize to [0, 360)
 	return ((a % 360) + 360) % 360;
 }
 
