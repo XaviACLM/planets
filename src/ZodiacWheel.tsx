@@ -262,8 +262,13 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 								y={y-symbolSize/2}
 								width={symbolSize}
 								height={symbolSize}
-								transform={`rotate(${r}, ${x}, ${y})`}
+								//transform={`rotate(${r}, ${x}, ${y})`}
 								filter={filter}
+								style = {{
+									transition: "transform 0.5s ease",
+									transform: `rotate(${r}deg)`,
+									transformOrigin: `${x}px ${y}px`
+								}}
 							/>
 						);
 					})
