@@ -130,44 +130,52 @@ function App() {
 					
 					{menuOpen && (
 						<div>
-							<label>
+							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
+									className="custom-checkbox"
 									checked={showLabels}
 									onChange={() => setShowLabels(!showLabels)}
+									id="show-labels"
 								/>
-								Show labels
-							</label>
+								<label htmlFor="rotate-symbols">Show labels</label>
+							</div>
 							<hr/>
-							<label>
+							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
+									className="custom-checkbox"
 									checked={flipText}
 									onChange={() => setFlipText(!flipText)}
+									id="flip-text"
 								/>
-								Keep text right-side-up
-							</label>
+								<label htmlFor="rotate-symbols">Keep text right-side-up</label>
+							</div>
 							<hr/>
-							<label>
+							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
+									className="custom-checkbox"
 									checked={housePresweep}
 									onChange={() => setHousePresweep(!housePresweep)}
+									id="pre-sweep"
 								/>
-								House pre-sweep
-							</label>
+								<label htmlFor="rotate-symbols">House pre-sweep</label>
+							</div>
 							<hr/>
-							<label>
+							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
+									className="custom-checkbox"
 									checked={rotateSymbols}
 									onChange={() => setRotateSymbols(!rotateSymbols)}
+									id="rotate-symbols"
 								/>
-								Rotate symbols
-							</label>
+								<label htmlFor="rotate-symbols">Rotate symbols</label>
+							</div>
 							<hr/>
 							<div className="toggle-switch">
-								<span>Lunar node calculation mode:</span>
+								<span>Lunar node  mode:</span>
 								<button
 									className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
 									onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
@@ -182,43 +190,49 @@ function App() {
 								</button>
 							</div>
 							<hr/>
-							<select
-								value={selectedHouseSystem}
-								onChange={(e) => setSelectedHouseSystem(e.target.value)}
-								style={{
-									backgroundColor: "black",
-									color: "white",
-									border: "1px solid white",
-									padding: "8px 12px",
-									borderRadius: "4px",
-									outline: "none",
-								}}
-							>
-								{Object.values(HouseSystem).map(system =>(
-									<option key={system} value={system}>
-										{system}
-									</option>
-								))}
-							</select>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+							<span>House system</span>
+								<select
+									value={selectedHouseSystem}
+									onChange={(e) => setSelectedHouseSystem(e.target.value)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(HouseSystem).map(system =>(
+										<option key={system} value={system}>
+											{system}
+										</option>
+									))}
+								</select>
+							</div>
 							<hr/>
-							<select
-								value={selectedAstrologyMode}
-								onChange={(e) => setSelectedAstrologyMode(e.target.value)}
-								style={{
-									backgroundColor: "black",
-									color: "white",
-									border: "1px solid white",
-									padding: "8px 12px",
-									borderRadius: "4px",
-									outline: "none",
-								}}
-							>
-								{Object.values(AstrologyMode).map(system =>(
-									<option key={system} value={system}>
-										{system}
-									</option>
-								))}
-							</select>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+							<span>Hode</span>
+								<select
+									value={selectedAstrologyMode}
+									onChange={(e) => setSelectedAstrologyMode(e.target.value)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(AstrologyMode).map(system =>(
+										<option key={system} value={system}>
+											{system}
+										</option>
+									))}
+								</select>
+							</div>
 						</div>
 					)}
 				</div>
