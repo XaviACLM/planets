@@ -54,7 +54,7 @@
 .module {
 	width: 100%;
 	background: black;
-	border: 1px solid red;
+	border: 1px solid #777;
 	border-radius: 0px;
 	padding: 0px;
 	color: white;

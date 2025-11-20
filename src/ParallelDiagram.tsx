@@ -58,42 +58,6 @@ const nodeShortName: Record<Node, String> = {
 	[Node.PART_OF_FORTUNE] : "Fortuna",
 }
 
-//TODO all this later, all this elsewhere
-enum AstrologyKind {
-	TROPICAL = "Tropical",
-	SIDEREAL_LAHIRI = "Sidereal - Lahiri",
-	SIDEREAL_FAGAN_BRADLEY = "Sidereal - Fagan / Bradley",
-	SIDEREAL_RAMAN = "Sidereal - Raman",
-	SIDEREAL_KRISHNAMURTI = "Sidereal - Krishnamurti",
-	SIDEREAL_YUKTESHWAR = "Sidereal - Yukteshwar",
-	SIDEREAL_DE_LUCE = "Sidereal - De Luce",
-	SIDEREAL_HIPPARCHOS = "Sidereal - Hipparchos",
-	SIDEREAL_BABYLONIAN = "Sidereal - Babylonian",
-	SIDEREAL_HUBER = "Sidereal - Huber",
-	SIDEREAL_SURYASIDDHANTA = "Sidereal - Suryasiddhanta",
-	SIDEREAL_TRUE_CITRA = "Sidereal - True Citra",
-	SIDEREAL_TRUE_REVANTI = "Sidereal - True Revanti",
-}
-
-// https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
-// https://iphemeris.com/blog/document/ayanamsa
-// those missing from the code in scripts, pulling swissephemeris data
-const Ayanamsas: Record<AstrologyKind, number> = {
-	// in J2000 ecliptic longitude
-	[AstrologyKind.SIDEREAL_LAHIRI] : 23.8531,
-	[AstrologyKind.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
-	[AstrologyKind.SIDEREAL_RAMAN] : 22.4069, 
-	[AstrologyKind.SIDEREAL_KRISHNAMURTI] : 23.7619,
-	[AstrologyKind.SIDEREAL_YUKTESHWAR] : 22.4778,
-	[AstrologyKind.SIDEREAL_DE_LUCE] : 27.8056,
-	[AstrologyKind.SIDEREAL_HIPPARCHOS] : 20.2461,
-	[AstrologyKind.SIDEREAL_BABYLONIAN] : 24.7867,
-	[AstrologyKind.SIDEREAL_HUBER] : 24.7336,
-	[AstrologyKind.SIDEREAL_SURYASIDDHANTA] : 20.8950,
-	[AstrologyKind.SIDEREAL_TRUE_CITRA] : 23.8400,
-	[AstrologyKind.SIDEREAL_TRUE_REVANTI] : 20.0451,
-}
-
 // from the code in scripts, pulling simbad data
 const fixedStars: Record<String, number> = {
 	// in J2000 ecliptic longitude
@@ -115,9 +79,6 @@ const fixedStars: Record<String, number> = {
 	["Fomalhaut"] : 333.856, //not behenian, but royal
 }
 
-
-
-
 function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspect}: {
 	showLabels: boolean,
 	zodiacPositions: Map<Node, number> | null,
@@ -125,28 +86,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 	highlightedAspect: Aspect | null
 }) {
 	
-	
-	
-	
-	
-	
-	
-
-	const sectorRadius = 45;
-	const hoveredSymbolRadius = 42;
-	const symbolRadius = 40;
-	const radius = 35; // percent of viewport
-	const aspectRadius = showLabels ? 20 : 25;
-	const planetRadius = showLabels ? 30 : (radius+aspectRadius)/2;
-	
-	
 	const blurBaseWidth = 2;
-	
-	
-	
-	
-	
-	
 	const strokeWidthPrimary = 0.3;
 	const strokeWidthSecondary = 0.2;
 	const strokeWidthTertiary = 0.1;
@@ -410,6 +350,58 @@ function ParallelDiagram({ showLabels, zodiacPositions, aspects, highlightedAspe
 					})
 				}
 				
+				
+				{/*Fixed star labels*/}
+				{Object.entries(fixedStars).map(([star, aDeg]) => {
+					const a = aDeg * Math.PI / 180;
+					const left = a < Math.PI;
+					
+					//a hack - fine, since these are fixed
+					const y = 100 * a / Math.PI - 50 + 0.6
+					+ (star=="Spica" ? -1 : 0)
+					+ (star=="Arcturus" ? +1 : 0);
+					
+					const x = 50 + (left ? -10 : 10);
+					
+					return (
+						<text
+							key={star}
+							x={x}
+							y={y}
+							fontSize="3"
+							fontWeight="bold"
+							textAnchor={left ? "end" : "start"}
+							style={{filter:"invert(1)", fontVariant: "small-caps"}}
+						>
+							{star}
+						</text>
+
+					);
+				})}
+				
+				{/*Fixed star lines*/}
+				{Object.entries(fixedStars).map(([star, aDeg]) => {
+					const a = aDeg * Math.PI / 180;
+					const left = a < Math.PI;
+					//a hack - fine, since these are fixed
+					const y = 100 * a / Math.PI - 50;
+					const x1 = 50 + (left ? -10 : 10);
+					const x2 = 50 + waveAmplitude * 50 * Math.sin(a);
+					
+					return (
+						<line
+							key={star}
+							x1={x1}
+							y1={y}
+							x2={x2}
+							y2={y}
+							stroke="white"
+							strokeWidth={strokeWidthTertiary}
+							strokeDasharray="1,1"
+							
+						/>
+					);
+				})}
 			</svg>
 		</div>
 	)

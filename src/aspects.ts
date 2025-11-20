@@ -271,11 +271,6 @@ export function findAspects(
 			
 			if (dp < PI * (1 - thresholdPairs)) {
 				const polarity = Math.sign(s1) == Math.sign(s2);
-				console.log(n1, n2);
-				console.log(p1, p2);
-				console.log(s1, s2);
-				console.log(dp);
-				console.log("");
 				aspects.push({
 					kind: polarity ? AspectKind.PARALLEL : AspectKind.CONTRAPARALLEL,
 					nodes: [n1, n2],

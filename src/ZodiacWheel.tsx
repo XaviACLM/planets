@@ -147,7 +147,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		[Node.PART_OF_FORTUNE, partOfFortuneSymbol],
 	]);
 	
-	const { offset, nodeAngles, houseCuspAngles } = useMemo<Map<Node, number> | null>(() => {
+	const { offset, nodeAngles, houseCuspAngles, siderealOffset } = useMemo<Map<Node, number> | null>(() => {
 		
 		const offset = zodiacPositions.hasSurfacePosition() ?
 			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
@@ -162,7 +162,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		return {
 			offset: offset,
 			nodeAngles: nodeAngles,
-			houseCuspAngles: zodiacPositions.getHouseCuspPositions()
+			houseCuspAngles: zodiacPositions.getHouseCuspPositions(),
+			siderealOffset: zodiacPositions.siderealOffset,
 		}
 	}, [zodiacPositions]);
 	
@@ -214,14 +215,14 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				
 				{/*Outer zodiac sector separators*/}
 				{Array.from({ length: 12 }).map((_, i) => {
-					const a = (i/12) * 2 * Math.PI - offset;
+					const a = (i/12) * 2 * Math.PI + offset + siderealOffset;
 					return (
 						<line
 							key={i}
 							x1={50 + radius * Math.cos(a)}
-							y1={50 + radius * Math.sin(a)}
+							y1={50 - radius * Math.sin(a)}
 							x2={50 + sectorRadius * Math.cos(a)}
-							y2={50 + sectorRadius * Math.sin(a)}
+							y2={50 - sectorRadius * Math.sin(a)}
 							stroke="white"
 							strokeWidth={strokeWidthPrimary}
 							
@@ -300,7 +301,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				
 				{/*Zodiac symbols*/}
 				{zodiac.map((symbol, i) => {
-					const a = (i/12) * 2 * Math.PI + offset + Math.PI/12;
+					const a = (i/12) * 2 * Math.PI + offset + Math.PI/12 + siderealOffset;
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
@@ -326,7 +327,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*Zodiac labels*/}
 				{showLabels && 
 					zodiac.map((symbol, i) => {
-						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset;
+						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset + siderealOffset;
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 - sectorRadius * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);

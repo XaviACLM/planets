@@ -6,13 +6,12 @@ import ParallelDiagram from './ParallelDiagram'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
-import { LunarNodeMode, ZodiacPositions } from './astro.ts'
+import { LunarNodeMode, ZodiacPositions, AstrologyMode } from './astro.ts'
 import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
 import { type CityData, barcelonaCityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 
 import "./App.css";
-
 
 function App() {
 	
@@ -23,6 +22,7 @@ function App() {
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
+	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<HouseSystem>(AstrologyMode.TROPICAL);
 	
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
@@ -30,7 +30,7 @@ function App() {
 	const [selectedCity, setSelectedCity] = useState<cityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
-	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));
+	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
 	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions()));
 
 	useEffect(() => {
@@ -38,7 +38,7 @@ function App() {
 	}, [zodiacPositions])
 	
 	useEffect(() => {
-		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem));
+		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
 	}, [selectedCity, selectedDate])
 	
 	useEffect(() => {
@@ -48,6 +48,10 @@ function App() {
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
+	
+	useEffect(() => {
+		setZodiacPositions(zodiacPositions.changeAstrologyMode(selectedAstrologyMode));
+	}, [selectedAstrologyMode])
 	
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
@@ -183,6 +187,25 @@ function App() {
 								}}
 							>
 								{Object.values(HouseSystem).map(system =>(
+									<option key={system} value={system}>
+										{system}
+									</option>
+								))}
+							</select>
+							<hr/>
+							<select
+								value={selectedAstrologyMode}
+								onChange={(e) => setSelectedAstrologyMode(e.target.value)}
+								style={{
+									backgroundColor: "black",
+									color: "white",
+									border: "1px solid white",
+									padding: "8px 12px",
+									borderRadius: "4px",
+									outline: "none",
+								}}
+							>
+								{Object.values(AstrologyMode).map(system =>(
 									<option key={system} value={system}>
 										{system}
 									</option>

@@ -4,41 +4,6 @@ import { computeHouseCuspPositions } from './houses.ts'
 
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
-export enum AstrologyMode {
-	TROPICAL = "Tropical",
-	SIDEREAL_LAHIRI = "Sidereal - Lahiri",
-	SIDEREAL_FAGAN_BRADLEY = "Sidereal - Fagan / Bradley",
-	SIDEREAL_RAMAN = "Sidereal - Raman",
-	SIDEREAL_KRISHNAMURTI = "Sidereal - Krishnamurti",
-	SIDEREAL_YUKTESHWAR = "Sidereal - Yukteshwar",
-	SIDEREAL_DE_LUCE = "Sidereal - De Luce",
-	SIDEREAL_HIPPARCHOS = "Sidereal - Hipparchos",
-	SIDEREAL_BABYLONIAN = "Sidereal - Babylonian",
-	SIDEREAL_HUBER = "Sidereal - Huber",
-	SIDEREAL_SURYASIDDHANTA = "Sidereal - Suryasiddhanta",
-	SIDEREAL_TRUE_CITRA = "Sidereal - True Citra",
-	SIDEREAL_TRUE_REVANTI = "Sidereal - True Revanti",
-}
-
-// https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
-// https://iphemeris.com/blog/document/ayanamsa
-// those missing from the code in scripts, pulling swissephemeris data
-const Ayanamsas: Record<AstrologyMode, number> = {
-	// in J2000 ecliptic longitude
-	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
-	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
-	[AstrologyMode.SIDEREAL_RAMAN] : 22.4069, 
-	[AstrologyMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
-	[AstrologyMode.SIDEREAL_YUKTESHWAR] : 22.4778,
-	[AstrologyMode.SIDEREAL_DE_LUCE] : 27.8056,
-	[AstrologyMode.SIDEREAL_HIPPARCHOS] : 20.2461,
-	[AstrologyMode.SIDEREAL_BABYLONIAN] : 24.7867,
-	[AstrologyMode.SIDEREAL_HUBER] : 24.7336,
-	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
-	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
-	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
-}
-
 export enum Node {
 	// bodies
 	SUN = "Sun",
@@ -414,30 +379,13 @@ function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, l
 	return nodePositions;
 }
 
-function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
-	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
-	
-	const ayanamsaJ2000 = Ayanamsas[astrologyMode];
-	
-	const degPerSecondPrecession = 4.426734852389845e-10;
-	const j2000InMillis = Date.UTC(2000, 0, 1, 12, 0, 0);
-	
-	//getTime will count leap seconds, but the difference is negligible
-	const delta = (date.getTime() - j2000InMillis) / 1000;
-	const ayanamsaNow = ayanamsaJ2000 + degPerSecondPrecession * delta;
-	
-	return ayanamsaNow * Math.PI / 180;
-}
-
 interface ZodiacPositionsConstructorArgs {
 	date: Date;
 	surfacePosition: SurfacePosition | null;
 	lunarNodeMode: LunarNodeMode;
 	houseSystem: HouseSystem;
-	astrologyMode: AstrologyMode;
 	nodePositions?: Map<Node, number>;
-	houseCuspPositions?: Map<Node, number>;
-	siderealOffset?: number;
+	houseCuspPositions?: Map<Node, number>
 }
 
 export class ZodiacPositions {
@@ -448,20 +396,12 @@ export class ZodiacPositions {
 	public readonly surfacePosition: SurfacePosition | null;
 	public readonly lunarNodeMode: LunarNodeMode;
 	public readonly houseSystem: HouseSystem;
-	public readonly siderealOffset: number;
 	
 	constructor( config: ZodiacPositionsConstructorArgs ){
 		this.surfacePosition = config.surfacePosition;
 		this.date = config.date;
 		this.lunarNodeMode = config.lunarNodeMode;
 		this.houseSystem = config.houseSystem;
-		this.astrologyMode = config.astrologyMode;
-		
-		if (config.siderealOffset) {
-			this.siderealOffset = config.siderealOffset;
-		} else {
-			this.siderealOffset = computeSiderealOffset(this.date, this.astrologyMode);
-		}
 		
 		if (config.nodePositions) {
 			this._nodePositions = config.nodePositions;
@@ -480,14 +420,12 @@ export class ZodiacPositions {
 		surfacePosition: SurfacePosition | null,
 		lunarNodeMode: LunarNodeMode,
 		houseSystem: HouseSystem,
-		astrologyMode: AstrologyMode,
 	): ZodiacPositions {
 		return new ZodiacPositions({
 			date,
 			surfacePosition,
 			lunarNodeMode,
-			houseSystem,
-			astrologyMode
+			houseSystem
 		});
 	}
 	
@@ -519,14 +457,6 @@ export class ZodiacPositions {
 		}
 		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions);
 		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
-	}
-	
-	public changeAstrologyMode(newAstrologyMode: AstrologyMode){
-		if (newAstrologyMode == this.astrologyMode) {
-			return this;
-		}
-		const newSiderealOffset = computeSiderealOffset(this.date, newAstrologyMode);
-		return this.copyWith({astrologyMode: newAstrologyMode, siderealOffset: newSiderealOffset});
 	}
 	
 	public hasSurfacePosition(): boolean{
