@@ -497,8 +497,10 @@ export class ZodiacPositions {
 			surfacePosition: this.surfacePosition,
 			lunarNodeMode: this.lunarNodeMode,
 			houseSystem: this.houseSystem,
+			astrologyMode: this.astrologyMode,
 			nodePositions: this._nodePositions,
 			houseCuspPositions: this._houseCuspPositions,
+			siderealOffset: this.siderealOffset,
 			...updates
 		});
 	}
