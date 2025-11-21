@@ -1,14 +1,13 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
-import { AspectKind } from './aspects.ts'
+import { type Aspect, AspectKind } from './aspects.ts'
 import { Node } from './astroDefs.ts'
-
-import { spreadIcons, normalizeAngleDeg } from './util.ts'
-
-import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, nodeShortName } from './astroGraphics.ts'
+import { ZodiacPositions } from './astro.ts'
+import { spreadIcons } from './util.ts'
+import { nodeSymbolHideable, nodeSymbols, nodeShortName } from './astroGraphics.ts'
 
 // from the code in scripts, pulling simbad data
-const fixedStars: Record<String, number> = {
+const fixedStars: Record<string, number> = {
 	// in J2000 ecliptic longitude
 	["Aldebaran"] : 69.785,
 	["Algol"] : 56.163,
@@ -30,9 +29,9 @@ const fixedStars: Record<String, number> = {
 
 function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
 	showLabels: boolean,
-	zodiacPositions: Map<Node, number> | null,
+	zodiacPositions: ZodiacPositions,
 	selectedNodes: Set<Node>,
-	aspects: Aspect[] | null,
+	aspects: Aspect[],
 	highlightedAspect: Aspect | null
 }) {
 	
@@ -45,7 +44,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 	const pathSegments = 50;
 	const waveAmplitude = 0.5;
 	
-	const { trueNodeAngles, adjustedNodeAngles } = useMemo<Map<Node, number> | null>(() => {
+	const { trueNodeAngles, adjustedNodeAngles } = useMemo(() => {
 		
 		const nodeAngles = new Map<Node, number>();
 		zodiacPositions.getNodePositions().forEach((position, node) => {
@@ -126,7 +125,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				{/*Node symbols*/}
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
-						const a = adjustedNodeAngles.get(node);
+						const a = adjustedNodeAngles.get(node)!;
 						const left = a > Math.PI;
 						const y = 100 * a / Math.PI - 50;
 						const x = 50 + waveAmplitude * 50 * Math.sin(a) + (left ? -symbolSize : symbolSize);
@@ -160,7 +159,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				{/*Node true placement indicators*/}
 				{trueNodeAngles != null && 
 					nodes.map((node, i) => {
-						const a = trueNodeAngles.get(node);
+						const a = trueNodeAngles.get(node)!;
 						const left = a > Math.PI;
 						const y = 100 * a / Math.PI - 50;
 						const x1 = 50 + waveAmplitude * 50 * Math.sin(a);
@@ -184,17 +183,14 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				{/*Node labels*/}
 				{adjustedNodeAngles != null && showLabels &&
 					nodes.map((node, i) => {
-						const a = adjustedNodeAngles.get(node);
+						const a = adjustedNodeAngles.get(node)!;
 						const left = a > Math.PI;
 						const y = 100 * a / Math.PI - 50;
 						const x = 50 + waveAmplitude * 50 * Math.sin(a) + (left ? -symbolSize/2 : symbolSize/2);
 						
 						const displacement = nodeSymbolHideable[node] ? 0 : 0.5 + symbolSize;
 						
-						var nodeName = node;
-						if ( nodeShortName[node] ) {
-							nodeName = nodeShortName[node];
-						}
+						var nodeName = nodeShortName[node] || node;
 
 						return (
 							<text
@@ -232,8 +228,8 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 							return null;
 						}
 						
-						const a1 = trueNodeAngles.get(n1);
-						const a2 = trueNodeAngles.get(n2);
+						const a1 = trueNodeAngles.get(n1)!;
+						const a2 = trueNodeAngles.get(n2)!;
 						
 						const y1 = 100 * a1 / Math.PI - 50;
 						const y2 = 100 * a2 / Math.PI - 50;
@@ -261,7 +257,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 										ref={node => {
 											if (node) {
 												requestAnimationFrame(() => {
-													node.style.opacity = 1;
+													node.style.opacity = "1";
 												});
 											 }
 										}}
@@ -293,7 +289,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				
 				
 				{/*Fixed star labels*/}
-				{Object.entries(fixedStars).map(([star, aDeg]) => {
+				{Object.entries(fixedStars).map(([star, aDeg]: [string, number]) => {
 					const a = aDeg * Math.PI / 180;
 					const left = a < Math.PI;
 					
@@ -321,7 +317,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				})}
 				
 				{/*Fixed star lines*/}
-				{Object.entries(fixedStars).map(([star, aDeg]) => {
+				{Object.entries(fixedStars).map(([star, aDeg]: [string, number]) => {
 					const a = aDeg * Math.PI / 180;
 					const left = a < Math.PI;
 					//a hack - fine, since these are fixed

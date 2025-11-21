@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 
-import { AspectKind } from './aspects.ts'
+import { type Aspect, AspectKind } from './aspects.ts'
 import { Node, Zodiac } from './astroDefs.ts'
-
+import { ZodiacPositions } from './astro.ts'
 import { spreadIcons, normalizeAngleDeg } from './util.ts'
-
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName } from './astroGraphics.ts'
 
 function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
@@ -12,9 +11,9 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 	flipText: boolean,
 	housePresweep: boolean,
 	rotateSymbols: boolean,
-	zodiacPositions: Map<Node, number> | null,
+	zodiacPositions: ZodiacPositions,
 	selectedNodes: Set<Node>,
-	aspects: Aspect[] | null,
+	aspects: Aspect[],
 	highlightedAspect: Aspect | null
 }) {
 	
@@ -32,7 +31,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 	const strokeWidthTertiary = 0.05;
 	const blurBaseWidth = 2;
 	
-	const { offset, nodeAngles, houseCuspAngles, siderealOffset } = useMemo<Map<Node, number> | null>(() => {
+	const { offset, nodeAngles, houseCuspAngles, siderealOffset } = useMemo(() => {
 		
 		const offset = zodiacPositions.hasSurfacePosition() ?
 			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
@@ -61,15 +60,17 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 			Array.from(nodeAngles.values()), minimumIconSpace
 		);
 		
+		const nodes = [...nodeAngles.keys()];
 		const adjustedMap = new Map<Node, number>();
-		Array.from(nodeAngles.keys()).forEach((node, index) => {
+		//Array.from(nodeAngles.keys()).forEach((node, index) => {
+		nodes.forEach((node, index) => {
 			adjustedMap.set(node, adjustedPositions[index]);
 		});
 		return adjustedMap;
 	}, [nodeAngles]);
 
 	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
-	const nodes: Zodiac[] = Array.from(nodeAngles.keys());
+	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
 	const [hoveredZodiac, setHoveredZodiac] = useState<number | null>(null);
 	
@@ -141,7 +142,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*House presweep line*/}
 				{ housePresweep && zodiacPositions.hasSurfacePosition() &&
 					Array.from({ length: 12 }).map((_, i) => {
-						const a = houseCuspAngles[i] + offset;
+						const a = houseCuspAngles![i] + offset;
 						return (
 							<line
 								key={i}
@@ -160,7 +161,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*House cusp labels*/}
 				{zodiacPositions.hasSurfacePosition() &&
 					Array.from({ length: 12 }).map((_, i) => {
-						const a = houseCuspAngles[i] + offset;
+						const a = houseCuspAngles![i] + offset;
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 						const flip = (r>90 && r<270) && flipText;
 						const adj = flip ? 0.01 : -0.01; //perfect alignment w/ house separators
@@ -241,7 +242,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*Node symbols*/}
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
-						const a = adjustedNodeAngles.get(node);
+						const a = adjustedNodeAngles.get(node)!;
 						const z = Math.floor((((a-offset-siderealOffset)*6/Math.PI)%12+12)%12);
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
@@ -281,7 +282,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*Node original placement indicators*/}
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
-						const a = nodeAngles.get(node);
+						const a = nodeAngles.get(node)!;
 						
 						const r1 = aspectRadius + 1.25;
 						const r2 = aspectRadius + 0.5;
@@ -309,15 +310,12 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{/*Node labels*/}
 				{adjustedNodeAngles != null && showLabels && 
 					nodes.map((node, i) => {
-						const a = adjustedNodeAngles.get(node);
+						const a = adjustedNodeAngles.get(node)!;
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 - planetRadius * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 						const flip = (r>90 && r<270) && flipText;
-						var nodeName = node;
-						if ( nodeShortName[node] ) {
-							nodeName = nodeShortName[node];
-						}
+						const nodeName = nodeShortName[node] || node;
 						let px = x;
 						if ( nodeSymbolHideable[node] ) {
 							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
@@ -343,7 +341,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				{aspects != null &&
 					aspects.map((aspect, i) => {
 						
-						if ( [AspectKind.CONJUNCTION, AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL].includes(aspect.kind) ) {
+						if ( ([AspectKind.CONJUNCTION, AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL] as AspectKind[]).includes(aspect.kind) ) {
 							return null;
 						}
 						
@@ -352,8 +350,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 						}
 						
 						const as: number[] = aspect.nodes
-						.map( (node) => nodeAngles.get(node))
-						.map( (a) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
+						.map( (node) => nodeAngles.get(node)!)
+						.map( (a: number) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
 						.sort();
 						const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
 						const ys: number[] = as.map( (a) => 50 - aspectRadius * Math.sin(a));
@@ -393,6 +391,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 								`L ${xs[5]} ${ys[5]}`,
 								`Z`
 							].join(" ");
+						} else {
+							throw new Error(`Unexpected number of nodes: ${aspect.nodes.length}`);
 						}
 						
 						if ( aspect == highlightedAspect ) {
@@ -410,7 +410,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 										ref={node => {
 											if (node) {
 												requestAnimationFrame(() => {
-													node.style.opacity = 1;
+													node.style.opacity = "1";
 												});
 											 }
 										}}

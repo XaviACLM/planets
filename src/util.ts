@@ -4,12 +4,12 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export function toZonedTime(date, tz) {
+export function toZonedTime(date: Date, tz: string) {
 	const d = dayjs(date).tz(tz);
 	const offsetMs = (d.utcOffset()+0) * 60 * 1000;
 	return new Date(date.getTime() + offsetMs);
 }
-export function fromZonedTime(date, tz) {
+export function fromZonedTime(date: Date, tz: string) {
 	const d = dayjs(date).tz(tz);
 	const offsetMs = (d.utcOffset() - 60) * 60 * 1000;
 	return new Date(date.getTime() - offsetMs);

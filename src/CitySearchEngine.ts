@@ -2,15 +2,16 @@ interface City {
   id: string;
   name: string;
   country: string;
-  admin1: string;
+  admin1: string | null;
   lat: string;
   lon: string;
   pop: string;
+  timezone: string;
 }
 
-interface CityData {
+export interface CityData {
   countryName: string;
-  stateName: string;
+  stateName: string | null;
   cityName: string;
   latitude: number;
   longitude: number;
@@ -31,8 +32,8 @@ export const barcelonaCityData: CityData = {
 };
 
 export class CitySearchEngine {
-  private citiesData: City[];
   private countryCodeMap: Map<string, string>;
+  private sortedCities: City[];
 
   constructor() {
 	this.sortedCities = citiesData.sort((a, b) => 

@@ -111,7 +111,7 @@ function solveKepler(M: number, e: number, tol = 1e-8): number {
 
 // propagate elements to 3D position in heliocentric ecliptic (J2000)
 function positionFromKepler(
-  elems: OrbitElements,
+  elems: OrbitParams,
   targetJD: number
 ): { x: number; y: number; z: number } {
   const { a, e, i, om, w, ma, epoch } = elems;
@@ -170,7 +170,7 @@ function eclipticLongitudeFromPosition(pos: { x: number; y: number; z: number })
 
 // main function: elements + date → ecliptic longitude
 export function orbitalLongitude(
-  elems: OrbitElements,
+  elems: OrbitParams,
   date: Date
 ): number {
   // convert JS Date to Julian Day

@@ -9,8 +9,7 @@ import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
 import { LunarNodeMode, AstrologyMode, Node } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
-import { type SearchResult, CitySearchEngine } from './CitySearchEngine.ts'
-import { type CityData, barcelonaCityData } from './CitySearchEngine'
+import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 
 import "./App.css";
@@ -24,12 +23,12 @@ function App() {
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
-	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<HouseSystem>(AstrologyMode.TROPICAL);
+	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
 
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
-	const [selectedCity, setSelectedCity] = useState<cityData|null>(null);
+	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
 	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(
@@ -114,7 +113,7 @@ function App() {
 						<AspectMenu
 							aspects={aspects}
 							onHover={(aspect) => {setHighlightedAspect(aspect)}}
-							onDelete={(aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
+							onDelete={(aspect: Aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 						/>
 					</div>
 				</div>
@@ -194,7 +193,7 @@ function App() {
 							<span>House system</span>
 								<select
 									value={selectedHouseSystem}
-									onChange={(e) => setSelectedHouseSystem(e.target.value)}
+									onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
 									style={{
 										backgroundColor: "black",
 										color: "white",
@@ -216,7 +215,7 @@ function App() {
 							<span>Mode</span>
 								<select
 									value={selectedAstrologyMode}
-									onChange={(e) => setSelectedAstrologyMode(e.target.value)}
+									onChange={(e) => setSelectedAstrologyMode(e.target.value as AstrologyMode)}
 									style={{
 										backgroundColor: "black",
 										color: "white",

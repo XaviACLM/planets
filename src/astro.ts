@@ -1,17 +1,14 @@
-import { normalizeAngleRad } from './util.ts'
-
-import { computeHouseCuspPositions } from './houses.ts'
-
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
+import { normalizeAngleRad } from './util.ts'
+import { computeHouseCuspPositions, HouseSystem } from './houses.ts'
 import { nodeToParams, orbitalLongitude } from './astroSmallObjects.ts'
-
 import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode } from './astroDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
 // those missing from the code in scripts, pulling swissephemeris data
-const Ayanamsas: Record<AstrologyMode, number> = {
+const Ayanamsas: Partial<Record<AstrologyMode, number>> = {
 	// in J2000 ecliptic longitude
 	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
 	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
@@ -27,7 +24,7 @@ const Ayanamsas: Record<AstrologyMode, number> = {
 	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
 }
 
-function computeLunarApogeePerigeeMeeus(date: Date): Map<LunarPoint, number> {
+function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
     const jd = (date.getTime() / 86400000) + 2440587.5;
     const t = (jd - 2451545.0) / 36525.0;
     
@@ -35,20 +32,17 @@ function computeLunarApogeePerigeeMeeus(date: Date): Map<LunarPoint, number> {
     const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
     const perigee = (omega % 360) * Math.PI / 180;
     
-    return new Map<LunarPoint, number>([
+    return new Map<Node, number>([
         [Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
         [Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
     ]);
 }
 
-function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
+function computeLunarApogeePerigeeExact(date: Date): Map<Node, number> {
     const s = GeoMoonState(date);
     
-    const GM = 398600.4418; // earth's gravitational parameter (km3/s2)
+    const GM = 8.887692587023177e-10;  // earth's gravitational parameter in AU^3 / day^2
     const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
-    const v = Math.sqrt(s.vx*s.vx + s.vy*s.vy + s.vz*s.vz);
-    const energy = (v*v)/2 - GM/r; // specific orbital energy)
-    const semiMajorAxis = -GM/(2*energy);
     
     // angular momentum
     const h = {
@@ -56,7 +50,6 @@ function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
         y: s.z * s.vx - s.x * s.vz,
         z: s.x * s.vy - s.y * s.vx
     };
-    const hMag = Math.sqrt(h.x*h.x + h.y*h.y + h.z*h.z);
     
     // eccentricity vector points toward perigee
     const rVec = {x: s.x, y: s.y, z: s.z};
@@ -68,7 +61,7 @@ function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
         y: vVec.z * h.x - vVec.x * h.z,
         z: vVec.x * h.y - vVec.y * h.x
     };
-    const eVec = {
+    const e = {
         x: vxh.x/GM - rVec.x/r,
         y: vxh.y/GM - rVec.y/r,
         z: vxh.z/GM - rVec.z/r,
@@ -76,10 +69,10 @@ function computeLunarApogeePerigeeExact(date: Date): Map<LunarPoint, number> {
     };
     
 	
-    const eEcl = Ecliptic(eVec).vec;
+    const eEcl = Ecliptic(new Vector(e.x, e.y, e.z, e.t)).vec;
     const omega = Math.atan2(eEcl.y, eEcl.x);
     
-    return new Map<LunarPoint, number>([
+    return new Map<Node, number>([
         [Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
         [Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
     ]);
@@ -118,10 +111,10 @@ function computeLunarNodesExact(date: Date): Map<Node, number>{
 		x: r.y * v.z - r.z * v.y,
 		y: r.z * v.x - r.x * v.z,
 		z: r.x * v.y - r.y * v.x,
-		t: MakeTime(date)
+		t: new AstroTime(date)
 	};
 	
-	const hEcl = Ecliptic(h).vec; // { x, y, z } in ecliptic frame
+	const hEcl = Ecliptic(new Vector(h.x, h.y, h.z, h.t)).vec; // { x, y, z } in ecliptic frame
 	const omega = Math.atan2(hEcl.x, -hEcl.y);
 	return new Map <Node, number>([
 		[Node.LUNAR_ASCENDING, normalizeAngleRad(omega)],
@@ -146,8 +139,7 @@ export function computeAxialTilt(date: Date): number {
 	return obliquity;
 }
 
-function computeMCIC(date: Date, surfacePos: SurfacePosition): number {
-	const latitudeDeg = surfacePos.latitude;
+function computeMCIC(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
 	const longitudeDeg = surfacePos.longitude;
 	const gstHours = SiderealTime(date);
 	const lstHours = gstHours + longitudeDeg / 15.0;
@@ -159,13 +151,13 @@ function computeMCIC(date: Date, surfacePos: SurfacePosition): number {
 	//const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
 	const mc = Math.atan2(Math.sin(theta)/Math.cos(epsRad), Math.cos(theta));
 	
-	return new Map <Node, number>([
+	return new Map<Node, number>([
 		[Node.MIDHEAVEN, normalizeAngleRad(mc)],
 		[Node.IMUM_COELI, normalizeAngleRad(mc + Math.PI)]
 	]);
 }
 
-function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): number {
+function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
 	const latitudeDeg = surfacePos.latitude;
 	const longitudeDeg = surfacePos.longitude;
 	const gstHours = SiderealTime(date);
@@ -181,7 +173,7 @@ function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition):
 	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
 	const lambda = Math.atan2(x,y);
 	
-	return new Map <Node, number>([
+	return new Map<Node, number>([
 		[Node.ASCENDANT, normalizeAngleRad(lambda)],
 		[Node.DESCENDANT, normalizeAngleRad(lambda + Math.PI)]
 	]);
@@ -208,9 +200,9 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	const nodeAngles = new Map<Node, number>();
 		
 	for ( const [node, body] of Object.entries(nodeToBody)) {
-		const eqj = GeoVector(body, new Date(), correctForAberration)
+		const eqj = GeoVector(body, date, correctForAberration)
 		const etc = Ecliptic(eqj);
-		nodeAngles.set(node, (etc.elon)/360*2*Math.PI);
+		nodeAngles.set(node as Node, (etc.elon)/360*2*Math.PI);
 	}
 	
 	return nodeAngles;
@@ -221,15 +213,15 @@ function computeSmallObjectPositions(date: Date): Map<Node, number> {
 		
 	for ( const [node, params] of Object.entries(nodeToParams)) {
 		const lonDeg = orbitalLongitude(params, date);
-		nodeAngles.set(node, lonDeg*Math.PI/180);
+		nodeAngles.set(node as Node, lonDeg*Math.PI/180);
 	}
 	
 	return nodeAngles;	
 }
 	
 function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node, number> {
-	const asc = nodePositions.get(Node.ASCENDANT);
-	const sun = nodePositions.get(Node.SUN);
+	const asc = nodePositions.get(Node.ASCENDANT)!;
+	const sun = nodePositions.get(Node.SUN)!;
 	const d = normalizeAngleRad(sun-asc);
 	const dayBirth = d > Math.PI;
 	const f = dayBirth ? 1 : -1;
@@ -243,7 +235,7 @@ function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node,
 	// oh, and this will depend on house cusps eventually, so we'll need to move things around a bit.
 	// this will probably go in its own file, anyway.
 	return new Map <Node, number>([
-		[Node.PART_OF_FORTUNE, asc + f*(nodePositions.get(Node.MOON) - nodePositions.get(Node.SUN))],
+		[Node.PART_OF_FORTUNE, asc + f*(nodePositions.get(Node.MOON)! - nodePositions.get(Node.SUN)!)],
 		//[Node.PART_OF_SPIRIT, asc + f*(nodePositions.get(Node.SUN) - nodePositions.get(Node.MOON))],
 		//[Node.PART_OF_LOVE, asc + f*(nodePositions.get(Node.VENUS) - nodePositions.get(Node.SUN))],
 		//[Node.PART_OF_MARRIAGE, asc + f*(nodePositions.get(Node.DESCENDANT) - nodePositions.get(Node.VENUS))],
@@ -287,7 +279,7 @@ function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, l
 function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
 	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
 	
-	const ayanamsaJ2000 = Ayanamsas[astrologyMode];
+	const ayanamsaJ2000 = Ayanamsas[astrologyMode]!;
 	
 	const degPerSecondPrecession = 4.426734852389845e-10;
 	const j2000InMillis = Date.UTC(2000, 0, 1, 12, 0, 0);
@@ -306,19 +298,20 @@ interface ZodiacPositionsConstructorArgs {
 	houseSystem: HouseSystem;
 	astrologyMode: AstrologyMode;
 	nodePositions?: Map<Node, number>;
-	houseCuspPositions?: Map<Node, number>;
+	houseCuspPositions?: number[] | null;
 	siderealOffset?: number;
 }
 
 export class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
-	private readonly _houseCuspPositions: Map<Node, number> | null;
+	private readonly _houseCuspPositions: number[] | null;
 	
 	public readonly date: Date;
 	public readonly surfacePosition: SurfacePosition | null;
 	public readonly lunarNodeMode: LunarNodeMode;
 	public readonly houseSystem: HouseSystem;
 	public readonly siderealOffset: number;
+	public readonly astrologyMode: AstrologyMode;
 	
 	constructor( config: ZodiacPositionsConstructorArgs ){
 		this.surfacePosition = config.surfacePosition;
@@ -335,7 +328,7 @@ export class ZodiacPositions {
 		
 		if (config.nodePositions) {
 			this._nodePositions = config.nodePositions;
-			this._houseCuspPositions = config.houseCuspPositions;
+			this._houseCuspPositions = config.houseCuspPositions || null;
 		} else if (this.surfacePosition !== null) {
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode);
 			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions);
@@ -375,7 +368,7 @@ export class ZodiacPositions {
 		});
 	}
 
-	public changeLunarNodeMode(newMode: LunarNodeMode){
+	public changeLunarNodeMode(newMode: LunarNodeMode): ZodiacPositions{
 		if (newMode == this.lunarNodeMode) {
 			return this;
 		}
@@ -385,15 +378,17 @@ export class ZodiacPositions {
 		return this.copyWith({lunarNodeMode: newMode, nodePositions: newNodePositions});
 	}
 	
-	public changeHouseSystem(newSystem: HouseSystem){
+	public changeHouseSystem(newSystem: HouseSystem): ZodiacPositions{
 		if (newSystem == this.houseSystem) {
-			return;
+			return this;
 		}
-		const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions);
+		const newHouseCuspPositions = this.surfacePosition ? 
+			computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions)
+			: null;
 		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
 	}
 	
-	public changeAstrologyMode(newAstrologyMode: AstrologyMode){
+	public changeAstrologyMode(newAstrologyMode: AstrologyMode): ZodiacPositions{
 		if (newAstrologyMode == this.astrologyMode) {
 			return this;
 		}
@@ -410,14 +405,16 @@ export class ZodiacPositions {
 	}
 	
 	public getNodePosition(node: Node): number{
-		return this._nodePositions.get(node);
+		const a = this._nodePositions.get(node);
+		if (!a) {throw new Error("getNodePosition called for absent node");}
+		return a;
 	}
 	
-	public getHouseCuspPositions(): number[12]{
+	public getHouseCuspPositions(): number[] | null{
 		return this._houseCuspPositions;
 	}
 	
-	public getHouseCuspPosition(i: number): number{
-		return this._houseCuspPositions[i];
+	public getHouseCuspPosition(i: number): number | null{
+		return this._houseCuspPositions?.[i] || null;
 	}
 }

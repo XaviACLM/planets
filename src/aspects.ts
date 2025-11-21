@@ -1,6 +1,5 @@
-import { normalizeAngleRad, sawtoothSine } from './util.ts'
-
-import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
+import { sawtoothSine } from './util.ts'
+import { Node } from './astroDefs.ts'
 
 export function distance(p1: number, p2: number): number {
 	const twoPi = 2 * Math.PI;
@@ -79,22 +78,6 @@ export function findQuantile(d: number, n: number): number {
 	return 99.99 / 100;
 }
 
-export enum Node {
-	SUN = "Sun",
-	MOON = "Moon",
-	ASCENDANT = "Ascendant",
-	LUNAR_ASCENDING = "Lunar Ascending",
-	LUNAR_DESCENDING = "Lunar Descending",
-	MERCURY = "Mercury",
-	MARS = "Mars",
-	VENUS = "Venus",
-	JUPITER = "Jupiter",
-	NEPTUNE = "Neptune",
-	PLUTO = "Pluto",
-	URANUS = "Uranus",
-	SATURN = "Saturn",
-}
-
 const visibleNodes: Node[] = [
 	Node.SUN,
 	Node.MOON,
@@ -108,31 +91,19 @@ const visibleNodes: Node[] = [
 	Node.SATURN
 ]
 
-export const NodeToBody: Partial<Record<Node, Body>> = {
-	[Node.SUN]: Body.Sun,
-	[Node.MOON]: Body.Moon,
-	[Node.MERCURY]: Body.Mercury,
-	[Node.VENUS]: Body.Venus,
-	[Node.MARS]: Body.Mars,
-	[Node.JUPITER]: Body.Jupiter,
-	[Node.SATURN]: Body.Saturn,
-	[Node.URANUS]: Body.Uranus,
-	[Node.NEPTUNE]: Body.Neptune,
-	[Node.PLUTO]: Body.Pluto,
-};
-
-export enum AspectKind {
-	CONJUNCTION = "Conjunction",
-	SEXTILE = "Sextile",
-	SQUARE = "Square",
-	TRINE = "Trine",
-	OPPOSITION = "Opposition",
-	GRAND_SEXTILE = "Grand Sextile",
-	GRAND_SQUARE = "Grand Square",
-	GRAND_TRINE = "Grand Trine",
-	PARALLEL = "Parallel",
-	CONTRAPARALLEL = "Contraparallel",
-}
+export const AspectKind = {
+	CONJUNCTION: "Conjunction",
+	SEXTILE: "Sextile",
+	SQUARE: "Square",
+	TRINE: "Trine",
+	OPPOSITION: "Opposition",
+	GRAND_SEXTILE: "Grand Sextile",
+	GRAND_SQUARE: "Grand Square",
+	GRAND_TRINE: "Grand Trine",
+	PARALLEL: "Parallel",
+	CONTRAPARALLEL: "Contraparallel",
+} as const;
+export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
 
 export interface Aspect {
 	kind: AspectKind;
@@ -181,11 +152,11 @@ export function findAspects(
 
 	// 6 before 3 to fill sextileTrines
 	for (const n of [6, 4, 3]) {
-		const t = thresholdGrands[n];
-		const aspectType = aspectGrands[n];
+		const t = thresholdGrands[n]!;
+		const aspectType = aspectGrands[n]!;
 
 		for (const subset of combinations(nodes, n)) {
-			const positionsSubset = subset.map(node => positions.get(node));
+			const positionsSubset = subset.map(node => positions.get(node)!);
 			const error = minEmDistanceToRegular(positionsSubset, n);
 			const quantile = findQuantile(error, n);
 			if (quantile > t) {
@@ -207,7 +178,7 @@ export function findAspects(
 					}
 				}
 				if ( n == 6 ) {
-					const [n1, n2, n3, n4, n5, n6] = subset.sort((na, nb) => positions.get(na) - positions.get(nb))
+					const [n1, n2, n3, n4, n5, n6] = subset.sort((na, nb) => positions.get(na)! - positions.get(nb)!)
 					sextileTrines.add([n1,n3,n5].sort().join("/"));
 					sextileTrines.add([n2,n4,n6].sort().join("/"));
 				}
@@ -248,8 +219,8 @@ export function findAspects(
 			//     might be contraparallel. compare pi-
 			
 			// first check conjunctions (these will never be caught by grand aspect pairs)
-			const p1 = positions.get(n1);
-			const p2 = positions.get(n2);
+			const p1 = positions.get(n1)!;
+			const p2 = positions.get(n2)!;
 			const d = distance(p1, p2);
 			
 			if (d < PI * (1 - thresholdPairs)) {
@@ -323,88 +294,4 @@ export function findAspects(
 	aspects.sort((a, b) => b.percentile - a.percentile);
 
 	return aspects;
-}
-
-function getLunarNodes(date: Date): {ascending: number, descending: number}{
-	const s = GeoMoonState(date);
-	
-	const r = { x: s.x, y: s.y, z: s.z };
-	const v = { x: s.vx, y: s.vy, z: s.vz };
-	const h = {
-		x: r.y * v.z - r.z * v.y,
-		y: r.z * v.x - r.x * v.z,
-		z: r.x * v.y - r.y * v.x,
-		t: MakeTime(date)
-	};
-	
-	const hEcl = Ecliptic(h).vec; // { x, y, z } in ecliptic frame
-	const omega = Math.atan2(hEcl.x, -hEcl.y) - 15/360*2*Math.PI;
-	const ascending = normalizeAngleRad(omega);
-	const descending = normalizeAngleRad(omega + Math.PI);
-	return { ascending, descending }
-}
-
-function getAxialTilt(date: Date): number {
-	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
-	const eclPole = Ecliptic(vecPole);
-	const obliquity = Math.acos(eclPole.vec.z);
-	return obliquity;
-	
-}
-
-function getAscendant(date: Date, latitudeDeg: number, longitudeDeg: number): number {
-	const gstHours = SiderealTime(date);
-	const lstHours = gstHours + longitudeDeg / 15.0;
-	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
-	const theta = lstHoursNorm * Math.PI / 12
-	
-	const epsRad = getAxialTilt(date);
-		
-	const phi = latitudeDeg * Math.PI/180;
-	
-	const x = Math.cos(theta);
-	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
-	const lambda = normalizeAngleRad(Math.atan2(x,y)-Math.PI/12);
-	return lambda;
-}
-
-export function getNodePositions(date: Date, latitudeDeg: number, longitudeDeg: number): Map<Node, number> {
-	
-	const correctForAberration = true;
-	
-	const nodeAngles = new Map<Node, number>();
-		
-	for ( const [node, body] of Object.entries(NodeToBody)) {
-		const eqj = GeoVector(body, new Date(), correctForAberration)
-		const etc = Ecliptic(eqj);
-		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
-	}
-	
-	const lunarNodes = getLunarNodes(date);
-	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
-	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
-	
-	const ascendant = getAscendant(date, latitudeDeg, longitudeDeg);
-	nodeAngles.set(Node.ASCENDANT, ascendant);
-	
-	return nodeAngles;
-}
-
-export function getNodePositionsWithoutLocation(date: Date): Map<Node, number> {
-	
-	const correctForAberration = true;
-	
-	const nodeAngles = new Map<Node, number>();
-		
-	for ( const [node, body] of Object.entries(NodeToBody)) {
-		const eqj = GeoVector(body, new Date(), correctForAberration)
-		const etc = Ecliptic(eqj);
-		nodeAngles.set(node, (etc.elon-15)/360*2*Math.PI);
-	}
-	
-	const lunarNodes = getLunarNodes(date);
-	nodeAngles.set(Node.LUNAR_ASCENDING, lunarNodes.ascending);
-	nodeAngles.set(Node.LUNAR_DESCENDING, lunarNodes.descending);
-	
-	return nodeAngles;
 }

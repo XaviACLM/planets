@@ -59,7 +59,7 @@ import dotSymbol from "./assets/general-symbols/Dot.png"
 
 export { earthSymbol, dotSymbol };
 
-export const nodeShortName: Record<Node, String> = {
+export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
 	[Node.LUNAR_DESCENDING] : "Lunar ▼",
 	[Node.LUNAR_APOGEE] : "Lilith",
@@ -148,7 +148,7 @@ export const nodeSymbols = new Map<Node, string>([
 	[Node.VESTA, vestaSymbol],
 ]);
 
-export const aspectSymbols = new Map<Node, string>([
+export const aspectSymbols = new Map<AspectKind, string>([
 	[AspectKind.GRAND_SEXTILE, grandSextileSymbol],
 	[AspectKind.GRAND_SQUARE, grandSquareSymbol],
 	[AspectKind.GRAND_TRINE, grandTrineSymbol],

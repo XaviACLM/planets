@@ -1,6 +1,4 @@
-import React from "react";
-import { Node, AspectKind, type Aspect } from './aspects.ts';
-
+import { type Aspect } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
@@ -28,7 +26,7 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 						{/* aspect type icon */}
 						<img
 							src={aspectSymbols.get(aspect.kind)}
-							alt={aspect.type}
+							alt={aspect.kind}
 							width={symbolSize}
 							height={symbolSize}
 							className="aspect-icon"

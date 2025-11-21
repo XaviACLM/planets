@@ -1,17 +1,18 @@
-import { useState, useEffect, useRef, FC } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type CityData, CitySearchEngine } from "./CitySearchEngine.ts"
 
 import "./CitySelector.css";
 
 interface CitySelectorProps {
-	onSelect: (city: CityData) => void;
+  startingQueryText: CityData | null;
+  onSelect: (city: CityData) => void;
 }
 
-export function CitySelector({startingQueryText, onSelect}: [CityData | null, CitySelectorProps]) {
+export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps) {
 	const [ query, setQuery ] = useState<string>("");
 	const [ results, setResults ] = useState<CityData[]>([]);
 	const [ isLoading, setIsLoading ] = useState<boolean>(false);
-	const [ selected, setSelected ] = useState<CityData | null>(null);
+	const [ _selected, setSelected ] = useState<CityData | null>(null);
 	const cseRef = useRef<CitySearchEngine|null>(null);
 	
 	useEffect(() => {
@@ -21,7 +22,9 @@ export function CitySelector({startingQueryText, onSelect}: [CityData | null, Ci
 	// 
 	useEffect(() => {
 		if (startingQueryText != null) {
-			setQuery(startingQueryText.cityName+", "+startingQueryText.stateName+", "+startingQueryText.countryName);
+			setQuery([startingQueryText.cityName, startingQueryText.stateName, startingQueryText.countryName]
+			.filter(Boolean)
+			.join(", "));
 		}
 	}, []);
 	
@@ -32,6 +35,7 @@ export function CitySelector({startingQueryText, onSelect}: [CityData | null, Ci
 		}
 		
 		const timeout = setTimeout(async () => {
+			if (!cseRef.current) return;
 			setIsLoading(true);
 			const regex = new RegExp(query + ".*", "i");
 			const res = cseRef.current.searchCities(regex, 5);
@@ -44,7 +48,9 @@ export function CitySelector({startingQueryText, onSelect}: [CityData | null, Ci
 	
 	const handleSelect = (cityData: CityData) => {
 		setSelected(cityData);
-		setQuery(cityData.cityName+", "+cityData.stateName+", "+cityData.countryName);
+		setQuery([cityData.cityName, cityData.stateName, cityData.countryName]
+		.filter(Boolean)
+		.join(", "));
 		setResults([]);
 		onSelect(cityData);
 	};

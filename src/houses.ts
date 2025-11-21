@@ -3,34 +3,35 @@ import { normalizeAngleRad, interpolateAngles } from './util.ts'
 import { Node, type SurfacePosition } from './astroDefs.ts'
 import { computeAxialTilt } from './astro.ts'
 
-import { RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
+import { Vector, RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 
-export interface AxisAngles {
+interface AxisAngles {
 	asc: number;
 	dsc: number;
 	mc: number;
 	ic: number
 }
 
-export enum HouseSystem {
-	WHOLE_SIGN = "Whole Sign",
-	EQUAL_HOUSES = "Equal Houses",
-	PORPHYRY = "Porphyry",
+export const HouseSystem = {
+	WHOLE_SIGN: "Whole Sign",
+	EQUAL_HOUSES: "Equal Houses",
+	PORPHYRY: "Porphyry",
 	
-	KRUSINSKY = "Krusinsky",
-	REGIOMONTANUS = "Regiomontanus",
-	MERIDIAN = "Meridian",
-	MORINUS = "Morinus",
-	CAMPANUS = "Campanus",
-	ZENITH_HORIZONTAL = "Zenith / Horizontal",
+	KRUSINSKY: "Krusinsky",
+	REGIOMONTANUS: "Regiomontanus",
+	MERIDIAN: "Meridian",
+	MORINUS: "Morinus",
+	CAMPANUS: "Campanus",
+	ZENITH_HORIZONTAL: "Zenith / Horizontal",
 	
-	PLACIDUS = "Placidus",
-	TOPOCENTRIC = "Topocentric",
-	KOCH = "Koch",
-	ALCABITIUS = "Alcabitius",
-}
+	PLACIDUS: "Placidus",
+	TOPOCENTRIC: "Topocentric",
+	KOCH: "Koch",
+	ALCABITIUS: "Alcabitius",
+} as const;
+export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];
 
-function computeWholeSignCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeWholeSignCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
 	const idx = Math.floor(angles.asc/(Math.PI/6));
 	return [
 		normalizeAngleRad(idx*Math.PI/6),
@@ -48,7 +49,7 @@ function computeWholeSignCuspPositions(date: Date, surfacePosition: SurfacePosit
 	];
 }
 
-function computeEqualHousesCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeEqualHousesCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
 	return [
 		angles.asc,
 		angles.asc + Math.PI/6,
@@ -65,7 +66,7 @@ function computeEqualHousesCuspPositions(date: Date, surfacePosition: SurfacePos
 	];
 }
 
-function computePorphyryCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computePorphyryCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
 	return [
 		angles.asc,
 		interpolateAngles(1/3, angles.asc, angles.ic),
@@ -89,7 +90,11 @@ function computePorphyryCuspPositions(date: Date, surfacePosition: SurfacePositi
 interface vec3 {
 	x: number;
 	y: number;
-	z: numer
+	z: number
+}
+
+function toAstronomyVector(v: vec3, time: Date = new Date()): Vector {
+    return new Vector(v.x, v.y, v.z, new AstroTime(time));
 }
 
 function normVec(v: vec3): number {
@@ -99,10 +104,6 @@ function normVec(v: vec3): number {
 function normalize(v: vec3): vec3 {
 	const r = normVec(v);
 	return {x:v.x/r, y:v.y/r, z:v.z/r};
-}
-
-function dot(v: vec3, w: vec3): number {
-	return v.x*w.x + v.y*w.y + v.z*w.z;
 }
 
 function flipVec(v: vec3): vec3 {
@@ -121,15 +122,15 @@ function cardinalsAndCirclesAndAscDsc(date: Date, surfacePosition: SurfacePositi
 	const astroTime = new AstroTime(date);
 	const obs = new Observer(surfacePosition.latitude, surfacePosition.longitude, 0); //height
 	const rot = Rotation_HOR_EQJ(astroTime, obs);
-	const N = normalize(RotateVector(rot, {x:1, y:0, z:0}));
-	const E = normalize(RotateVector(rot, {x:0, y:1, z:0}));
-	const zenith = normalize(RotateVector(rot, {x:0, y:0, z:1}));
+	const N = normalize(RotateVector(rot, toAstronomyVector({x:1, y:0, z:0})));
+	const E = normalize(RotateVector(rot, toAstronomyVector({x:0, y:1, z:0})));
+	const zenith = normalize(RotateVector(rot, toAstronomyVector({x:0, y:0, z:1})));
 	const S = flipVec(N);
 	const W = flipVec(E);
 	const nadir = flipVec(zenith);
-	const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), {x:0, y:0, z:1}));
+	const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), toAstronomyVector({x:0, y:0, z:1})));
 	const ecN = ecliptic;
-	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),{x:0, y:0, z:1}));
+	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),toAstronomyVector({x:0, y:0, z:1})));
 	const eqN = equator;
 	const primeVertical = N;
 	const meridian = E;
@@ -158,13 +159,13 @@ function projectPoint(q: vec3, circle: vec3, center: vec3): vec3 {
 	return intersection;
 }
 
-function projectPoints(qs: Vec3[], circle: vec3, center: vec3): vec3[] {
+function projectPoints(qs: vec3[], circle: vec3, center: vec3): vec3[] {
 	return qs.map(q => projectPoint(q, circle, center));
 }
 
 function computeEclipticAngle(p: vec3): number {
 	const rot = Rotation_EQJ_ECL();
-	const v = RotateVector(rot, p);
+	const v = RotateVector(rot, toAstronomyVector(p));
 	const alpha = Math.atan2(v.y, v.x);
 	return normalizeAngleRad(alpha);
 }
@@ -196,37 +197,37 @@ function computeSpaceBasedSystemCuspPositions(
 // I am not completely sure about all that follow
 // descriptions for them are rather sparse, and i strongly suspect some secondary sources are inaccurate
 // one day - maybe - i will look for primary sources on these
-function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {asc, eqN, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const krusinskyCircle = normalize(cross(asc, zenith));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, krusinskyCircle, asc, eqN);
 }
 
-function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {N, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
 }
 
-function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
 }
 
-function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {ecN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, ecN);
 }
 
-function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {N, meridian, primeVertical} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, primeVertical));
-	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, primeVertical, intersection, N);
 }
 
-function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
 	const {horizon, meridian, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, horizon));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, horizon, intersection, zenith);
@@ -246,7 +247,7 @@ function raToEcliptic(ra: number, date: Date): number {
     return Math.atan2( Math.sin(ra) / Math.cos(epsilon), Math.cos(ra));
 }
 
-function interpolateRAByTime(f: number,raStart: number,raEnd: number,latitude: number,date: Date): number {
+function interpolateRAByTime(f: number, raStart: number, raEnd: number, _latitude: number, _date: Date): number {
 	//TODO this is unfinished, currently equiv to porphyrius. Need to finish this function (the hard part) for time-based
     let delta = raEnd - raStart;
     delta = ((delta + Math.PI) % (2 * Math.PI)) - Math.PI;
@@ -278,24 +279,24 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 }
 
 
-function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
 	return [1,2,3,4,5,6,7,8,9,10,11,12];
 }
 
-function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeKochCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
 	return [1,2,3,4,5,6,7,8,9,10,11,12];
 }
 
-function computeAlcabitiusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeAlcabitiusCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
 	return [1,2,3,4,5,6,7,8,9,10,11,12];
 }
 
-export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[12]{
+export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[]{
 	const angles = {
-		asc: knownNodes.get(Node.ASCENDANT),
-		dsc: knownNodes.get(Node.DESCENDANT),
-		mc: knownNodes.get(Node.MIDHEAVEN),
-		ic: knownNodes.get(Node.IMUM_COELI)
+		asc: knownNodes.get(Node.ASCENDANT)!,
+		dsc: knownNodes.get(Node.DESCENDANT)!,
+		mc: knownNodes.get(Node.MIDHEAVEN)!,
+		ic: knownNodes.get(Node.IMUM_COELI)!
 	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
@@ -325,6 +326,6 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 		case HouseSystem.ALCABITIUS:
 			return computeAlcabitiusCuspPositions(date, surfacePosition, angles);
 		default:
-			console.log("something wrong with house computation dispatch:", houseSystem);
+			throw new Error("something wrong with house computation dispatch:", houseSystem);
 	}
 }
