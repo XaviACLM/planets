@@ -1,0 +1,1 @@
+Everything in project_txts, scripts or src is CC BY-NC 4.0 - see [here](https://creativecommons.org/licenses/by-nc/4.0/).
