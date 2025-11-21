@@ -138,7 +138,7 @@ function App() {
 									onChange={() => setShowLabels(!showLabels)}
 									id="show-labels"
 								/>
-								<label htmlFor="rotate-symbols">Show labels</label>
+								<label htmlFor="show-labels">Show labels</label>
 							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
@@ -149,7 +149,7 @@ function App() {
 									onChange={() => setFlipText(!flipText)}
 									id="flip-text"
 								/>
-								<label htmlFor="rotate-symbols">Keep text right-side-up</label>
+								<label htmlFor="flip-text">Keep text right-side-up</label>
 							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
@@ -160,7 +160,7 @@ function App() {
 									onChange={() => setHousePresweep(!housePresweep)}
 									id="pre-sweep"
 								/>
-								<label htmlFor="rotate-symbols">House pre-sweep</label>
+								<label htmlFor="pre-sweep">House pre-sweep</label>
 							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
@@ -213,7 +213,7 @@ function App() {
 							</div>
 							<hr/>
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-							<span>Hode</span>
+							<span>Mode</span>
 								<select
 									value={selectedAstrologyMode}
 									onChange={(e) => setSelectedAstrologyMode(e.target.value)}

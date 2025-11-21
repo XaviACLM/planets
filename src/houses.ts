@@ -221,10 +221,9 @@ function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePositio
 }
 
 function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
-	// as described, identical to meridian
-	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
-	const intersection = normalize(cross(meridian, equator));
-	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
+	const {N, meridian, primeVertical} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const intersection = normalize(cross(meridian, primeVertical));
+	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
 }
 
 function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
