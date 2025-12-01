@@ -79,12 +79,25 @@ export function normalizeAngleDeg(a: number) {
 }
 
 export function interpolateAngles(coeff:number, a1: number, a2: number) {
-	// goes a1 -> a2, coeff 0 -> 1
+	// goes a1 -> a2, increasing, as coeff 0 -> 1
 	// assumes a1 and a2 are already normalized
 	if (a1 < a2) {
 		return (1-coeff) * a1 + coeff * a2 
 	} else {
 		return normalizeAngleRad((1-coeff) * a1 + coeff * (a2 + 2*Math.PI)); 
+	}
+}
+
+export function interpolateShorterAngle(coeff:number, a1: number, a2: number) {
+	// goes a1 -> a2, on whichever side is shorterst, coeff 0 -> 1
+	// assumes a1 and a2 are already normalized
+	const diff = normalizeAngleRad(a2-a1);
+	if (diff < Math.PI) {
+		// increasing direction
+		return normalizeAngleRad(a1 + coeff*diff);
+	} else {
+		// decreasing direction
+		return normalizeAngleRad(a1 - coeff*(2*Math.PI - diff));
 	}
 }
 

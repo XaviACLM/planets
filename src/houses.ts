@@ -1,9 +1,9 @@
-import { normalizeAngleRad, interpolateAngles } from './util.ts'
+import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle } from './util.ts'
 
 import { Node, type SurfacePosition } from './astroDefs.ts'
 import { computeAxialTilt } from './astro.ts'
 
-import { Vector, RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, AstroTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
+import { Vector, RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, Rotation_EQJ_ECT, Rotation_ECT_EQJ, AstroTime, SiderealTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 
 interface AxisAngles {
 	asc: number;
@@ -128,7 +128,8 @@ function cardinalsAndCirclesAndAscDsc(date: Date, surfacePosition: SurfacePositi
 	const S = flipVec(N);
 	const W = flipVec(E);
 	const nadir = flipVec(zenith);
-	const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), toAstronomyVector({x:0, y:0, z:1})));
+	//const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), toAstronomyVector({x:0, y:0, z:1})));
+	const ecliptic = normalize(RotateVector(Rotation_ECT_EQJ(astroTime), toAstronomyVector({x:0, y:0, z:1})));
 	const ecN = ecliptic;
 	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),toAstronomyVector({x:0, y:0, z:1})));
 	const eqN = equator;
@@ -235,49 +236,136 @@ function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: Surfa
 
 
 // time-based
-
-
-function eclipticToRA(eclipticLongitude: number, date: Date): number {
-	const epsilon = computeAxialTilt(date);
-    return Math.atan2(Math.sin(eclipticLongitude) * Math.cos(epsilon), Math.cos(eclipticLongitude));
+function eclipticLongitudeToRAAndDeclination(longitude: number, axialTilt: number){
+	// formula transparent, makes sense
+	const RA = Math.atan2(Math.sin(longitude)*Math.cos(axialTilt), Math.cos(longitude));
+	const declination = Math.asin(Math.sin(axialTilt)*Math.sin(longitude));
+	return {RA, declination}
 }
 
-function raToEcliptic(ra: number, date: Date): number {
-    const epsilon = computeAxialTilt(date);
-    return Math.atan2( Math.sin(ra) / Math.cos(epsilon), Math.cos(ra));
+// returns radians as a unit of time (2pi = 24hr)
+function timeToHorizon(pointRA: number, pointDeclination: number, RAMC: number, observerLatitude: number): number | null{
+	
+	const cosAD = -Math.tan(observerLatitude * Math.PI / 180)*Math.tan(pointDeclination);
+	if ( Math.abs(cosAD) > 1 ) {
+		return null;
+	}
+	const TAU = 2*Math.PI;
+	const AD = Math.acos(cosAD); //hour angle btw observer (=MC=meridian) and (point-on-the-same-latitude-as-point)-on-the-horizon
+	const H = RAMC - pointRA; // point H off the meridian (=observer)
+	const adjH = ((H + AD)%TAU+TAU)%TAU - AD; // mod 2pi conjugated by -AD -> mod but maps to (-AD, TAU-AD)
+	if (adjH <= AD) {
+		return AD - adjH;
+	} else {
+		return TAU - AD - adjH;
+	}
 }
 
-function interpolateRAByTime(f: number, raStart: number, raEnd: number, _latitude: number, _date: Date): number {
-	//TODO this is unfinished, currently equiv to porphyrius. Need to finish this function (the hard part) for time-based
-    let delta = raEnd - raStart;
-    delta = ((delta + Math.PI) % (2 * Math.PI)) - Math.PI;
-    return raStart + f * delta;
+// returns radians as a unit of time (2pi = 24hr)
+function timeSinceHorizon(pointRA: number, pointDeclination: number, RAMC: number, observerLatitude: number): number | null{
+	
+	const cosAD = -Math.tan(observerLatitude * Math.PI / 180)*Math.tan(pointDeclination);
+	if ( Math.abs(cosAD) > 1 ) {
+		return null;
+	}
+	const TAU = 2*Math.PI;
+	const AD = Math.acos(cosAD); //hour angle btw observer (=MC=meridian) and (point-on-the-same-latitude-as-point)-on-the-horizon
+	const H = RAMC - pointRA; // point H off the meridian (=observer)
+	const adjH = ((H + AD)%TAU+TAU)%TAU - AD; // mod 2pi conjugated by -AD -> mod but maps to (-AD, TAU-AD)
+	if (adjH <= AD) {
+		return AD + adjH;
+	} else {
+		return adjH - AD;
+	}
+}
+
+// returns radians as a unit of time (2pi = 24hr)
+function timeToMeridian(pointRA: number, RAMC: number): number{
+	const H = RAMC - pointRA;
+	return Math.PI-((H)%Math.PI+Math.PI)%Math.PI // pi - (h mod pi)
+}
+
+export const MainAxisArc = {
+	ASC_TO_MC: "Asc to MC",
+	DSC_TO_MC: "Dsc to MC",
+	ASC_TO_IC: "Asc to IC",
+	DSC_TO_IC: "Dsc to IC",
+} as const;
+export type MainAxisArc = typeof MainAxisArc[keyof typeof MainAxisArc];
+
+function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number, angles: AxisAngles, mode: MainAxisArc, c: number): number { 
+	const { asc, mc, dsc, ic } = angles;
+	const { RA: RAASC, declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
+	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
+	const start = [MainAxisArc.ASC_TO_IC, MainAxisArc.ASC_TO_MC].includes(mode) ? asc : dsc;
+	const end = [MainAxisArc.ASC_TO_MC, MainAxisArc.DSC_TO_MC].includes(mode) ? mc : ic;
+	var x = interpolateShorterAngle(c, start, end);
+	var y = x - 2*eps;
+	function f(eclLon: number): number{
+		const { RA, declination } = eclipticLongitudeToRAAndDeclination(eclLon, axialTilt);
+		var tsh, tth, ttm, tsm;
+		switch (mode){
+			case MainAxisArc.ASC_TO_MC:	
+				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
+				ttm = timeToMeridian(RA, RAMC);
+				return (1-c)*tsh - c*ttm;
+			case MainAxisArc.DSC_TO_MC:
+				tth = timeToHorizon(RA, declination, RAMC, obsLatitude);
+				tsm = Math.PI-timeToMeridian(RA, RAMC);
+				return (1-c)*tth - c*tsm;
+			case MainAxisArc.ASC_TO_IC:	
+				tth = timeToHorizon(RA, declination, RAMC, obsLatitude);
+				tsm = Math.PI-timeToMeridian(RA, RAMC);
+				return (1-c)*tth - c*tsm;
+			case MainAxisArc.DSC_TO_IC:	
+				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
+				ttm = timeToMeridian(RA, RAMC);
+				return (1-c)*tsh - c*ttm;
+		}
+	}
+	var fx = f(x);
+	var fy = f(y);
+	var z = 0;
+	var fz = 0;
+	// TODO exit if null or takes too many iterations
+	// + update the logic all the way up the chain st house system can be null
+	while ( Math.abs(x - y) > 1e-10 ) {
+		z = y - fy*(x-y)/(fx-fy); // secant
+		fz = f(z);
+		//console.log(z, fz);
+		if ( Math.abs(fz) < 1e-10 ) {
+			x = y;//exit
+		} else if ( Math.abs(fx) > Math.abs(fy) ) {
+			x = z;
+			fx = fz;
+		} else {
+			y = z;
+			fy = fz;
+		}
+	}
+	return z;
 }
 
 function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] {
-	const { asc, mc, dsc, ic } = angles;
-
-	const raAsc = eclipticToRA(asc, date);
-	const raMC = eclipticToRA(mc, date);
-	const raIC = eclipticToRA(ic, date);
-	const raDsc = eclipticToRA(dsc, date);
-
+	// note: some people claim asc is midpoint, timewise, btw asc-dsc. This would simplify calculations but it's false
+	const axialTilt = computeAxialTilt(date);
+	const eps = 0.01;
+	
 	return [
-		asc,
-		raToEcliptic(interpolateRAByTime(2/3, raIC, raAsc, surfacePosition.latitude, date), date),
-		raToEcliptic(interpolateRAByTime(1/3, raIC, raAsc, surfacePosition.latitude, date), date),
-		ic,
-		raToEcliptic(interpolateRAByTime(2/3, raDsc, raIC, surfacePosition.latitude, date), date),
-		raToEcliptic(interpolateRAByTime(1/3, raDsc, raIC, surfacePosition.latitude, date), date),
-		dsc,
-		raToEcliptic(interpolateRAByTime(2/3, raMC, raDsc, surfacePosition.latitude, date), date),
-		raToEcliptic(interpolateRAByTime(1/3, raMC, raDsc, surfacePosition.latitude, date), date),
-		mc,
-		raToEcliptic(interpolateRAByTime(2/3, raAsc, raMC, surfacePosition.latitude, date), date),
-		raToEcliptic(interpolateRAByTime(1/3, raAsc, raMC, surfacePosition.latitude, date), date),
+		angles.asc,
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_IC, 1/3),
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_IC, 2/3),
+		angles.ic,
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.DSC_TO_IC, 2/3),
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.DSC_TO_IC, 1/3),
+		angles.dsc,
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.DSC_TO_MC, 1/3),
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.DSC_TO_MC, 2/3),
+		angles.mc,
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 2/3),
+		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 1/3)
 	];
 }
-
 
 function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
 	return [1,2,3,4,5,6,7,8,9,10,11,12];

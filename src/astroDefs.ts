@@ -77,6 +77,20 @@ export const Node = {
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 
+export const innerPlanets: Node[] = [
+	Node.MERCURY,
+	Node.VENUS,
+	Node.EARTH,
+	Node.MARS,
+]
+
+export const outerPlanets: Node[] = [
+	Node.MERCURY,
+	Node.VENUS,
+	Node.EARTH,
+	Node.MARS,
+]
+
 export const NodeType = {
 	BODY: "Body",
 	POINT: "Point",
