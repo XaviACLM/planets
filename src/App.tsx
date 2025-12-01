@@ -40,6 +40,8 @@ function App() {
 			Node.CERES, Node.ERIS
 		])
 	);
+	
+	//TODO a label if house system undefined for position
 
 	const handleNodeToggle = (node: Node) => {
 		setSelectedNodes(prev => {
@@ -245,6 +247,21 @@ function App() {
 					aspects={aspects}
 					highlightedAspect={highlightedAspect}
 				/>
+				
+				{zodiacPositions.houseSystemUndefinedForPosition() && 
+					<div className="house-system-warning">
+						<span>
+							Selected house system ({selectedHouseSystem}) is not defined for the selected time and location.{" "}
+							<button
+								onClick={() => setSelectedHouseSystem(HouseSystem.TOPOCENTRIC)}
+								className="switch-house-system-button"
+							>
+								Switch to Topocentric
+							</button>
+						</span>
+					</div>
+				}
+				
 			</main>
 			
 			<aside className="sidebar right-sidebar">

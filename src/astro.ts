@@ -417,4 +417,13 @@ export class ZodiacPositions {
 	public getHouseCuspPosition(i: number): number | null{
 		return this._houseCuspPositions?.[i] || null;
 	}
+	
+	public houseSystemUndefinedForPosition(): boolean {
+		// returns true iff a position is specified but the chosen house system is undefined for that date/time
+		return this.surfacePosition !== null && this._houseCuspPositions === null
+	}
+	
+	public houseCuspsAreDefined(): boolean {
+		return this._houseCuspPositions !== null
+	}
 }

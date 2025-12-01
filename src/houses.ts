@@ -307,32 +307,40 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 		switch (mode){
 			case MainAxisArc.ASC_TO_MC:	
 				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
+				if ( tsh === null ) { return null; }
 				ttm = timeToMeridian(RA, RAMC);
 				return (1-c)*tsh - c*ttm;
 			case MainAxisArc.DSC_TO_MC:
 				tth = timeToHorizon(RA, declination, RAMC, obsLatitude);
+				if ( tth === null ) { return null; }
 				tsm = Math.PI-timeToMeridian(RA, RAMC);
 				return (1-c)*tth - c*tsm;
 			case MainAxisArc.ASC_TO_IC:	
 				tth = timeToHorizon(RA, declination, RAMC, obsLatitude);
+				if ( tth === null ) { return null; }
 				tsm = Math.PI-timeToMeridian(RA, RAMC);
 				return (1-c)*tth - c*tsm;
 			case MainAxisArc.DSC_TO_IC:	
 				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
+				if ( tsh === null ) { return null; }
 				ttm = timeToMeridian(RA, RAMC);
 				return (1-c)*tsh - c*ttm;
 		}
 	}
 	var fx = f(x);
 	var fy = f(y);
+	if (fx === null || fy === null) { return null; }
 	var z = 0;
 	var fz = 0;
+	var counter = 0;
+	const max_iter = 100;
 	// TODO exit if null or takes too many iterations
 	// + update the logic all the way up the chain st house system can be null
 	while ( Math.abs(x - y) > 1e-10 ) {
 		z = y - fy*(x-y)/(fx-fy); // secant
 		fz = f(z);
-		//console.log(z, fz);
+		counter++;
+		if ( fz === null || counter >= max_iter ) { return null; }
 		if ( Math.abs(fz) < 1e-10 ) {
 			x = y;//exit
 		} else if ( Math.abs(fx) > Math.abs(fy) ) {
@@ -351,7 +359,7 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 	const axialTilt = computeAxialTilt(date);
 	const eps = 0.01;
 	
-	return [
+	const houseCusps = [
 		angles.asc,
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_IC, 1/3),
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_IC, 2/3),
@@ -365,6 +373,9 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 2/3),
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 1/3)
 	];
+	
+	const containsNull = houseCusps.some(cusp => cusp === null);
+	return containsNull ? null : houseCusps;
 }
 
 function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){

@@ -89,7 +89,7 @@ export function interpolateAngles(coeff:number, a1: number, a2: number) {
 }
 
 export function interpolateShorterAngle(coeff:number, a1: number, a2: number) {
-	// goes a1 -> a2, on whichever side is shorterst, coeff 0 -> 1
+	// goes a1 -> a2, on whichever side is shorter, coeff 0 -> 1
 	// assumes a1 and a2 are already normalized
 	const diff = normalizeAngleRad(a2-a1);
 	if (diff < Math.PI) {

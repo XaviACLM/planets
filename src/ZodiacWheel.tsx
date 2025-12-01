@@ -124,7 +124,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 					if (houseCuspAngles) {
 						if (housePresweep) { a = houseCuspAngles[i] + offset - Math.PI/36 // 5 degree presweep
 						} else { a = houseCuspAngles[i] + offset; }
-					} else { a = (i/12) * 2 * Math.PI - offset; }
+					} else { a = (i/12) * 2 * Math.PI - offset + siderealOffset + 0.028; } // ?
 					return (
 						<line
 							key={i}
@@ -140,7 +140,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				})}
 				
 				{/*House presweep line*/}
-				{ housePresweep && zodiacPositions.hasSurfacePosition() &&
+				{ housePresweep && zodiacPositions.houseCuspsAreDefined() &&
 					Array.from({ length: 12 }).map((_, i) => {
 						const a = houseCuspAngles![i] + offset;
 						return (
@@ -159,7 +159,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 				}
 				
 				{/*House cusp labels*/}
-				{zodiacPositions.hasSurfacePosition() &&
+				{zodiacPositions.houseCuspsAreDefined() &&
 					Array.from({ length: 12 }).map((_, i) => {
 						const a = houseCuspAngles![i] + offset;
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
