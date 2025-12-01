@@ -1,7 +1,7 @@
 import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle } from './util.ts'
 
 import { Node, type SurfacePosition } from './astroDefs.ts'
-import { computeAxialTilt } from './astro.ts'
+import { computeAxialTilt, computeAscendantAndDescendant } from './astro.ts'
 
 import { Vector, RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, Rotation_EQJ_ECT, Rotation_ECT_EQJ, AstroTime, SiderealTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
 
@@ -334,8 +334,6 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 	var fz = 0;
 	var counter = 0;
 	const max_iter = 100;
-	// TODO exit if null or takes too many iterations
-	// + update the logic all the way up the chain st house system can be null
 	while ( Math.abs(x - y) > 1e-10 ) {
 		z = y - fy*(x-y)/(fx-fy); // secant
 		fz = f(z);
@@ -355,7 +353,9 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 }
 
 function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] {
-	// note: some people claim asc is midpoint, timewise, btw asc-dsc. This would simplify calculations but it's false
+	// 12th cusp is the point along the ecliptic which is 1/3rd of the way, time-wise, from the ascendant to the mc
+	
+	// note: some people claim asc is midpoint, timewise, btw asc-dsc. This would simplify calculations but it is false
 	const axialTilt = computeAxialTilt(date);
 	const eps = 0.01;
 	
@@ -378,11 +378,59 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 	return containsNull ? null : houseCusps;
 }
 
-function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
-	return [1,2,3,4,5,6,7,8,9,10,11,12];
+function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	//consider the time it took the current mc to arrive there from the horizon. 12th house is the 1/3rd point (time-wise)
+	
+	// setup
+	const axialTilt = computeAxialTilt(date);	
+	const { asc, mc, dsc, ic } = angles;
+	
+	//first quadrant
+	// how long did the current mc take to arrive from the horizon?
+	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
+	const tshRadMC = timeSinceHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
+	const tshHoursMC = tshRadMC * 12 / Math.PI;
+	
+	const date11th = new Date(date.getTime() - tshHoursMC*(2/3)*3600*1000)
+	const date12th = new Date(date.getTime() - tshHoursMC*(1/3)*3600*1000)
+	const cusp11 = computeAscendantAndDescendant(date11th, surfacePosition).get(Node.ASCENDANT)!;
+	const cusp12 = computeAscendantAndDescendant(date12th, surfacePosition).get(Node.ASCENDANT)!;
+	
+	//second quadrant
+	// how long will the current mc take to get to the horizon again?
+	const tthRadMC = timeToHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
+	const tthHoursMC = tthRadMC* 12 / Math.PI;
+	
+	const date8th = new Date(date.getTime() + tthHoursMC*(1/3)*3600*1000)
+	const date9th = new Date(date.getTime() + tthHoursMC*(2/3)*3600*1000)
+	const cusp8 = computeAscendantAndDescendant(date8th, surfacePosition).get(Node.DESCENDANT)!;
+	const cusp9 = computeAscendantAndDescendant(date9th, surfacePosition).get(Node.DESCENDANT)!;
+	
+	//third quadrant
+	// how long did the current ic take to arrive from the horizon?
+	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
+	const tshRadIC = timeSinceHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
+	const tshHoursIC = tshRadIC* 12 / Math.PI;
+	
+	const date5th = new Date(date.getTime() - tshHoursIC*(2/3)*3600*1000)
+	const date6th = new Date(date.getTime() - tshHoursIC*(1/3)*3600*1000)
+	const cusp5 = computeAscendantAndDescendant(date5th, surfacePosition).get(Node.DESCENDANT)!;
+	const cusp6 = computeAscendantAndDescendant(date6th, surfacePosition).get(Node.DESCENDANT)!;
+	
+	//fourth quadrant
+	// how long will the current ic take to get to the horizon again?
+	const tthRadIC = timeToHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
+	const tthHoursIC = tthRadIC* 12 / Math.PI;
+	
+	const date2nd = new Date(date.getTime() + tthHoursIC*(1/3)*3600*1000)
+	const date3rd = new Date(date.getTime() + tthHoursIC*(2/3)*3600*1000)
+	const cusp2 = computeAscendantAndDescendant(date2nd, surfacePosition).get(Node.ASCENDANT)!;
+	const cusp3 = computeAscendantAndDescendant(date3rd, surfacePosition).get(Node.ASCENDANT)!;
+				
+	return [asc, cusp2, cusp3, ic, cusp5, cusp6, dsc, cusp8, cusp9, mc, cusp11, cusp12];
 }
 
-function computeKochCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
 	return [1,2,3,4,5,6,7,8,9,10,11,12];
 }
 

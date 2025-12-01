@@ -157,7 +157,7 @@ function computeMCIC(date: Date, surfacePos: SurfacePosition): Map<Node, number>
 	]);
 }
 
-function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
+export function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
 	const latitudeDeg = surfacePos.latitude;
 	const longitudeDeg = surfacePos.longitude;
 	const gstHours = SiderealTime(date);
