@@ -34,13 +34,16 @@ export const HouseSystem = {
 } as const;
 export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];
 
-function computeWholeSignCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
-	const idx = Math.floor(angles.asc/(Math.PI/6));
+function computeWholeSignCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles, siderealOffset: number){
+	// TODO wrong, doesn't fit with ayanamsa
+	const idx = Math.floor((angles.asc - siderealOffset)/(Math.PI/6));
+	console.log(siderealOffset);
 	return [
-		normalizeAngleRad(idx*Math.PI/6),
-		normalizeAngleRad((idx+1)*Math.PI/6),
-		normalizeAngleRad((idx+2)*Math.PI/6),
-		normalizeAngleRad((idx+3)*Math.PI/6),
+		normalizeAngleRad(idx*Math.PI/6 + siderealOffset),
+		//normalizeAngleRad(idx*Math.PI/6),
+		normalizeAngleRad((idx+1)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+2)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+3)*Math.PI/6 + siderealOffset),
 		normalizeAngleRad((idx+4)*Math.PI/6),
 		normalizeAngleRad((idx+5)*Math.PI/6),
 		normalizeAngleRad((idx+6)*Math.PI/6),
@@ -481,7 +484,7 @@ function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePos
 	]
 }
 
-export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[]{
+export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>, siderealOffset: number): number[]{
 	const angles = {
 		asc: knownNodes.get(Node.ASCENDANT)!,
 		dsc: knownNodes.get(Node.DESCENDANT)!,
@@ -490,7 +493,7 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
-			return computeWholeSignCuspPositions(date, surfacePosition, angles);
+			return computeWholeSignCuspPositions(date, surfacePosition, angles, siderealOffset);
 		case HouseSystem.EQUAL_HOUSES:
 			return computeEqualHousesCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.PORPHYRY:

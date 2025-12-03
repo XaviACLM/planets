@@ -331,7 +331,7 @@ export class ZodiacPositions {
 			this._houseCuspPositions = config.houseCuspPositions || null;
 		} else if (this.surfacePosition !== null) {
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode);
-			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions);
+			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions, this.siderealOffset);
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
 			this._houseCuspPositions = null;
@@ -383,7 +383,7 @@ export class ZodiacPositions {
 			return this;
 		}
 		const newHouseCuspPositions = this.surfacePosition ? 
-			computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions)
+			computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions, this.siderealOffset)
 			: null;
 		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
 	}
