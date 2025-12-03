@@ -21,6 +21,8 @@ export const HouseSystem = {
 	WHOLE_SIGN: "Whole Sign",
 	EQUAL_HOUSES: "Equal Houses",
 	PORPHYRY: "Porphyry",
+	EQUAL_HOUSES_VEHLOW: "Equal Houses - Vehlow",
+	WHOLE_SIGN_ARIES: "Whole Sign - Aries",
 	
 	KRUSINSKY: "Krusinsky",
 	REGIOMONTANUS: "Regiomontanus",
@@ -34,28 +36,30 @@ export const HouseSystem = {
 } as const;
 export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];
 
-function computeWholeSignCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles, siderealOffset: number){
-	// TODO wrong, doesn't fit with ayanamsa
+export const AyanamsaDependantHouseSystems: HouseSystem[] = [
+	HouseSystem.WHOLE_SIGN,
+	HouseSystem.WHOLE_SIGN_ARIES,
+];
+
+function computeWholeSignCuspPositions(angles: AxisAngles, siderealOffset: number){
 	const idx = Math.floor((angles.asc - siderealOffset)/(Math.PI/6));
-	console.log(siderealOffset);
 	return [
 		normalizeAngleRad(idx*Math.PI/6 + siderealOffset),
-		//normalizeAngleRad(idx*Math.PI/6),
 		normalizeAngleRad((idx+1)*Math.PI/6 + siderealOffset),
 		normalizeAngleRad((idx+2)*Math.PI/6 + siderealOffset),
 		normalizeAngleRad((idx+3)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+4)*Math.PI/6),
-		normalizeAngleRad((idx+5)*Math.PI/6),
-		normalizeAngleRad((idx+6)*Math.PI/6),
-		normalizeAngleRad((idx+7)*Math.PI/6),
-		normalizeAngleRad((idx+8)*Math.PI/6),
-		normalizeAngleRad((idx+9)*Math.PI/6),
-		normalizeAngleRad((idx+10)*Math.PI/6),
-		normalizeAngleRad((idx+11)*Math.PI/6),
+		normalizeAngleRad((idx+4)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+5)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+6)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+7)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+8)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+9)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+10)*Math.PI/6 + siderealOffset),
+		normalizeAngleRad((idx+11)*Math.PI/6 + siderealOffset),
 	];
 }
 
-function computeEqualHousesCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeEqualHousesCuspPositions(angles: AxisAngles){
 	return [
 		angles.asc,
 		angles.asc + Math.PI/6,
@@ -72,7 +76,7 @@ function computeEqualHousesCuspPositions(_date: Date, _surfacePosition: SurfaceP
 	];
 }
 
-function computePorphyryCuspPositions(_date: Date, _surfacePosition: SurfacePosition, angles: AxisAngles){
+function computePorphyryCuspPositions(angles: AxisAngles){
 	return [
 		angles.asc,
 		interpolateAngles(1/3, angles.asc, angles.ic),
@@ -86,6 +90,41 @@ function computePorphyryCuspPositions(_date: Date, _surfacePosition: SurfacePosi
 		angles.mc,
 		interpolateAngles(1/3, angles.mc, angles.asc),
 		interpolateAngles(2/3, angles.mc, angles.asc),
+	];
+}
+
+function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
+	return [
+		angles.asc + (-1)*Math.PI/12,
+		angles.asc + 1*Math.PI/12,
+		angles.asc + 3*Math.PI/12,
+		angles.asc + 5*Math.PI/12,
+		angles.asc + 7*Math.PI/12,
+		angles.asc + 9*Math.PI/12,
+		angles.asc + 11*Math.PI/12,
+		angles.asc + 13*Math.PI/12,
+		angles.asc + 15*Math.PI/12,
+		angles.asc + 17*Math.PI/12,
+		angles.asc + 19*Math.PI/12,
+		angles.asc + 21*Math.PI/12,
+	];
+}
+
+function computeWholeSignAriesCuspPositions(angles: AxisAngles, siderealOffset: number){
+	const idx = Math.floor((angles.asc - siderealOffset)/(Math.PI/6));
+	return [
+		normalizeAngleRad(siderealOffset),
+		normalizeAngleRad(1*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(2*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(3*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(4*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(5*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(6*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(7*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(8*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(9*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(10*Math.PI/6 + siderealOffset),
+		normalizeAngleRad(11*Math.PI/6 + siderealOffset),
 	];
 }
 
@@ -134,7 +173,6 @@ function cardinalsAndCirclesAndAscDsc(date: Date, surfacePosition: SurfacePositi
 	const S = flipVec(N);
 	const W = flipVec(E);
 	const nadir = flipVec(zenith);
-	//const ecliptic = normalize(RotateVector(Rotation_ECL_EQJ(), toAstronomyVector({x:0, y:0, z:1})));
 	const ecliptic = normalize(RotateVector(Rotation_ECT_EQJ(astroTime), toAstronomyVector({x:0, y:0, z:1})));
 	const ecN = ecliptic;
 	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),toAstronomyVector({x:0, y:0, z:1})));
@@ -204,37 +242,37 @@ function computeSpaceBasedSystemCuspPositions(
 // I am not completely sure about all that follow
 // descriptions for them are rather sparse, and i strongly suspect some secondary sources are inaccurate
 // one day - maybe - i will look for primary sources on these
-function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {asc, eqN, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const krusinskyCircle = normalize(cross(asc, zenith));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, krusinskyCircle, asc, eqN);
 }
 
-function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {N, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
 }
 
-function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
 }
 
-function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {ecN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, ecN);
 }
 
-function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {N, meridian, primeVertical} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, primeVertical));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, primeVertical, intersection, N);
 }
 
-function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition, _angles: AxisAngles){
+function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {horizon, meridian, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
 	const intersection = normalize(cross(meridian, horizon));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, horizon, intersection, zenith);
@@ -493,23 +531,27 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
-			return computeWholeSignCuspPositions(date, surfacePosition, angles, siderealOffset);
+			return computeWholeSignCuspPositions(angles, siderealOffset);
 		case HouseSystem.EQUAL_HOUSES:
-			return computeEqualHousesCuspPositions(date, surfacePosition, angles);
+			return computeEqualHousesCuspPositions(angles);
 		case HouseSystem.PORPHYRY:
-			return computePorphyryCuspPositions(date, surfacePosition, angles);
+			return computePorphyryCuspPositions(angles);
+		case HouseSystem.EQUAL_HOUSES_VEHLOW:
+			return computeEqualHousesVehlowCuspPositions(angles);
+		case HouseSystem.WHOLE_SIGN_ARIES:
+			return computeWholeSignAriesCuspPositions(angles, siderealOffset);
 		case HouseSystem.KRUSINSKY:
-			return computeKrusinskyCuspPositions(date, surfacePosition, angles);
+			return computeKrusinskyCuspPositions(date, surfacePosition);
 		case HouseSystem.REGIOMONTANUS:
-			return computeRegiomontanusCuspPositions(date, surfacePosition, angles);
+			return computeRegiomontanusCuspPositions(date, surfacePosition);
 		case HouseSystem.MERIDIAN:
-			return computeMeridianCuspPositions(date, surfacePosition, angles);
+			return computeMeridianCuspPositions(date, surfacePosition);
 		case HouseSystem.MORINUS:
-			return computeMorinusCuspPositions(date, surfacePosition, angles);
+			return computeMorinusCuspPositions(date, surfacePosition);
 		case HouseSystem.CAMPANUS:
-			return computeCampanusCuspPositions(date, surfacePosition, angles);
+			return computeCampanusCuspPositions(date, surfacePosition);
 		case HouseSystem.ZENITH_HORIZONTAL:
-			return computeZenithHorizontalCuspPositions(date, surfacePosition, angles);
+			return computeZenithHorizontalCuspPositions(date, surfacePosition);
 		case HouseSystem.PLACIDUS:
 			return computePlacidusCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.KOCH:

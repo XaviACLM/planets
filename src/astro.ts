@@ -1,7 +1,7 @@
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
 
 import { normalizeAngleRad } from './util.ts'
-import { computeHouseCuspPositions, HouseSystem } from './houses.ts'
+import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { nodeToParams, orbitalLongitude } from './astroSmallObjects.ts'
 import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode } from './astroDefs.ts'
 
@@ -393,7 +393,12 @@ export class ZodiacPositions {
 			return this;
 		}
 		const newSiderealOffset = computeSiderealOffset(this.date, newAstrologyMode);
-		return this.copyWith({astrologyMode: newAstrologyMode, siderealOffset: newSiderealOffset});
+		if (AyanamsaDependantHouseSystems.includes(this.houseSystem) && this.surfacePosition !== null) {
+			const newHouseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions, newSiderealOffset);
+			return this.copyWith({astrologyMode: newAstrologyMode, siderealOffset: newSiderealOffset, houseCuspPositions: newHouseCuspPositions});
+		} else {
+			return this.copyWith({astrologyMode: newAstrologyMode, siderealOffset: newSiderealOffset});
+		}
 	}
 	
 	public hasSurfacePosition(): boolean{
