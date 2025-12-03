@@ -1,4 +1,9 @@
-import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle } from './util.ts'
+// definitions and systems largely sourced from
+// swisseph docs: https://gitea.polonkai.eu/gergely/swe-glib/raw/commit/18b5390a33e7f3eeacf1d2dfc748dbc668414e56/swe/doc/swisseph.pdf
+// astro.com overview: https://www.astro.com/faq/fq_fh_owhouse_i.htm
+// originally - urania trust article: https://www.uraniatrust.org/astrology/astronomy-of-houses
+
+import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle, anglesLieInShortArc } from './util.ts'
 
 import { Node, type SurfacePosition } from './astroDefs.ts'
 import { computeAxialTilt, computeAscendantAndDescendant } from './astro.ts'
@@ -25,9 +30,7 @@ export const HouseSystem = {
 	ZENITH_HORIZONTAL: "Zenith / Horizontal",
 	
 	PLACIDUS: "Placidus",
-	TOPOCENTRIC: "Topocentric",
-	KOCH: "Koch",
-	ALCABITIUS: "Alcabitius",
+	KOCH: "Koch / Birthplace",
 } as const;
 export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];
 
@@ -385,7 +388,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const axialTilt = computeAxialTilt(date);	
 	const { asc, mc, dsc, ic } = angles;
 	
-	//first quadrant
+	// first quadrant
 	// how long did the current mc take to arrive from the horizon?
 	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
 	const tshRadMC = timeSinceHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
@@ -396,7 +399,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp11 = computeAscendantAndDescendant(date11th, surfacePosition).get(Node.ASCENDANT)!;
 	const cusp12 = computeAscendantAndDescendant(date12th, surfacePosition).get(Node.ASCENDANT)!;
 	
-	//second quadrant
+	// second quadrant
 	// how long will the current mc take to get to the horizon again?
 	const tthRadMC = timeToHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
 	const tthHoursMC = tthRadMC* 12 / Math.PI;
@@ -406,7 +409,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp8 = computeAscendantAndDescendant(date8th, surfacePosition).get(Node.DESCENDANT)!;
 	const cusp9 = computeAscendantAndDescendant(date9th, surfacePosition).get(Node.DESCENDANT)!;
 	
-	//third quadrant
+	// third quadrant
 	// how long did the current ic take to arrive from the horizon?
 	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
 	const tshRadIC = timeSinceHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
@@ -417,7 +420,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp5 = computeAscendantAndDescendant(date5th, surfacePosition).get(Node.DESCENDANT)!;
 	const cusp6 = computeAscendantAndDescendant(date6th, surfacePosition).get(Node.DESCENDANT)!;
 	
-	//fourth quadrant
+	// fourth quadrant
 	// how long will the current ic take to get to the horizon again?
 	const tthRadIC = timeToHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
 	const tthHoursIC = tthRadIC* 12 / Math.PI;
@@ -430,12 +433,52 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	return [asc, cusp2, cusp3, ic, cusp5, cusp6, dsc, cusp8, cusp9, mc, cusp11, cusp12];
 }
 
-function computeTopocentricCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
-	return [1,2,3,4,5,6,7,8,9,10,11,12];
+function computePolichPageCusp(c: number, p1: number, p2: number, tp1: number, tp2: number, axialTilt: number): number {
+	const cuspDecl = Math.atan(c * tp1 + (1-c) * tp2);
+	const cuspLongOpt1 = Math.asin(Math.sin(cuspDecl)/Math.sin(axialTilt));
+	const cuspLongOpt2 = (cuspLongOpt1 > 0 ? Math.PI : -Math.PI) - cuspLongOpt1;
+	if ( anglesLieInShortArc(p1, cuspLongOpt1, p2) ) {
+		return cuspLongOpt1;
+	} else {
+		return cuspLongOpt2;
+	}
 }
 
-function computeAlcabitiusCuspPositions(_date: Date, _surfacePosition: SurfacePosition, _angles: AxisAngles){
-	return [1,2,3,4,5,6,7,8,9,10,11,12];
+// TODO works, but is not close to placidus. Are some of the calculations wrong?
+// ugh... another serious release blocker
+// tried three other ways, none worked. see scripts/discarded.ts
+// we'll just remove this from the options for now.
+function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+	// polich - page. Consider the "polar elevation" of the asc-mc, i.e. its geographic latitude
+	// consider tangents, trisect interval, invert over the ecliptic.
+	
+	const axialTilt = computeAxialTilt(date);	
+	const { asc, mc, dsc, ic } = angles;
+	
+	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
+	const { RA: RAASC, declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
+	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
+	const { RA: RADSC, declination: declinationDSC } = eclipticLongitudeToRAAndDeclination(dsc, axialTilt);
+	
+	const tAsc = Math.tan(declinationASC);
+	const tMc = Math.tan(declinationMC);
+	const tDsc = Math.tan(declinationDSC);
+	const tIc = Math.tan(declinationIC);
+	
+	return [
+		asc,
+		computePolichPageCusp(2/3, asc, ic, tAsc, tIc, axialTilt),
+		computePolichPageCusp(1/3, asc, ic, tAsc, tIc, axialTilt),
+		ic,
+		computePolichPageCusp(2/3, ic, dsc, tIc, tDsc, axialTilt),
+		computePolichPageCusp(1/3, ic, dsc, tIc, tDsc, axialTilt),
+		dsc,
+		computePolichPageCusp(2/3, dsc, mc, tDsc, tMc, axialTilt),
+		computePolichPageCusp(1/3, dsc, mc, tDsc, tMc, axialTilt),
+		mc,
+		computePolichPageCusp(2/3, mc, asc, tMc, tAsc, axialTilt),
+		computePolichPageCusp(1/3, mc, asc, tMc, tAsc, axialTilt)
+	]
 }
 
 export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>): number[]{
@@ -466,12 +509,8 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 			return computeZenithHorizontalCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.PLACIDUS:
 			return computePlacidusCuspPositions(date, surfacePosition, angles);
-		case HouseSystem.TOPOCENTRIC:
-			return computeTopocentricCuspPositions(date, surfacePosition, angles);
 		case HouseSystem.KOCH:
 			return computeKochCuspPositions(date, surfacePosition, angles);
-		case HouseSystem.ALCABITIUS:
-			return computeAlcabitiusCuspPositions(date, surfacePosition, angles);
 		default:
 			throw new Error("something wrong with house computation dispatch:", houseSystem);
 	}

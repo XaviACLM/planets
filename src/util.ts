@@ -101,6 +101,19 @@ export function interpolateShorterAngle(coeff:number, a1: number, a2: number) {
 	}
 }
 
+function angleShortDistance(a: number, b: number) {
+	// returns the length of the shorter of the two AB arcs
+	const d = normalizeAngleRad(a-b);
+	const td = d > Math.PI ? 2*Math.PI - d : d;
+	return td;
+}
+
+export function anglesLieInShortArc(a: number, b: number, c:number) {
+	// checks that the AC arc that is <pi contains b, i.e. a->b->c is short
+	const error = angleShortDistance(a, b) + angleShortDistance(b, c) - angleShortDistance(a,c);
+	return error < 1e-10;
+}
+
 export function sawtoothSine(x: number): number{
 	// takes a normalized angle in radians
 	if (x < Math.PI/2) {
