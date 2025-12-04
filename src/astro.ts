@@ -2,8 +2,8 @@ import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector
 
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
-import { smallBodyParams, orbitalLongitude, HamburgSchoolMode, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
-import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode } from './astroDefs.ts'
+import { smallBodyParams, orbitalLongitude, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
+import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode, HamburgSchoolMode } from './astroDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
@@ -266,19 +266,28 @@ function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node,
 	]);
 }
 
-function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+function computeAllNodePositionsWithoutSurfacePosition(
+	date: Date,
+	lunarNodeMode: LunarNodeMode,
+	hamburgSchoolMode: HamburgSchoolMode
+): Map<Node, number>{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
 		...computeSmallObjectPositions(date),
-		...computeHamburgSchoolObjectPositions(date, HamburgSchoolMode.NEELY), //TODO
+		...computeHamburgSchoolObjectPositions(date, hamburgSchoolMode),
 		...computeLunarNodes(date, lunarNodeMode),
 		...computeLunarApogeePerigee(date, lunarNodeMode),
 	]);
 }
 
-function computeAllNodePositions(date: Date, surfacePosition: SurfacePosition, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+function computeAllNodePositions(
+	date: Date,
+	surfacePosition: SurfacePosition,
+	lunarNodeMode: LunarNodeMode,
+	hamburgSchoolMode: HamburgSchoolMode
+): Map<Node, number>{
 	let nodePositions = new Map<Node, number>([
-		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode),
+		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode, hamburgSchoolMode),
 		...computeAscendantAndDescendant(date, surfacePosition),
 		...computeMCIC(date, surfacePosition),
 	]);
@@ -325,6 +334,7 @@ export class ZodiacPositions {
 	public readonly houseSystem: HouseSystem;
 	public readonly siderealOffset: number;
 	public readonly astrologyMode: AstrologyMode;
+	public readonly hamburgSchoolMode: HamburgSchoolMode;
 	
 	constructor( config: ZodiacPositionsConstructorArgs ){
 		this.surfacePosition = config.surfacePosition;
@@ -332,6 +342,7 @@ export class ZodiacPositions {
 		this.lunarNodeMode = config.lunarNodeMode;
 		this.houseSystem = config.houseSystem;
 		this.astrologyMode = config.astrologyMode;
+		this.hamburgSchoolMode = config.hamburgSchoolMode;
 		
 		if (config.siderealOffset) {
 			this.siderealOffset = config.siderealOffset;
@@ -343,10 +354,10 @@ export class ZodiacPositions {
 			this._nodePositions = config.nodePositions;
 			this._houseCuspPositions = config.houseCuspPositions || null;
 		} else if (this.surfacePosition !== null) {
-			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode);
+			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.hamburgSchoolMode);
 			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions, this.siderealOffset);
 		} else {
-			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode);
+			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode, this.hamburgSchoolMode);
 			this._houseCuspPositions = null;
 		}
 	}
@@ -357,13 +368,15 @@ export class ZodiacPositions {
 		lunarNodeMode: LunarNodeMode,
 		houseSystem: HouseSystem,
 		astrologyMode: AstrologyMode,
+		hamburgSchoolMode: HamburgSchoolMode,
 	): ZodiacPositions {
 		return new ZodiacPositions({
 			date,
 			surfacePosition,
 			lunarNodeMode,
 			houseSystem,
-			astrologyMode
+			astrologyMode,
+			hamburgSchoolMode
 		});
 	}
 	
@@ -374,6 +387,7 @@ export class ZodiacPositions {
 			lunarNodeMode: this.lunarNodeMode,
 			houseSystem: this.houseSystem,
 			astrologyMode: this.astrologyMode,
+			hamburgSchoolMode: this.hamburgSchoolMode,
 			nodePositions: this._nodePositions,
 			houseCuspPositions: this._houseCuspPositions,
 			siderealOffset: this.siderealOffset,
@@ -412,6 +426,15 @@ export class ZodiacPositions {
 		} else {
 			return this.copyWith({astrologyMode: newAstrologyMode, siderealOffset: newSiderealOffset});
 		}
+	}
+
+	public changeHamburgSchoolMode(newMode: HamburgSchoolMode): ZodiacPositions{
+		if (newMode == this.hamburgSchoolMode) {
+			return this;
+		}
+		const newHamburgSchoolObjectPositions = computeHamburgSchoolObjectPositions(this.date, newMode);
+		const newNodePositions = new Map<Node, number>([ ...this._nodePositions, ...newHamburgSchoolObjectPositions]);
+		return this.copyWith({hamburgSchoolMode: newMode, nodePositions: newNodePositions});
 	}
 	
 	public hasSurfacePosition(): boolean{

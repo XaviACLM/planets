@@ -95,12 +95,6 @@ export const smallBodyParams: Partial<Record<Node, OrbitParams>> = {
     },
 }
 
-export const HamburgSchoolMode = {
-	WITTE: "Witte/Sieggrün",
-	NEELY: "Neely",
-} as const;
-export type HamburgSchoolMode = typeof HamburgSchoolMode[keyof typeof HamburgSchoolMode];
-
 export const hamburgSchoolParamsNeely: Partial<Record<Node, OrbitParams>> = {
     [Node.CUPIDO]: {
 		e: 0.00460,

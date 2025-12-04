@@ -7,7 +7,7 @@ import NodeSelector from './NodeSelector'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -24,6 +24,7 @@ function App() {
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
+	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
 
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
@@ -63,7 +64,7 @@ function App() {
 	}, [zodiacPositions])
 	
 	useEffect(() => {
-		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
+		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
 	}, [selectedCity, selectedDate])
 	
 	useEffect(() => {
@@ -77,6 +78,11 @@ function App() {
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeAstrologyMode(selectedAstrologyMode));
 	}, [selectedAstrologyMode])
+	
+	useEffect(() => {
+		console.log("balls");
+		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
+	}, [hamburgSchoolMode])
 	
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
@@ -188,6 +194,22 @@ function App() {
 									onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
 								>
 									True
+								</button>
+							</div>
+							<hr/>
+							<div className="toggle-switch">
+								<span>Hamburg school params:</span>
+								<button
+									className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.WITTE ? 'active' : ''}`}
+									onClick={() => setHamburgSchoolMode(HamburgSchoolMode.WITTE)}
+								>
+									Witte
+								</button>
+								<button
+									className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.NEELY ? 'active' : ''}`}
+									onClick={() => setHamburgSchoolMode(HamburgSchoolMode.NEELY)}
+								>
+									Neely
 								</button>
 							</div>
 							<hr/>

@@ -187,3 +187,9 @@ export const LunarNodeMode = {
 	MEAN: "Mean", //meeus
 } as const;
 export type LunarNodeMode = typeof LunarNodeMode[keyof typeof LunarNodeMode];
+
+export const HamburgSchoolMode = {
+	WITTE: "Witte/Sieggrün",
+	NEELY: "Neely",
+} as const;
+export type HamburgSchoolMode = typeof HamburgSchoolMode[keyof typeof HamburgSchoolMode];
