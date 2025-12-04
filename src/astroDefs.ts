@@ -87,6 +87,28 @@ export const Node = {
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 
+export const defaultNodes: Node[] = [
+	Node.SUN,
+	Node.MOON,
+	Node.MERCURY,
+	Node.VENUS,
+	Node.MARS,
+	Node.JUPITER,
+	Node.SATURN,
+	Node.URANUS,
+	Node.NEPTUNE,
+	Node.PLUTO,
+	Node.ASCENDANT,
+	Node.DESCENDANT,
+	Node.MIDHEAVEN,
+	Node.IMUM_COELI,
+	Node.LUNAR_ASCENDING,
+	Node.LUNAR_APOGEE,
+	Node.PART_OF_FORTUNE,
+	Node.CERES,
+	Node.ERIS
+]
+
 export const innerPlanets: Node[] = [
 	Node.MERCURY,
 	Node.VENUS,

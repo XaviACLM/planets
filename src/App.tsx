@@ -7,7 +7,7 @@ import NodeSelector from './NodeSelector'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -32,17 +32,7 @@ function App() {
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
-	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(
-		new Set([
-			Node.SUN, Node.MOON, Node.MERCURY, Node.VENUS, Node.MARS,
-			Node.JUPITER, Node.SATURN, Node.URANUS, Node.NEPTUNE, Node.PLUTO,
-			Node.ASCENDANT, Node.DESCENDANT, Node.MIDHEAVEN, Node.IMUM_COELI,
-			Node.LUNAR_ASCENDING, Node.LUNAR_APOGEE, Node.PART_OF_FORTUNE,
-			Node.CERES, Node.ERIS
-		])
-	);
-	
-	//TODO a label if house system undefined for position
+	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( defaultNodes ));
 
 	const handleNodeToggle = (node: Node) => {
 		setSelectedNodes(prev => {
@@ -80,7 +70,6 @@ function App() {
 	}, [selectedAstrologyMode])
 	
 	useEffect(() => {
-		console.log("balls");
 		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
 	}, [hamburgSchoolMode])
 	
@@ -90,13 +79,6 @@ function App() {
 		}
 		return selectedCity.timezone;
 	}, [selectedCity]);
-	
-	// config options:
-	//  that affect the zodiacWheel itself:
-	//   a toggle for each and every node
-	//  i'm not that sure - these affects aspects, but where will those end up living?
-	//   for each aspect, a slider of how many physical nodes it needs to count
-	//   a multi-toggle for each aspect: never - btw bodies - allow 1 point - allow any points w 1 body
 	
 	return (
 		<div className="app-container">
