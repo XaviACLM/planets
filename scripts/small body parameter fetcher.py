@@ -9,6 +9,11 @@ TARGETS = [
     "Ceres", "Pallas", "Juno", "Vesta",
     "Chiron", "Eris", "Makemake", "Haumea", "Sedna"
 ]
+TARGETS = [
+    "Astraea", "Hygiea", "Pholus", "Nessus", "Chariklo", "Hylonome", "Cyllarus",
+    "Gonggong", "Quaoar", "Orcus", "Salacia", "Varda", "Ixion", "Varuna",
+    "Typhon", "Chaos", # "Radamanthus", "Gǃkúnǁʼhòmdímà"
+]
 
 SBDB_API = "https://ssd-api.jpl.nasa.gov/sbdb.api"
 

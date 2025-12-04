@@ -43,6 +43,14 @@ import makemakeSymbol from "./assets/body-symbols/Makemake.png"
 import pallasSymbol from "./assets/body-symbols/Pallas.png"
 import sednaSymbol from "./assets/body-symbols/Sedna.png"
 import vestaSymbol from "./assets/body-symbols/Vesta.png"
+import cupidoSymbol from "./assets/body-symbols/Cupido.png"
+import hadesSymbol from "./assets/body-symbols/Hades.png"
+import zeusSymbol from "./assets/body-symbols/Zeus.png"
+import kronosSymbol from "./assets/body-symbols/Kronos.png"
+import apollonSymbol from "./assets/body-symbols/Apollon.png"
+import admetosSymbol from "./assets/body-symbols/Admetos.png"
+import vulcanusSymbol from "./assets/body-symbols/Vulcanus.png"
+import poseidonSymbol from "./assets/body-symbols/Poseidon.png"
 
 import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
 import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
@@ -84,6 +92,7 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
 	[Node.DESCENDANT] : true,
 	[Node.MIDHEAVEN] : true,
 	[Node.IMUM_COELI] : true,
+	
 	[Node.PART_OF_FORTUNE] : false,
 	
 	[Node.LUNAR_ASCENDING] : false,
@@ -100,6 +109,15 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
 	[Node.PALLAS] : false,
 	[Node.SEDNA] : false,
 	[Node.VESTA] : false,
+	
+	[Node.CUPIDO] : false,
+	[Node.HADES] : false,
+	[Node.ZEUS] : false,
+	[Node.KRONOS] : false,
+	[Node.APOLLON] : false,
+	[Node.ADMETOS] : false,
+	[Node.VULCANUS] : false,
+	[Node.POSEIDON] : false,
 }
 	
 export const zodiacSymbols = new Map<Zodiac, string>([
@@ -146,6 +164,14 @@ export const nodeSymbols = new Map<Node, string>([
 	[Node.PALLAS, pallasSymbol],
 	[Node.SEDNA, sednaSymbol],
 	[Node.VESTA, vestaSymbol],
+	[Node.CUPIDO, cupidoSymbol],
+	[Node.HADES, hadesSymbol],
+	[Node.ZEUS, zeusSymbol],
+	[Node.KRONOS, kronosSymbol],
+	[Node.APOLLON, apollonSymbol],
+	[Node.ADMETOS, admetosSymbol],
+	[Node.VULCANUS, vulcanusSymbol],
+	[Node.POSEIDON, poseidonSymbol],
 ]);
 
 export const aspectSymbols = new Map<AspectKind, string>([

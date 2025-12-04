@@ -11,7 +11,7 @@ interface OrbitParams {
   epoch: number;   // epoch of the elements, in Julian Day
 }
 
-export const nodeToParams: Partial<Record<Node, OrbitParams>> = {
+export const smallBodyParams: Partial<Record<Node, OrbitParams>> = {
     [Node.CERES]: {
         e: .07957631994408416,
         a: 2.765615651508659,
@@ -92,6 +92,162 @@ export const nodeToParams: Partial<Record<Node, OrbitParams>> = {
         w: 311.0098251025547,
         ma: 358.6072668813861,
 		epoch: 2461000.5,
+    },
+}
+
+export const HamburgSchoolMode = {
+	WITTE: "Witte/Sieggrün",
+	NEELY: "Neely",
+} as const;
+export type HamburgSchoolMode = typeof HamburgSchoolMode[keyof typeof HamburgSchoolMode];
+
+export const hamburgSchoolParamsNeely: Partial<Record<Node, OrbitParams>> = {
+    [Node.CUPIDO]: {
+		e: 0.00460,
+        a: 40.99837,
+        i: 1.0833,
+        om: 129.8325,
+        w: 171.4333,
+        ma: 163.7409,
+        epoch: 2415020.0,
+    },
+    [Node.HADES]: {
+        e: 0.00245,
+        a: 50.66744,
+        i: 1.0500,
+        om: 161.3339,
+        w: 148.1796,
+        ma: 27.6496,
+        epoch: 2415020.0,
+    },
+    [Node.ZEUS]: {
+        e: 0.00120,
+        a: 59.21436,
+        i: 0.0000,
+        om: 0.0000,
+        w: 299.0440,
+        ma: 165.1232,
+        epoch: 2415020.0,
+    },
+    [Node.KRONOS]: {
+        e: 0.00305,
+        a: 64.81960,
+        i: 0.0000,
+        om: 0.0000,
+        w: 208.8801,
+        ma: 169.0193,
+        epoch: 2415020.0,
+    },
+    [Node.APOLLON]: {
+        e: 0.00000,
+        a: 70.29949,
+        i: 0.0000,
+        om: 0.0000,
+        w: 0.0000,
+        ma: 138.0533,
+        epoch: 2415020.0,
+    },
+    [Node.ADMETOS]: {
+        e: 0.00000,
+        a: 73.62765,
+        i: 0.0000,
+        om: 0.0000,
+        w: 0.0000,
+        ma: 351.3350,
+        epoch: 2415020.0,
+    },
+    [Node.VULCANUS]: {
+        e: 0.00000,
+        a: 77.25568,
+        i: 0.0000,
+        om: 0.0000,
+        w: 0.0000,
+        ma: 55.8983,
+        epoch: 2415020.0,
+    },
+    [Node.POSEIDON]: {
+        e: 0.00000,
+        a: 83.66907,
+        i: 0.0000,
+        om: 0.0000,
+        w: 0.0000,
+        ma: 165.5163,
+        epoch: 2415020.0,
+    },
+}
+
+export const hamburgSchoolParamsWitte: Partial<Record<Node, OrbitParams>> = {
+	[Node.CUPIDO]: {
+        e: 0,
+        a: 40.99837,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 104.5959,
+        epoch: 2415020.0,
+    },
+    [Node.HADES]: {
+        e: 0,
+        a: 50.667443,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 337.4517,
+        epoch: 2415020.0,
+    },
+    [Node.ZEUS]: {
+        e: 0,
+        a: 59.214362,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 104.0904,
+        epoch: 2415020.0,
+    },
+    [Node.KRONOS]: {
+        e: 0,
+        a: 64.816896,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 17.7346,
+        epoch: 2415020.0,
+    },
+    [Node.APOLLON]: {
+        e: 0,
+        a: 70.361652,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 138.0354,
+        epoch: 2415020.0,
+    },
+    [Node.ADMETOS]: {
+        e: 0,
+        a: 73.736476,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: -8.678,
+        epoch: 2415020.0,
+    },
+    [Node.VULKANUS]: {
+        e: 0,
+        a: 77.445895,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 55.9826,
+        epoch: 2415020.0,
+    },
+    [Node.POSEIDON]: {
+        e: 0,
+        a: 83.493733,
+        i: 0,
+        om: 0,
+        w: 0,
+        ma: 165.3595,
+        epoch: 2415020.0,
     },
 }
 

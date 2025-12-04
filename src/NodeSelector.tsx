@@ -6,14 +6,25 @@ const NODE_CATEGORIES = [
   {
     name: 'Main Bodies',
     nodes: [
-      Node.SUN, Node.MOON, Node.MERCURY, Node.VENUS, Node.MARS,
-      Node.JUPITER, Node.SATURN, Node.URANUS, Node.NEPTUNE, Node.PLUTO
+      Node.SUN,
+	  Node.MOON,
+	  Node.MERCURY,
+	  Node.VENUS,
+	  Node.MARS,
+      Node.JUPITER,
+	  Node.SATURN,
+	  Node.URANUS,
+	  Node.NEPTUNE,
+	  Node.PLUTO
     ]
   },
   {
     name: 'Primary Angles',
     nodes: [
-      Node.ASCENDANT, Node.DESCENDANT, Node.MIDHEAVEN, Node.IMUM_COELI
+      Node.ASCENDANT,
+	  Node.DESCENDANT,
+	  Node.MIDHEAVEN,
+	  Node.IMUM_COELI
     ]
   },
   {
@@ -25,19 +36,41 @@ const NODE_CATEGORIES = [
   {
     name: 'Lunar',
     nodes: [
-      Node.LUNAR_ASCENDING, Node.LUNAR_DESCENDING, 
-      Node.LUNAR_APOGEE, Node.LUNAR_PERIGEE
+      Node.LUNAR_ASCENDING,
+	  Node.LUNAR_DESCENDING, 
+      Node.LUNAR_APOGEE,
+	  Node.LUNAR_PERIGEE
     ]
   },
   {
     name: 'Minor Bodies',
     nodes: [
-      Node.CERES, Node.PALLAS, Node.JUNO, Node.VESTA, Node.CHIRON,
-      Node.ERIS, Node.MAKEMAKE, Node.HAUMEA, Node.SEDNA
+      Node.CERES,
+	  Node.PALLAS,
+	  Node.JUNO,
+	  Node.VESTA,
+	  Node.CHIRON,
+      Node.ERIS,
+	  Node.MAKEMAKE,
+	  Node.HAUMEA,
+	  Node.SEDNA
+    ]
+  },
+  {
+    name: 'Hamburg School Objects',
+    nodes: [
+      Node.CUPIDO,
+	  Node.HADES,
+	  Node.ZEUS,
+	  Node.KRONOS,
+	  Node.APOLLON,
+      Node.ADMETOS,
+	  Node.VULCANUS,
+	  Node.POSEIDON,
     ]
   }
 ];
-
+	
 interface NodeSelectorProps {
   selectedNodes: Set<Node>;
   onNodeToggle: (node: Node) => void;

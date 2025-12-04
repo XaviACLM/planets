@@ -62,7 +62,6 @@ export const Node = {
 	
 	// missing:
 	// secondary angles: anti/vertex, east/west points
-	// hamburg school: cupido, hades, zeus...
 	
 	// minor bodies
 	CERES: "Ceres",
@@ -74,6 +73,17 @@ export const Node = {
 	MAKEMAKE: "Makemake",
 	HAUMEA: "Haumea",
 	SEDNA: "Sedna",
+	
+	// hamburg school objects
+	CUPIDO: "Cupido",
+	HADES: "Hades",
+	ZEUS: "Zeus",
+	KRONOS: "Kronos",
+	APOLLON: "Apollon",
+	ADMETOS: "Admetos",
+	VULCANUS: "Vulcanus",
+	POSEIDON: "Poseidon",
+	
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 

@@ -2,7 +2,7 @@ import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector
 
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
-import { nodeToParams, orbitalLongitude } from './astroSmallObjects.ts'
+import { smallBodyParams, orbitalLongitude, HamburgSchoolMode, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
 import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode } from './astroDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
@@ -211,7 +211,19 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 function computeSmallObjectPositions(date: Date): Map<Node, number> {
 	const nodeAngles = new Map<Node, number>();
 		
-	for ( const [node, params] of Object.entries(nodeToParams)) {
+	for ( const [node, params] of Object.entries(smallBodyParams)) {
+		const lonDeg = orbitalLongitude(params, date);
+		nodeAngles.set(node as Node, lonDeg*Math.PI/180);
+	}
+	
+	return nodeAngles;	
+}
+
+function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: HamburgSchoolMode): Map<Node, number> {
+	const nodeAngles = new Map<Node, number>();
+	
+	const hamburgSchoolParams = hamburgSchoolMode == HamburgSchoolMode.NEELY ? hamburgSchoolParamsNeely : hamburgSchoolParamsWitte;
+	for ( const [node, params] of Object.entries(hamburgSchoolParams)) {
 		const lonDeg = orbitalLongitude(params, date);
 		nodeAngles.set(node as Node, lonDeg*Math.PI/180);
 	}
@@ -258,6 +270,7 @@ function computeAllNodePositionsWithoutSurfacePosition(date: Date, lunarNodeMode
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
 		...computeSmallObjectPositions(date),
+		...computeHamburgSchoolObjectPositions(date, HamburgSchoolMode.NEELY), //TODO
 		...computeLunarNodes(date, lunarNodeMode),
 		...computeLunarApogeePerigee(date, lunarNodeMode),
 	]);
