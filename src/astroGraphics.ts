@@ -51,6 +51,24 @@ import apollonSymbol from "./assets/body-symbols/Apollon.png"
 import admetosSymbol from "./assets/body-symbols/Admetos.png"
 import vulcanusSymbol from "./assets/body-symbols/Vulcanus.png"
 import poseidonSymbol from "./assets/body-symbols/Poseidon.png"
+import astraeaSymbol from "./assets/body-symbols/Astraea.png"
+import hygieaSymbol from "./assets/body-symbols/Hygiea.png"
+import pholusSymbol from "./assets/body-symbols/Pholus.png"
+import nessusSymbol from "./assets/body-symbols/Nessus.png"
+import charikloSymbol from "./assets/body-symbols/Chariklo.png"
+import hylonomeSymbol from "./assets/body-symbols/Hylonome.png"
+import cyllarusSymbol from "./assets/body-symbols/Cyllarus.png"
+import gonggongSymbol from "./assets/body-symbols/Gonggong.png"
+import quaoarSymbol from "./assets/body-symbols/Quaoar.png"
+import orcusSymbol from "./assets/body-symbols/Orcus.png"
+import salaciaSymbol from "./assets/body-symbols/Salacia.png"
+import vardaSymbol from "./assets/body-symbols/Varda.png"
+import ixionSymbol from "./assets/body-symbols/Ixion.png"
+import varunaSymbol from "./assets/body-symbols/Varuna.png"
+import typhonSymbol from "./assets/body-symbols/Typhon.png"
+import chaosSymbol from "./assets/body-symbols/Chaos.png"
+import radamanthusSymbol from "./assets/body-symbols/Radamanthus.png"
+import gkunhomdimaSymbol from "./assets/body-symbols/Gkunhomdima.png"
 
 import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
 import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
@@ -74,6 +92,7 @@ export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.LUNAR_PERIGEE] : "Selene",
 	[Node.PART_OF_FORTUNE] : "Fortuna",
 	[Node.MAKEMAKE] : "M-Make",
+	//TODO shortnames of hamburg school and minor-minor objects
 }
 
 export const nodeSymbolHideable: Record<Node, boolean> = {
@@ -118,6 +137,25 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
 	[Node.ADMETOS] : false,
 	[Node.VULCANUS] : false,
 	[Node.POSEIDON] : false,
+	
+    [Node.ASTRAEA] : false,
+    [Node.HYGIEA] : false,
+    [Node.PHOLUS] : false,
+    [Node.NESSUS] : false,
+    [Node.CHARIKLO] : false,
+    [Node.HYLONOME] : false,
+    [Node.CYLLARUS] : false,
+    [Node.GONGGONG] : false,
+    [Node.QUAOAR] : false,
+    [Node.ORCUS] : false,
+    [Node.SALACIA] : false,
+    [Node.VARDA] : false,
+    [Node.IXION] : false,
+    [Node.VARUNA] : false,
+    [Node.TYPHON] : false,
+    [Node.CHAOS] : false,
+    [Node.RADAMANTHUS] : false,
+    [Node.GKUNHOMDIMA] : false,
 }
 	
 export const zodiacSymbols = new Map<Zodiac, string>([
@@ -172,6 +210,24 @@ export const nodeSymbols = new Map<Node, string>([
 	[Node.ADMETOS, admetosSymbol],
 	[Node.VULCANUS, vulcanusSymbol],
 	[Node.POSEIDON, poseidonSymbol],
+    [Node.ASTRAEA, astraeaSymbol],
+    [Node.HYGIEA, hygieaSymbol],
+    [Node.PHOLUS, pholusSymbol],
+    [Node.NESSUS, nessusSymbol],
+    [Node.CHARIKLO, charikloSymbol],
+    [Node.HYLONOME, hylonomeSymbol],
+    [Node.CYLLARUS, cyllarusSymbol],
+    [Node.GONGGONG, gonggongSymbol],
+    [Node.QUAOAR, quaoarSymbol],
+    [Node.ORCUS, orcusSymbol],
+    [Node.SALACIA, salaciaSymbol],
+    [Node.VARDA, vardaSymbol],
+    [Node.IXION, ixionSymbol],
+    [Node.VARUNA, varunaSymbol],
+    [Node.TYPHON, typhonSymbol],
+    [Node.CHAOS, chaosSymbol],
+    [Node.RADAMANTHUS, radamanthusSymbol],
+    [Node.GKUNHOMDIMA, gkunhomdimaSymbol],
 ]);
 
 export const aspectSymbols = new Map<AspectKind, string>([
