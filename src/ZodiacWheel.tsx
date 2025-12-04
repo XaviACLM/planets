@@ -17,11 +17,11 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 	highlightedAspect: Aspect | null
 }) {
 	
-	const sectorRadius = 45;
-	const symbolRadius = 40;
-	const radius = 35; // percent of viewport
-	const aspectRadius = showLabels ? 20 : 25;
-	const planetRadius = showLabels ? 30 : (radius+aspectRadius)/2;
+	const sectorRadius = 48;
+	const symbolRadius = 43.5;
+	const radius = 39; // percent of viewport
+	const aspectRadius = showLabels ? 23 : 28;
+	const planetRadius = showLabels ? 35 : (radius+aspectRadius)/2;
 	
 	const minimumIconSpace = 0.12; // radial
 	

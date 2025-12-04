@@ -91,7 +91,8 @@ export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.LUNAR_APOGEE] : "Lilith",
 	[Node.LUNAR_PERIGEE] : "Selene",
 	[Node.PART_OF_FORTUNE] : "Fortuna",
-	[Node.MAKEMAKE] : "M-Make",
+	[Node.RADAMANTHUS] : "R-manthus",
+	[Node.GKUNHOMDIMA] : "G-Hmdima",
 	//TODO shortnames of hamburg school and minor-minor objects
 }
 
