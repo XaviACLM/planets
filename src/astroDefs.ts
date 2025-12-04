@@ -84,6 +84,26 @@ export const Node = {
 	VULCANUS: "Vulcanus",
 	POSEIDON: "Poseidon",
 	
+	// minor minor bodies
+    ASTRAEA: "Astraea",
+    HYGIEA: "Hygiea",
+    PHOLUS: "Pholus",
+    NESSUS: "Nessus",
+    CHARIKLO: "Chariklo",
+    HYLONOME: "Hylonome",
+    CYLLARUS: "Cyllarus",
+    GONGGONG: "Gonggong",
+    QUAOAR: "Quaoar",
+    ORCUS: "Orcus",
+    SALACIA: "Salacia",
+    VARDA: "Varda",
+    IXION: "Ixion",
+    VARUNA: "Varuna",
+    TYPHON: "Typhon",
+    CHAOS: "Chaos",
+    RADAMANTHUS: "Radamanthus",
+    GKUNHOMDIMA: "Gkunhomdima",
+	
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 
@@ -106,7 +126,7 @@ export const defaultNodes: Node[] = [
 	Node.LUNAR_APOGEE,
 	Node.PART_OF_FORTUNE,
 	Node.CERES,
-	Node.ERIS
+	Node.ERIS,
 ]
 
 export const innerPlanets: Node[] = [
@@ -126,6 +146,7 @@ export const outerPlanets: Node[] = [
 export const NodeType = {
 	BODY: "Body",
 	POINT: "Point",
+	HYPOTHETICAL: "Hypothetical",
 } as const;
 export type NodeType = typeof NodeType[keyof typeof NodeType];
 
@@ -162,6 +183,34 @@ export const nodeTypes: Record<Node, NodeType> = {
 	[Node.MAKEMAKE] : NodeType.BODY,
 	[Node.HAUMEA] : NodeType.BODY,
 	[Node.SEDNA] : NodeType.BODY,
+	
+    [Node.CUPIDO] : NodeType.HYPOTHETICAL,
+    [Node.HADES] : NodeType.HYPOTHETICAL,
+    [Node.ZEUS] : NodeType.HYPOTHETICAL,
+    [Node.KRONOS] : NodeType.HYPOTHETICAL,
+    [Node.APOLLON] : NodeType.HYPOTHETICAL,
+    [Node.ADMETOS] : NodeType.HYPOTHETICAL,
+    [Node.VULCANUS] : NodeType.HYPOTHETICAL,
+    [Node.POSEIDON] : NodeType.HYPOTHETICAL,
+	
+    [Node.ASTRAEA] : NodeType.BODY,
+    [Node.HYGIEA] : NodeType.BODY,
+    [Node.PHOLUS] : NodeType.BODY,
+    [Node.NESSUS] : NodeType.BODY,
+    [Node.CHARIKLO] : NodeType.BODY,
+    [Node.HYLONOME] : NodeType.BODY,
+    [Node.CYLLARUS] : NodeType.BODY,
+    [Node.GONGGONG] : NodeType.BODY,
+    [Node.QUAOAR] : NodeType.BODY,
+    [Node.ORCUS] : NodeType.BODY,
+    [Node.SALACIA] : NodeType.BODY,
+    [Node.VARDA] : NodeType.BODY,
+    [Node.IXION] : NodeType.BODY,
+    [Node.VARUNA] : NodeType.BODY,
+    [Node.TYPHON] : NodeType.BODY,
+    [Node.CHAOS] : NodeType.BODY,
+    [Node.RADAMANTHUS] : NodeType.BODY,
+    [Node.GKUNHOMDIMA] : NodeType.BODY,
 }
 
 export const nodeDependsOnLocation: Record<Node, boolean> = {
@@ -197,6 +246,34 @@ export const nodeDependsOnLocation: Record<Node, boolean> = {
 	[Node.MAKEMAKE] : false,
 	[Node.HAUMEA] : false,
 	[Node.SEDNA] : false,
+	
+    [Node.CUPIDO] : false,
+    [Node.HADES] : false,
+    [Node.ZEUS] : false,
+    [Node.KRONOS] : false,
+    [Node.APOLLON] : false,
+    [Node.ADMETOS] : false,
+    [Node.VULCANUS] : false,
+    [Node.POSEIDON] : false,
+	
+    [Node.ASTRAEA] : false,
+    [Node.HYGIEA] : false,
+    [Node.PHOLUS] : false,
+    [Node.NESSUS] : false,
+    [Node.CHARIKLO] : false,
+    [Node.HYLONOME] : false,
+    [Node.CYLLARUS] : false,
+    [Node.GONGGONG] : false,
+    [Node.QUAOAR] : false,
+    [Node.ORCUS] : false,
+    [Node.SALACIA] : false,
+    [Node.VARDA] : false,
+    [Node.IXION] : false,
+    [Node.VARUNA] : false,
+    [Node.TYPHON] : false,
+    [Node.CHAOS] : false,
+    [Node.RADAMANTHUS] : false,
+    [Node.GKUNHOMDIMA] : false,
 }
 
 export interface SurfacePosition {

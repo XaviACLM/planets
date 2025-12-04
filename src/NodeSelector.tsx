@@ -4,7 +4,7 @@ import { nodeSymbols, nodeShortName } from './astroGraphics';
 
 const NODE_CATEGORIES = [
   {
-    name: 'Main Bodies',
+    name: 'Major Bodies',
     nodes: [
       Node.SUN,
 	  Node.MOON,
@@ -34,7 +34,7 @@ const NODE_CATEGORIES = [
     ]
   },
   {
-    name: 'Lunar',
+    name: 'Lunar Nodes',
     nodes: [
       Node.LUNAR_ASCENDING,
 	  Node.LUNAR_DESCENDING, 
@@ -43,7 +43,7 @@ const NODE_CATEGORIES = [
     ]
   },
   {
-    name: 'Minor Bodies',
+    name: 'Major Asteroids & Dwarfs',
     nodes: [
       Node.CERES,
 	  Node.PALLAS,
@@ -67,6 +67,29 @@ const NODE_CATEGORIES = [
       Node.ADMETOS,
 	  Node.VULCANUS,
 	  Node.POSEIDON,
+    ]
+  },
+  {
+    name: 'Minor Bodies',
+    nodes: [
+      Node.ASTRAEA,
+      Node.HYGIEA,
+      Node.PHOLUS,
+      Node.NESSUS,
+      Node.CHARIKLO,
+      Node.HYLONOME,
+      Node.CYLLARUS,
+      Node.GONGGONG,
+      Node.QUAOAR,
+      Node.ORCUS,
+      Node.SALACIA,
+      Node.VARDA,
+      Node.IXION,
+      Node.VARUNA,
+      Node.TYPHON,
+      Node.CHAOS,
+      Node.RADAMANTHUS,
+      Node.GKUNHOMDIMA,
     ]
   }
 ];

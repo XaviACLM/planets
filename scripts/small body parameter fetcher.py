@@ -12,8 +12,15 @@ TARGETS = [
 TARGETS = [
     "Astraea", "Hygiea", "Pholus", "Nessus", "Chariklo", "Hylonome", "Cyllarus",
     "Gonggong", "Quaoar", "Orcus", "Salacia", "Varda", "Ixion", "Varuna",
-    "Typhon", "Chaos", # "Radamanthus", "Gǃkúnǁʼhòmdímà"
+    "Typhon", "Chaos",
+    "38083", #Radamanthus
+    "229762", #Gǃkúnǁʼhòmdímà
 ]
+
+name_substitutions = {
+    "38083": "Radamanthus",
+    "229762": "Gkunhomdima" # romanized
+}
 
 SBDB_API = "https://ssd-api.jpl.nasa.gov/sbdb.api"
 
@@ -76,6 +83,8 @@ def main():
 
     print("const NodeToParams: Partial<Record<Node, OrbitParams>> = {")
     for name, data in orbits.items():
+        if name in name_substitutions:
+            name = name_substitutions[name]
         print(f"    [Node.{name.upper()}]: {{")
         for param, param_data in data.items():
             if param == "epoch":
