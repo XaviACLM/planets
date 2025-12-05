@@ -47,10 +47,10 @@ function App() {
 	};
 	
 	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
-	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions()));
+	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions())[0]);
 
 	useEffect(() => {
-		setAspects(findAspects(zodiacPositions.getNodePositions()));
+		setAspects(findAspects(zodiacPositions.getNodePositions())[0]);
 	}, [zodiacPositions])
 	
 	useEffect(() => {

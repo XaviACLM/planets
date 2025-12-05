@@ -61,7 +61,8 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 						
 						{/* error, quantile */}
 						<div className="aspect-values">
-							 {aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%
+							{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
+							 {aspect.error.toFixed(2)}Δ
 						</div>
 			  
 						{/* delete button */}

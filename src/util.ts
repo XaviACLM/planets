@@ -101,7 +101,7 @@ export function interpolateShorterAngle(coeff:number, a1: number, a2: number) {
 	}
 }
 
-function angleShortDistance(a: number, b: number) {
+export function angleShortDistance(a: number, b: number) {
 	// returns the length of the shorter of the two AB arcs
 	const d = normalizeAngleRad(a-b);
 	const td = d > Math.PI ? 2*Math.PI - d : d;
