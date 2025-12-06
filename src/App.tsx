@@ -3,11 +3,11 @@ import { useState, useEffect, useMemo } from 'react'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import ParallelDiagram from './ParallelDiagram'
-import NodeSelector from './NodeSelector'
+import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
-import { findAspects, type Aspect } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes } from './astroDefs.ts'
+import { findAspects, type Aspect, filterAspects } from './aspects.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -33,25 +33,17 @@ function App() {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	
 	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( defaultNodes ));
-
-	const handleNodeToggle = (node: Node) => {
-		setSelectedNodes(prev => {
-		const newSet = new Set(prev);
-		if (newSet.has(node)) {
-			newSet.delete(node);
-		} else {
-			newSet.add(node);
-		}
-			return newSet;
-		});
-	};
+	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
 	
-	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
-	const [aspects, setAspects] = useState(findAspects(zodiacPositions.getNodePositions())[0]);
+    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
+	const fullAspects = useMemo(() => {
+		return findAspects(zodiacPositions.getNodePositions())[0];
+	}, [zodiacPositions]);
+	const [aspects, setAspects] = useState(filterAspects(fullAspects, selectedNodes, selectedAspectKinds));
 
 	useEffect(() => {
-		setAspects(findAspects(zodiacPositions.getNodePositions())[0]);
-	}, [zodiacPositions])
+		setAspects(filterAspects(fullAspects, selectedNodes, selectedAspectKinds));
+	}, [fullAspects, selectedNodes, selectedAspectKinds])
 	
 	useEffect(() => {
 		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
@@ -281,8 +273,15 @@ function App() {
 				</div>
 				<div className="module">
 					<NodeSelector
-						selectedNodes={selectedNodes}
-						onNodeToggle={handleNodeToggle}
+						selectedItems={selectedNodes}
+						setSelectedItems={setSelectedNodes}
+						showLabels={showLabels}
+					/>
+				</div>
+				<div className="module">
+					<AspectKindSelector
+						selectedItems={selectedAspectKinds}
+						setSelectedItems={setSelectedAspectKinds}
 						showLabels={showLabels}
 					/>
 				</div>

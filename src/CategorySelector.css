@@ -1,0 +1,66 @@
+/* Add to your existing CSS */
+.node-selector {
+  padding: 16px;
+  color: white;
+}
+
+.node-category {
+  margin-bottom: 10px;
+}
+
+.category-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ccc;
+  letter-spacing: 0.7px;
+  font-variant: small-caps;
+}
+
+.node-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.node-item {
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 0px;
+  padding: 6px 6px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant: small-caps;
+}
+
+.node-item:hover {
+  border-color: #777;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.node-item.selected {
+  border-color: white;
+}
+
+.node-item:focus, 
+.node-item:active, 
+.node-item:focus-visible {
+  border-radius: 0;
+  border-color: #333;
+}
+
+.node-label {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.node-symbol {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: invert(1); /* Make white symbols visible on black background */
+}

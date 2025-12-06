@@ -1,44 +1,5 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node } from './astroDefs.ts'
-
-export const AspectKind = {
-	// major binary
-	CONJUNCTION: "Conjunction", // 0
-	OPPOSITION: "Opposition", // 1/2
-	TRINE: "Trine", // 1/3
-	SQUARE: "Square", // 1/4
-	SEXTILE: "Sextile", // 1/6
-	PARALLEL: "Parallel",  // same eq. latitude
-	CONTRAPARALLEL: "Contraparallel", // opposite eq. latitude
-	
-	// minor binary
-    VIGINTILE: "Vigintile", // 1/20
-    SEMISEXTILE: "Semisextile", // 1/12
-    UNDECILE: "Undecile", // 1/11
-    DECILE: "Decile", // 1/10
-    NOVILE: "Novile", // 1/9
-    SEMISQUARE: "Semisquare", // 1/8
-    SEPTILE: "Septile", // 1/7
-    QUINTILE: "Quintile", // 1/5
-    BINOVILE: "Binovile", // 2/9
-    BISEPTILE: "Biseptile", // 2/7
-    TREDECILE: "Tredecile", // 3/10
-    SESQUIQUADRATE: "Sesquiquadrate", // 3/8
-    BIQUINTILE: "Biquintile", // 2/5
-    QUINCUNX: "Quincunx", // 5/12
-    TRISEPTILE: "Triseptile", // 3/7
-    QUADRANOVILE: "Quadranovile", // 4/9
-	
-	// configurations
-	GRAND_TRINE: "Grand Trine", // 3 in trines
-	GRAND_SQUARE: "Grand Square", // 4 in consecutive squares
-	GRAND_SEXTILE: "Grand Sextile", // 6 in consecutive sextiles
-	T_SQUARE: "T-Square", // a square missing one node
-	MYSTIC_RECTANGLE: "Mystic Rectangle", // grand sextile missing two opposed nodes
-	FINGER_OF_YOD: "Finger of Yod", // two nodes in sextile are quincunx a third
-	KITE: "Kite", // grand sextile missing nodes 1 and 3
-} as const;
-export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
+import { Node, AspectKind } from './astroDefs.ts'
 
 const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
@@ -505,8 +466,11 @@ export function findAspects(
             }
         }
     }
-
-	const aspectList = aspects.getAllAspects();
+	const aspectList = aspects.getAllAspects().sort((a1, a2) => {
+		const score1 = a1.error / a1.nodes.length - (a1.nodes.length > 2 ? 1 : 0);
+		const score2 = a2.error / a2.nodes.length - (a2.nodes.length > 2 ? 1 : 0);
+		return score1 - score2;
+	});
 	
 	// doesn't print anything, so it looks like the error we compute on-the-fly is already good
 	// which is odd, I don't see why that should be the case with irregular configurations
@@ -527,6 +491,19 @@ export function findAspects(
     return [aspectList, subaspects];
 }
 
+export function filterAspects(
+	fullAspects: Aspect[],
+	selectedNodes: Set<Node>,
+	selectedAspectKinds: Set<AspectKind>
+){
+	return fullAspects.filter(aspect => 
+		selectedAspectKinds.has(aspect.kind) && 
+		aspect.nodes.every(node => selectedNodes.has(node))
+	);
+}
+
+
+
 // TODO re aspects
 // XX switch errors to degrees
 // XX abstract away aspect/angle/definition business
@@ -535,14 +512,15 @@ export function findAspects(
 // ??   use startingVertices. At each node try each orientation of the configuration
 // XX ensure subaspects have error computed
 
-//  create subaspect menu
+// XX create subaspect menu
 //  alt icons
 //  [ names / icons / alt icons ] toggle
+//  hide contraparallel diagram if both parallel thingues are off?
 
 //  (optional/alt/something somehow) better contraparallels
 //  optional aspect colors (but how, really? seems pretty complicated...)
 
-//  order by error-per-node
+// XX order by error-per-node
 //  aspect type toggles
 //  aspect admissibility sliders
 //  memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)

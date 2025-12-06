@@ -1,5 +1,4 @@
-import { Node, Zodiac } from './astroDefs.ts'
-import { AspectKind } from './aspects.ts'
+import { Node, Zodiac, AspectKind } from './astroDefs.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
@@ -116,6 +115,9 @@ export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.RADAMANTHUS] : "R-manthus",
 	[Node.GKUNHOMDIMA] : "G-Hmdima",
 	//TODO shortnames of hamburg school and minor-minor objects
+}
+
+export const aspectKindShortName: Partial<Record<AspectKind, String>> = {
 }
 
 export const nodeSymbolHideable: Record<Node, boolean> = {

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 
-import { type Aspect, AspectKind } from './aspects.ts'
-import { Node, Zodiac } from './astroDefs.ts'
+import { type Aspect } from './aspects.ts'
+import { Node, Zodiac, AspectKind } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { spreadIcons, normalizeAngleDeg } from './util.ts'
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName } from './astroGraphics.ts'
