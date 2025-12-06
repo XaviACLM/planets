@@ -1,4 +1,4 @@
-import { sawtoothSine, normalizeAngleRad, angleShortDistance } from './util.ts'
+import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
 import { Node } from './astroDefs.ts'
 
 export const AspectKind = {
@@ -40,23 +40,85 @@ export const AspectKind = {
 } as const;
 export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
 
-//const AspectAngles: Record<Aspect, number[]> = 
+const aspectKindAngles: Record<AspectKind, number[] | null> = {
+	[AspectKind.CONJUNCTION] : [0],
+	[AspectKind.OPPOSITION] : [1/2],
+	[AspectKind.TRINE] : [1/3],
+	[AspectKind.SQUARE] : [1/4],
+	[AspectKind.SEXTILE] : [1/6],
+	[AspectKind.PARALLEL] : null,
+	[AspectKind.CONTRAPARALLEL] : null,
+    [AspectKind.VIGINTILE] : [1/20],
+    [AspectKind.SEMISEXTILE] : [1/12],
+    [AspectKind.UNDECILE] : [1/11],
+    [AspectKind.DECILE] : [1/10],
+    [AspectKind.NOVILE] : [1/9],
+    [AspectKind.SEMISQUARE] : [1/8],
+    [AspectKind.SEPTILE] : [1/7],
+    [AspectKind.QUINTILE] : [1/5],
+    [AspectKind.BINOVILE] : [2/9],
+    [AspectKind.BISEPTILE] : [2/7],
+    [AspectKind.TREDECILE] : [3/10],
+    [AspectKind.SESQUIQUADRATE] : [3/8],
+    [AspectKind.BIQUINTILE] : [2/5],
+    [AspectKind.QUINCUNX] : [5/12],
+    [AspectKind.TRISEPTILE] : [3/7],
+    [AspectKind.QUADRANOVILE] : [4/9],
+	[AspectKind.GRAND_TRINE] : [1/3, 2/3],
+	[AspectKind.GRAND_SQUARE] : [1/4, 2/4, 3/4],
+	[AspectKind.GRAND_SEXTILE] : [1/6, 2/6, 3/6, 4/6, 5/6],
+	[AspectKind.T_SQUARE] : [1/4, 2/4],
+	[AspectKind.MYSTIC_RECTANGLE] : [1/6, 3/6, 4/6],
+	[AspectKind.FINGER_OF_YOD] : [2/12, 7/12],
+	[AspectKind.KITE] : [2/6, 3/6, 4/6]
+}
+
+// (except contra/parallels)
+const binaryAspectKinds = Object.entries(aspectKindAngles)
+	.filter(([_, angles]) => angles?.length === 1)
+	.map(([kind]) => kind as AspectKind);
+
+// important that they're ordered by length so no aspect is preceded by a subaspect
+const configurationAspectKinds = Object.entries(aspectKindAngles)
+	.filter(([_, angles]) => angles && angles.length > 1)
+	.sort(([_, a], [__, b]) => b!.length - a!.length)
+	.map(([kind]) => kind as AspectKind);
+
+// consider symmetries on each configuration.
+// consider the eq. classes of vertices under these
+// we provide the indices of a set of representatives of these classes
+const startingVertices: Partial<Record<AspectKind, number[]>> = {
+	[AspectKind.GRAND_TRINE]: [0],
+	[AspectKind.GRAND_SQUARE]: [0],
+	[AspectKind.GRAND_SEXTILE]: [0],
+	[AspectKind.T_SQUARE]: [0, 1, 2],
+	[AspectKind.MYSTIC_RECTANGLE]: [0,1],
+	[AspectKind.FINGER_OF_YOD]: [0, 1, 2],
+	[AspectKind.KITE]: [0, 1, 2, 3],
+};
+
+const isRegular: Partial<Record<AspectKind, boolean>> = Object.fromEntries(
+	Object.entries(startingVertices).map(([kind, vertices]) => [
+		kind, 
+		vertices?.length === 1
+	])
+);
 
 export class Aspect {
     kind: AspectKind;
     nodes: Node[];
-    basis_node_idx: number | null;
+    basisNodeIdx: number | null;
     error: number | null;
 
     constructor(
         kind: AspectKind,
         nodes: Node[],
-        basis_node_idx?: number | null,
+        basisNodeIdx?: number | null,
         error?: number | null
     ) {
         this.kind = kind;
         this.nodes = nodes;
-        this.basis_node_idx = basis_node_idx ?? null;
+        this.basisNodeIdx = basisNodeIdx ?? null;
         this.error = error ?? null;
     }
 }
@@ -70,18 +132,18 @@ export class Aspect {
 // for kite, 120, 60, 60, (120)
 
 function ensureCorrectOrderingInAspect(aspect: Aspect, nodePositions: Map<Node, number>): void {
-    if (aspect.basis_node_idx === null) {
+    if (aspect.basisNodeIdx === null) {
         aspect.nodes.sort((a, b) => nodePositions.get(a)! - nodePositions.get(b)!);
     } else {
         const nodesWithFlags = aspect.nodes.map((node, idx) => ({
             node,
-            isBasis: idx === aspect.basis_node_idx
+            isBasis: idx === aspect.basisNodeIdx
         }));
         
         nodesWithFlags.sort((a, b) => nodePositions.get(a.node)! - nodePositions.get(b.node)!);
         
         aspect.nodes = nodesWithFlags.map(item => item.node);
-        aspect.basis_node_idx = nodesWithFlags.findIndex(item => item.isBasis);
+        aspect.basisNodeIdx = nodesWithFlags.findIndex(item => item.isBasis);
     }
 }
 
@@ -94,11 +156,54 @@ function ensureCorrectOrderingInAspectList(
     }
 }
 
-function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[] {
+function aspectError(aspect: Aspect, nodePositions: Map<Node, number>): number {
 	const n = aspect.nodes;
-	if (n.length==2) return [];
 	
-	const i = aspect.basis_node_idx ?? 0;
+	if ( binaryAspectKinds.includes(aspect.kind) ) {
+		const d = angleShortDistance(nodePositions.get(n[0])!, nodePositions.get(n[1])!);
+		const target = aspectKindAngles[aspect.kind][0]*TAU;
+		return Math.abs(target - d);
+	}
+	
+	if ( n.length == 2 ){
+		// dealing with a contra/parallel
+		const p1 = sawtoothSine(n[0]);
+		const p2 = sawtoothSine(n[1]);
+		return Math.abs(aspect.kind == AspectKind.PARALLEL ? p1-p2 : p1+p2);
+	}
+	
+	const k = n.length;
+	const angles = [0, ...aspectKindAngles[aspect.kind].map(angle => angle * TAU)];
+	let leastError = Infinity;
+	for (let offsetIdx = 0; offsetIdx < k; offsetIdx++) {
+		// n (vertex) we're looking at starts at basisIdx + offsetIdx
+		// idx in angles starts at offsetIdx
+		let error = 0;
+		const startAngle = angles[offsetIdx];
+		const startIdx = (aspect.basisNodeIdx + offsetIdx) % k;
+		const startPos = nodePositions.get(n[startIdx])!;
+		for (let i = 1; i < k; i++) {
+			const vertexIdx = (i + startIdx) % k;
+			const angleIdx = (i + offsetIdx) % k;
+			const idealPos = normalizeAngleRad(startPos + angles[angleIdx] - startAngle);
+			const p = nodePositions.get(n[vertexIdx])!;
+			error += angleShortDistance(p, idealPos);
+		}
+		leastError = Math.min(leastError, error);
+	}
+
+	return leastError;
+}
+
+function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[] {
+	// we could write this function synthetically from aspectKindAngles but that'd be pointlessly slow
+	// it would be possible to precompute subaspect tables but that'd be pointlessly slow (in dev time)
+	if ( binaryAspectKinds.includes(aspect.kind) ) {
+		return [];
+	}
+	const n = aspect.nodes;
+	
+	const i = aspect.basisNodeIdx ?? 0;
 	
 	switch (aspect.kind) {
 		case AspectKind.GRAND_TRINE: {
@@ -118,7 +223,7 @@ function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[
 				new Aspect(AspectKind.SQUARE, [n1, n4]),
 				new Aspect(AspectKind.OPPOSITION, [n1, n3]),
 				new Aspect(AspectKind.OPPOSITION, [n2, n4]),
-				new Aspect(AspectKind.T_SQUARE, [n1, n2, n3], 0), //third param is basis_node_idx
+				new Aspect(AspectKind.T_SQUARE, [n1, n2, n3], 0), //third param is basisNodeIdx
 				new Aspect(AspectKind.T_SQUARE, [n2, n3, n4], 0),
 				new Aspect(AspectKind.T_SQUARE, [n1, n3, n4], 1),
 				new Aspect(AspectKind.T_SQUARE, [n1, n2, n4], 2),
@@ -235,7 +340,7 @@ class AspectGroup {
 	}
 }
 
-const TAU = 2*Math.PI;
+
 
 export function findAspects(
     nodePositions: Map<Node, number>,
@@ -256,24 +361,17 @@ export function findAspects(
     const subaspects = new Map<Aspect, Aspect[]>(); // maps every aspect to its subaspects
     const excludedAspects = new AspectGroup(); // holds every subaspect of an aspect we've found, to avoid reintroduction
 	
-
-
-
-
     // we start with the grands, in a reverse topological order of inclusion
     // grand sextile, kite, grand square, finger of yod, mystic rectangle, t-square, grand trine
     // populate and use aspects, subaspects, and excluded_aspects during search
-    const aspectConfigs = [
-        { kind: AspectKind.GRAND_SEXTILE, angles: [1/6, 2/6, 3/6, 4/6, 5/6], requiresBasis: false },
-        { kind: AspectKind.KITE, angles: [2/6, 3/6, 4/6], requiresBasis: true },
-        { kind: AspectKind.GRAND_SQUARE, angles: [1/4, 2/4, 3/4], requiresBasis: false },
-        { kind: AspectKind.FINGER_OF_YOD, angles: [2/12, 7/12], requiresBasis: true },
-        { kind: AspectKind.MYSTIC_RECTANGLE, angles: [1/6, 3/6, 4/6], requiresBasis: true },
-        { kind: AspectKind.T_SQUARE, angles: [1/4, 2/4], requiresBasis: true },
-        { kind: AspectKind.GRAND_TRINE, angles: [1/3, 2/3], requiresBasis: false },
-    ];
+    const aspectConfigs = configurationAspectKinds
+	.map(kind => ({
+		kind,
+		angles: aspectKindAngles[kind]!,
+		requiresBasis: !isRegular[kind]
+	}));
 
-    for (const config of aspectConfigs) {
+	for (const config of aspectConfigs) {
         const { kind, angles, requiresBasis } = config;
         const scaledAngles = angles.map(angle => angle * TAU);
         const numVertices = scaledAngles.length + 1;
@@ -362,29 +460,13 @@ export function findAspects(
             const d = angleShortDistance(p1, p2);
 
             // standard binary aspects
-            const binaryAspects = [
-                { target: 0, kind: AspectKind.CONJUNCTION },
-                { target: 1/2, kind: AspectKind.OPPOSITION },
-                { target: 1/3, kind: AspectKind.TRINE },
-                { target: 1/4, kind: AspectKind.SQUARE },
-                { target: 1/6, kind: AspectKind.SEXTILE },
-                { target: 1/20, kind: AspectKind.VIGINTILE },
-                { target: 1/12, kind: AspectKind.SEMISEXTILE },
-                { target: 1/11, kind: AspectKind.UNDECILE },
-                { target: 1/10, kind: AspectKind.DECILE },
-                { target: 1/9, kind: AspectKind.NOVILE },
-                { target: 1/8, kind: AspectKind.SEMISQUARE },
-                { target: 1/7, kind: AspectKind.SEPTILE },
-                { target: 1/5, kind: AspectKind.QUINTILE },
-                { target: 2/9, kind: AspectKind.BINOVILE },
-                { target: 2/7, kind: AspectKind.BISEPTILE },
-                { target: 3/10, kind: AspectKind.TREDECILE },
-                { target: 3/8, kind: AspectKind.SESQUIQUADRATE },
-                { target: 2/5, kind: AspectKind.BIQUINTILE },
-                { target: 5/12, kind: AspectKind.QUINCUNX },
-                { target: 3/7, kind: AspectKind.TRISEPTILE },
-                { target: 4/9, kind: AspectKind.QUADRANOVILE },
-            ];
+            const binaryAspects = binaryAspectKinds
+				.filter(kind => aspectKindAngles[kind]?.[0] !== undefined)
+				.map(kind => ({
+					target: aspectKindAngles[kind]![0],
+					kind
+				}));
+
 
             for (const { target, kind } of binaryAspects) {
                 const error = Math.abs(d - target * TAU);
@@ -424,14 +506,34 @@ export function findAspects(
         }
     }
 
-    return [aspects.getAllAspects(), subaspects];
+	const aspectList = aspects.getAllAspects();
+	
+	// doesn't print anything, so it looks like the error we compute on-the-fly is already good
+	// which is odd, I don't see why that should be the case with irregular configurations
+	// might revisit this at some point
+	//for ( const aspect of aspectList ){
+	//	const computedError = aspectError(aspect, nodePositions) - 1e-10;
+	//	if (computedError > aspect.error){
+	//		console.log(aspect.kind, aspect.error, computedError);
+	//	}
+	//}
+	
+	for (const [aspect, subs] in subaspects){
+		for (const subaspect of subs){
+			subaspect.error = aspectError(subaspect, nodePositions);
+		}
+	}
+
+    return [aspectList, subaspects];
 }
 
 // TODO re aspects
 // XX switch errors to degrees
-//  abstract away aspect/angle/definition business
-//  develop generic error calculator
-//  ensure subaspects have error computed
+// XX abstract away aspect/angle/definition business
+// XX develop generic error calculator
+// ?? that business with non-regular aspect search
+// ??   use startingVertices. At each node try each orientation of the configuration
+// XX ensure subaspects have error computed
 
 //  create subaspect menu
 //  alt icons
@@ -440,6 +542,7 @@ export function findAspects(
 //  (optional/alt/something somehow) better contraparallels
 //  optional aspect colors (but how, really? seems pretty complicated...)
 
+//  order by error-per-node
 //  aspect type toggles
 //  aspect admissibility sliders
 //  memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)

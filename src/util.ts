@@ -4,6 +4,8 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+export const TAU = 2*Math.PI;
+
 export function toZonedTime(date: Date, tz: string) {
 	const d = dayjs(date).tz(tz);
 	const offsetMs = (d.utcOffset()+0) * 60 * 1000;
@@ -69,8 +71,7 @@ export function spreadIcons(
 
 export function normalizeAngleRad(a: number) {
 	// normalize to [0, 2pi)
-	const twoPi = 2*Math.PI;
-	return ((a % twoPi) + twoPi) % twoPi;
+	return ((a % TAU) + TAU) % TAU;
 }
 
 export function normalizeAngleDeg(a: number) {
@@ -84,7 +85,7 @@ export function interpolateAngles(coeff:number, a1: number, a2: number) {
 	if (a1 < a2) {
 		return (1-coeff) * a1 + coeff * a2 
 	} else {
-		return normalizeAngleRad((1-coeff) * a1 + coeff * (a2 + 2*Math.PI)); 
+		return normalizeAngleRad((1-coeff) * a1 + coeff * (a2 + TAU)); 
 	}
 }
 
@@ -97,14 +98,14 @@ export function interpolateShorterAngle(coeff:number, a1: number, a2: number) {
 		return normalizeAngleRad(a1 + coeff*diff);
 	} else {
 		// decreasing direction
-		return normalizeAngleRad(a1 - coeff*(2*Math.PI - diff));
+		return normalizeAngleRad(a1 - coeff*(TAU - diff));
 	}
 }
 
 export function angleShortDistance(a: number, b: number) {
 	// returns the length of the shorter of the two AB arcs
 	const d = normalizeAngleRad(a-b);
-	const td = d > Math.PI ? 2*Math.PI - d : d;
+	const td = d > Math.PI ? TAU - d : d;
 	return td;
 }
 
