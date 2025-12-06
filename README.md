@@ -18,35 +18,36 @@
 
 #### Minor, corrections, double-checking
 
+- Figure out why datetime widget crashes when receiving keyboard input
 - Lunar apogee/perigee calculations - the difference from mean to true mode is larger than one would expect, at times. The Meeus polynomial or the calculations might have some typo.
 - Space-based house systems. Need to find a primary source for them.
-- Switch ASC/DSC and other calculations to R3. No reason to believe they're wrong, I just don't like inscrutable trigonometric formulas.
 
 #### Major, required
 
 - Explainers - **?** icons next to anything nonobvious, with a toggle to hide them.
-- Time-based house systems (Placidus, Koch, Topocentric, etc)
-    - Just requires figuring out RA interpolation-by-time
+- Time-based house systems (~Placidus~, ~Koch~, Topocentric, etc)
 - Aspects rework
-    - Standard format: All angles 0-2pi, all angles in order
+    - ~Standard format: All angles 0-2pi, all angles in order~
     - Display errors (orbs) in degrees instead of radians
-    - All aspects:
-        - Minor binary: quincunx (150º), semi-sextile (30º), quintile (72º), semi-square (45º), sesquiquadrate (135º), biquintile (144º), septile (2rad/7)
-        - Others: T-Square, kite, yod, mystic rectangle
+    - ~All aspects~:
+        - ~Minor binary: quincunx (150º), semi-sextile (30º), quintile (72º), semi-square (45º), sesquiquadrate (135º), biquintile (144º), septile (2rad/7)~
+        - ~Others: T-Square, kite, yod, mystic rectangle~
         - Will have to think about the symbols for these - [wikipedia](https://en.wikipedia.org/wiki/Astrological_symbols) has them, but without grands.
     - Search takes max-non-physical params
     - Menu to customize physical node requirements (w shortcuts)
-    - Subaspects
-    - Lightweight node subset identifiers (for subaspect exclusion)
+    - ~Subaspects~
+    - ~Lightweight node subset identifiers (for subaspect exclusion)~
     - Subaspect menu
     - Customizable diagram colorcoding
     - Rethink the quantiles
-    - Decide on how to re/compute these
+    - ~Decide on how to re/compute these~
 
 #### Later
 
-- Hamburg school objects ("trans-neptunian/hypothetical"). Would be easy if we go off some secondary source but it's very unclear how Witte originally defined these. No intent to make a fully customizable menu for harmonics, just Cupido, Hades, Admetos, etc.
-- Really, no reason not to include every single small object [with an astrological symbol](https://en.wikipedia.org/wiki/Astrological_symbols) as long as we can find their orbital parameters in the jpl api (`scripts/small body parameter fetcher.py`).
+- True symbol ranges (with Ophiuchus)
+- ~Hamburg school objects ("trans-neptunian/hypothetical"). Would be easy if we go off some secondary source but it's very unclear how Witte originally defined these. No intent to make a fully customizable menu for harmonics, just Cupido, Hades, Admetos, etc.~
+- Full hamburg school support (but how, exactly?)
+- ~Really, no reason not to include every single small object [with an astrological symbol](https://en.wikipedia.org/wiki/Astrological_symbols) as long as we can find their orbital parameters in the jpl api (`scripts/small body parameter fetcher.py`).~
 - Other arabic parts. See [source](https://horoscopes.astro-seek.com/astrology-arabic-lots-list). As explained in `src/astro.ts`, we need to make some decisions about how/if to integrate other arabic parts.
 - Better fixed stars, conjunction indicator - integrate with the parallel diagram or put it in another.
 - ISS node (with the toilet api)

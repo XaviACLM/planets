@@ -115,7 +115,7 @@ const NodeSelector: React.FC<NodeSelectorProps> = ({
           <div className="node-list">
             {category.nodes.map(node => {
               const isSelected = selectedNodes.has(node);
-              const symbol = nodeSymbols.get(node);
+              const symbol = nodeSymbols[node];
               return (
                 <button
                   key={node}

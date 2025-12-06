@@ -70,16 +70,38 @@ import chaosSymbol from "./assets/body-symbols/Chaos.png"
 import radamanthusSymbol from "./assets/body-symbols/Radamanthus.png"
 import gkunhomdimaSymbol from "./assets/body-symbols/Gkunhomdima.png"
 
-import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
-import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
-import grandTrineSymbol from "./assets/aspect-symbols/Grand Trine.png"
 import conjunctionSymbol from "./assets/aspect-symbols/Conjunction.png"
 import oppositionSymbol from "./assets/aspect-symbols/Opposition.png"
-import sextileSymbol from "./assets/aspect-symbols/Sextile.png"
-import squareSymbol from "./assets/aspect-symbols/Square.png"
 import trineSymbol from "./assets/aspect-symbols/Trine.png"
+import squareSymbol from "./assets/aspect-symbols/Square.png"
+import sextileSymbol from "./assets/aspect-symbols/Sextile.png"
 import parallelSymbol from "./assets/aspect-symbols/Parallel.png"
 import contraparallelSymbol from "./assets/aspect-symbols/Contraparallel.png"
+
+import binovileSymbol from "./assets/aspect-symbols/Binovile.png"
+import biquintileSymbol from "./assets/aspect-symbols/Biquintile.png"
+import biseptileSymbol from "./assets/aspect-symbols/Biseptile.png"
+import decileSymbol from "./assets/aspect-symbols/Decile.png"
+import novileSymbol from "./assets/aspect-symbols/Novile.png"
+import quadranovileSymbol from "./assets/aspect-symbols/Quadranovile.png"
+import quincunxSymbol from "./assets/aspect-symbols/Quincunx.png"
+import quintileSymbol from "./assets/aspect-symbols/Quintile.png"
+import semisextileSymbol from "./assets/aspect-symbols/Semisextile.png"
+import semisquareSymbol from "./assets/aspect-symbols/Semisquare.png"
+import septileSymbol from "./assets/aspect-symbols/Septile.png"
+import sesquiquadrateSymbol from "./assets/aspect-symbols/Sesquiquadrate.png"
+import tredecileSymbol from "./assets/aspect-symbols/Tredecile.png"
+import triseptileSymbol from "./assets/aspect-symbols/Triseptile.png"
+import undecileSymbol from "./assets/aspect-symbols/Undecile.png"
+import vigintileSymbol from "./assets/aspect-symbols/Vigintile.png"
+
+import grandTrineSymbol from "./assets/aspect-symbols/Grand Trine.png"
+import grandSquareSymbol from "./assets/aspect-symbols/Grand Square.png"
+import grandSextileSymbol from "./assets/aspect-symbols/Grand Sextile.png"
+import fingerOfYodSymbol from "./assets/aspect-symbols/Finger of Yod.png"
+import kiteSymbol from "./assets/aspect-symbols/Kite.png"
+import mysticRectangleSymbol from "./assets/aspect-symbols/Mystic Rectangle.png"
+import tSquareSymbol from "./assets/aspect-symbols/T-Square.png"
 
 import dotSymbol from "./assets/general-symbols/Dot.png"
 
@@ -159,87 +181,108 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
     [Node.GKUNHOMDIMA] : false,
 }
 	
-export const zodiacSymbols = new Map<Zodiac, string>([
-	[Zodiac.Aries, ariesSymbol],
-	[Zodiac.Taurus, taurusSymbol],
-	[Zodiac.Gemini, geminiSymbol],
-	[Zodiac.Cancer, cancerSymbol],
-	[Zodiac.Leo, leoSymbol],
-	[Zodiac.Virgo, virgoSymbol],
-	[Zodiac.Libra, libraSymbol],
-	[Zodiac.Scorpio, scorpioSymbol],
-	[Zodiac.Sagittarius, sagittariusSymbol],
-	[Zodiac.Capricorn, capricornSymbol],
-	[Zodiac.Aquarius, aquariusSymbol],
-	[Zodiac.Pisces, piscesSymbol]
-]);
+export const zodiacSymbols: Record<Zodiac, string> = {
+	[Zodiac.Aries] : ariesSymbol,
+	[Zodiac.Taurus] : taurusSymbol,
+	[Zodiac.Gemini] : geminiSymbol,
+	[Zodiac.Cancer] : cancerSymbol,
+	[Zodiac.Leo] : leoSymbol,
+	[Zodiac.Virgo] : virgoSymbol,
+	[Zodiac.Libra] : libraSymbol,
+	[Zodiac.Scorpio] : scorpioSymbol,
+	[Zodiac.Sagittarius] : sagittariusSymbol,
+	[Zodiac.Capricorn] : capricornSymbol,
+	[Zodiac.Aquarius] : aquariusSymbol,
+	[Zodiac.Pisces] : piscesSymbol
+}
 
-export const nodeSymbols = new Map<Node, string>([
-	[Node.SUN, sunSymbol],
-	[Node.MOON, moonSymbol],
-	[Node.MERCURY, mercurySymbol],
-	[Node.VENUS, venusSymbol],
-	[Node.MARS, marsSymbol],
-	[Node.JUPITER, jupiterSymbol],
-	[Node.SATURN, saturnSymbol],
-	[Node.URANUS, uranusSymbol],
-	[Node.NEPTUNE, neptuneSymbol],
-	[Node.PLUTO, plutoSymbol],
-	[Node.ASCENDANT, ascendantSymbol],
-	[Node.DESCENDANT, descendantSymbol],
-	[Node.MIDHEAVEN, midheavenSymbol],
-	[Node.IMUM_COELI, imumCoeliSymbol],
-	[Node.LUNAR_ASCENDING, lunarAscendingSymbol],
-	[Node.LUNAR_DESCENDING, lunarDescendingSymbol],
-	[Node.LUNAR_APOGEE, lunarApogeeSymbol],
-	[Node.LUNAR_PERIGEE, lunarPerigeeSymbol],
-	[Node.PART_OF_FORTUNE, partOfFortuneSymbol],
-	[Node.CERES, ceresSymbol],
-	[Node.CHIRON, chironSymbol],
-	[Node.ERIS, erisSymbol],
-	[Node.HAUMEA, haumeaSymbol],
-	[Node.JUNO, junoSymbol],
-	[Node.MAKEMAKE, makemakeSymbol],
-	[Node.PALLAS, pallasSymbol],
-	[Node.SEDNA, sednaSymbol],
-	[Node.VESTA, vestaSymbol],
-	[Node.CUPIDO, cupidoSymbol],
-	[Node.HADES, hadesSymbol],
-	[Node.ZEUS, zeusSymbol],
-	[Node.KRONOS, kronosSymbol],
-	[Node.APOLLON, apollonSymbol],
-	[Node.ADMETOS, admetosSymbol],
-	[Node.VULCANUS, vulcanusSymbol],
-	[Node.POSEIDON, poseidonSymbol],
-    [Node.ASTRAEA, astraeaSymbol],
-    [Node.HYGIEA, hygieaSymbol],
-    [Node.PHOLUS, pholusSymbol],
-    [Node.NESSUS, nessusSymbol],
-    [Node.CHARIKLO, charikloSymbol],
-    [Node.HYLONOME, hylonomeSymbol],
-    [Node.CYLLARUS, cyllarusSymbol],
-    [Node.GONGGONG, gonggongSymbol],
-    [Node.QUAOAR, quaoarSymbol],
-    [Node.ORCUS, orcusSymbol],
-    [Node.SALACIA, salaciaSymbol],
-    [Node.VARDA, vardaSymbol],
-    [Node.IXION, ixionSymbol],
-    [Node.VARUNA, varunaSymbol],
-    [Node.TYPHON, typhonSymbol],
-    [Node.CHAOS, chaosSymbol],
-    [Node.RADAMANTHUS, radamanthusSymbol],
-    [Node.GKUNHOMDIMA, gkunhomdimaSymbol],
-]);
+export const nodeSymbols: Record<Node, string> = {
+	[Node.SUN] : sunSymbol,
+	[Node.MOON] : moonSymbol,
+	[Node.MERCURY] : mercurySymbol,
+	[Node.VENUS] : venusSymbol,
+	[Node.MARS] : marsSymbol,
+	[Node.JUPITER] : jupiterSymbol,
+	[Node.SATURN] : saturnSymbol,
+	[Node.URANUS] : uranusSymbol,
+	[Node.NEPTUNE] : neptuneSymbol,
+	[Node.PLUTO] : plutoSymbol,
+	[Node.ASCENDANT] : ascendantSymbol,
+	[Node.DESCENDANT] : descendantSymbol,
+	[Node.MIDHEAVEN] : midheavenSymbol,
+	[Node.IMUM_COELI] : imumCoeliSymbol,
+	[Node.LUNAR_ASCENDING] : lunarAscendingSymbol,
+	[Node.LUNAR_DESCENDING] : lunarDescendingSymbol,
+	[Node.LUNAR_APOGEE] : lunarApogeeSymbol,
+	[Node.LUNAR_PERIGEE] : lunarPerigeeSymbol,
+	[Node.PART_OF_FORTUNE] : partOfFortuneSymbol,
+	[Node.CERES] : ceresSymbol,
+	[Node.CHIRON] : chironSymbol,
+	[Node.ERIS] : erisSymbol,
+	[Node.HAUMEA] : haumeaSymbol,
+	[Node.JUNO] : junoSymbol,
+	[Node.MAKEMAKE] : makemakeSymbol,
+	[Node.PALLAS] : pallasSymbol,
+	[Node.SEDNA] : sednaSymbol,
+	[Node.VESTA] : vestaSymbol,
+	[Node.CUPIDO] : cupidoSymbol,
+	[Node.HADES] : hadesSymbol,
+	[Node.ZEUS] : zeusSymbol,
+	[Node.KRONOS] : kronosSymbol,
+	[Node.APOLLON] : apollonSymbol,
+	[Node.ADMETOS] : admetosSymbol,
+	[Node.VULCANUS] : vulcanusSymbol,
+	[Node.POSEIDON] : poseidonSymbol,
+    [Node.ASTRAEA] : astraeaSymbol,
+    [Node.HYGIEA] : hygieaSymbol,
+    [Node.PHOLUS] : pholusSymbol,
+    [Node.NESSUS] : nessusSymbol,
+    [Node.CHARIKLO] : charikloSymbol,
+    [Node.HYLONOME] : hylonomeSymbol,
+    [Node.CYLLARUS] : cyllarusSymbol,
+    [Node.GONGGONG] : gonggongSymbol,
+    [Node.QUAOAR] : quaoarSymbol,
+    [Node.ORCUS] : orcusSymbol,
+    [Node.SALACIA] : salaciaSymbol,
+    [Node.VARDA] : vardaSymbol,
+    [Node.IXION] : ixionSymbol,
+    [Node.VARUNA] : varunaSymbol,
+    [Node.TYPHON] : typhonSymbol,
+    [Node.CHAOS] : chaosSymbol,
+    [Node.RADAMANTHUS] : radamanthusSymbol,
+    [Node.GKUNHOMDIMA] : gkunhomdimaSymbol,
+}
 
-export const aspectSymbols = new Map<AspectKind, string>([
-	[AspectKind.GRAND_SEXTILE, grandSextileSymbol],
-	[AspectKind.GRAND_SQUARE, grandSquareSymbol],
-	[AspectKind.GRAND_TRINE, grandTrineSymbol],
-	[AspectKind.CONJUNCTION, conjunctionSymbol],
-	[AspectKind.OPPOSITION, oppositionSymbol],
-	[AspectKind.SEXTILE, sextileSymbol],
-	[AspectKind.SQUARE, squareSymbol],
-	[AspectKind.TRINE, trineSymbol],
-	[AspectKind.PARALLEL, parallelSymbol],
-	[AspectKind.CONTRAPARALLEL, contraparallelSymbol],
-]);
+export const aspectSymbols: Record<AspectKind, string> = {
+	[AspectKind.CONJUNCTION] : conjunctionSymbol,
+	[AspectKind.OPPOSITION] : oppositionSymbol,
+	[AspectKind.TRINE] : trineSymbol,
+	[AspectKind.SQUARE] : squareSymbol,
+	[AspectKind.SEXTILE] : sextileSymbol,
+	[AspectKind.PARALLEL] : parallelSymbol,
+	[AspectKind.CONTRAPARALLEL] : contraparallelSymbol,	
+	[AspectKind.BINOVILE] : binovileSymbol,
+	[AspectKind.BIQUINTILE] : biquintileSymbol,
+	[AspectKind.BISEPTILE] : biseptileSymbol,
+	[AspectKind.DECILE] : decileSymbol,
+	[AspectKind.NOVILE] : novileSymbol,
+	[AspectKind.QUADRANOVILE] : quadranovileSymbol,
+	[AspectKind.QUINCUNX] : quincunxSymbol,
+	[AspectKind.QUINTILE] : quintileSymbol,
+	[AspectKind.SEMISEXTILE] : semisextileSymbol,
+	[AspectKind.SEMISQUARE] : semisquareSymbol,
+	[AspectKind.SEPTILE] : septileSymbol,
+	[AspectKind.SESQUIQUADRATE] : sesquiquadrateSymbol,
+	[AspectKind.TREDECILE] : tredecileSymbol,
+	[AspectKind.TRISEPTILE] : triseptileSymbol,
+	[AspectKind.UNDECILE] : undecileSymbol,
+	[AspectKind.VIGINTILE] : vigintileSymbol,
+	[AspectKind.GRAND_TRINE] : grandTrineSymbol,
+	[AspectKind.GRAND_SQUARE] : grandSquareSymbol,
+	[AspectKind.GRAND_SEXTILE] : grandSextileSymbol,
+	[AspectKind.FINGER_OF_YOD] : fingerOfYodSymbol,
+	[AspectKind.KITE] : kiteSymbol,
+	[AspectKind.MYSTIC_RECTANGLE] : mysticRectangleSymbol,
+	[AspectKind.T_SQUARE] : tSquareSymbol,
+}
+

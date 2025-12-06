@@ -3,8 +3,9 @@ import { nodeSymbols, aspectSymbols, dotSymbol } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
 
-function AspectMenu({ aspects, onDelete, onHover }: {
+function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 	aspects: Aspect[],
+	showLabels: boolean,
 	onDelete: (aspect: Aspect) => void,
 	onHover: (aspect: Aspect | null) => void
 }) {
@@ -23,22 +24,28 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 						onMouseEnter={() => {onHover(aspect)}}
 						onMouseLeave={() => {onHover(null)}}
 					>
-						{/* aspect type icon */}
-						<img
-							src={aspectSymbols.get(aspect.kind)}
-							alt={aspect.kind}
-							width={symbolSize}
-							height={symbolSize}
-							className="aspect-icon"
-							style={{filter:"invert(1)"}}
-						/>
+						{ !showLabels &&
+							<img
+								src={aspectSymbols[aspect.kind]}
+								alt={aspect.kind}
+								width={symbolSize}
+								height={symbolSize}
+								className="aspect-icon"
+								style={{filter:"invert(1)"}}
+							/>
+						}
+						{ showLabels && 
+							<label>
+								{aspect.kind}
+							</label>
+						}
 						
 						{/* node icons */}
 						<div className="node-icons">
 							{aspect.nodes.map((node, i) => (
 								<img
 									key={i}
-									src={nodeSymbols.get(node)}
+									src={nodeSymbols[node]}
 									alt={node}
 									width={symbolSize}
 									height={symbolSize}
@@ -62,7 +69,7 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 						{/* error, quantile */}
 						<div className="aspect-values">
 							{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
-							 {aspect.error.toFixed(2)}Δ
+							 Δ{(aspect.error*180/Math.PI).toFixed(2)}º
 						</div>
 			  
 						{/* delete button */}

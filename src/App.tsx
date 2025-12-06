@@ -102,6 +102,7 @@ function App() {
 					<div className="aspect-menu">
 						<AspectMenu
 							aspects={aspects}
+							showLabels={showLabels}
 							onHover={(aspect) => {setHighlightedAspect(aspect)}}
 							onDelete={(aspect: Aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 						/>

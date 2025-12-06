@@ -388,7 +388,7 @@ export const hamburgSchoolParamsWitte: Partial<Record<Node, OrbitParams>> = {
         ma: -8.678,
         epoch: 2415020.0,
     },
-    [Node.VULKANUS]: {
+    [Node.VULCANUS]: {
         e: 0,
         a: 77.445895,
         i: 0,

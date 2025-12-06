@@ -1,7 +1,6 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance } from './util.ts'
 import { Node } from './astroDefs.ts'
 
-
 export const AspectKind = {
 	// major binary
 	CONJUNCTION: "Conjunction", // 0
@@ -40,6 +39,8 @@ export const AspectKind = {
 	KITE: "Kite", // grand sextile missing nodes 1 and 3
 } as const;
 export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
+
+//const AspectAngles: Record<Aspect, number[]> = 
 
 export class Aspect {
     kind: AspectKind;
@@ -372,7 +373,7 @@ export function findAspects(
                 { target: 1/11, kind: AspectKind.UNDECILE },
                 { target: 1/10, kind: AspectKind.DECILE },
                 { target: 1/9, kind: AspectKind.NOVILE },
-                { target: 1/8, kind: AspectKind.SEMI_SQUARE },
+                { target: 1/8, kind: AspectKind.SEMISQUARE },
                 { target: 1/7, kind: AspectKind.SEPTILE },
                 { target: 1/5, kind: AspectKind.QUINTILE },
                 { target: 2/9, kind: AspectKind.BINOVILE },
@@ -425,3 +426,20 @@ export function findAspects(
 
     return [aspects.getAllAspects(), subaspects];
 }
+
+// TODO re aspects
+// XX switch errors to degrees
+//  abstract away aspect/angle/definition business
+//  develop generic error calculator
+//  ensure subaspects have error computed
+
+//  create subaspect menu
+//  alt icons
+//  [ names / icons / alt icons ] toggle
+
+//  (optional/alt/something somehow) better contraparallels
+//  optional aspect colors (but how, really? seems pretty complicated...)
+
+//  aspect type toggles
+//  aspect admissibility sliders
+//  memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)

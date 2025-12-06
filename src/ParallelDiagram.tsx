@@ -145,7 +145,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 						return (
 							<image
 								key={i}
-								href={nodeSymbols.get(node)}
+								href={nodeSymbols[node]}
 								x={x-symbolSize/2}
 								y={y-symbolSize/2}
 								width={symbolSize}

@@ -69,7 +69,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 		return adjustedMap;
 	}, [nodeAngles]);
 
-	const zodiac: Zodiac[] = Array.from(zodiacSymbols.keys());
+	const zodiac: Zodiac[] = Array.from(Object.values(Zodiac));
 	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
 	const [hoveredZodiac, setHoveredZodiac] = useState<number | null>(null);
@@ -197,7 +197,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 					return (
 						<image
 							key={i}
-							href={zodiacSymbols.get(symbol)}
+							href={zodiacSymbols[symbol]}
 							x={x-symbolSize/2}
 							y={y-symbolSize/2}
 							width={symbolSize}
@@ -262,7 +262,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 						return (
 							<image
 								key={i}
-								href={nodeSymbols.get(node)}
+								href={nodeSymbols[node]}
 								x={x-symbolSize/2}
 								y={y-symbolSize/2}
 								width={symbolSize}
