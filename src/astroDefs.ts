@@ -488,3 +488,11 @@ export const defaultAspectKinds: Node[] = [
 	AspectKind.PARALLEL,
 	AspectKind.CONTRAPARALLEL,
 ]
+
+export const AspectPhysicalityFilter = {
+	ALL_PHYSICAL: "All",
+	ALL_BUT_ONE_PHYSICAL: "All but one",
+	ONE_PHYSICAL: "One",
+	NO_PHYSICAL: "None",
+} as const;
+export type AspectPhysicalityFilter = typeof AspectPhysicalityFilter[keyof typeof AspectPhysicalityFilter];

@@ -1,5 +1,5 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node, AspectKind } from './astroDefs.ts'
+import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes } from './astroDefs.ts'
 
 const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
@@ -305,7 +305,7 @@ class AspectGroup {
 
 export function findAspects(
     nodePositions: Map<Node, number>,
-    maxErrorPerNode: number = 0.01
+    maxErrorPerNode: number = 0.03
 ): Aspect[] {
 
     // should be unnecessary, but let's make sure
@@ -494,12 +494,22 @@ export function findAspects(
 export function filterAspects(
 	fullAspects: Aspect[],
 	selectedNodes: Set<Node>,
-	selectedAspectKinds: Set<AspectKind>
+	selectedAspectKinds: Set<AspectKind>,
+	aspectPhysicalityFilter: AspectPhysicalityFilter,
+	hamburgPhysical: boolean
 ){
-	return fullAspects.filter(aspect => 
-		selectedAspectKinds.has(aspect.kind) && 
-		aspect.nodes.every(node => selectedNodes.has(node))
-	);
+	return fullAspects.filter(aspect => {
+		const aspectSelected = selectedAspectKinds.has(aspect.kind);
+		const nodesSelected = aspect.nodes.every(node => selectedNodes.has(node));
+		const amtPhysical = aspect.nodes.filter(node => nodeTypes[node] == NodeType.BODY ||
+								  (nodeTypes[node] == NodeType.HYPOTHETICAL && hamburgPhysical)).length;
+		const amtNodes = aspect.nodes.length;
+		const physicalEnough = (aspectPhysicalityFilter == AspectPhysicalityFilter.NO_PHYSICAL) ||
+							   (aspectPhysicalityFilter == AspectPhysicalityFilter.ONE_PHYSICAL && amtPhysical >= 1) ||
+							   (aspectPhysicalityFilter == AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL && amtPhysical >= amtNodes - 1) ||
+							   (amtPhysical == amtNodes)
+		return aspectSelected && nodesSelected && physicalEnough;
+	});
 }
 
 
@@ -521,6 +531,10 @@ export function filterAspects(
 //  optional aspect colors (but how, really? seems pretty complicated...)
 
 // XX order by error-per-node
-//  aspect type toggles
-//  aspect admissibility sliders
-//  memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)
+// XX aspect type toggles
+// XX aspect admissibility sliders
+//  fix aspect physicality slider look
+// XX memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)
+//  the physicality criterion doesn't quite work
+
+//  check whether minor object positions are correct (based on earth vs ssb)

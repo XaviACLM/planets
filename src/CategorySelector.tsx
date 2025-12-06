@@ -1,4 +1,4 @@
-import React from 'react';
+import FC from 'react';
 import { Node, AspectKind, nodeCategories, aspectKindCategories } from './astroDefs';
 import { nodeSymbols, nodeShortName, aspectSymbols, aspectKindShortName } from './astroGraphics';
 	
@@ -67,7 +67,7 @@ const Selector = <T extends string | number>({
 
 
 
-export const NodeSelector: React.FC<Omit<SelectorProps<Node>, 'categories' | 'symbols' | 'labels'>> = (props) => (
+export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'symbols' | 'labels'>> = (props) => (
 	<Selector
 		{...props}
 		categories={nodeCategories}
@@ -76,7 +76,7 @@ export const NodeSelector: React.FC<Omit<SelectorProps<Node>, 'categories' | 'sy
 	/>
 );
 
-export const AspectKindSelector: React.FC<Omit<SelectorProps<AspectKind>, 'categories' | 'symbols' | 'labels'>> = (props) => (
+export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'symbols' | 'labels'>> = (props) => (
 	<Selector
 		{...props}
 		categories={aspectKindCategories}

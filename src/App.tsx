@@ -3,11 +3,12 @@ import { useState, useEffect, useMemo } from 'react'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import ParallelDiagram from './ParallelDiagram'
+import Slider from './Slider'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -16,21 +17,22 @@ import "./App.css";
 
 function App() {
 	
-	// config
 	const [showLabels, setShowLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [housePresweep, setHousePresweep] = useState<boolean>(false);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
-	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PORPHYRY);
+	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
+	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.MOST);
+	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
 
-	const [menuOpen, setMenuOpen] = useState<boolean>(false);
-	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
-	
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
+	
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
 	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( defaultNodes ));
 	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
@@ -39,11 +41,11 @@ function App() {
 	const fullAspects = useMemo(() => {
 		return findAspects(zodiacPositions.getNodePositions())[0];
 	}, [zodiacPositions]);
-	const [aspects, setAspects] = useState(filterAspects(fullAspects, selectedNodes, selectedAspectKinds));
+	const [aspects, setAspects] = useState(filterAspects(fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical));
 
 	useEffect(() => {
-		setAspects(filterAspects(fullAspects, selectedNodes, selectedAspectKinds));
-	}, [fullAspects, selectedNodes, selectedAspectKinds])
+		setAspects(filterAspects(fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical));
+	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical])
 	
 	useEffect(() => {
 		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
@@ -231,6 +233,24 @@ function App() {
 									))}
 								</select>
 							</div>
+							<hr/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={hamburgPhysical}
+									onChange={() => setHamburgPhysical(!hamburgPhysical)}
+									id="hamburg-physical"
+								/>
+								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
+							</div>
+							<hr/>
+							<Slider
+								options={Object.keys(AspectPhysicalityFilter) as AspectPhysicalityFilter[]}
+								labels={AspectPhysicalityFilter}
+								value={AspectPhysicalityFilter}
+								onChange={setAspectPhysicalityFilter}
+							/>
 						</div>
 					)}
 				</div>
