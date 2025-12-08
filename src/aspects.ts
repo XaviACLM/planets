@@ -523,6 +523,7 @@ export function filterAspects(
 // XX ensure subaspects have error computed
 
 // XX create subaspect menu
+//  but do i really want to?
 //  alt icons
 //  [ names / icons / alt icons ] toggle
 //  hide contraparallel diagram if both parallel thingues are off?
@@ -531,10 +532,16 @@ export function filterAspects(
 //  optional aspect colors (but how, really? seems pretty complicated...)
 
 // XX order by error-per-node
-// XX aspect type toggles
+// XXs aspect type toggles
 // XX aspect admissibility sliders
 //  fix aspect physicality slider look
 // XX memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)
-//  the physicality criterion doesn't quite work
+// XX the physicality criterion doesn't quite work
 
 //  check whether minor object positions are correct (based on earth vs ssb)
+
+//  the business with how error is aggregated into configurations. very complicated...
+//  is it complicated, though? It should be doable
+//  what's more annoying, really, is the business with the orbs-per-aspect
+
+// really, the best idea would be a sort of aspect searcher, per-kind, selectable, etc. But that's a long term thing

@@ -25,7 +25,7 @@ function App() {
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
-	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.MOST);
+	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
 
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
@@ -245,10 +245,11 @@ function App() {
 								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
 							</div>
 							<hr/>
+							Required # of physical nodes per aspect:
 							<Slider
-								options={Object.keys(AspectPhysicalityFilter) as AspectPhysicalityFilter[]}
+								options={Object.values(AspectPhysicalityFilter)}
 								labels={AspectPhysicalityFilter}
-								value={AspectPhysicalityFilter}
+								value={aspectPhysicalityFilter}
 								onChange={setAspectPhysicalityFilter}
 							/>
 						</div>

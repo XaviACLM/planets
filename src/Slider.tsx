@@ -50,7 +50,7 @@ const Slider = <T extends string>({
 						className={`slider-label ${value === option ? 'active' : ''}`}
 						onClick={() => onChange(option)}
 					>
-						{labels[option]}
+						{option}
 					</div>
 				))}
 			</div>
