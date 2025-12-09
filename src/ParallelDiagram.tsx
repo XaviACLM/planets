@@ -41,7 +41,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 	const strokeWidthTertiary = 0.1;
 	const symbolSize = 6;
 	const minimumIconSpace = 0.18; // radial
-	const pathSegments = 50;
+	const pathSegments = 100;
 	const waveAmplitude = 0.5;
 	
 	const { trueNodeAngles, adjustedNodeAngles } = useMemo(() => {
@@ -76,17 +76,6 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				preserveAspectRatio="xMidYMid meet"
 				style={{ width: "100%", height: "100%" }}
 			>
-				{/*
-				<circle cx="50%" cy="50%" r={radius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={radius-0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
-				
-				<circle cx="50%" cy="50%" r={aspectRadius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
-				
-				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
-				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
-				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
-				*/}
 				
 				{/*Main axis*/}
 				<line
@@ -236,11 +225,20 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 						const x1 = 50 + waveAmplitude * 50 * Math.sin(a1);
 						const x2 = 50 + waveAmplitude * 50 * Math.sin(a2);
 						
-						const pathData = [
-							`M ${x1} ${y1}`,
-							`L ${x2} ${y2}`,
-							`Z`
-						].join(" ");
+						let pathData: string;
+						if ( isParallel ) {
+							pathData = [
+								`M ${x1} ${y1}`,
+								`L ${x2} ${y2}`,
+								`Z`
+							].join(" ");
+						} else {
+							pathData = [
+								`M ${x1} ${y1}`,
+								`L ${x2} ${y1}`,
+								`L ${x2} ${y2}`,
+							].join(" ");
+						}
 						
 						if ( aspect == highlightedAspect ) {
 							return (
@@ -287,6 +285,34 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 					})
 				}
 				
+				{/* Mirrored wave for contraparallels */}
+				{Array.from({ length: pathSegments/2 }).map((_, i) => {
+					
+					if (i%2==0) {
+						return null;
+					}
+					
+					const startA = (i/pathSegments)*2*Math.PI;
+					const endA = ((i+1)/pathSegments)*2*Math.PI;
+					const startH = 100* startA / Math.PI - 50;
+					const endH = 100 * endA / Math.PI - 50;
+					
+					return (
+						<line
+							key={i}
+							x1={50 - waveAmplitude * 50 * Math.sin(startA)}
+							y1={startH}
+							x2={50 - waveAmplitude * 50 * Math.sin(endA)}
+							y2={endH}
+							stroke="white"
+							strokeWidth={strokeWidthSecondary}
+							
+						/>
+					);
+				})}
+				
+				{/* Fixed star business deactivated */}
+				{false && ( <>
 				
 				{/*Fixed star labels*/}
 				{Object.entries(fixedStars).map(([star, aDeg]: [string, number]) => {
@@ -339,6 +365,10 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 						/>
 					);
 				})}
+				
+				{/* closing of the deactivator */}
+				</>)} 
+				
 			</svg>
 		</div>
 	)

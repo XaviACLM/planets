@@ -526,10 +526,12 @@ export function filterAspects(
 //  but do i really want to?
 //  alt icons
 //  [ names / icons / alt icons ] toggle
-//  hide contraparallel diagram if both parallel thingues are off?
+// XX hide contraparallel diagram if both parallel thingues are off?
 
-//  (optional/alt/something somehow) better contraparallels
-//  optional aspect colors (but how, really? seems pretty complicated...)
+// XX (optional/alt/something somehow) better contraparallels
+// XX optional aspect colors (but how, really? seems pretty complicated...)
+//  figure out the stuff with the parallels diagram and the fixed stars. what do we want, really?
+//  if it does do fixed star stuff then deactivate that hide/unhide thing
 
 // XX order by error-per-node
 // XXs aspect type toggles

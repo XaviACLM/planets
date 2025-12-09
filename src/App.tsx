@@ -75,6 +75,10 @@ function App() {
 		return selectedCity.timezone;
 	}, [selectedCity]);
 	
+	const showParallelDiagram = useMemo(() => {
+		return selectedAspectKinds.has(AspectKind.PARALLEL) || selectedAspectKinds.has(AspectKind.CONTRAPARALLEL);
+	}, [selectedAspectKinds])
+	
 	return (
 		<div className="app-container">
 			<aside className="sidebar left-sidebar">
@@ -296,15 +300,17 @@ function App() {
 			</main>
 			
 			<aside className="sidebar right-sidebar">
-				<div className="module">
-					<ParallelDiagram
-						showLabels={showLabels}
-						zodiacPositions={zodiacPositions}
-						selectedNodes={selectedNodes}
-						aspects={aspects}
-						highlightedAspect={highlightedAspect}
-					/>
-				</div>
+				{ showParallelDiagram && 
+					<div className="module">
+						<ParallelDiagram
+							showLabels={showLabels}
+							zodiacPositions={zodiacPositions}
+							selectedNodes={selectedNodes}
+							aspects={aspects}
+							highlightedAspect={highlightedAspect}
+						/>
+					</div>
+				}
 				<div className="module">
 					<NodeSelector
 						selectedItems={selectedNodes}
