@@ -409,7 +409,7 @@ export const hamburgSchoolParamsWitte: Partial<Record<Node, OrbitParams>> = {
     },
 }
 
-// code below is from chatgpt.
+// code below is partly from chatgpt.
 // code itself only lightly checked, but results match the data from the jpl api
 
 // helper: solve Kepler's equation for eccentric anomaly E

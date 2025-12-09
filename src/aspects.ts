@@ -534,14 +534,14 @@ export function filterAspects(
 // XX order by error-per-node
 // XXs aspect type toggles
 // XX aspect admissibility sliders
-//  fix aspect physicality slider look
+// XX fix aspect physicality slider look
 // XX memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)
 // XX the physicality criterion doesn't quite work
 
-//  check whether minor object positions are correct (based on earth vs ssb)
+// XX check whether minor object positions are correct (based on earth vs ssb)
 
 //  the business with how error is aggregated into configurations. very complicated...
 //  is it complicated, though? It should be doable
 //  what's more annoying, really, is the business with the orbs-per-aspect
 
-// really, the best idea would be a sort of aspect searcher, per-kind, selectable, etc. But that's a long term thing
+//  really, the best idea would be a sort of aspect searcher, per-kind, selectable, etc. But that's a long term thing

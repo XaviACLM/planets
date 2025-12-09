@@ -4,13 +4,14 @@ import { type Aspect } from './aspects.ts'
 import { Node, Zodiac, AspectKind } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { spreadIcons, normalizeAngleDeg } from './util.ts'
-import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName } from './astroGraphics.ts'
+import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
 
-function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
+function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspectsColorcoded, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
 	showLabels: boolean,
 	flipText: boolean,
 	housePresweep: boolean,
 	rotateSymbols: boolean,
+	aspectsColorcoded: boolean,
 	zodiacPositions: ZodiacPositions,
 	selectedNodes: Set<Node>,
 	aspects: Aspect[],
@@ -395,6 +396,11 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 							throw new Error(`Unexpected number of nodes: ${aspect.nodes.length}`);
 						}
 						
+						const [r,g,b] = aspectKindColors[aspect.kind];
+						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+						const selectedStrokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary
+						const defaultStrokeWidth = aspectsColorcoded ? strokeWidthSecondary*3 : strokeWidthSecondary
+						
 						if ( aspect == highlightedAspect ) {
 							return (
 								<g key={`aspect-group-${i}`}>
@@ -402,7 +408,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 										key={-1}
 										d={pathData}
 										fill="none"
-										stroke="white"
+										stroke={stroke}
 										strokeWidth={blurBaseWidth}
 										filter="url(#path-glow)"
 										opacity={0}
@@ -419,8 +425,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 										key={i}
 										d={pathData}
 										fill="none"
-										stroke="white"
-										strokeWidth={strokeWidthPrimary}
+										stroke={stroke}
+										strokeWidth={selectedStrokeWidth}
 									/>
 								</g>
 							);
@@ -430,8 +436,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, zodia
 									key={i}
 									d={pathData}
 									fill="none"
-									stroke="white"
-									strokeWidth={strokeWidthSecondary}
+									stroke={stroke}
+									strokeWidth={defaultStrokeWidth}
 								/>
 							);
 						}

@@ -27,6 +27,7 @@ function App() {
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
+	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
 
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
@@ -252,6 +253,17 @@ function App() {
 								value={aspectPhysicalityFilter}
 								onChange={setAspectPhysicalityFilter}
 							/>
+							<hr/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={aspectsColorcoded}
+									onChange={() => setAspectsColorcoded(!aspectsColorcoded)}
+									id="aspects-colorcoded"
+								/>
+								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
+							</div>
 						</div>
 					)}
 				</div>
@@ -260,6 +272,7 @@ function App() {
 					flipText={flipText}
 					housePresweep={housePresweep}
 					rotateSymbols={rotateSymbols}
+					aspectsColorcoded={aspectsColorcoded}
 					zodiacPositions={zodiacPositions}
 					selectedNodes={selectedNodes}
 					aspects={aspects}
