@@ -200,8 +200,13 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	const nodeAngles = new Map<Node, number>();
 		
 	for ( const [node, body] of Object.entries(nodeToBody)) {
+		
+		//returns geocentric EQJ2000 vector. also stores date
 		const eqj = GeoVector(body, date, correctForAberration)
+		
+		// accepts EQJ2000 vector w date and turns into ECT (ecliptic of date)
 		const etc = Ecliptic(eqj);
+		
 		nodeAngles.set(node as Node, (etc.elon)/360*2*Math.PI);
 	}
 	

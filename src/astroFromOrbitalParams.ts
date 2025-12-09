@@ -1,4 +1,5 @@
 import { Node } from './astroDefs.ts'
+import { HelioVector, Ecliptic, RotateVector, Rotation_ECL_EQJ, Rotation_EQJ_ECT, Vector, AstroTime } from 'astronomy-engine'
 
 // types for orbital elements
 interface OrbitParams {
@@ -413,16 +414,16 @@ export const hamburgSchoolParamsWitte: Partial<Record<Node, OrbitParams>> = {
 
 // helper: solve Kepler's equation for eccentric anomaly E
 function solveKepler(M: number, e: number, tol = 1e-8): number {
-  // M in radians, return E in radians
-  let E = M;
-  for (let iter = 0; iter < 50; ++iter) {
-    const f = E - e * Math.sin(E) - M;
-    const f1 = 1 - e * Math.cos(E);
-    const dE = -f / f1;
-    E += dE;
-    if (Math.abs(dE) < tol) break;
-  }
-  return E;
+	// M in radians, return E in radians
+	let E = M;
+	for (let iter = 0; iter < 50; ++iter) {
+		const f = E - e * Math.sin(E) - M;
+		const f1 = 1 - e * Math.cos(E);
+		const dE = -f / f1;
+		E += dE;
+		if (Math.abs(dE) < tol) break;
+	}
+	return E;
 }
 
 // propagate elements to 3D position in heliocentric ecliptic (J2000)
@@ -430,58 +431,58 @@ function positionFromKepler(
   elems: OrbitParams,
   targetJD: number
 ): { x: number; y: number; z: number } {
-  const { a, e, i, om, w, ma, epoch } = elems;
+	const { a, e, i, om, w, ma, epoch } = elems;
 
-  // convert degrees to radians
-  const i_rad = i * Math.PI / 180;
-  const om_rad = om * Math.PI / 180;
-  const w_rad = w * Math.PI / 180;
+	// convert degrees to radians
+	const i_rad = i * Math.PI / 180;
+	const om_rad = om * Math.PI / 180;
+	const w_rad = w * Math.PI / 180;
 
-  // mean motion n (rad/day), from Kepler's third law: n = sqrt(μ / a^3)
-  // For Solar System, μ ≈ k^2, where k = Gaussian gravitational constant = 0.01720209895 AU^1.5/day
-  const k = 0.01720209895;
-  const n = k / Math.sqrt(a * a * a);
+	// mean motion n (rad/day), from Kepler's third law: n = sqrt(μ / a^3)
+	// For Solar System, μ ≈ k^2, where k = Gaussian gravitational constant = 0.01720209895 AU^1.5/day
+	const k = 0.01720209895;
+	const n = k / Math.sqrt(a * a * a);
 
-  const dt = (targetJD - epoch); // days
-  const M = (ma * Math.PI / 180) + n * dt;
-  const M_norm = ((M % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+	const dt = (targetJD - epoch); // days
+	const M = (ma * Math.PI / 180) + n * dt;
+	const M_norm = ((M % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
-  const E = solveKepler(M_norm, e);
+	const E = solveKepler(M_norm, e);
 
-  // true anomaly ν
-  const ν = 2 * Math.atan2(
-    Math.sqrt(1 + e) * Math.sin(E / 2),
-    Math.sqrt(1 - e) * Math.cos(E / 2)
-  );
+	// true anomaly ν
+	const ν = 2 * Math.atan2(
+		Math.sqrt(1 + e) * Math.sin(E / 2),
+		Math.sqrt(1 - e) * Math.cos(E / 2)
+	);
 
-  // distance r
-  const r = a * (1 - e * Math.cos(E));
+	// distance r
+	const r = a * (1 - e * Math.cos(E));
 
-  // position in orbital plane (perihelion at ν = 0)
-  const x_orb = r * Math.cos(ν);
-  const y_orb = r * Math.sin(ν);
+	// position in orbital plane (perihelion at ν = 0)
+	const x_orb = r * Math.cos(ν);
+	const y_orb = r * Math.sin(ν);
 
-  // now rotate from orbital plane to ecliptic plane:
-  // 1) argument of periapsis w
-  const x1 = x_orb * Math.cos(w_rad) - y_orb * Math.sin(w_rad);
-  const y1 = x_orb * Math.sin(w_rad) + y_orb * Math.cos(w_rad);
-  // 2) inclination i
-  const z2 = y1 * Math.sin(i_rad);
-  const y2 = y1 * Math.cos(i_rad);
-  // 3) longitude of ascending node om
-  const x3 = x1 * Math.cos(om_rad) - y2 * Math.sin(om_rad);
-  const y3 = x1 * Math.sin(om_rad) + y2 * Math.cos(om_rad);
-  const z3 = z2;
+	// now rotate from orbital plane to ecliptic plane:
+	// 1) argument of periapsis w
+	const x1 = x_orb * Math.cos(w_rad) - y_orb * Math.sin(w_rad);
+	const y1 = x_orb * Math.sin(w_rad) + y_orb * Math.cos(w_rad);
+	// 2) inclination i
+	const z2 = y1 * Math.sin(i_rad);
+	const y2 = y1 * Math.cos(i_rad);
+	// 3) longitude of ascending node om
+	const x3 = x1 * Math.cos(om_rad) - y2 * Math.sin(om_rad);
+	const y3 = x1 * Math.sin(om_rad) + y2 * Math.cos(om_rad);
+	const z3 = z2;
 
-  return { x: x3, y: y3, z: z3 };
+	return { x: x3, y: y3, z: z3 };
 }
 
 // convert cartesian to spherical ecliptic longitude (degrees)
 function eclipticLongitudeFromPosition(pos: { x: number; y: number; z: number }): number {
-  const { x, y } = pos;
-  let lon = Math.atan2(y, x) * 180 / Math.PI;
-  if (lon < 0) lon += 360;
-  return lon;
+	const { x, y } = pos;
+	let lon = Math.atan2(y, x) * 180 / Math.PI;
+	if (lon < 0) lon += 360;
+	return lon;
 }
 
 // main function: elements + date → ecliptic longitude
@@ -489,24 +490,45 @@ export function orbitalLongitude(
   elems: OrbitParams,
   date: Date
 ): number {
-  // convert JS Date to Julian Day
-  const jd = dateToJulianDay(date);
-  const pos = positionFromKepler(elems, jd);
-  const lon = eclipticLongitudeFromPosition(pos);
-  return lon;
+	// convert JS Date to Julian Day
+	const jd = dateToJulianDay(date);
+
+	// heliocentric ecliptic J2000
+	const pos = positionFromKepler(elems, jd);
+
+	const earthEqj2000 = HelioVector('Earth', date);
+	const earthEclj2000 = Ecliptic(earthEqj2000)
+	
+	// geocentric ecl j2000
+	const posgeo = {
+		x: pos.x - earthEclj2000.vec.x,
+		y: pos.y - earthEclj2000.vec.y,
+		z: pos.z - earthEclj2000.vec.z,
+	}
+	
+	// astronomy-engine doesn't provide an ec j2000 -> ect rotation matrix
+	// (or an ect1 -> ect2, for that matter)
+	// so we go ec j2000 -> eq j2000 -> ect_today
+	// we could skip v and pass posgeo directly (since it has the x,y,z attrs) but this is improper+dangerous
+	const v = new Vector(posgeo.x, posgeo.y, posgeo.z, new AstroTime(date))
+	const posEqj = RotateVector(Rotation_ECL_EQJ(), v);
+	const posEct = RotateVector(Rotation_EQJ_ECT(date), posEqj);
+	const lon = eclipticLongitudeFromPosition(posEct);
+
+	return lon;
 }
 
 // helper: convert JS Date to Julian Day (UTC)
 function dateToJulianDay(date: Date): number {
-  const utc = Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate(),
-    date.getUTCHours(),
-    date.getUTCMinutes(),
-    date.getUTCSeconds(),
-    date.getUTCMilliseconds()
-  );
-  // Julian Day at Unix epoch (1970-01-01 00:00 UTC) is 2440587.5
-  return utc / 86400000 + 2440587.5;
+	const utc = Date.UTC(
+		date.getUTCFullYear(),
+		date.getUTCMonth(),
+		date.getUTCDate(),
+		date.getUTCHours(),
+		date.getUTCMinutes(),
+		date.getUTCSeconds(),
+		date.getUTCMilliseconds()
+	);
+	// Julian Day at Unix epoch (1970-01-01 00:00 UTC) is 2440587.5
+	return utc / 86400000 + 2440587.5;
 }
