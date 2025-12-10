@@ -21,15 +21,15 @@ function App() {
 	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
 	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
-	const [housePresweep, setHousePresweep] = useState<boolean>(false);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
+	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
+	const [housePresweep, setHousePresweep] = useState<boolean>(false);
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
-	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
 
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
@@ -165,6 +165,28 @@ function App() {
 								/>
 								<label htmlFor="flip-text">Keep text right-side-up</label>
 							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={rotateSymbols}
+									onChange={() => setRotateSymbols(!rotateSymbols)}
+									id="rotate-symbols"
+								/>
+								<label htmlFor="rotate-symbols">Rotate symbols</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={aspectsColorcoded}
+									onChange={() => setAspectsColorcoded(!aspectsColorcoded)}
+									id="aspects-colorcoded"
+								/>
+								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
+							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
 								<input
@@ -175,17 +197,6 @@ function App() {
 									id="pre-sweep"
 								/>
 								<label htmlFor="pre-sweep">House pre-sweep</label>
-							</div>
-							<hr/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={rotateSymbols}
-									onChange={() => setRotateSymbols(!rotateSymbols)}
-									id="rotate-symbols"
-								/>
-								<label htmlFor="rotate-symbols">Rotate symbols</label>
 							</div>
 							<hr/>
 							<div className="toggle-switch">
@@ -282,17 +293,6 @@ function App() {
 								value={aspectPhysicalityFilter}
 								onChange={setAspectPhysicalityFilter}
 							/>
-							<hr/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={aspectsColorcoded}
-									onChange={() => setAspectsColorcoded(!aspectsColorcoded)}
-									id="aspects-colorcoded"
-								/>
-								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
-							</div>
 						</div>
 					)}
 				</div>

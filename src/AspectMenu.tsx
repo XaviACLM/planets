@@ -51,7 +51,10 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 						/>
 					}
 					{ showAspectLabels && 
-						<label className="aspect-label">
+						<label
+							className="aspect-label"
+							style = {{color:aspectsColorcoded ? `rgb(${r}, ${g}, ${b})` : "white"}}
+						>
 							{aspect.kind}
 						</label>
 					}

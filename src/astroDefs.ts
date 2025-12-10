@@ -497,6 +497,13 @@ export const AspectPhysicalityFilter = {
 } as const;
 export type AspectPhysicalityFilter = typeof AspectPhysicalityFilter[keyof typeof AspectPhysicalityFilter];
 
+export const AspectMenuMode = {
+	SHOW_ALL: "Show all",
+	SHOW_ONLY_MAXIMAL: "Show only maximal",
+	SHOW_MAXIMAL_WITH_SUBMENUS: "Show maximal with submenus",
+} as const;
+export type AspectMenuMode = typeof AspectMenuMode[keyof typeof AspectMenuMode];
+
 export const fixedStars: Record<string, number> = {
 	// in J2000 ecliptic longitude
 	["Aldebaran"] : 69.785,
