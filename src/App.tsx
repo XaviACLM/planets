@@ -17,7 +17,7 @@ import "./App.css";
 
 function App() {
 	
-	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(true);
+	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(false);
 	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
 	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
@@ -104,6 +104,7 @@ function App() {
 						<AspectMenu
 							aspects={aspects}
 							showAspectLabels={showAspectLabels}
+							aspectsColorcoded={aspectsColorcoded}
 							onHover={(aspect) => {setHighlightedAspect(aspect)}}
 							onDelete={(aspect: Aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 						/>
