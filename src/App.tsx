@@ -7,7 +7,7 @@ import Slider from './Slider'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
-import { findAspects, type Aspect, filterAspects } from './aspects.ts'
+import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList } from './aspects.ts'
 import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
@@ -48,31 +48,56 @@ function App() {
 	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
 	
     const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
-	const fullAspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions())[0];
-	}, [zodiacPositions]);
-	const [aspects, setAspects] = useState(filterAspects(fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical));
-
-	useEffect(() => {
-		setAspects(filterAspects(fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical));
-	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical])
 	
+	// fullAspects is the whole thing
+	// filteredAspects is the filtered thing, but by ref it is also the first thing
+	// ...so it's wrong.
+	// okay
+	// TODO make it so that filterAspects and formatAspects do memcpy
+	// this fucking sucks. this is a piece of shit. this is some of the shittiest logic i've designed.
+	// then we have fullAspects -> filteredAspects
+	// filteredAspects -> formattedAspects, flattenedAspects
+	// these last two are useStates.
+	// which fucking sucks. again. it fucking sucks.
+	// you know what? flattenedAspects is actually just an useMemo of formattedAspects. fuck you. i don't need to care. fuck you.
+	
+	// all aspects of all kinds from all nodes
+	const fullAspects = useMemo(() => {
+		return findAspects(zodiacPositions.getNodePositions());
+	}, [zodiacPositions]);
+	
+	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
+	const filteredAspects = useMemo(() => {
+		return filterAspects(fullAspects, zodiacPositions.getNodePositions(), selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical);
+	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
+
+	// aspects, filtered, in the format imposed by the selected aspect menu mode
+	const [aspects, setAspects] = useState<Aspect>(formatAspects(filteredAspects, selectedAspectMenuMode));
+	useEffect(() => {
+		return setAspects(formatAspects(filteredAspects, selectedAspectMenuMode));
+	}, [filteredAspects, selectedAspectMenuMode])
+	
+	// aspects, flattened down to a single list for processing in UI components
+	// (this might be possible to do w/ enforced redundancy but unnecessary and much too complicated, even considering the above)
+	const flattenedAspects = useMemo(() => {
+		return flattenSubaspectsToList(aspects)
+	}, [aspects])
+	
+	// recompute zodiac whenever date or time changes
 	useEffect(() => {
 		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
 	}, [selectedCity, selectedDate])
 	
+	// handlers for changing config details in the zodiac positions that only require partial recomputation
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeHouseSystem(selectedHouseSystem));
 	}, [selectedHouseSystem])
-	
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
-	
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeAstrologyMode(selectedAstrologyMode));
 	}, [selectedAstrologyMode])
-	
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
 	}, [hamburgSchoolMode])
@@ -333,7 +358,7 @@ function App() {
 					aspectsColorcoded={aspectsColorcoded}
 					zodiacPositions={zodiacPositions}
 					selectedNodes={selectedNodes}
-					aspects={aspects}
+					aspects={flattenedAspects}
 					highlightedAspect={highlightedAspect}
 				/>
 				
@@ -360,7 +385,7 @@ function App() {
 							showNodeLabels={showNodeLabels}
 							zodiacPositions={zodiacPositions}
 							selectedNodes={selectedNodes}
-							aspects={aspects}
+							aspects={flattenedAspects}
 							highlightedAspect={highlightedAspect}
 						/>
 					</div>

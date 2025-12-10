@@ -4,7 +4,7 @@ import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astro
 import "./AspectMenu.css";
 
 function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, onHover }: {
-	aspects: Aspect[],
+	aspects: Map<Aspect,Aspect[]>,
 	showAspectLabels: boolean,
 	aspectsColorcoded: boolean,
 	onDelete: (aspect: Aspect) => void,
@@ -16,7 +16,7 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 	return (
 		<div className="aspect-menu">
 
-			{aspects != null && aspects.map((aspect, index) => {
+			{aspects != null && aspects.keys().map((aspect, index) => {
 				const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind] : [255,255,255];
 				return <div
 					key={index}

@@ -1,5 +1,5 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes } from './astroDefs.ts'
+import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode } from './astroDefs.ts'
 
 export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
@@ -247,7 +247,7 @@ function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[
 		case AspectKind.FINGER_OF_YOD: {
 			const [n1, n2, n3] = [...n.slice(i), ...n.slice(0, i)];
 			const subaspects = [
-				new Aspect(AspectKind.SQUARE, [n1, n2]),
+				new Aspect(AspectKind.SEXTILE, [n1, n2]),
 				new Aspect(AspectKind.QUINCUNX, [n2, n3]),
 				new Aspect(AspectKind.QUINCUNX, [n1, n3]),
 			];
@@ -466,11 +466,28 @@ export function findAspects(
             }
         }
     }
-	const aspectList = aspects.getAllAspects().sort((a1, a2) => {
-		const score1 = a1.error / a1.nodes.length - (a1.nodes.length > 2 ? 1 : 0);
-		const score2 = a2.error / a2.nodes.length - (a2.nodes.length > 2 ? 1 : 0);
-		return score1 - score2;
-	});
+	
+	// guaranteed everything has had its error computed
+	for (const [aspect, subs] of subaspects){
+		for (const subaspect of subs){
+			subaspect.error = aspectError(subaspect, nodePositions);
+		}
+	}
+	
+	for (const aspect of aspects.getAllAspects()) {
+		if ( !subaspects.has(aspect) ) {
+			subaspects.set(aspect, []);
+		}
+	}
+
+	return subaspects;
+
+	// TODO remove this later. we'll sort in another place, keeping this code for then
+	//const aspectList = aspects.getAllAspects().sort((a1, a2) => {
+	//	const score1 = a1.error / a1.nodes.length - (a1.nodes.length > 2 ? 1 : 0);
+	//	const score2 = a2.error / a2.nodes.length - (a2.nodes.length > 2 ? 1 : 0);
+	//	return score1 - score2;
+	//});
 	
 	// doesn't print anything, so it looks like the error we compute on-the-fly is already good
 	// which is odd, I don't see why that should be the case with irregular configurations
@@ -481,73 +498,155 @@ export function findAspects(
 	//		console.log(aspect.kind, aspect.error, computedError);
 	//	}
 	//}
-	
-	for (const [aspect, subs] in subaspects){
-		for (const subaspect of subs){
-			subaspect.error = aspectError(subaspect, nodePositions);
-		}
-	}
-
-    return [aspectList, subaspects];
 }
 
-export function filterAspects(
-	fullAspects: Aspect[],
+export function ensureNoDuplicates(
+	subaspectMap: Map<Aspect, Aspect[]>
+){
+	// TODO also sort by error
+	const excludedAspects = new AspectGroup();
+    const sortedEntries = Array.from(subaspectMap.entries())
+        .sort(([a, sa], [b, sb]) => b.nodes.length - a.nodes.length);
+	subaspectMap.clear();
+	for (const [aspect, subs] of sortedEntries){
+		if  ( excludedAspects.contains(aspect) ){
+			continue;
+		}
+		excludedAspects.insert(aspect);
+		for (const subaspect of subs){
+			excludedAspects.insert(subaspect);
+		}
+		subaspectMap.set(aspect, subs);
+	}
+}
+
+function filterAspect(
+	aspect: Aspect,
 	selectedNodes: Set<Node>,
 	selectedAspectKinds: Set<AspectKind>,
 	aspectPhysicalityFilter: AspectPhysicalityFilter,
 	hamburgPhysical: boolean
 ){
-	return fullAspects.filter(aspect => {
-		const aspectSelected = selectedAspectKinds.has(aspect.kind);
-		const nodesSelected = aspect.nodes.every(node => selectedNodes.has(node));
-		const amtPhysical = aspect.nodes.filter(node => nodeTypes[node] == NodeType.BODY ||
-								  (nodeTypes[node] == NodeType.HYPOTHETICAL && hamburgPhysical)).length;
-		const amtNodes = aspect.nodes.length;
-		const physicalEnough = (aspectPhysicalityFilter == AspectPhysicalityFilter.NO_PHYSICAL) ||
-							   (aspectPhysicalityFilter == AspectPhysicalityFilter.ONE_PHYSICAL && amtPhysical >= 1) ||
-							   (aspectPhysicalityFilter == AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL && amtPhysical >= amtNodes - 1) ||
-							   (amtPhysical == amtNodes)
-		return aspectSelected && nodesSelected && physicalEnough;
-	});
+	const aspectSelected = selectedAspectKinds.has(aspect.kind);
+	const nodesSelected = aspect.nodes.every(node => selectedNodes.has(node));
+	const amtPhysical = aspect.nodes.filter(node => nodeTypes[node] == NodeType.BODY ||
+							  (nodeTypes[node] == NodeType.HYPOTHETICAL && hamburgPhysical)).length;
+	const amtNodes = aspect.nodes.length;
+	const physicalEnough = (aspectPhysicalityFilter == AspectPhysicalityFilter.NO_PHYSICAL) ||
+						   (aspectPhysicalityFilter == AspectPhysicalityFilter.ONE_PHYSICAL && amtPhysical >= 1) ||
+						   (aspectPhysicalityFilter == AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL && amtPhysical >= amtNodes - 1) ||
+						   (amtPhysical == amtNodes);
+	return aspectSelected && nodesSelected && physicalEnough;
+}
+
+export function filterAspects(
+	subaspectMap: Map<Aspect, Aspect[]>,
+	nodePositions: Map<Node, number>,
+	selectedNodes: Set<Node>,
+	selectedAspectKinds: Set<AspectKind>,
+	aspectPhysicalityFilter: AspectPhysicalityFilter,
+	hamburgPhysical: boolean
+): Map<Aspect, Aspect[]>{
+	//deepcopy subaspect map
+	const newMap = new Map<Aspect, Aspect[]>();
+    for (const [aspect, subs] of subaspectMap.entries()) {
+        newMap.set(aspect, [...subs]);
+    }
+	
+    // tasks list
+    const entries: [Aspect, Aspect[]][] = Array.from(newMap.entries());
+	
+    let i = 0;
+    while (i < entries.length) {
+        const [aspect, subaspects] = entries[i];
+        i++;
+        // if the aspect survives filtering, keep it
+        if (filterAspect(aspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)) {
+            continue;
+        }
+        // Otherwise remove it from the new map
+        newMap.delete(aspect);
+        // Insert its subaspects and queue them for later cleaning
+        for (const subaspect of subaspects) {
+            const subsubaspects = subaspectsOf(subaspect, nodePositions);
+            for (const s of subsubaspects) {
+                s.error = aspectError(s, nodePositions);
+            }
+            newMap.set(subaspect, subsubaspects);
+            entries.push([subaspect, subsubaspects]);
+        }
+    }
+    // only mutate the new map
+    ensureNoDuplicates(newMap);
+    return newMap;
+}
+
+function flattenSubaspects(
+    subaspectMap: Map<Aspect, Aspect[]>
+): Map<Aspect, Aspect[]> {
+    const newMap = new Map<Aspect, Aspect[]>();
+    for (const [aspect, subaspects] of subaspectMap) {
+        newMap.set(aspect, []);
+        for (const subaspect of subaspects) {
+            newMap.set(subaspect, []);
+        }
+    }
+    ensureNoDuplicates(newMap);
+    return newMap;
+}
+
+function clearSubaspects(
+    subaspectMap: Map<Aspect, Aspect[]>
+): Map<Aspect, Aspect[]> {
+    const newMap = new Map<Aspect, Aspect[]>();
+    for (const [aspect, subaspects] of subaspectMap) {
+        newMap.set(aspect, []);
+    }
+    return newMap;
+}
+
+function copySubaspects(
+    subaspectMap: Map<Aspect, Aspect[]>
+): Map<Aspect, Aspect[]> {
+    const newMap = new Map<Aspect, Aspect[]>();
+    for (const [aspect, subaspects] of subaspectMap) {
+        newMap.set(aspect, []);
+    }
+    return newMap;
+}
+	
+export function formatAspects(
+	subaspectMap: Map<Aspect, Aspect[]>,
+	selectedAspectMenuMode: AspectMenuMode
+){
+	if ( selectedAspectMenuMode == AspectMenuMode.SHOW_ALL ){
+		return flattenSubaspects(subaspectMap);
+	} else if ( selectedAspectMenuMode == AspectMenuMode.SHOW_ONLY_MAXIMAL ){
+		return clearSubaspects(subaspectMap);
+	} else if ( selectedAspectMenuMode == AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS ){
+		return copySubaspects(subaspectMap);
+	}
+}
+
+export function flattenSubaspectsToList(
+    subaspectMap: Map<Aspect, Aspect[]>
+): Map<Aspect, Aspect[]> {
+	return Array.from(flattenSubaspects(subaspectMap).keys());
 }
 
 
-
 // TODO re aspects
-// XX switch errors to degrees
-// XX abstract away aspect/angle/definition business
-// XX develop generic error calculator
-// ?? that business with non-regular aspect search
-// ??  use startingVertices. At each node try each orientation of the configuration
-// XX ensure subaspects have error computed
 
 //  create subaspect menu
-//  but with the different options and stuff
-// ?? alt icons
-// XX proper aspect label option
-// ?? [ names / icons / alt icons ] toggle
-// XX hide contraparallel diagram if both parallel thingues are off?
-// XX separate showlabels for nodes / symbols / aspects
 
-// XX (optional/alt/something somehow) better contraparallels
-// XX optional aspect colors (but how, really? seems pretty complicated...)
 //  figure out the stuff with the parallels diagram and the fixed stars. what do we want, really?
 //  if it does do fixed star stuff then deactivate that hide/unhide thing
-
-// XX order by error-per-node
-// XXs aspect type toggles
-// XX aspect admissibility sliders
-// XX fix aspect physicality slider look
-// XX memoize selected aspects (aspects, selectedNodes, selectedAspectKinds)
-// XX the physicality criterion doesn't quite work
-
-// XX check whether minor object positions are correct (based on earth vs ssb)
-
 
 //  the business with how error is aggregated into configurations. very complicated...
 //  is it complicated, though? It should be doable
 //  what's more annoying, really, is the business with the orbs-per-aspect
 //  but it's mostly annoying because I don't know how to set up the UI. rest is easy.
 
-//  really, the best idea would be a sort of aspect searcher, per-kind, selectable, etc. But that's a long term thing
+//  make sure that the aspect deletion still works alright
+
+//  the whole node spacing thing can move things over the 0/2pi line, which is fine for zodiac wheel but looks really weird for the parallel diagram
