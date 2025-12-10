@@ -8,7 +8,7 @@ import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -17,19 +17,26 @@ import "./App.css";
 
 function App() {
 	
+	// settings
+	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
+	const [housePresweep, setHousePresweep] = useState<boolean>(false);
+	
 	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(false);
 	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
 	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
+	
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
-	const [housePresweep, setHousePresweep] = useState<boolean>(false);
-	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
-	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
-	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
-	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
+	
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
+	const [selectedAspectMenuMode, setSelectedAspectMenuMode] = useState<AspectMenuMode>(AspectMenuMode.SHOW_ALL);
+	
+	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
+	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
+	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
+
 
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
@@ -122,6 +129,38 @@ function App() {
 					
 					{menuOpen && (
 						<div>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+							<span>House system</span>
+								<select
+									value={selectedHouseSystem}
+									onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(HouseSystem).map(system =>(
+										<option key={system} value={system}>
+											{system}
+										</option>
+									))}
+								</select>
+							</div>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={housePresweep}
+									onChange={() => setHousePresweep(!housePresweep)}
+									id="pre-sweep"
+								/>
+								<label htmlFor="pre-sweep">House pre-sweep</label>
+							</div>
+							<hr/>
 							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
@@ -188,15 +227,45 @@ function App() {
 								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
 							</div>
 							<hr/>
+							Required # of physical nodes per aspect:
+							<Slider
+								options={Object.values(AspectPhysicalityFilter)}
+								labels={AspectPhysicalityFilter}
+								value={aspectPhysicalityFilter}
+								onChange={setAspectPhysicalityFilter}
+							/>
+							<br/>
 							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
 									className="custom-checkbox"
-									checked={housePresweep}
-									onChange={() => setHousePresweep(!housePresweep)}
-									id="pre-sweep"
+									checked={hamburgPhysical}
+									onChange={() => setHamburgPhysical(!hamburgPhysical)}
+									id="hamburg-physical"
 								/>
-								<label htmlFor="pre-sweep">House pre-sweep</label>
+								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
+							</div>
+							<br/>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								<span>Display aspects</span>
+								<select
+									value={selectedAspectMenuMode}
+									onChange={(e) => setSelectedAspectMenuMode(e.target.value as AspectMenuMode)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(AspectMenuMode).map(system =>(
+										<option key={system} value={system}>
+											{system}
+										</option>
+									))}
+								</select>
 							</div>
 							<hr/>
 							<div className="toggle-switch">
@@ -232,29 +301,7 @@ function App() {
 							</div>
 							<hr/>
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-							<span>House system</span>
-								<select
-									value={selectedHouseSystem}
-									onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(HouseSystem).map(system =>(
-										<option key={system} value={system}>
-											{system}
-										</option>
-									))}
-								</select>
-							</div>
-							<hr/>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-							<span>Mode</span>
+								<span>Mode</span>
 								<select
 									value={selectedAstrologyMode}
 									onChange={(e) => setSelectedAstrologyMode(e.target.value as AstrologyMode)}
@@ -274,25 +321,6 @@ function App() {
 									))}
 								</select>
 							</div>
-							<hr/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={hamburgPhysical}
-									onChange={() => setHamburgPhysical(!hamburgPhysical)}
-									id="hamburg-physical"
-								/>
-								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
-							</div>
-							<hr/>
-							Required # of physical nodes per aspect:
-							<Slider
-								options={Object.values(AspectPhysicalityFilter)}
-								labels={AspectPhysicalityFilter}
-								value={aspectPhysicalityFilter}
-								onChange={setAspectPhysicalityFilter}
-							/>
 						</div>
 					)}
 				</div>

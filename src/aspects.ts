@@ -519,7 +519,7 @@ export function filterAspects(
 // XX abstract away aspect/angle/definition business
 // XX develop generic error calculator
 // ?? that business with non-regular aspect search
-// ??   use startingVertices. At each node try each orientation of the configuration
+// ??  use startingVertices. At each node try each orientation of the configuration
 // XX ensure subaspects have error computed
 
 //  create subaspect menu

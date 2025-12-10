@@ -498,9 +498,9 @@ export const AspectPhysicalityFilter = {
 export type AspectPhysicalityFilter = typeof AspectPhysicalityFilter[keyof typeof AspectPhysicalityFilter];
 
 export const AspectMenuMode = {
-	SHOW_ALL: "Show all",
-	SHOW_ONLY_MAXIMAL: "Show only maximal",
-	SHOW_MAXIMAL_WITH_SUBMENUS: "Show maximal with submenus",
+	SHOW_ALL: "All",
+	SHOW_ONLY_MAXIMAL: "Only maximal",
+	SHOW_MAXIMAL_WITH_SUBMENUS: "Maximal with submenus",
 } as const;
 export type AspectMenuMode = typeof AspectMenuMode[keyof typeof AspectMenuMode];
 
