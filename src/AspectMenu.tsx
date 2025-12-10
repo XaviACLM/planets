@@ -3,9 +3,9 @@ import { nodeSymbols, aspectSymbols, dotSymbol } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
 
-function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
+function AspectMenu({ aspects, showAspectLabels, onDelete, onHover }: {
 	aspects: Aspect[],
-	showLabels: boolean,
+	showAspectLabels: boolean,
 	onDelete: (aspect: Aspect) => void,
 	onHover: (aspect: Aspect | null) => void
 }) {
@@ -24,7 +24,7 @@ function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 						onMouseEnter={() => {onHover(aspect)}}
 						onMouseLeave={() => {onHover(null)}}
 					>
-						{ !showLabels &&
+						{ !showAspectLabels &&
 							<img
 								src={aspectSymbols[aspect.kind]}
 								alt={aspect.kind}
@@ -34,7 +34,7 @@ function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 								style={{filter:"invert(1)"}}
 							/>
 						}
-						{ showLabels && 
+						{ showAspectLabels && 
 							<label className="aspect-label">
 								{aspect.kind}
 							</label>

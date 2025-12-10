@@ -522,13 +522,13 @@ export function filterAspects(
 // ??   use startingVertices. At each node try each orientation of the configuration
 // XX ensure subaspects have error computed
 
-// XX create subaspect menu
-//  but do i really want to?
+//  create subaspect menu
+//  but with the different options and stuff
 // ?? alt icons
 // XX proper aspect label option
-//  [ names / icons / alt icons ] toggle
+// ?? [ names / icons / alt icons ] toggle
 // XX hide contraparallel diagram if both parallel thingues are off?
-// separate showlabels for nodes / symbols / aspects
+// XX separate showlabels for nodes / symbols / aspects
 
 // XX (optional/alt/something somehow) better contraparallels
 // XX optional aspect colors (but how, really? seems pretty complicated...)
@@ -548,5 +548,6 @@ export function filterAspects(
 //  the business with how error is aggregated into configurations. very complicated...
 //  is it complicated, though? It should be doable
 //  what's more annoying, really, is the business with the orbs-per-aspect
+//  but it's mostly annoying because I don't know how to set up the UI. rest is easy.
 
 //  really, the best idea would be a sort of aspect searcher, per-kind, selectable, etc. But that's a long term thing

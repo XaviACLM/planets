@@ -17,7 +17,9 @@ import "./App.css";
 
 function App() {
 	
-	const [showLabels, setShowLabels] = useState<boolean>(true);
+	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(true);
+	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
+	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [housePresweep, setHousePresweep] = useState<boolean>(false);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
@@ -101,7 +103,7 @@ function App() {
 					<div className="aspect-menu">
 						<AspectMenu
 							aspects={aspects}
-							showLabels={showLabels}
+							showAspectLabels={showAspectLabels}
 							onHover={(aspect) => {setHighlightedAspect(aspect)}}
 							onDelete={(aspect: Aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
 						/>
@@ -123,11 +125,33 @@ function App() {
 								<input
 									type="checkbox"
 									className="custom-checkbox"
-									checked={showLabels}
-									onChange={() => setShowLabels(!showLabels)}
-									id="show-labels"
+									checked={showAspectLabels}
+									onChange={() => setShowAspectLabels(!showAspectLabels)}
+									id="show-aspect-labels"
 								/>
-								<label htmlFor="show-labels">Show labels</label>
+								<label htmlFor="show-aspect-labels">Show aspect labels</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={showNodeLabels}
+									onChange={() => setShowNodeLabels(!showNodeLabels)}
+									id="show-node-labels"
+								/>
+								<label htmlFor="show-node-labels">Show node labels</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={showSymbolLabels}
+									onChange={() => setShowSymbolLabels(!showSymbolLabels)}
+									id="show-symbol-labels"
+								/>
+								<label htmlFor="show-symbol-labels">Show zodiac symbol labels</label>
 							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
@@ -272,7 +296,8 @@ function App() {
 					)}
 				</div>
 				<ZodiacWheel
-					showLabels={showLabels}
+					showNodeLabels={showNodeLabels}
+					showSymbolLabels={showSymbolLabels}
 					flipText={flipText}
 					housePresweep={housePresweep}
 					rotateSymbols={rotateSymbols}
@@ -303,7 +328,7 @@ function App() {
 				{ showParallelDiagram && 
 					<div className="module">
 						<ParallelDiagram
-							showLabels={showLabels}
+							showNodeLabels={showNodeLabels}
 							zodiacPositions={zodiacPositions}
 							selectedNodes={selectedNodes}
 							aspects={aspects}
@@ -315,14 +340,14 @@ function App() {
 					<NodeSelector
 						selectedItems={selectedNodes}
 						setSelectedItems={setSelectedNodes}
-						showLabels={showLabels}
+						showLabels={showNodeLabels}
 					/>
 				</div>
 				<div className="module">
 					<AspectKindSelector
 						selectedItems={selectedAspectKinds}
 						setSelectedItems={setSelectedAspectKinds}
-						showLabels={showLabels}
+						showLabels={showAspectLabels}
 					/>
 				</div>
 			</aside>

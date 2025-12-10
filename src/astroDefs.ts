@@ -496,3 +496,23 @@ export const AspectPhysicalityFilter = {
 	NO_PHYSICAL: "None",
 } as const;
 export type AspectPhysicalityFilter = typeof AspectPhysicalityFilter[keyof typeof AspectPhysicalityFilter];
+
+export const fixedStars: Record<string, number> = {
+	// in J2000 ecliptic longitude
+	["Aldebaran"] : 69.785,
+	["Algol"] : 56.163,
+	["Sirius"] : 104.077,
+	["Procyon"] : 115.781,
+	["Regulus"] : 149.825,
+	["Alkaid"] : 176.929,
+	["Alcyone"] : 59.988,
+	["Capella"] : 81.854,
+	["Spica"] : 203.837,
+	["Arcturus"] : 204.229,
+	["Alphecca"] : 222.291,
+	["Antares"] : 249.758,
+	["Vega"] : 285.312,
+	["Deneb Algedi"] : 323.538,
+	["Unukalhai"] : 232.071,
+	["Fomalhaut"] : 333.856, //not behenian, but royal
+}

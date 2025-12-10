@@ -1,34 +1,13 @@
 import { useMemo } from 'react'
 
 import { type Aspect } from './aspects.ts'
-import { Node, AspectKind } from './astroDefs.ts'
+import { Node, AspectKind, fixedStars } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { spreadIcons } from './util.ts'
 import { nodeSymbolHideable, nodeSymbols, nodeShortName } from './astroGraphics.ts'
 
-// from the code in scripts, pulling simbad data
-const fixedStars: Record<string, number> = {
-	// in J2000 ecliptic longitude
-	["Aldebaran"] : 69.785,
-	["Algol"] : 56.163,
-	["Sirius"] : 104.077,
-	["Procyon"] : 115.781,
-	["Regulus"] : 149.825,
-	["Alkaid"] : 176.929,
-	["Alcyone"] : 59.988,
-	["Capella"] : 81.854,
-	["Spica"] : 203.837,
-	["Arcturus"] : 204.229,
-	["Alphecca"] : 222.291,
-	["Antares"] : 249.758,
-	["Vega"] : 285.312,
-	["Deneb Algedi"] : 323.538,
-	["Unukalhai"] : 232.071,
-	["Fomalhaut"] : 333.856, //not behenian, but royal
-}
-
-function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
-	showLabels: boolean,
+function ParallelDiagram({ showNodeLabels, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
+	showNodeLabels: boolean,
 	zodiacPositions: ZodiacPositions,
 	selectedNodes: Set<Node>,
 	aspects: Aspect[],
@@ -119,7 +98,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 						const y = 100 * a / Math.PI - 50;
 						const x = 50 + waveAmplitude * 50 * Math.sin(a) + (left ? -symbolSize : symbolSize);
 						
-						if ( showLabels && nodeSymbolHideable[node] ) {
+						if ( showNodeLabels && nodeSymbolHideable[node] ) {
 							return null;
 						}
 						
@@ -170,7 +149,7 @@ function ParallelDiagram({ showLabels, zodiacPositions, selectedNodes, aspects, 
 				}
 				
 				{/*Node labels*/}
-				{adjustedNodeAngles != null && showLabels &&
+				{adjustedNodeAngles != null && showNodeLabels &&
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
 						const left = a > Math.PI;

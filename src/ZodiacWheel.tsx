@@ -6,8 +6,9 @@ import { ZodiacPositions } from './astro.ts'
 import { spreadIcons, normalizeAngleDeg } from './util.ts'
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
 
-function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspectsColorcoded, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
-	showLabels: boolean,
+function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep, rotateSymbols, aspectsColorcoded, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
+	showNodeLabels: boolean,
+	showSymbolLabels: boolean,
 	flipText: boolean,
 	housePresweep: boolean,
 	rotateSymbols: boolean,
@@ -21,8 +22,8 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspec
 	const sectorRadius = 48;
 	const symbolRadius = 43.5;
 	const radius = 39; // percent of viewport
-	const aspectRadius = showLabels ? 23 : 28;
-	const planetRadius = showLabels ? 35 : (radius+aspectRadius)/2;
+	const aspectRadius = showNodeLabels ? 23 : 28;
+	const planetRadius = showNodeLabels ? 35 : (radius+aspectRadius)/2;
 	
 	const minimumIconSpace = 0.12; // radial
 	
@@ -40,7 +41,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspec
 		
 		// this is vestigial, but it will be useful in the future to implement anglo style
 		const nodeAngles = new Map<Node, number>();
-		zodiacPositions.getNodePositions().forEach((position, node) => { // what?
+		zodiacPositions.getNodePositions().forEach((position, node) => {
 			if (selectedNodes.has(node)) {
 				nodeAngles.set(node, position + offset);
 			}
@@ -214,7 +215,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspec
 				})}
 				
 				{/*Zodiac labels*/}
-				{showLabels && 
+				{showSymbolLabels && 
 					zodiac.map((symbol, i) => {
 						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset + siderealOffset;
 						const x = 50 + sectorRadius * Math.cos(a);
@@ -249,7 +250,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspec
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-						if ( showLabels && nodeSymbolHideable[node] ) {
+						if ( showNodeLabels && nodeSymbolHideable[node] ) {
 							return null;
 						}
 						
@@ -309,7 +310,7 @@ function ZodiacWheel({ showLabels, flipText, housePresweep, rotateSymbols, aspec
 				}
 				
 				{/*Node labels*/}
-				{adjustedNodeAngles != null && showLabels && 
+				{adjustedNodeAngles != null && showNodeLabels && 
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
 						const x = 50 + planetRadius * Math.cos(a);
