@@ -1,7 +1,7 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
 import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes } from './astroDefs.ts'
 
-const aspectKindAngles: Record<AspectKind, number[] | null> = {
+export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
 	[AspectKind.OPPOSITION] : [1/2],
 	[AspectKind.TRINE] : [1/3],
@@ -524,9 +524,11 @@ export function filterAspects(
 
 // XX create subaspect menu
 //  but do i really want to?
-//  alt icons
+// ?? alt icons
+// XX proper aspect label option
 //  [ names / icons / alt icons ] toggle
 // XX hide contraparallel diagram if both parallel thingues are off?
+// separate showlabels for nodes / symbols / aspects
 
 // XX (optional/alt/something somehow) better contraparallels
 // XX optional aspect colors (but how, really? seems pretty complicated...)
@@ -541,6 +543,7 @@ export function filterAspects(
 // XX the physicality criterion doesn't quite work
 
 // XX check whether minor object positions are correct (based on earth vs ssb)
+
 
 //  the business with how error is aggregated into configurations. very complicated...
 //  is it complicated, though? It should be doable

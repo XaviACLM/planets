@@ -1,12 +1,9 @@
 .aspect-menu {
     padding: 0.5rem;
     overflow-y: auto;
-    //height: 100vh;
     background: black;
 	color: white;
-    
 	scrollbar-width: none;
-    //scrollbar-color: #666 black;
 }
 
 .aspect-item {
@@ -24,7 +21,7 @@
 .aspect-icon {
     width: 1rem;
     height: 1rem;
-    margin-right: 2rem;
+    margin-right: 3rem;
 }
 
 .node-icons {
@@ -53,4 +50,15 @@
     color: white;
 	padding: 0;
     font-size: 1rem;
+}
+
+.aspect-label {
+  width: 4rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 2rem;
+  text-align: left;
+  font-weight: bold;
+  font-variant: small-caps;
 }

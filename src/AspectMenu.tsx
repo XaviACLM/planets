@@ -1,4 +1,4 @@
-import { type Aspect } from './aspects.ts';
+import { type Aspect, aspectKindAngles } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
@@ -16,8 +16,8 @@ function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 		<div className="aspect-menu">
 
 			{aspects != null &&
-				aspects.map((aspect, index) => (
-					<div
+				aspects.map((aspect, index) => {
+					return <div
 						key={index}
 						className="aspect-item"
 						//todo
@@ -35,7 +35,7 @@ function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 							/>
 						}
 						{ showLabels && 
-							<label>
+							<label className="aspect-label">
 								{aspect.kind}
 							</label>
 						}
@@ -79,8 +79,8 @@ function AspectMenu({ aspects, showLabels, onDelete, onHover }: {
 						>
 							✕
 						</button>
-					</div>
-				)
+					</div>;
+				}
 			)}
 		</div>
 	);
