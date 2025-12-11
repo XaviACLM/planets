@@ -3,7 +3,7 @@ import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astro
 
 import "./AspectMenu.css";
 
-function aspectElement(
+function createAspectElement(
 	key: number,
 	aspect: Aspect,
 	showAspectLabels: boolean,
@@ -12,12 +12,10 @@ function aspectElement(
 	onDelete: (aspect: Aspect) => void,
 	onHover: (aspect: Aspect | null) => void
 ){
-	
 	const symbolSize = 20;
 	const fixedWidth = "90px";
 	const fixedHeight = "20px";
 	
-	const isSubaspectMock = key%3!=0;
 	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind] : [255,255,255];
 	return <div
 		key={key}
@@ -26,7 +24,7 @@ function aspectElement(
 		onMouseLeave={() => {onHover(null)}}
 	>
 		<div
-			className={`aspect-container ${isSubaspectMock ? 'subaspect' : ''}`}	
+			className={`aspect-container ${isSubaspect ? 'subaspect' : ''}`}	
 			style={{
 				width: fixedWidth,
 				height: fixedHeight,
@@ -120,8 +118,12 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 	
 	return (
 		<div className="aspect-menu">
-			{aspects != null && Array.from(aspects.keys()).map((aspect, index) => {
-				return aspectElement(index, aspect, showAspectLabels, aspectsColorcoded, false, onDelete, onHover);
+			{aspects != null && Array.from(aspects.entries()).map(([aspect, subaspects], index) => {
+				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, false, onDelete, onHover);
+				const subaspectElements = subaspects.map((subaspect, subindex) => {
+					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, true, onDelete, onHover);
+				})
+				return [aspectElement, ...subaspectElements]
 			})}
 		</div>
 	);

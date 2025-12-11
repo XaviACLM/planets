@@ -610,7 +610,7 @@ function copySubaspects(
 ): Map<Aspect, Aspect[]> {
     const newMap = new Map<Aspect, Aspect[]>();
     for (const [aspect, subaspects] of subaspectMap) {
-        newMap.set(aspect, []);
+        newMap.set(aspect, subaspects);
     }
     return newMap;
 }
@@ -649,5 +649,6 @@ export function flattenSubaspectsToList(
 //  what's more annoying, really, is the business with the orbs-per-aspect
 //  but it's mostly annoying because I don't know how to set up the UI. rest is easy.
 
+//  real constellations mode
 
 //  the whole node spacing thing can move things over the 0/2pi line, which is fine for zodiac wheel but looks really weird for the parallel diagram
