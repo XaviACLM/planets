@@ -634,7 +634,25 @@ export function flattenSubaspectsToList(
 	return Array.from(flattenSubaspects(subaspectMap).keys());
 }
 
-
+export function deleteAspectFromMap(
+	subaspectMap: Map<Aspect, Aspect[]>,
+	aspect: Aspect,
+	parentAspect: Aspect | null
+){
+	const newMap = copySubaspects(subaspectMap);
+	if ( parentAspect === null ){
+		const subaspects = subaspectMap.get(aspect);
+		newMap.delete(aspect);
+		for ( const subaspect of subaspects ){
+			newMap.set(subaspect, []);
+		}
+		ensureNoDuplicates(newMap);
+	} else {
+		const otherSubaspects = subaspectMap.get(parentAspect);
+		newMap.set(parentAspect, otherSubaspects.filter(subaspect => subaspect != aspect));
+	}
+	return newMap;
+}
 // TODO re aspects
 
 // XX create subaspect menu

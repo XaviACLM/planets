@@ -8,13 +8,14 @@ function createAspectElement(
 	aspect: Aspect,
 	showAspectLabels: boolean,
 	aspectsColorcoded: boolean,
-	isSubaspect: boolean,
+	parentAspect: Aspect | null,
 	onDelete: (aspect: Aspect) => void,
 	onHover: (aspect: Aspect | null) => void
 ){
 	const symbolSize = 20;
 	const fixedWidth = "90px";
 	const fixedHeight = "20px";
+	const isSubaspect = parentAspect !== null;
 	
 	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind] : [255,255,255];
 	return <div
@@ -101,7 +102,7 @@ function createAspectElement(
 		{/* delete button */}
 		<button
 			className="delete-button"
-			onClick={() => onDelete(aspect)}
+			onClick={() => onDelete(aspect, parentAspect)}
 		>
 			✕
 		</button>
@@ -112,16 +113,16 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 	aspects: Map<Aspect,Aspect[]>,
 	showAspectLabels: boolean,
 	aspectsColorcoded: boolean,
-	onDelete: (aspect: Aspect) => void,
+	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void
 }) {
 	
 	return (
 		<div className="aspect-menu">
 			{aspects != null && Array.from(aspects.entries()).map(([aspect, subaspects], index) => {
-				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, false, onDelete, onHover);
+				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover);
 				const subaspectElements = subaspects.map((subaspect, subindex) => {
-					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, true, onDelete, onHover);
+					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, aspect, onDelete, onHover);
 				})
 				return [aspectElement, ...subaspectElements]
 			})}

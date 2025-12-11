@@ -7,7 +7,7 @@ import Slider from './Slider'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
-import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList } from './aspects.ts'
+import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
 import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
@@ -113,6 +113,10 @@ function App() {
 		return selectedAspectKinds.has(AspectKind.PARALLEL) || selectedAspectKinds.has(AspectKind.CONTRAPARALLEL);
 	}, [selectedAspectKinds])
 	
+	function handleAspectDeletion(aspect: Aspect, parentAspect: Aspect | null){
+		setAspects(deleteAspectFromMap(aspects, aspect, parentAspect));
+	}
+	
 	return (
 		<div className="app-container">
 			<aside className="sidebar left-sidebar">
@@ -138,7 +142,7 @@ function App() {
 							showAspectLabels={showAspectLabels}
 							aspectsColorcoded={aspectsColorcoded}
 							onHover={(aspect) => {setHighlightedAspect(aspect)}}
-							onDelete={(aspect: Aspect) => setAspects(prev => prev.filter(a => a !== aspect))}
+							onDelete={handleAspectDeletion}
 						/>
 					</div>
 				</div>
