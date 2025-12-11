@@ -637,7 +637,9 @@ export function flattenSubaspectsToList(
 
 // TODO re aspects
 
-//  create subaspect menu
+// XX create subaspect menu
+
+//  make sure that the aspect deletion still works alright
 
 //  figure out the stuff with the parallels diagram and the fixed stars. what do we want, really?
 //  if it does do fixed star stuff then deactivate that hide/unhide thing
@@ -647,6 +649,5 @@ export function flattenSubaspectsToList(
 //  what's more annoying, really, is the business with the orbs-per-aspect
 //  but it's mostly annoying because I don't know how to set up the UI. rest is easy.
 
-//  make sure that the aspect deletion still works alright
 
 //  the whole node spacing thing can move things over the 0/2pi line, which is fine for zodiac wheel but looks really weird for the parallel diagram
