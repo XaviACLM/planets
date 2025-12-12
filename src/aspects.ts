@@ -530,6 +530,7 @@ export function findAspects(
 
 			// re: the sequel's use of maxMajorBAError, note contra/parallels and conjunctions/oppositions are all major binary
             // paralells / contraparallels: skip if conjunct
+			// note that in degenerate (close to the equinoxes) cases two nodes can be both opposite and parallel. we elect that this is fine
             if (d <= maxMajorBAError) {
                 continue;
             }
@@ -541,7 +542,7 @@ export function findAspects(
             
 			// parallel
             let error = Math.abs(s1 - s2);
-            if (error <= maxMajorBAError && d > maxMajorBAError) {
+            if (error <= maxMajorBAError) {
                 const aspect = new Aspect(AspectKind.PARALLEL, [n1, n2], null, error);
                 if (!excludedAspects.contains(aspect)) {
                     aspects.insert(aspect);

@@ -3,8 +3,50 @@ import { useState, useMemo } from 'react'
 import { type Aspect } from './aspects.ts'
 import { Node, Zodiac, AspectKind } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
-import { spreadIcons, normalizeAngleDeg } from './util.ts'
+import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
+
+function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRadius: number){
+	const as: number[] = aspect.nodes
+	.map( (node) => nodeAngles.get(node)!)
+	.map( (a: number) => (normalizeAngleRad(a)))
+	.sort();
+	const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
+	const ys: number[] = as.map( (a) => 50 - aspectRadius * Math.sin(a));
+	
+	if (aspect.nodes.length == 2) {
+		return [
+			`M ${xs[0]} ${ys[0]}`,
+			`L ${xs[1]} ${ys[1]}`
+		].join(" ");
+	} else if (aspect.nodes.length == 3) {
+		return [
+			`M ${xs[0]} ${ys[0]}`,
+			`L ${xs[1]} ${ys[1]}`,
+			`L ${xs[2]} ${ys[2]}`,
+			`Z`
+		].join(" ");
+	} else if (aspect.nodes.length == 4) {
+		return [
+			`M ${xs[0]} ${ys[0]}`,
+			`L ${xs[1]} ${ys[1]}`,
+			`L ${xs[2]} ${ys[2]}`,
+			`L ${xs[3]} ${ys[3]}`,
+			`Z`
+		].join(" ");
+	} else if (aspect.nodes.length == 6) {
+		return [
+			`M ${xs[0]} ${ys[0]}`,
+			`L ${xs[3]} ${ys[3]}`,
+			`M ${xs[1]} ${ys[1]}`,
+			`L ${xs[4]} ${ys[4]}`,
+			`M ${xs[2]} ${ys[2]}`,
+			`L ${xs[5]} ${ys[5]}`,
+		].join(" ");
+	} else {
+		throw new Error(`Unexpected number of nodes: ${aspect.nodes.length}`);
+	}
+}
 
 function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep, rotateSymbols, aspectsColorcoded, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
 	showNodeLabels: boolean,
@@ -94,7 +136,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
 
 				<image
-					key={-1}
+					key={0}
 					href={earthSymbol}
 					x={50-symbolSize/2}
 					y={50-symbolSize/2}
@@ -339,111 +381,66 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					})
 				}
 				
+				{/*Highlighted aspect*/}
+				{ highlightedAspect != null && (() => {
+						
+					if ( AspectKind.CONJUNCTION == highlightedAspect.kind ) {
+						return null;
+					}
+						
+					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
+					
+					const [r,g,b] = aspectKindColors[highlightedAspect.kind];
+					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+					const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
+					return (
+						<path
+							key={-aspects.indexOf(highlightedAspect)}
+							d={pathData}
+							fill="none"
+							stroke={stroke}
+							strokeWidth={blurBaseWidth}
+							filter="url(#path-glow)"
+							opacity={0}
+							style={{ transition: 'opacity 0.6s ease' }}
+							ref={node => {
+								if (node) {
+									requestAnimationFrame(() => {
+										node.style.opacity = "1";
+									});
+								 }
+							}}
+						/>
+					);
+				})()}
+				
 				{/*Aspects*/}
 				{aspects != null &&
 					aspects.map((aspect, i) => {
 						
-						if ( ([AspectKind.CONJUNCTION, AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL] as AspectKind[]).includes(aspect.kind) ) {
+						if ( AspectKind.CONJUNCTION == aspect.kind ) {
 							return null;
 						}
 						
-						if (!aspect.nodes.every(node => nodeAngles.has(node))){
-							return null;
-						}
-						
-						const as: number[] = aspect.nodes
-						.map( (node) => nodeAngles.get(node)!)
-						.map( (a: number) => ((((a)%(2*Math.PI))+2*Math.PI)%(2*Math.PI)))
-						.sort();
-						const xs: number[] = as.map( (a) => 50 + aspectRadius * Math.cos(a));
-						const ys: number[] = as.map( (a) => 50 - aspectRadius * Math.sin(a));
-						
-						let pathData: string;
-						
-						if (aspect.nodes.length == 2) {
-							pathData = [
-								`M ${xs[0]} ${ys[0]}`,
-								`L ${xs[1]} ${ys[1]}`,
-								`Z`
-							].join(" ");
-						} else if (aspect.nodes.length == 3) {
-							pathData = [
-								`M ${xs[0]} ${ys[0]}`,
-								`L ${xs[1]} ${ys[1]}`,
-								`L ${xs[2]} ${ys[2]}`,
-								`L ${xs[0]} ${ys[0]}`,
-								`Z`
-							].join(" ");
-						} else if (aspect.nodes.length == 4) {
-							pathData = [
-								`M ${xs[0]} ${ys[0]}`,
-								`L ${xs[1]} ${ys[1]}`,
-								`L ${xs[2]} ${ys[2]}`,
-								`L ${xs[3]} ${ys[3]}`,
-								`L ${xs[0]} ${ys[0]}`,
-								`Z`
-							].join(" ");
-						} else if (aspect.nodes.length == 6) {
-							pathData = [
-								`M ${xs[0]} ${ys[0]}`,
-								`L ${xs[3]} ${ys[3]}`,
-								`M ${xs[1]} ${ys[1]}`,
-								`L ${xs[4]} ${ys[4]}`,
-								`M ${xs[2]} ${ys[2]}`,
-								`L ${xs[5]} ${ys[5]}`,
-								`Z`
-							].join(" ");
-						} else {
-							throw new Error(`Unexpected number of nodes: ${aspect.nodes.length}`);
-						}
+						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
 						
 						const [r,g,b] = aspectKindColors[aspect.kind];
 						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
-						const selectedStrokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary
-						const defaultStrokeWidth = aspectsColorcoded ? strokeWidthSecondary*3 : strokeWidthSecondary
+						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 						
-						if ( aspect == highlightedAspect ) {
-							return (
-								<g key={`aspect-group-${i}`}>
-									<path
-										key={-1}
-										d={pathData}
-										fill="none"
-										stroke={stroke}
-										strokeWidth={blurBaseWidth}
-										filter="url(#path-glow)"
-										opacity={0}
-										style={{ transition: 'opacity 0.6s ease' }}
-										ref={node => {
-											if (node) {
-												requestAnimationFrame(() => {
-													node.style.opacity = "1";
-												});
-											 }
-										}}
-									/>
-									<path
-										key={i}
-										d={pathData}
-										fill="none"
-										stroke={stroke}
-										strokeWidth={selectedStrokeWidth}
-									/>
-								</g>
-							);
-						} else {
-							return (
-								<path
-									key={i}
-									d={pathData}
-									fill="none"
-									stroke={stroke}
-									strokeWidth={defaultStrokeWidth}
-								/>
-							);
-						}
+						return (
+							<path
+								key={i}
+								d={pathData}
+								fill="none"
+								stroke={stroke}
+								strokeWidth={strokeWidth}
+							/>
+						);
 					})
 				}
+
+				// highlighted aspect
 
 				{/*Zodiac symbol highlighting*/}
 				{Array.from({ length: 12 }).map((_, i) => {

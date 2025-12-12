@@ -316,6 +316,8 @@ export const aspectKindColors: Record<AspectKind, [number, number, number]> = {
 	[AspectKind.TRINE] : [73, 41, 245],
 	[AspectKind.SQUARE] : [41, 120, 62],
 	[AspectKind.SEXTILE] : [156, 156, 135],
+	[AspectKind.PARALLEL] : [256, 99, 78],
+	[AspectKind.CONTRAPARALLEL] : [36, 78, 130],
 	
 	[AspectKind.BINOVILE] : [120, 67, 88],
 	[AspectKind.BIQUINTILE] : [0, 67, 67],
