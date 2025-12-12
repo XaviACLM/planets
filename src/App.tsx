@@ -8,7 +8,7 @@ import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -31,7 +31,8 @@ function App() {
 	
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
-	const [selectedAspectMenuMode, setSelectedAspectMenuMode] = useState<AspectMenuMode>(AspectMenuMode.SHOW_ALL);
+	const [selectedAspectMenuMode, setSelectedAspectMenuMode] = useState<AspectMenuMode>(AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS);
+	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_SUM);
 	
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
@@ -63,8 +64,8 @@ function App() {
 	
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions());
-	}, [zodiacPositions]);
+		return findAspects(zodiacPositions.getNodePositions(), selectedAspectErrorMode);
+	}, [zodiacPositions, selectedAspectErrorMode]);
 	
 	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
 	const filteredAspects = useMemo(() => {
@@ -255,7 +256,30 @@ function App() {
 								/>
 								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
 							</div>
+							
 							<hr/>
+							
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								<span>Configuration error</span>
+								<select
+									value={selectedAspectErrorMode}
+									onChange={(e) => setSelectedAspectErrorMode(e.target.value as AspectErrorMode)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(AspectErrorMode).map(system =>(
+										<option key={system} value={system}>
+											{system}
+										</option>
+									))}
+								</select>
+							</div>
 							Required # of physical nodes per aspect:
 							<Slider
 								options={Object.values(AspectPhysicalityFilter)}
@@ -274,7 +298,6 @@ function App() {
 								/>
 								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
 							</div>
-							<br/>
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 								<span>Display aspects</span>
 								<select
@@ -296,7 +319,9 @@ function App() {
 									))}
 								</select>
 							</div>
+							
 							<hr/>
+							
 							<div className="toggle-switch">
 								<span>Lunar node  mode:</span>
 								<button

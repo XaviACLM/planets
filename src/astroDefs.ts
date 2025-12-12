@@ -504,6 +504,16 @@ export const AspectMenuMode = {
 } as const;
 export type AspectMenuMode = typeof AspectMenuMode[keyof typeof AspectMenuMode];
 
+export const AspectErrorMode = {
+	POINTWISE_MAX: "Pointwise max",
+	POINTWISE_SUM: "Pointwise sum",
+	PAIRWISE_OUTER_MAX: "Pairwise outer max",
+	PAIRWISE_OUTER_SUM: "Pairwise outer sum",
+	PAIRWISE_FULL_MAX: "Pairwise full max",
+	PAIRWISE_FULL_SUM: "Pairwise full sum",
+} as const;
+export type AspectErrorMode = typeof AspectErrorMode[keyof typeof AspectErrorMode];
+
 export const fixedStars: Record<string, number> = {
 	// in J2000 ecliptic longitude
 	["Aldebaran"] : 69.785,

@@ -1,5 +1,5 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode } from './astroDefs.ts'
+import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode, AspectErrorMode } from './astroDefs.ts'
 
 export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
@@ -117,7 +117,11 @@ function ensureCorrectOrderingInAspectList(
     }
 }
 
-function aspectError(aspect: Aspect, nodePositions: Map<Node, number>): number {
+function aspectError(
+	aspect: Aspect,
+	nodePositions: Map<Node, number>,
+	aspectErrorMode: AspectErrorMode
+): number {
 	const n = aspect.nodes;
 	
 	if ( binaryAspectKinds.includes(aspect.kind) ) {
@@ -128,35 +132,78 @@ function aspectError(aspect: Aspect, nodePositions: Map<Node, number>): number {
 	
 	if ( n.length == 2 ){
 		// dealing with a contra/parallel
-		const p1 = sawtoothSine(n[0]);
-		const p2 = sawtoothSine(n[1]);
+		const p1 = sawtoothSine(nodePositions.get(n[0])!);
+		const p2 = sawtoothSine(nodePositions.get(n[1])!);
 		return Math.abs(aspect.kind == AspectKind.PARALLEL ? p1-p2 : p1+p2);
 	}
 	
+	//TODO the business
+	
 	const k = n.length;
 	const angles = [0, ...aspectKindAngles[aspect.kind].map(angle => angle * TAU)];
-	let leastError = Infinity;
-	for (let offsetIdx = 0; offsetIdx < k; offsetIdx++) {
-		// n (vertex) we're looking at starts at basisIdx + offsetIdx
-		// idx in angles starts at offsetIdx
-		let error = 0;
-		const startAngle = angles[offsetIdx];
-		const startIdx = (aspect.basisNodeIdx + offsetIdx) % k;
-		const startPos = nodePositions.get(n[startIdx])!;
-		for (let i = 1; i < k; i++) {
-			const vertexIdx = (i + startIdx) % k;
-			const angleIdx = (i + offsetIdx) % k;
-			const idealPos = normalizeAngleRad(startPos + angles[angleIdx] - startAngle);
-			const p = nodePositions.get(n[vertexIdx])!;
-			error += angleShortDistance(p, idealPos);
+	
+	if ( [AspectErrorMode.POINTWISE_SUM, AspectErrorMode.POINTWISE_MAX].includes(aspectErrorMode) ){
+		let leastError = Infinity;
+		for (let offsetIdx = 0; offsetIdx < k; offsetIdx++) {
+			// n (vertex) we're looking at starts at basisIdx + offsetIdx
+			// idx in angles starts at offsetIdx
+			let error = 0;
+			const startAngle = angles[offsetIdx];
+			const startIdx = (aspect.basisNodeIdx + offsetIdx) % k;
+			const startPos = nodePositions.get(n[startIdx])!;
+			for (let i = 1; i < k; i++) {
+				const vertexIdx = (i + startIdx) % k;
+				const angleIdx = (i + offsetIdx) % k;
+				const idealPos = normalizeAngleRad(startPos + angles[angleIdx] - startAngle);
+				const p = nodePositions.get(n[vertexIdx])!;
+				if ( aspectErrorMode == AspectErrorMode.POINTWISE_SUM ){
+					error += angleShortDistance(p, idealPos);
+				} else {
+					error = Math.max(error, angleShortDistance(p, idealPos));
+				}
+			}
+			leastError = Math.min(leastError, error);
 		}
-		leastError = Math.min(leastError, error);
+		return leastError;
+	} else if ( [AspectErrorMode.PAIRWISE_OUTER_MAX, AspectErrorMode.PAIRWISE_OUTER_SUM].includes(aspectErrorMode) ) {
+		let totalError = 0;
+		for (let i1=0; i1<k; i1++){
+			const i2 = (i1+1)%k;
+			const p1 = nodePositions.get(n[i1])!;
+			const p2 = nodePositions.get(n[i2])!;
+			const d = ((p2-p1)%TAU+TAU)%TAU;
+			const dTarget = ((angles[i2]-angles[i1])%TAU+TAU)%TAU;
+			const error = angleShortDistance(d, dTarget);
+			if ( aspectErrorMode == AspectErrorMode.PAIRWISE_OUTER_SUM ){
+				totalError += error;
+			} else {
+				totalError = Math.max(totalError, error);
+			}
+		}
+		return totalError;
+	} else { // Pairwise inner (max, sum)
+		let totalError = 0;
+		for ( const subaspect of subaspectsOf(aspect, nodePositions) ){
+			if (subaspect.nodes.length > 2){
+				continue;
+			}
+			const error = aspectError(aspect, nodePositions, AspectErrorMode.PAIRWISE_OUTER_MAX); // mode doesn't matter
+			if ( aspectErrorMode == AspectErrorMode.PAIRWISE_FULL_SUM ){
+				totalError += error;
+			} else {
+				totalError = Math.max(totalError, error);
+			}
+		}
+		return totalError;
 	}
 
 	return leastError;
 }
 
-function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[] {
+function subaspectsOf(
+	aspect: Aspect,
+	nodePositions: Map<Node, number>
+): Aspect[] {
 	// we could write this function synthetically from aspectKindAngles but that'd be pointlessly slow
 	// it would be possible to precompute subaspect tables but that'd be pointlessly slow (in dev time)
 	if ( binaryAspectKinds.includes(aspect.kind) ) {
@@ -235,8 +282,8 @@ function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[
 			const [n1, n2, n3, n4] = [...n.slice(i), ...n.slice(0, i)];
 			const subaspects = [
 				new Aspect(AspectKind.SEXTILE, [n1, n2]),
-				new Aspect(AspectKind.TRINE, [n2, n3]),
 				new Aspect(AspectKind.SEXTILE, [n3, n4]),
+				new Aspect(AspectKind.TRINE, [n2, n3]),
 				new Aspect(AspectKind.TRINE, [n1, n4]),
 				new Aspect(AspectKind.OPPOSITION, [n1, n3]),
 				new Aspect(AspectKind.OPPOSITION, [n2, n4]),
@@ -258,10 +305,10 @@ function subaspectsOf(aspect: Aspect, nodePositions: Map<Node, number>): Aspect[
 			const [n1, n2, n3, n4] = [...n.slice(i), ...n.slice(0, i)];
 			const subaspects = [
 				new Aspect(AspectKind.TRINE, [n1, n2]),
-				new Aspect(AspectKind.OPPOSITION, [n1, n3]),
 				new Aspect(AspectKind.TRINE, [n1, n4]),
-				new Aspect(AspectKind.SEXTILE, [n2, n3]),
 				new Aspect(AspectKind.TRINE, [n2, n4]),
+				new Aspect(AspectKind.OPPOSITION, [n1, n3]),
+				new Aspect(AspectKind.SEXTILE, [n2, n3]),
 				new Aspect(AspectKind.SEXTILE, [n3, n4]),
 				new Aspect(AspectKind.GRAND_TRINE, [n1, n2, n4]),
 			];
@@ -305,7 +352,8 @@ class AspectGroup {
 
 export function findAspects(
     nodePositions: Map<Node, number>,
-    maxErrorPerNode: number = 0.03
+	aspectErrorMode: AspectErrorMode,
+    maxError: number = 0.12,
 ): Aspect[] {
 
     // should be unnecessary, but let's make sure
@@ -322,8 +370,7 @@ export function findAspects(
     const subaspects = new Map<Aspect, Aspect[]>(); // maps every aspect to its subaspects
     const excludedAspects = new AspectGroup(); // holds every subaspect of an aspect we've found, to avoid reintroduction
 	
-    // we start with the grands, in a reverse topological order of inclusion
-    // grand sextile, kite, grand square, finger of yod, mystic rectangle, t-square, grand trine
+    // we start with the grands, in a reverse topological order of inclusion <= descending amt of nodes
     // populate and use aspects, subaspects, and excluded_aspects during search
     const aspectConfigs = configurationAspectKinds
 	.map(kind => ({
@@ -334,65 +381,104 @@ export function findAspects(
 
 	for (const config of aspectConfigs) {
         const { kind, angles, requiresBasis } = config;
+		const k = angles.length + 1;
         const scaledAngles = angles.map(angle => angle * TAU);
         const numVertices = scaledAngles.length + 1;
 
         for (const basisNode of orderedNodes) {
             const basisPosition = nodePositions.get(basisNode)!;
             
-            // node_error[vertex_idx][node] = how far away node at idx is from the required position to be the vertex-idx-th vertex of the aspect
-            let nodeErrors: Array<Map<Node, number>> = scaledAngles.map(angle => {
-                const vertexError = new Map<Node, number>();
-                for (const node of orderedNodes) {
-                    const position = nodePositions.get(node)!;
-                    //const error = Math.abs(((position - basisPosition) % TAU) - angle);
-                    const error = angleShortDistance(normalizeAngleRad(basisPosition + angle), position);
-                    vertexError.set(node, error);
-                }
-                return vertexError;
-            });
+			
+			// for pairwise we have to compute error on-the-fly, I think
+			// can't easily pre-filter them, either (well, we can, but it's done differently)
+			// similar flow, but I might just duplicate the code entirely to avoid overcomplication
+					
+			// node_error[vertex_idx][node] = how far away node at idx is from the required position to be the vertex-idx-th vertex of the aspect
+			let nodeErrors: Array<Map<Node, number>> = scaledAngles.map(angle => {
+				const vertexError = new Map<Node, number>();
+				for (const node of orderedNodes) {
+					const position = nodePositions.get(node)!;
+					const error = angleShortDistance(normalizeAngleRad(basisPosition + angle), position);
+					vertexError.set(node, error);
+				}
+				return vertexError;
+			});
 
-            // remove everything above max error
-            nodeErrors = nodeErrors.map(vertexError => {
-                const filtered = new Map<Node, number>();
-                for (const [node, error] of vertexError.entries()) {
-                    if (error < numVertices * maxErrorPerNode) {
-                        filtered.set(node, error);
-                    }
-                }
-                return filtered;
-            });
+			if ( [AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_OUTER_MAX].includes(aspectErrorMode) ){
+				// remove everything above max error, aggregated step-by-step
+				nodeErrors = nodeErrors.map((vertexError, index) => {
+					const filtered = new Map<Node, number>();
+					for (const [node, error] of vertexError.entries()) {
+						if (error <= maxError*Math.min(index+1,k-index)) {
+							filtered.set(node, error);
+						}
+					}
+					return filtered;
+				});
+			} else {
+				// remove everything above max error
+				// obv why pointwise uses this error but note this is also valid for pairwise_X_sum (they add up!)
+				nodeErrors = nodeErrors.map(vertexError => {
+					const filtered = new Map<Node, number>();
+					for (const [node, error] of vertexError.entries()) {
+						if (error <= maxError) {
+							filtered.set(node, error);
+						}
+					}
+					return filtered;
+				});
+			}
 
-            const aspectsOnBasis: Aspect[] = [];
+			const aspectsOnBasis: Aspect[] = [];
 
-            // complicated search time. dfs but exhaustive and with error
-            const search = (currentNodes: Node[], currentError: number, depth: number): void => {
-                if (currentError >= numVertices * maxErrorPerNode) {
-                    return;
-                }
-                if (depth + 1 === numVertices) {
-                    // we could make things complicated here to ensure correct node ordering
-                    // but we don't. we'll just reorder these later.
-                    // for now, all we do is point at the basis idx if necessary
-                    aspectsOnBasis.push(
-                        new Aspect(
-                            kind,
-                            currentNodes,
-                            requiresBasis ? 0 : null,
-                            currentError
-                        )
-                    );
-                    return;
-                }
-                
-                const currentDepthErrors = nodeErrors[depth];
-                for (const [node, localError] of currentDepthErrors.entries()) {
-                    search([...currentNodes, node], currentError + localError, depth + 1);
-                }
-            };
-
-            // do search
-            search([basisNode], 0, 0);
+			// complicated search time. dfs but exhaustive and with error
+			const search = (currentNodes: Node[], currentError: number, depth: number): void => {
+				if (currentError > maxError) {
+					return;
+				}
+				if (depth + 1 === numVertices) {
+					// we could make things complicated here to ensure correct node ordering
+					// but we don't. we'll just reorder these later.
+					// for now, all we do is point at the basis idx if necessary
+					aspectsOnBasis.push(
+						new Aspect(
+							kind,
+							currentNodes,
+							requiresBasis ? 0 : null,
+							currentError
+						)
+					);
+					return;
+				}
+				
+				// calculate and aggregate error depending on type
+				// pairwise_full gets treated like pairwise_outer, filtered later
+				const currentDepthErrors = nodeErrors[depth];
+				for (const [node, localPointwiseError] of currentDepthErrors.entries()) {
+					let newError: number;
+					if ( aspectErrorMode == AspectErrorMode.POINTWISE_SUM ){
+						newError = currentError + localPointwiseError;
+					} else if ( aspectErrorMode == AspectErrorMode.POINTWISE_MAX ){
+						newError = Math.max(currentError, localPointwiseError);
+					} else if ( [AspectErrorMode.PAIRWISE_OUTER_SUM, AspectErrorMode.PAIRWISE_FULL_SUM].includes(aspectErrorMode) ) {
+						const currentNodePos = nodePositions.get(node)!;
+						const lastNodePos = nodePositions.get(currentNodes[depth])!;
+						const angleDiff = depth == 0 ? scaledAngles[0] : scaledAngles[depth] - scaledAngles[depth-1];
+						const localPairwiseError = angleShortDistance(currentNodePos, normalizeAngleRad(lastNodePos+angleDiff));
+						newError = currentError + localPairwiseError;
+					} else { // pairwise_x_max
+						const currentNodePos = nodePositions.get(node)!;
+						const lastNodePos = nodePositions.get(currentNodes[depth])!;
+						const angleDiff = depth == 0 ? scaledAngles[0] : scaledAngles[depth] - scaledAngles[depth-1];
+						const localPairwiseError = angleShortDistance(currentNodePos, normalizeAngleRad(lastNodePos+angleDiff));
+						newError = Math.max(currentError, localPairwiseError);
+					}
+					search([...currentNodes, node], newError, depth + 1);
+				}
+			};
+			
+			// do search
+			search([basisNode], 0, 0)
 
             // ensure correct ordering
             ensureCorrectOrderingInAspectList(aspectsOnBasis, nodePositions);
@@ -431,7 +517,7 @@ export function findAspects(
 
             for (const { target, kind } of binaryAspects) {
                 const error = Math.abs(d - target * TAU);
-                if (error < 2 * maxErrorPerNode) {
+                if (error <= maxError) {
                     const aspect = new Aspect(kind, [n1, n2], null, error);
                     if (!excludedAspects.contains(aspect)) {
                         aspects.insert(aspect);
@@ -440,7 +526,7 @@ export function findAspects(
             }
 
             // paralells / contraparallels: skip if conjunct
-            if (d < 2 * maxErrorPerNode) {
+            if (d <= maxError) {
                 continue;
             }
             
@@ -449,16 +535,18 @@ export function findAspects(
             const s1 = sawtoothSine(p1);
             const s2 = sawtoothSine(p2);
             
+			// parallel, skip if conjunct
             let error = Math.abs(s1 - s2);
-            if (error < 2 * maxErrorPerNode) {
+            if (error <= maxError && d > maxError) {
                 const aspect = new Aspect(AspectKind.PARALLEL, [n1, n2], null, error);
                 if (!excludedAspects.contains(aspect)) {
                     aspects.insert(aspect);
                 }
             }
             
+			// contraparallel, skip if opposite
             error = Math.abs(s1 + s2);
-            if (error < 2 * maxErrorPerNode) {
+            if (error <= maxError && Math.abs(d-Math.PI) > maxError) {
                 const aspect = new Aspect(AspectKind.CONTRAPARALLEL, [n1, n2], null, error);
                 if (!excludedAspects.contains(aspect)) {
                     aspects.insert(aspect);
@@ -468,27 +556,40 @@ export function findAspects(
     }
 	
 	// guaranteed everything has had its error computed
+	// remove if error is too large (different kinds of aspects may have different thresholds)
 	for (const [aspect, subs] of subaspects){
-		for (const subaspect of subs){
-			subaspect.error = aspectError(subaspect, nodePositions);
-		}
+		subaspects.set(aspect, subs.filter(subaspect => {
+			const error = aspectError(subaspect, nodePositions, aspectErrorMode);
+			subaspect.error = error;
+			return error <= maxError;
+		}));
 	}
 	
+	// put all information in subasect map
 	for (const aspect of aspects.getAllAspects()) {
 		if ( !subaspects.has(aspect) ) {
 			subaspects.set(aspect, []);
 		}
 	}
+	
+	// error of top-level configurations may be incorrect -> we recompute
+	if ( [AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_FULL_SUM].includes(aspectErrorMode) ){
+		for (const [aspect, subs] of subaspects){
+			aspect.error = aspectError(aspect, nodePositions, aspectErrorMode);
+			// if necessary, delete and reintroduce subaspects
+			if ( aspect.error > maxError ){
+				subaspects.delete(aspect);
+				for ( const subaspect of subs ){
+					subaspects.set(subaspect, []);
+				}
+			}
+		}
+		// possible deletions requires duplicate cleanup
+		ensureNoDuplicates(subaspects);
+	}
 
 	return subaspects;
 
-	// TODO remove this later. we'll sort in another place, keeping this code for then
-	//const aspectList = aspects.getAllAspects().sort((a1, a2) => {
-	//	const score1 = a1.error / a1.nodes.length - (a1.nodes.length > 2 ? 1 : 0);
-	//	const score2 = a2.error / a2.nodes.length - (a2.nodes.length > 2 ? 1 : 0);
-	//	return score1 - score2;
-	//});
-	
 	// doesn't print anything, so it looks like the error we compute on-the-fly is already good
 	// which is odd, I don't see why that should be the case with irregular configurations
 	// might revisit this at some point
@@ -506,7 +607,7 @@ export function ensureNoDuplicates(
 	// TODO also sort by error
 	const excludedAspects = new AspectGroup();
     const sortedEntries = Array.from(subaspectMap.entries())
-        .sort(([a, sa], [b, sb]) => b.nodes.length - a.nodes.length);
+        .sort(([a, sa], [b, sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error - b.error));
 	subaspectMap.clear();
 	for (const [aspect, subs] of sortedEntries){
 		if  ( excludedAspects.contains(aspect) ){
@@ -657,16 +758,42 @@ export function deleteAspectFromMap(
 
 // XX create subaspect menu
 
-//  make sure that the aspect deletion still works alright
+// XX make sure that the aspect deletion still works alright
+
+//  fix: aspect highlighting sometimes doesnt work for subaspects (?)
+//  seemingly when the subaspect already appears in a prior node
+//  could export the keying function
+
+// XX todo fix: aspects aren't being ordered by error
 
 //  figure out the stuff with the parallels diagram and the fixed stars. what do we want, really?
 //  if it does do fixed star stuff then deactivate that hide/unhide thing
 
-//  the business with how error is aggregated into configurations. very complicated...
-//  is it complicated, though? It should be doable
-//  what's more annoying, really, is the business with the orbs-per-aspect
-//  but it's mostly annoying because I don't know how to set up the UI. rest is easy.
+// XX ensure grand sextiles are drawn properly
+
+//  the business with how error is aggregated into configurations
+// XX update aspectError computation
+// XX update error computation DURING search
+// XX  including post-search error recheck for pairwise-full
+// XX debug the above
+// XX  pairwise full/outer max: many (all?) configurations have nan error
+// XX  pairwise full/outer sum: parallels/contraparallels have nan error
+// XX  pairwise gets absolutely no grands, unclear why
+//  update search to take max-error-per-aspectKind map
+//  make ui widget with error kind, error-per-aspect fields (also per-category), and a "recompute" button
+//  search gets slow for certain errors. be careful with that, maybe cap it.
 
 //  real constellations mode
+
+//  antiscia
+// XX also the business with true/oppositive contraparallels
+// XX just forbid opposite contraparallels, they don't make sense
+
+//  integrate parallels diagram (sad!)
+//  think about what diagram to do wrt the behenian stars
+
+//  add vertex, antivertex, equinoxes, etc
+
+//  the other widgets
 
 //  the whole node spacing thing can move things over the 0/2pi line, which is fine for zodiac wheel but looks really weird for the parallel diagram
