@@ -424,6 +424,16 @@ export const AspectKind = {
 } as const;
 export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
 
+export const majorBinaryAspectsKinds: AspectKind[] = [
+	AspectKind.CONJUNCTION,
+	AspectKind.OPPOSITION,
+	AspectKind.TRINE,
+	AspectKind.SQUARE,
+	AspectKind.SEXTILE,
+	AspectKind.PARALLEL,
+	AspectKind.CONTRAPARALLEL,
+]
+
 export const aspectKindCategories = [
 	{
 		name: 'Configurations',
@@ -439,15 +449,7 @@ export const aspectKindCategories = [
 	},
 	{
 		name: 'Major Binary',
-		items: [
-			AspectKind.CONJUNCTION,
-			AspectKind.OPPOSITION,
-			AspectKind.TRINE,
-			AspectKind.SQUARE,
-			AspectKind.SEXTILE,
-			AspectKind.PARALLEL,
-			AspectKind.CONTRAPARALLEL,
-		]
+		items: majorBinaryAspectsKinds
 	},
 	{
 		name: 'Minor Binary',

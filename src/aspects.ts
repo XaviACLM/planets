@@ -1,5 +1,5 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode, AspectErrorMode } from './astroDefs.ts'
+import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode, AspectErrorMode, majorBinaryAspectsKinds } from './astroDefs.ts'
 
 export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],
@@ -353,7 +353,9 @@ class AspectGroup {
 export function findAspects(
     nodePositions: Map<Node, number>,
 	aspectErrorMode: AspectErrorMode,
-    maxError: number = 0.12,
+	maxConfigurationError: number,
+	maxMajorBAError: number,
+	maxMinorBAError: number
 ): Aspect[] {
 
     // should be unnecessary, but let's make sure
@@ -409,7 +411,7 @@ export function findAspects(
 				nodeErrors = nodeErrors.map((vertexError, index) => {
 					const filtered = new Map<Node, number>();
 					for (const [node, error] of vertexError.entries()) {
-						if (error <= maxError*Math.min(index+1,k-index)) {
+						if (error <= maxConfigurationError*Math.min(index+1,k-index)) {
 							filtered.set(node, error);
 						}
 					}
@@ -421,7 +423,7 @@ export function findAspects(
 				nodeErrors = nodeErrors.map(vertexError => {
 					const filtered = new Map<Node, number>();
 					for (const [node, error] of vertexError.entries()) {
-						if (error <= maxError) {
+						if (error <= maxConfigurationError) {
 							filtered.set(node, error);
 						}
 					}
@@ -433,7 +435,7 @@ export function findAspects(
 
 			// complicated search time. dfs but exhaustive and with error
 			const search = (currentNodes: Node[], currentError: number, depth: number): void => {
-				if (currentError > maxError) {
+				if (currentError > maxConfigurationError) {
 					return;
 				}
 				if (depth + 1 === numVertices) {
@@ -517,6 +519,7 @@ export function findAspects(
 
             for (const { target, kind } of binaryAspects) {
                 const error = Math.abs(d - target * TAU);
+				const maxError = majorBinaryAspectsKinds.includes(kind) ? maxMajorBAError : maxMinorBAError;
                 if (error <= maxError) {
                     const aspect = new Aspect(kind, [n1, n2], null, error);
                     if (!excludedAspects.contains(aspect)) {
@@ -525,8 +528,9 @@ export function findAspects(
                 }
             }
 
+			// re: the sequel's use of maxMajorBAError, note contra/parallels and conjunctions/oppositions are all major binary
             // paralells / contraparallels: skip if conjunct
-            if (d <= maxError) {
+            if (d <= maxMajorBAError) {
                 continue;
             }
             
@@ -535,9 +539,9 @@ export function findAspects(
             const s1 = sawtoothSine(p1);
             const s2 = sawtoothSine(p2);
             
-			// parallel, skip if conjunct
+			// parallel
             let error = Math.abs(s1 - s2);
-            if (error <= maxError && d > maxError) {
+            if (error <= maxMajorBAError && d > maxMajorBAError) {
                 const aspect = new Aspect(AspectKind.PARALLEL, [n1, n2], null, error);
                 if (!excludedAspects.contains(aspect)) {
                     aspects.insert(aspect);
@@ -546,7 +550,7 @@ export function findAspects(
             
 			// contraparallel, skip if opposite
             error = Math.abs(s1 + s2);
-            if (error <= maxError && Math.abs(d-Math.PI) > maxError) {
+            if (error <= maxMajorBAError && Math.abs(d-Math.PI) > maxMajorBAError) {
                 const aspect = new Aspect(AspectKind.CONTRAPARALLEL, [n1, n2], null, error);
                 if (!excludedAspects.contains(aspect)) {
                     aspects.insert(aspect);
@@ -561,6 +565,13 @@ export function findAspects(
 		subaspects.set(aspect, subs.filter(subaspect => {
 			const error = aspectError(subaspect, nodePositions, aspectErrorMode);
 			subaspect.error = error;
+			const maxError = subaspect.nodes.length > 2 ?
+				maxConfigurationError :
+				(
+					majorBinaryAspectsKinds.includes(subaspect.kind) ?
+						maxMajorBAError :
+						maxMinorBAError
+				)
 			return error <= maxError;
 		}));
 	}
@@ -577,7 +588,7 @@ export function findAspects(
 		for (const [aspect, subs] of subaspects){
 			aspect.error = aspectError(aspect, nodePositions, aspectErrorMode);
 			// if necessary, delete and reintroduce subaspects
-			if ( aspect.error > maxError ){
+			if ( aspect.error > maxConfigurationError ){
 				subaspects.delete(aspect);
 				for ( const subaspect of subs ){
 					subaspects.set(subaspect, []);
@@ -646,7 +657,10 @@ export function filterAspects(
 	selectedNodes: Set<Node>,
 	selectedAspectKinds: Set<AspectKind>,
 	aspectPhysicalityFilter: AspectPhysicalityFilter,
-	hamburgPhysical: boolean
+	hamburgPhysical: boolean,
+	maxConfigurationError: number,
+	maxMajorBAError: number,
+	maxMinorBAError: number
 ): Map<Aspect, Aspect[]>{
 	//deepcopy subaspect map
 	const newMap = new Map<Aspect, Aspect[]>();
@@ -669,16 +683,35 @@ export function filterAspects(
         newMap.delete(aspect);
         // Insert its subaspects and queue them for later cleaning
         for (const subaspect of subaspects) {
-            const subsubaspects = subaspectsOf(subaspect, nodePositions);
-            for (const s of subsubaspects) {
-                s.error = aspectError(s, nodePositions);
-            }
-            newMap.set(subaspect, subsubaspects);
+			
+			const subsubaspects: Aspect[] = [];
+			for ( const s of subaspectsOf(subaspect, nodePositions) ){
+				if (s.error !== null){
+					// if this was computed earlier, it was already filtered
+					subsubaspects.push(s);
+				} else {
+					// otherwise, check error again
+					s.error = aspectError(s, nodePositions);
+					const maxError = s.nodes.length > 2 ?
+						maxConfigurationError :
+						(
+							majorBinaryAspectsKinds.includes(s.kind) ?
+								maxMajorBAError :
+								maxMinorBAError
+						)
+					if ( s.error <= maxError ) {
+						subsubaspects.push(s);
+					}
+				}
+			}
+            
+			newMap.set(subaspect, subsubaspects);
             entries.push([subaspect, subsubaspects]);
         }
     }
     // only mutate the new map
     ensureNoDuplicates(newMap);
+	
     return newMap;
 }
 
@@ -709,10 +742,12 @@ function clearSubaspects(
 function copySubaspects(
     subaspectMap: Map<Aspect, Aspect[]>
 ): Map<Aspect, Aspect[]> {
+	
     const newMap = new Map<Aspect, Aspect[]>();
     for (const [aspect, subaspects] of subaspectMap) {
         newMap.set(aspect, subaspects);
     }
+	
     return newMap;
 }
 	
@@ -776,9 +811,20 @@ export function deleteAspectFromMap(
 // XX  pairwise full/outer max: many (all?) configurations have nan error
 // XX  pairwise full/outer sum: parallels/contraparallels have nan error
 // XX  pairwise gets absolutely no grands, unclear why
-//  update search to take max-error-per-aspectKind map
-//  make ui widget with error kind, error-per-aspect fields (also per-category), and a "recompute" button
-//  search gets slow for certain errors. be careful with that, maybe cap it.
+// XX update search to take max-error-per-aspectKind map
+// XX make ui widget with error kind, error-per-aspect fields (also per-category), and a "recompute" button
+// XX search gets slow for certain errors. be careful with that, maybe cap it.
+// XX actually use minorBAError, instead of just max for everything
+//  fix bugs
+// XX  configurations have error above limit somehow
+// XX   only when they're subaspects. because of the check towards the end of findSubaspects assumes we can use the majorBA whatever
+// XX    fix by using other check depending on aspect.nodes.length
+// XX  and binary aspects too
+// XX   because of line 681, where stuff gets reintroduced
+//   also everything resets back to the initial value when we close/reopen
+//    an issue relating to how prop update forces recomputation - fundamental react question. will have to look into it
+
+//  clean up the aspects code, someday
 
 //  real constellations mode
 
@@ -793,3 +839,5 @@ export function deleteAspectFromMap(
 //  add vertex, antivertex, equinoxes, etc
 
 //  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
+
+//  put the settings somewhere elses, together with the node/aspect selector: toggleable settings column

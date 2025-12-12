@@ -61,26 +61,26 @@ function App() {
 	
     const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
 	
-	// fullAspects is the whole thing
-	// filteredAspects is the filtered thing, but by ref it is also the first thing
-	// ...so it's wrong.
-	// okay
-	// TODO make it so that filterAspects and formatAspects do memcpy
-	// this fucking sucks. this is a piece of shit. this is some of the shittiest logic i've designed.
-	// then we have fullAspects -> filteredAspects
-	// filteredAspects -> formattedAspects, flattenedAspects
-	// these last two are useStates.
-	// which fucking sucks. again. it fucking sucks.
-	// you know what? flattenedAspects is actually just an useMemo of formattedAspects. fuck you. i don't need to care. fuck you.
-	
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions(), selectedAspectErrorMode);
-	}, [zodiacPositions, selectedAspectErrorMode]);
+		return findAspects(zodiacPositions.getNodePositions(), selectedAspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
+	}, [zodiacPositions, selectedAspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
 	
 	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
 	const filteredAspects = useMemo(() => {
-		return filterAspects(fullAspects, zodiacPositions.getNodePositions(), selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical);
+		return filterAspects(
+			fullAspects,
+			zodiacPositions.getNodePositions(),
+			selectedNodes,
+			selectedAspectKinds,
+			aspectPhysicalityFilter,
+			hamburgPhysical,
+			maxConfigurationError,
+			maxMajorBAError,
+			maxMinorBAError
+		);
+		// note that errors are not in dependencies list
+		// error changes force fullAspects recomputation which will force filteredAspects recomputation anyway
 	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
 
 	// aspects, filtered, in the format imposed by the selected aspect menu mode
