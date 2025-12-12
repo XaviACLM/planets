@@ -30,10 +30,20 @@ function App() {
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
 	
+	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_MAX);
+	const initialMaxConfigurationErrorDegrees = 3;
+	const initialMaxMajorBAErrorDegrees = 3;
+	const initialMaxMinorBAErrorDegrees = 3;
+	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(initialMaxConfigurationErrorDegrees);
+	const [maxMajorBAErrorDegrees, setMaxMajorBAErrorDegrees] = useState<number>(initialMaxMajorBAErrorDegrees);
+	const [maxMinorBAErrorDegrees, setMaxMinorBAErrorDegrees] = useState<number>(initialMaxMinorBAErrorDegrees);
+	const maxConfigurationError = useMemo(() => maxConfigurationErrorDegrees*Math.PI/180);
+	const maxMajorBAError = useMemo(() => maxMajorBAErrorDegrees*Math.PI/180);
+	const maxMinorBAError = useMemo(() => maxMinorBAErrorDegrees*Math.PI/180);
+	
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
 	const [selectedAspectMenuMode, setSelectedAspectMenuMode] = useState<AspectMenuMode>(AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS);
-	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_SUM);
 	
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
@@ -288,8 +298,8 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={3}
-										onValidCommit={x => {console.log(x);}}
+										initialValue={initialMaxConfigurationErrorDegrees}
+										onValidCommit={setMaxConfigurationErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
 									/>
@@ -301,8 +311,8 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={3}
-										onValidCommit={x => {console.log(x);}}
+										initialValue={initialMaxMajorBAErrorDegrees}
+										onValidCommit={setMaxMajorBAErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
 									/>
@@ -314,8 +324,8 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={3}
-										onValidCommit={x => {console.log(x);}}
+										initialValue={initialMaxMinorBAErrorDegrees}
+										onValidCommit={setMaxMinorBAErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
 									/>
