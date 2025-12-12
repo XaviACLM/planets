@@ -1,9 +1,11 @@
-import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime } from "astronomy-engine";
+import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
 
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { smallBodyParams, orbitalLongitude, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
 import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode, HamburgSchoolMode } from './astroDefs.ts'
+import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
+
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
@@ -131,51 +133,24 @@ function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, 
 	}
 }
 
-export function computeAxialTilt(date: Date): number {
-	// in radians
-	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
-	const eclPole = Ecliptic(vecPole);
-	const obliquity = Math.acos(eclPole.vec.z);
-	return obliquity;
+function getTodayEclipticLongitudeFromEQJ(date: Date, v: vec3): number {
+	const astroTime = new AstroTime(date);
+	const vECT = RotateVector(Rotation_EQJ_ECT(astroTime), toAstronomyVector(v));
+	return Math.atan2(vECT.y, vECT.x);
 }
 
-function computeMCIC(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
-	const longitudeDeg = surfacePos.longitude;
-	const gstHours = SiderealTime(date);
-	const lstHours = gstHours + longitudeDeg / 15.0;
-	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
-	const theta = lstHoursNorm * Math.PI / 12
+function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
+	const { asc, mc, vx } = computeAllSignificantPoints(date, surfacePos);
 	
-	const epsRad = computeAxialTilt(date);
-	
-	//const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
-	const mc = Math.atan2(Math.sin(theta)/Math.cos(epsRad), Math.cos(theta));
-	
-	return new Map<Node, number>([
-		[Node.MIDHEAVEN, normalizeAngleRad(mc)],
-		[Node.IMUM_COELI, normalizeAngleRad(mc + Math.PI)]
-	]);
-}
+	const ascLon = getTodayEclipticLongitudeFromEQJ(date, asc);
+	const mcLon = getTodayEclipticLongitudeFromEQJ(date, mc);
+	const vxLon = getTodayEclipticLongitudeFromEQJ(date, vx);
 
-export function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
-	const latitudeDeg = surfacePos.latitude;
-	const longitudeDeg = surfacePos.longitude;
-	const gstHours = SiderealTime(date);
-	const lstHours = gstHours + longitudeDeg / 15.0;
-	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
-	const theta = lstHoursNorm * Math.PI / 12
-	
-	const epsRad = computeAxialTilt(date);
-		
-	const phi = latitudeDeg * Math.PI/180;
-	
-	const x = Math.cos(theta);
-	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
-	const lambda = Math.atan2(x,y);
-	
 	return new Map<Node, number>([
-		[Node.ASCENDANT, normalizeAngleRad(lambda)],
-		[Node.DESCENDANT, normalizeAngleRad(lambda + Math.PI)]
+		[Node.ASCENDANT, normalizeAngleRad(ascLon)],
+		[Node.DESCENDANT, normalizeAngleRad(ascLon + Math.PI)],
+		[Node.MIDHEAVEN, normalizeAngleRad(mcLon)],
+		[Node.IMUM_COELI, normalizeAngleRad(mcLon + Math.PI)],
 	]);
 }
 
@@ -293,8 +268,7 @@ function computeAllNodePositions(
 ): Map<Node, number>{
 	let nodePositions = new Map<Node, number>([
 		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode, hamburgSchoolMode),
-		...computeAscendantAndDescendant(date, surfacePosition),
-		...computeMCIC(date, surfacePosition),
+		...computeAxisAngles(date, surfacePosition),
 	]);
 	nodePositions = new Map<Node, number>([
 		...nodePositions,

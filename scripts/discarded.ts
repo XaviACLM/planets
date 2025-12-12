@@ -98,3 +98,29 @@ function computeTopocentricCuspPositions2(date: Date, surfacePosition: SurfacePo
 		computePolichPageCusp2(latTan/3, mc, asc, axialTilt)
 	]
 }
+
+
+
+
+
+
+
+// from before we decided to do away with the trig approaches
+function computeMCIC(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
+	const longitudeDeg = surfacePos.longitude;
+	const gstHours = SiderealTime(date);
+	const lstHours = gstHours + longitudeDeg / 15.0;
+	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
+	const theta = lstHoursNorm * Math.PI / 12
+	
+	const epsRad = computeAxialTilt(date);
+	
+	//const mc = Math.atan2(Math.cos(epsRad)*Math.sin(theta), Math.cos(theta));
+	// TODO what the hell is going on here?
+	const mc = Math.atan2(Math.sin(theta)/Math.cos(epsRad), Math.cos(theta));
+	
+	return new Map<Node, number>([
+		[Node.MIDHEAVEN, normalizeAngleRad(mc)],
+		[Node.IMUM_COELI, normalizeAngleRad(mc + Math.PI)]
+	]);
+}

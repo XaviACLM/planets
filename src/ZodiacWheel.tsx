@@ -195,7 +195,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-					const translateY = hoveredZodiac === i ? -2 : 0;
+					const translateY = hoveredZodiac === i ? -1 : 0;
 					return (
 						<image
 							key={i}

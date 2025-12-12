@@ -820,3 +820,10 @@ export function deleteAspectFromMap(
 //  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
 
 //  put the settings somewhere elses, together with the node/aspect selector: toggleable settings column
+
+//  degree dits on the wheel
+
+//  why is the mcic computation like that. I remember being sure i was right when i changed it. but that's not the formula. what's going on.
+//  ugh, just switch all that to r3. i knew trigonometry was trouble
+
+//  getting a bit slow. irritating that things like houses cause aspect recomputation. maybe separate from zodiacPositions, or find another way to set up hooks.

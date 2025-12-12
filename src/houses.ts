@@ -6,9 +6,9 @@
 import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle, anglesLieInShortArc } from './util.ts'
 
 import { Node, type SurfacePosition } from './astroDefs.ts'
-import { computeAxialTilt, computeAscendantAndDescendant } from './astro.ts'
+import { type vec3, toAstronomyVector, normalize, cross, computeAllSignificantPoints } from './geometry.ts'
 
-import { Vector, RotateVector, Rotation_HOR_EQJ, Rotation_ECL_EQJ, Rotation_EQJ_ECL, Rotation_EQJ_ECT, Rotation_ECT_EQJ, AstroTime, SiderealTime, Observer, Rotation_EQD_EQJ } from "astronomy-engine";
+import { Vector, RotateVector, Rotation_EQJ_ECL, AstroTime, Ecliptic } from "astronomy-engine";
 
 interface AxisAngles {
 	asc: number;
@@ -131,60 +131,6 @@ function computeWholeSignAriesCuspPositions(angles: AxisAngles, siderealOffset: 
 
 // space-based
 
-
-interface vec3 {
-	x: number;
-	y: number;
-	z: number
-}
-
-function toAstronomyVector(v: vec3, time: Date = new Date()): Vector {
-    return new Vector(v.x, v.y, v.z, new AstroTime(time));
-}
-
-function normVec(v: vec3): number {
-	return Math.sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
-}
-
-function normalize(v: vec3): vec3 {
-	const r = normVec(v);
-	return {x:v.x/r, y:v.y/r, z:v.z/r};
-}
-
-function flipVec(v: vec3): vec3 {
-	return {x:-v.x, y:-v.y, z:-v.z};
-}
-
-function cross(v: vec3, w: vec3): vec3 {
-	return {
-		x: v.y*w.z - v.z*w.y,
-		y: v.z*w.x - v.x*w.z,
-		z: v.x*w.y - v.y*w.x
-	}
-}
-
-function cardinalsAndCirclesAndAscDsc(date: Date, surfacePosition: SurfacePosition) {
-	const astroTime = new AstroTime(date);
-	const obs = new Observer(surfacePosition.latitude, surfacePosition.longitude, 0); //height
-	const rot = Rotation_HOR_EQJ(astroTime, obs);
-	const N = normalize(RotateVector(rot, toAstronomyVector({x:1, y:0, z:0})));
-	const E = normalize(RotateVector(rot, toAstronomyVector({x:0, y:1, z:0})));
-	const zenith = normalize(RotateVector(rot, toAstronomyVector({x:0, y:0, z:1})));
-	const S = flipVec(N);
-	const W = flipVec(E);
-	const nadir = flipVec(zenith);
-	const ecliptic = normalize(RotateVector(Rotation_ECT_EQJ(astroTime), toAstronomyVector({x:0, y:0, z:1})));
-	const ecN = ecliptic;
-	const equator = normalize(RotateVector(Rotation_EQD_EQJ(astroTime),toAstronomyVector({x:0, y:0, z:1})));
-	const eqN = equator;
-	const primeVertical = N;
-	const meridian = E;
-	const horizon = zenith;
-	const asc = normalize(cross(ecliptic, horizon));
-	const dsc = flipVec(asc);
-	return {N, S, E, W, zenith, nadir, ecliptic, equator, primeVertical, meridian, horizon, asc, dsc, eqN, ecN};
-}
-
 function advanceAlongCircle(p: vec3, circle: vec3, angle: number): vec3 {
 	const q = normalize(cross(circle, p));
 	return normalize({
@@ -232,7 +178,7 @@ function computeSpaceBasedSystemCuspPositions(
 	startingPoint: vec3,
 	projectionCenter: vec3
 ): number[] {
-	const {ecliptic, asc} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {ecliptic, asc} = computeAllSignificantPoints(date, surfacePosition);
 	const kpts = twelvePoints(startingCircle, startingPoint);
 	const epts = projectPoints(kpts, ecliptic, projectionCenter);
 	const angles = computeEclipticAngles(epts);
@@ -243,37 +189,37 @@ function computeSpaceBasedSystemCuspPositions(
 // descriptions for them are rather sparse, and i strongly suspect some secondary sources are inaccurate
 // one day - maybe - i will look for primary sources on these
 function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {asc, eqN, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {asc, eqN, zenith} = computeAllSignificantPoints(date, surfacePosition);
 	const krusinskyCircle = normalize(cross(asc, zenith));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, krusinskyCircle, asc, eqN);
 }
 
 function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {N, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {N, meridian, equator} = computeAllSignificantPoints(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
 }
 
 function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {eqN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {eqN, meridian, equator} = computeAllSignificantPoints(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator)); 
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
 }
 
 function computeMorinusCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {ecN, meridian, equator} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {ecN, meridian, equator} = computeAllSignificantPoints(date, surfacePosition);
 	const intersection = normalize(cross(meridian, equator));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, ecN);
 }
 
 function computeCampanusCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {N, meridian, primeVertical} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {N, meridian, primeVertical} = computeAllSignificantPoints(date, surfacePosition);
 	const intersection = normalize(cross(meridian, primeVertical));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, primeVertical, intersection, N);
 }
 
 function computeZenithHorizontalCuspPositions(date: Date, surfacePosition: SurfacePosition){
-	const {horizon, meridian, zenith} = cardinalsAndCirclesAndAscDsc(date, surfacePosition);
+	const {horizon, meridian, zenith} = computeAllSignificantPoints(date, surfacePosition);
 	const intersection = normalize(cross(meridian, horizon));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, horizon, intersection, zenith);
 }
@@ -396,6 +342,14 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 	return z;
 }
 
+function computeAxialTilt(date: Date): number {
+	// in radians
+	const vecPole = new Vector(0, 0, 1, new AstroTime(date));
+	const eclPole = Ecliptic(vecPole);
+	const obliquity = Math.acos(eclPole.vec.z);
+	return obliquity;
+}
+
 function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] {
 	// 12th cusp is the point along the ecliptic which is 1/3rd of the way, time-wise, from the ascendant to the mc
 	
@@ -420,6 +374,28 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 	
 	const containsNull = houseCusps.some(cusp => cusp === null);
 	return containsNull ? null : houseCusps;
+}
+
+function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
+	const latitudeDeg = surfacePos.latitude;
+	const longitudeDeg = surfacePos.longitude;
+	const gstHours = SiderealTime(date);
+	const lstHours = gstHours + longitudeDeg / 15.0;
+	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
+	const theta = lstHoursNorm * Math.PI / 12
+	
+	const epsRad = computeAxialTilt(date);
+		
+	const phi = latitudeDeg * Math.PI/180;
+	
+	const x = Math.cos(theta);
+	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
+	const lambda = Math.atan2(x,y);
+	
+	return new Map<Node, number>([
+		[Node.ASCENDANT, normalizeAngleRad(lambda)],
+		[Node.DESCENDANT, normalizeAngleRad(lambda + Math.PI)]
+	]);
 }
 
 function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
