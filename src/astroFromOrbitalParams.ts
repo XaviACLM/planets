@@ -1,5 +1,5 @@
 import { Node } from './astroDefs.ts'
-import { HelioVector, Ecliptic, RotateVector, Rotation_ECL_EQJ, Rotation_EQJ_ECT, Vector, AstroTime } from 'astronomy-engine'
+import { HelioVector, Ecliptic, RotateVector, Rotation_ECL_EQJ, Rotation_EQJ_ECT, Vector, AstroTime, Body} from 'astronomy-engine'
 
 // types for orbital elements
 interface OrbitParams {
@@ -496,7 +496,7 @@ export function orbitalLongitude(
 	// heliocentric ecliptic J2000
 	const pos = positionFromKepler(elems, jd);
 
-	const earthEqj2000 = HelioVector('Earth', date);
+	const earthEqj2000 = HelioVector(Body.Earth, date);
 	const earthEclj2000 = Ecliptic(earthEqj2000)
 	
 	// geocentric ecl j2000

@@ -1,0 +1,13 @@
+// TODO re aspects
+
+//  clean up the aspects code, someday
+//  getting a bit slow. irritating that things like houses cause aspect recomputation. maybe separate from zodiacPositions, or find another way to set up hooks.
+
+//  real constellations mode
+//  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
+//  put the settings somewhere else, together with the node/aspect selector: toggleable settings column
+
+//  parallels vs antiscia
+//  degree dits on the wheel
+//  that stuff with the preferred names vs shortnames
+//  circles on the zodiac wheel depending on what binary aspects are selected (mind you this doesn't force recomputation bc selectedAspects is mutable)

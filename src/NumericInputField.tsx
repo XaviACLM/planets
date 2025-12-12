@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent, useMemo, FocusEvent, FC } from 'react';
+import { useState, useCallback, type ChangeEvent, type KeyboardEvent, useMemo, type FocusEvent, type FC } from 'react';
 import './NumericInputField.css';
 
 interface NumericInputFieldProps {

@@ -2,14 +2,12 @@ import './Slider.css';
 
 interface SliderProps<T extends string> {
 	options: T[];
-	labels: Record<T, string>;
 	value: T;
 	onChange: (value: T) => void;
 }
 
 const Slider = <T extends string>({
 	options,
-	labels,
 	value,
 	onChange
 }: SliderProps<T>) => {

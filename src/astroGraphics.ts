@@ -302,7 +302,7 @@ export const aspectSymbols: Record<AspectKind, string> = {
 	[AspectKind.T_SQUARE] : tSquareSymbol,
 }
 
-export const aspectKindColors: Record<AspectKind, [number, number, number]> = {
+export const aspectKindColors: Partial<Record<AspectKind, [number, number, number]>> = {
 	//conjunction and contra/parallels don't require color
 	[AspectKind.GRAND_TRINE] : [31, 0, 256],
 	[AspectKind.GRAND_SQUARE] : [10, 256, 0],

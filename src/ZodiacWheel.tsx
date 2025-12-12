@@ -390,9 +390,8 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						
 					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
 					
-					const [r,g,b] = aspectKindColors[highlightedAspect.kind];
+					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
 					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
-					const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 					return (
 						<path
 							key={-aspects.indexOf(highlightedAspect)}
@@ -416,7 +415,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 				
 				{/*Equinox (equator) line for parallels*/}
 				{ highlightedAspect != null
-				&& ([AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL].includes(highlightedAspect.kind))
+				&& (([AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL] as AspectKind[]).includes(highlightedAspect.kind))
 				&& (() => {
 					// autumnal and vernal equinoxes
 					const a1 = 0 + offset;
@@ -430,9 +429,8 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						`L ${x2} ${y2}`
 					].join(" ");	
 		
-					const [r,g,b] = aspectKindColors[highlightedAspect.kind];
+					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
 					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
-					const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 					return (
 						<path
 							key={-1000000}
@@ -464,7 +462,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						
 						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
 						
-						const [r,g,b] = aspectKindColors[aspect.kind];
+						const [r,g,b] = aspectKindColors[aspect.kind]!;
 						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
 						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 						

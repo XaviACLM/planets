@@ -1,4 +1,4 @@
-import FC from 'react';
+import { type FC } from 'react';
 import { Node, AspectKind, nodeCategories, aspectKindCategories } from './astroDefs';
 import { nodeSymbols, nodeShortName, aspectSymbols, aspectKindShortName } from './astroGraphics';
 	
@@ -11,7 +11,7 @@ interface SelectorProps<T extends string | number> {
 		items: T[];
 	}>;
 	symbols: Record<T, string>;  // For icons
-	labels: Record<T, string>;   // For text labels
+	labels: Partial<Record<T, String>>;   // For text labels
 }
 
 import "./CategorySelector.css";

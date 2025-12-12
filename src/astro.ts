@@ -1,4 +1,4 @@
-import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, SiderealTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
+import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
 
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
@@ -308,6 +308,7 @@ interface ZodiacPositionsConstructorArgs {
 	lunarNodeMode: LunarNodeMode;
 	houseSystem: HouseSystem;
 	astrologyMode: AstrologyMode;
+	hamburgSchoolMode: HamburgSchoolMode;
 	nodePositions?: Map<Node, number>;
 	houseCuspPositions?: number[] | null;
 	siderealOffset?: number;

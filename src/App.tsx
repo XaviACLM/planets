@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import ParallelDiagram from './ParallelDiagram'
 import Slider from './Slider'
 import NumericInputField from './NumericInputField'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
@@ -34,9 +33,9 @@ function App() {
 	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(3);
 	const [maxMajorBAErrorDegrees, setMaxMajorBAErrorDegrees] = useState<number>(3);
 	const [maxMinorBAErrorDegrees, setMaxMinorBAErrorDegrees] = useState<number>(3);
-	const maxConfigurationError = useMemo(() => maxConfigurationErrorDegrees*Math.PI/180);
-	const maxMajorBAError = useMemo(() => maxMajorBAErrorDegrees*Math.PI/180);
-	const maxMinorBAError = useMemo(() => maxMinorBAErrorDegrees*Math.PI/180);
+	const maxConfigurationError = useMemo(() => maxConfigurationErrorDegrees*Math.PI/180, [maxConfigurationErrorDegrees]);
+	const maxMajorBAError = useMemo(() => maxMajorBAErrorDegrees*Math.PI/180, [maxMajorBAErrorDegrees]);
+	const maxMinorBAError = useMemo(() => maxMinorBAErrorDegrees*Math.PI/180, [maxMinorBAErrorDegrees]);
 	
 	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
 	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
@@ -56,7 +55,7 @@ function App() {
 	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( defaultNodes ));
 	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
 	
-    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode));
+    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
 	
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
@@ -72,18 +71,19 @@ function App() {
 			selectedAspectKinds,
 			aspectPhysicalityFilter,
 			hamburgPhysical,
+			selectedAspectErrorMode,
 			maxConfigurationError,
 			maxMajorBAError,
 			maxMinorBAError
 		);
-		// note that errors are not in dependencies list
-		// error changes force fullAspects recomputation which will force filteredAspects recomputation anyway
+		// note that errors or error mode are not in dependencies list
+		// any change fullAspects recomputation which will force filteredAspects recomputation anyway
 	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
 
 	// aspects, filtered, in the format imposed by the selected aspect menu mode
-	const [aspects, setAspects] = useState<Aspect>(formatAspects(filteredAspects, selectedAspectMenuMode));
+	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(formatAspects(filteredAspects, selectedAspectMenuMode));
 	useEffect(() => {
-		return setAspects(formatAspects(filteredAspects, selectedAspectMenuMode));
+		setAspects(formatAspects(filteredAspects, selectedAspectMenuMode));
 	}, [filteredAspects, selectedAspectMenuMode])
 	
 	// aspects, flattened down to a single list for processing in UI components
@@ -117,10 +117,6 @@ function App() {
 		}
 		return selectedCity.timezone;
 	}, [selectedCity]);
-	
-	const showParallelDiagram = useMemo(() => {
-		return selectedAspectKinds.has(AspectKind.PARALLEL) || selectedAspectKinds.has(AspectKind.CONTRAPARALLEL);
-	}, [selectedAspectKinds])
 	
 	function handleAspectDeletion(aspect: Aspect, parentAspect: Aspect | null){
 		setAspects(deleteAspectFromMap(aspects, aspect, parentAspect));
@@ -334,7 +330,6 @@ function App() {
 							Required # of physical nodes per aspect:
 							<Slider
 								options={Object.values(AspectPhysicalityFilter)}
-								labels={AspectPhysicalityFilter}
 								value={aspectPhysicalityFilter}
 								onChange={setAspectPhysicalityFilter}
 							/>
@@ -447,10 +442,10 @@ function App() {
 						<span>
 							Selected house system ({selectedHouseSystem}) is not defined for the selected time and location.{" "}
 							<button
-								onClick={() => setSelectedHouseSystem(HouseSystem.TOPOCENTRIC)}
+								onClick={() => setSelectedHouseSystem(HouseSystem.PORPHYRY)}
 								className="switch-house-system-button"
 							>
-								Switch to Topocentric
+								Switch to Porphyry
 							</button>
 						</span>
 					</div>
@@ -459,17 +454,6 @@ function App() {
 			</main>
 			
 			<aside className="sidebar right-sidebar">
-				{ showParallelDiagram && 
-					<div className="module">
-						<ParallelDiagram
-							showNodeLabels={showNodeLabels}
-							zodiacPositions={zodiacPositions}
-							selectedNodes={selectedNodes}
-							aspects={flattenedAspects}
-							highlightedAspect={highlightedAspect}
-						/>
-					</div>
-				}
 				<div className="module">
 					<NodeSelector
 						selectedItems={selectedNodes}

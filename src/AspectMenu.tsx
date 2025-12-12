@@ -1,4 +1,4 @@
-import { type Aspect, aspectKindAngles } from './aspects.ts';
+import { type Aspect } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
 
 import "./AspectMenu.css";
@@ -9,7 +9,7 @@ function createAspectElement(
 	showAspectLabels: boolean,
 	aspectsColorcoded: boolean,
 	parentAspect: Aspect | null,
-	onDelete: (aspect: Aspect) => void,
+	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void
 ){
 	const symbolSize = 20;
@@ -17,7 +17,7 @@ function createAspectElement(
 	const fixedHeight = "20px";
 	const isSubaspect = parentAspect !== null;
 	
-	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind] : [255,255,255];
+	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind]! : [255,255,255];
 	return <div
 		key={key}
 		className="aspect-item"
@@ -96,7 +96,7 @@ function createAspectElement(
 		{/* error, quantile */}
 		<div className="aspect-values">
 			{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
-			 Δ{(aspect.error*180/Math.PI).toFixed(2)}º
+			 Δ{(aspect.error!*180/Math.PI).toFixed(2)}º
 		</div>
 
 		{/* delete button */}

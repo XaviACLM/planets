@@ -8,7 +8,7 @@ import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle, anglesLi
 import { Node, type SurfacePosition } from './astroDefs.ts'
 import { type vec3, toAstronomyVector, normalize, cross, computeAllSignificantPoints } from './geometry.ts'
 
-import { Vector, RotateVector, Rotation_EQJ_ECL, AstroTime, Ecliptic } from "astronomy-engine";
+import { Vector, SiderealTime, RotateVector, Rotation_EQJ_ECL, AstroTime, Ecliptic } from "astronomy-engine";
 
 interface AxisAngles {
 	asc: number;
@@ -110,8 +110,7 @@ function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computeWholeSignAriesCuspPositions(angles: AxisAngles, siderealOffset: number){
-	const idx = Math.floor((angles.asc - siderealOffset)/(Math.PI/6));
+function computeWholeSignAriesCuspPositions(siderealOffset: number){
 	return [
 		normalizeAngleRad(siderealOffset),
 		normalizeAngleRad(1*Math.PI/6 + siderealOffset),
@@ -283,15 +282,14 @@ export const MainAxisArc = {
 } as const;
 export type MainAxisArc = typeof MainAxisArc[keyof typeof MainAxisArc];
 
-function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number, angles: AxisAngles, mode: MainAxisArc, c: number): number { 
+function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number, angles: AxisAngles, mode: MainAxisArc, c: number): number | null { 
 	const { asc, mc, dsc, ic } = angles;
-	const { RA: RAASC, declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
-	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
-	const start = [MainAxisArc.ASC_TO_IC, MainAxisArc.ASC_TO_MC].includes(mode) ? asc : dsc;
-	const end = [MainAxisArc.ASC_TO_MC, MainAxisArc.DSC_TO_MC].includes(mode) ? mc : ic;
+	const { RA: RAMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
+	const start = ([MainAxisArc.ASC_TO_IC, MainAxisArc.ASC_TO_MC] as MainAxisArc[]).includes(mode) ? asc : dsc;
+	const end = ([MainAxisArc.ASC_TO_MC, MainAxisArc.DSC_TO_MC] as MainAxisArc[]).includes(mode) ? mc : ic;
 	var x = interpolateShorterAngle(c, start, end);
 	var y = x - 2*eps;
-	function f(eclLon: number): number{
+	function f(eclLon: number): number | null{
 		const { RA, declination } = eclipticLongitudeToRAAndDeclination(eclLon, axialTilt);
 		var tsh, tth, ttm, tsm;
 		switch (mode){
@@ -321,7 +319,7 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 	var fy = f(y);
 	if (fx === null || fy === null) { return null; }
 	var z = 0;
-	var fz = 0;
+	var fz: number | null = 0;
 	var counter = 0;
 	const max_iter = 100;
 	while ( Math.abs(x - y) > 1e-10 ) {
@@ -350,7 +348,7 @@ function computeAxialTilt(date: Date): number {
 	return obliquity;
 }
 
-function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] {
+function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] | null {
 	// 12th cusp is the point along the ecliptic which is 1/3rd of the way, time-wise, from the ascendant to the mc
 	
 	// note: some people claim asc is midpoint, timewise, btw asc-dsc. This would simplify calculations but it is false
@@ -373,7 +371,7 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 	];
 	
 	const containsNull = houseCusps.some(cusp => cusp === null);
-	return containsNull ? null : houseCusps;
+	return containsNull ? null : houseCusps as number[];
 }
 
 function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
@@ -405,10 +403,27 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const axialTilt = computeAxialTilt(date);	
 	const { asc, mc, dsc, ic } = angles;
 	
-	// first quadrant
 	// how long did the current mc take to arrive from the horizon?
 	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
 	const tshRadMC = timeSinceHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
+	// how long will the current mc take to get to the horizon again?
+	const tthRadMC = timeToHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
+	// how long did the current ic take to arrive from the horizon?
+	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
+	const tshRadIC = timeSinceHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
+	// how long will the current ic take to get to the horizon again?
+	const tthRadIC = timeToHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
+	
+	if (
+		tshRadMC === null ||
+		tthRadMC === null ||
+		tshRadIC === null ||
+		tthRadIC === null
+	){
+		return null;
+	}
+	
+	// first quadrant
 	const tshHoursMC = tshRadMC * 12 / Math.PI;
 	
 	const date11th = new Date(date.getTime() - tshHoursMC*(2/3)*3600*1000)
@@ -417,8 +432,6 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp12 = computeAscendantAndDescendant(date12th, surfacePosition).get(Node.ASCENDANT)!;
 	
 	// second quadrant
-	// how long will the current mc take to get to the horizon again?
-	const tthRadMC = timeToHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
 	const tthHoursMC = tthRadMC* 12 / Math.PI;
 	
 	const date8th = new Date(date.getTime() + tthHoursMC*(1/3)*3600*1000)
@@ -427,9 +440,6 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp9 = computeAscendantAndDescendant(date9th, surfacePosition).get(Node.DESCENDANT)!;
 	
 	// third quadrant
-	// how long did the current ic take to arrive from the horizon?
-	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
-	const tshRadIC = timeSinceHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
 	const tshHoursIC = tshRadIC* 12 / Math.PI;
 	
 	const date5th = new Date(date.getTime() - tshHoursIC*(2/3)*3600*1000)
@@ -438,9 +448,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const cusp6 = computeAscendantAndDescendant(date6th, surfacePosition).get(Node.DESCENDANT)!;
 	
 	// fourth quadrant
-	// how long will the current ic take to get to the horizon again?
-	const tthRadIC = timeToHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
-	const tthHoursIC = tthRadIC* 12 / Math.PI;
+	const tthHoursIC = tthRadIC * 12 / Math.PI;
 	
 	const date2nd = new Date(date.getTime() + tthHoursIC*(1/3)*3600*1000)
 	const date3rd = new Date(date.getTime() + tthHoursIC*(2/3)*3600*1000)
@@ -465,17 +473,17 @@ function computePolichPageCusp(c: number, p1: number, p2: number, tp1: number, t
 // ugh... another serious release blocker
 // tried three other ways, none worked. see scripts/discarded.ts
 // we'll just remove this from the options for now.
-function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeTopocentricCuspPositions(date: Date, angles: AxisAngles){
 	// polich - page. Consider the "polar elevation" of the asc-mc, i.e. its geographic latitude
 	// consider tangents, trisect interval, invert over the ecliptic.
 	
 	const axialTilt = computeAxialTilt(date);	
 	const { asc, mc, dsc, ic } = angles;
 	
-	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
-	const { RA: RAASC, declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
-	const { RA: RAIC, declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
-	const { RA: RADSC, declination: declinationDSC } = eclipticLongitudeToRAAndDeclination(dsc, axialTilt);
+	const { declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
+	const { declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
+	const { declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
+	const { declination: declinationDSC } = eclipticLongitudeToRAAndDeclination(dsc, axialTilt);
 	
 	const tAsc = Math.tan(declinationASC);
 	const tMc = Math.tan(declinationMC);
@@ -497,8 +505,9 @@ function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePos
 		computePolichPageCusp(1/3, mc, asc, tMc, tAsc, axialTilt)
 	]
 }
+void computeTopocentricCuspPositions;
 
-export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>, siderealOffset: number): number[]{
+export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>, siderealOffset: number): number[] | null{
 	const angles = {
 		asc: knownNodes.get(Node.ASCENDANT)!,
 		dsc: knownNodes.get(Node.DESCENDANT)!,
@@ -515,7 +524,7 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 		case HouseSystem.EQUAL_HOUSES_VEHLOW:
 			return computeEqualHousesVehlowCuspPositions(angles);
 		case HouseSystem.WHOLE_SIGN_ARIES:
-			return computeWholeSignAriesCuspPositions(angles, siderealOffset);
+			return computeWholeSignAriesCuspPositions(siderealOffset);
 		case HouseSystem.KRUSINSKY:
 			return computeKrusinskyCuspPositions(date, surfacePosition);
 		case HouseSystem.REGIOMONTANUS:

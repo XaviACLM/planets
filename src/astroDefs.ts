@@ -135,17 +135,17 @@ export const defaultNodes: Node[] = [
 ]
 
 export const innerPlanets: Node[] = [
+	Node.SUN,
+	Node.MOON,
 	Node.MERCURY,
 	Node.VENUS,
-	Node.EARTH,
 	Node.MARS,
 ]
 
 export const outerPlanets: Node[] = [
-	Node.MERCURY,
-	Node.VENUS,
-	Node.EARTH,
-	Node.MARS,
+	Node.URANUS,
+	Node.NEPTUNE,
+	Node.PLUTO,
 ]
 
 export const NodeType = {
@@ -491,7 +491,7 @@ export const aspectKindCategories = [
 	},
  ];
 
-export const defaultAspectKinds: Node[] = [
+export const defaultAspectKinds: AspectKind[] = [
 	AspectKind.GRAND_TRINE,
 	AspectKind.GRAND_SQUARE,
 	AspectKind.GRAND_SEXTILE,

@@ -126,7 +126,7 @@ function aspectError(
 	
 	if ( binaryAspectKinds.includes(aspect.kind) ) {
 		const d = angleShortDistance(nodePositions.get(n[0])!, nodePositions.get(n[1])!);
-		const target = aspectKindAngles[aspect.kind][0]*TAU;
+		const target = aspectKindAngles[aspect.kind]![0]*TAU;
 		return Math.abs(target - d);
 	}
 	
@@ -140,16 +140,16 @@ function aspectError(
 	//TODO the business
 	
 	const k = n.length;
-	const angles = [0, ...aspectKindAngles[aspect.kind].map(angle => angle * TAU)];
+	const angles = [0, ...aspectKindAngles[aspect.kind]!.map(angle => angle * TAU)];
 	
-	if ( [AspectErrorMode.POINTWISE_SUM, AspectErrorMode.POINTWISE_MAX].includes(aspectErrorMode) ){
+	if ( ([AspectErrorMode.POINTWISE_SUM, AspectErrorMode.POINTWISE_MAX] as AspectErrorMode[]).includes(aspectErrorMode) ){
 		let leastError = Infinity;
 		for (let offsetIdx = 0; offsetIdx < k; offsetIdx++) {
 			// n (vertex) we're looking at starts at basisIdx + offsetIdx
 			// idx in angles starts at offsetIdx
 			let error = 0;
 			const startAngle = angles[offsetIdx];
-			const startIdx = (aspect.basisNodeIdx + offsetIdx) % k;
+			const startIdx = (aspect.basisNodeIdx! + offsetIdx) % k;
 			const startPos = nodePositions.get(n[startIdx])!;
 			for (let i = 1; i < k; i++) {
 				const vertexIdx = (i + startIdx) % k;
@@ -165,7 +165,7 @@ function aspectError(
 			leastError = Math.min(leastError, error);
 		}
 		return leastError;
-	} else if ( [AspectErrorMode.PAIRWISE_OUTER_MAX, AspectErrorMode.PAIRWISE_OUTER_SUM].includes(aspectErrorMode) ) {
+	} else if ( ([AspectErrorMode.PAIRWISE_OUTER_MAX, AspectErrorMode.PAIRWISE_OUTER_SUM] as AspectErrorMode[]).includes(aspectErrorMode) ) {
 		let totalError = 0;
 		for (let i1=0; i1<k; i1++){
 			const i2 = (i1+1)%k;
@@ -196,8 +196,6 @@ function aspectError(
 		}
 		return totalError;
 	}
-
-	return leastError;
 }
 
 function subaspectsOf(
@@ -315,6 +313,8 @@ function subaspectsOf(
 			ensureCorrectOrderingInAspectList(subaspects, nodePositions);
 			return subaspects;
 		}
+		default:
+			throw new Error(`Unexpected aspect kind": ${aspect.kind}`)
 	}
 }
 
@@ -333,7 +333,7 @@ class AspectGroup {
         if (
             presentAspect === undefined || 
             presentAspect.error === null || 
-            (presentAspect.error > aspect.error)
+            (presentAspect.error > aspect.error!)
         ) {
             this.aspects.set(key, aspect);
         }
@@ -356,7 +356,7 @@ export function findAspects(
 	maxConfigurationError: number,
 	maxMajorBAError: number,
 	maxMinorBAError: number
-): Aspect[] {
+): Map<Aspect, Aspect[]> {
 
     // should be unnecessary, but let's make sure
     for (const [node, position] of nodePositions.entries()) {
@@ -406,7 +406,7 @@ export function findAspects(
 				return vertexError;
 			});
 
-			if ( [AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_OUTER_MAX].includes(aspectErrorMode) ){
+			if ( ([AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_OUTER_MAX] as AspectErrorMode[]).includes(aspectErrorMode) ){
 				// remove everything above max error, aggregated step-by-step
 				nodeErrors = nodeErrors.map((vertexError, index) => {
 					const filtered = new Map<Node, number>();
@@ -462,7 +462,7 @@ export function findAspects(
 						newError = currentError + localPointwiseError;
 					} else if ( aspectErrorMode == AspectErrorMode.POINTWISE_MAX ){
 						newError = Math.max(currentError, localPointwiseError);
-					} else if ( [AspectErrorMode.PAIRWISE_OUTER_SUM, AspectErrorMode.PAIRWISE_FULL_SUM].includes(aspectErrorMode) ) {
+					} else if ( ([AspectErrorMode.PAIRWISE_OUTER_SUM, AspectErrorMode.PAIRWISE_FULL_SUM] as AspectErrorMode[]).includes(aspectErrorMode) ) {
 						const currentNodePos = nodePositions.get(node)!;
 						const lastNodePos = nodePositions.get(currentNodes[depth])!;
 						const angleDiff = depth == 0 ? scaledAngles[0] : scaledAngles[depth] - scaledAngles[depth-1];
@@ -585,7 +585,7 @@ export function findAspects(
 	}
 	
 	// error of top-level configurations may be incorrect -> we recompute
-	if ( [AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_FULL_SUM].includes(aspectErrorMode) ){
+	if ( ([AspectErrorMode.PAIRWISE_FULL_MAX, AspectErrorMode.PAIRWISE_FULL_SUM] as AspectErrorMode[]).includes(aspectErrorMode) ){
 		for (const [aspect, subs] of subaspects){
 			aspect.error = aspectError(aspect, nodePositions, aspectErrorMode);
 			// if necessary, delete and reintroduce subaspects
@@ -619,7 +619,7 @@ export function ensureNoDuplicates(
 	// TODO also sort by error
 	const excludedAspects = new AspectGroup();
     const sortedEntries = Array.from(subaspectMap.entries())
-        .sort(([a, sa], [b, sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error - b.error));
+        .sort(([a, _sa], [b, _sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error! - b.error!));
 	subaspectMap.clear();
 	for (const [aspect, subs] of sortedEntries){
 		if  ( excludedAspects.contains(aspect) ){
@@ -659,6 +659,7 @@ export function filterAspects(
 	selectedAspectKinds: Set<AspectKind>,
 	aspectPhysicalityFilter: AspectPhysicalityFilter,
 	hamburgPhysical: boolean,
+	aspectErrorMode: AspectErrorMode,
 	maxConfigurationError: number,
 	maxMajorBAError: number,
 	maxMinorBAError: number
@@ -692,7 +693,7 @@ export function filterAspects(
 					subsubaspects.push(s);
 				} else {
 					// otherwise, check error again
-					s.error = aspectError(s, nodePositions);
+					s.error = aspectError(s, nodePositions, aspectErrorMode);
 					const maxError = s.nodes.length > 2 ?
 						maxConfigurationError :
 						(
@@ -734,7 +735,7 @@ function clearSubaspects(
     subaspectMap: Map<Aspect, Aspect[]>
 ): Map<Aspect, Aspect[]> {
     const newMap = new Map<Aspect, Aspect[]>();
-    for (const [aspect, subaspects] of subaspectMap) {
+    for (const [aspect, _] of subaspectMap) {
         newMap.set(aspect, []);
     }
     return newMap;
@@ -755,19 +756,21 @@ function copySubaspects(
 export function formatAspects(
 	subaspectMap: Map<Aspect, Aspect[]>,
 	selectedAspectMenuMode: AspectMenuMode
-){
+): Map<Aspect, Aspect[]>{
 	if ( selectedAspectMenuMode == AspectMenuMode.SHOW_ALL ){
 		return flattenSubaspects(subaspectMap);
 	} else if ( selectedAspectMenuMode == AspectMenuMode.SHOW_ONLY_MAXIMAL ){
 		return clearSubaspects(subaspectMap);
 	} else if ( selectedAspectMenuMode == AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS ){
 		return copySubaspects(subaspectMap);
+	} else {
+		throw new Error(`Unexpected aspect menu mode": ${selectedAspectMenuMode}`)
 	}
 }
 
 export function flattenSubaspectsToList(
     subaspectMap: Map<Aspect, Aspect[]>
-): Map<Aspect, Aspect[]> {
+): Aspect[] {
 	return Array.from(flattenSubaspects(subaspectMap).keys());
 }
 
@@ -778,53 +781,15 @@ export function deleteAspectFromMap(
 ){
 	const newMap = copySubaspects(subaspectMap);
 	if ( parentAspect === null ){
-		const subaspects = subaspectMap.get(aspect);
+		const subaspects = subaspectMap.get(aspect)!;
 		newMap.delete(aspect);
 		for ( const subaspect of subaspects ){
 			newMap.set(subaspect, []);
 		}
 		ensureNoDuplicates(newMap);
 	} else {
-		const otherSubaspects = subaspectMap.get(parentAspect);
+		const otherSubaspects = subaspectMap.get(parentAspect)!;
 		newMap.set(parentAspect, otherSubaspects.filter(subaspect => subaspect != aspect));
 	}
 	return newMap;
 }
-// TODO re aspects
-
-// XX create subaspect menu
-
-// XX make sure that the aspect deletion still works alright
-
-//  fix: aspect highlighting sometimes doesnt work for subaspects (?)
-//  seemingly when the subaspect already appears in a prior node
-//  could export the keying function
-
-// XX todo fix: aspects aren't being ordered by error
-
-// XX ensure grand sextiles are drawn properly
-
-//  clean up the aspects code, someday
-
-//  real constellations mode
-
-// XX removed cursed outlines
-
-//  antiscia
-// XX also the business with true/oppositive contraparallels
-// XX just forbid opposite contraparallels, they don't make sense
-
-//  integrate parallels diagram (sad!)
-
-// XX add vertex, antivertex, equinoxes, etc
-
-//  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
-
-//  put the settings somewhere elses, together with the node/aspect selector: toggleable settings column
-
-//  degree dits on the wheel
-
-//  why is the mcic computation like that. I remember being sure i was right when i changed it. but that's not the formula. what's going on.
-//  ugh, just switch all that to r3. i knew trigonometry was trouble
-
-//  getting a bit slow. irritating that things like houses cause aspect recomputation. maybe separate from zodiacPositions, or find another way to set up hooks.
