@@ -766,9 +766,6 @@ export function deleteAspectFromMap(
 
 // XX todo fix: aspects aren't being ordered by error
 
-//  figure out the stuff with the parallels diagram and the fixed stars. what do we want, really?
-//  if it does do fixed star stuff then deactivate that hide/unhide thing
-
 // XX ensure grand sextiles are drawn properly
 
 //  the business with how error is aggregated into configurations
@@ -785,15 +782,14 @@ export function deleteAspectFromMap(
 
 //  real constellations mode
 
+// XX removed cursed outlines
+
 //  antiscia
 // XX also the business with true/oppositive contraparallels
 // XX just forbid opposite contraparallels, they don't make sense
 
 //  integrate parallels diagram (sad!)
-//  think about what diagram to do wrt the behenian stars
 
 //  add vertex, antivertex, equinoxes, etc
 
-//  the other widgets
-
-//  the whole node spacing thing can move things over the 0/2pi line, which is fine for zodiac wheel but looks really weird for the parallel diagram
+//  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts

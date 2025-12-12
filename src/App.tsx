@@ -4,6 +4,7 @@ import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import ParallelDiagram from './ParallelDiagram'
 import Slider from './Slider'
+import NumericInputField from './NumericInputField'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
@@ -160,7 +161,7 @@ function App() {
 					{menuOpen && (
 						<div>
 							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-							<span>House system</span>
+								<span>House system</span>
 								<select
 									value={selectedHouseSystem}
 									onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
@@ -280,6 +281,49 @@ function App() {
 									))}
 								</select>
 							</div>
+							Maximum error per aspect type:
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								- Configurations:
+								<div style={{maxWidth:'50px'}}>
+									<NumericInputField
+										min={0}
+										max={20}
+										initialValue={3}
+										onValidCommit={x => {console.log(x);}}
+										placeholder="Error"
+										unit={"º"}
+									/>
+								</div>
+							</div>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								- Major binary aspects:
+								<div style={{maxWidth:'50px'}}>
+									<NumericInputField
+										min={0}
+										max={20}
+										initialValue={3}
+										onValidCommit={x => {console.log(x);}}
+										placeholder="Error"
+										unit={"º"}
+									/>
+								</div>
+							</div>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								- Minor binary aspects:
+								<div style={{maxWidth:'50px'}}>
+									<NumericInputField
+										min={0}
+										max={20}
+										initialValue={3}
+										onValidCommit={x => {console.log(x);}}
+										placeholder="Error"
+										unit={"º"}
+									/>
+								</div>
+							</div>
+							
+							<hr/>
+							
 							Required # of physical nodes per aspect:
 							<Slider
 								options={Object.values(AspectPhysicalityFilter)}
