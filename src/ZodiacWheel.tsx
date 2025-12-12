@@ -414,6 +414,46 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					);
 				})()}
 				
+				{/*Equinox (equator) line for parallels*/}
+				{ highlightedAspect != null
+				&& ([AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL].includes(highlightedAspect.kind))
+				&& (() => {
+					// autumnal and vernal equinoxes
+					const a1 = 0 + offset;
+					const a2 = Math.PI + offset;
+					const x1 = 50 + aspectRadius * Math.cos(a1);
+					const x2 = 50 + aspectRadius * Math.cos(a2);
+					const y1 = 50 - aspectRadius * Math.sin(a1);
+					const y2 = 50 - aspectRadius * Math.sin(a2);
+					const pathData = [
+						`M ${x1} ${y1}`,
+						`L ${x2} ${y2}`
+					].join(" ");	
+		
+					const [r,g,b] = aspectKindColors[highlightedAspect.kind];
+					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+					const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
+					return (
+						<path
+							key={-1000000}
+							d={pathData}
+							fill="none"
+							stroke={stroke}
+							strokeWidth={blurBaseWidth}
+							filter="url(#path-glow)"
+							opacity={0}
+							style={{ transition: 'opacity 0.6s ease' }}
+							ref={node => {
+								if (node) {
+									requestAnimationFrame(() => {
+										node.style.opacity = "1";
+									});
+								 }
+							}}
+						/>
+					);
+				})()}
+				
 				{/*Aspects*/}
 				{aspects != null &&
 					aspects.map((aspect, i) => {
