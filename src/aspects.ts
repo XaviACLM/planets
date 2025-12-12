@@ -815,7 +815,7 @@ export function deleteAspectFromMap(
 
 //  integrate parallels diagram (sad!)
 
-//  add vertex, antivertex, equinoxes, etc
+// XX add vertex, antivertex, equinoxes, etc
 
 //  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
 

@@ -151,6 +151,15 @@ function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, n
 		[Node.DESCENDANT, normalizeAngleRad(ascLon + Math.PI)],
 		[Node.MIDHEAVEN, normalizeAngleRad(mcLon)],
 		[Node.IMUM_COELI, normalizeAngleRad(mcLon + Math.PI)],
+		[Node.VERTEX, normalizeAngleRad(vxLon)],
+		[Node.ANTIVERTEX, normalizeAngleRad(vxLon + Math.PI)],
+	]);
+}
+
+export function computeEquinoxes(): Map<Node, number> {
+	return new Map<Node, number>([
+		[Node.VERNAL_EQUINOX, 0],
+		[Node.AUTUMNAL_EQUINOX, Math.PI]
 	]);
 }
 
@@ -257,6 +266,7 @@ function computeAllNodePositionsWithoutSurfacePosition(
 		...computeHamburgSchoolObjectPositions(date, hamburgSchoolMode),
 		...computeLunarNodes(date, lunarNodeMode),
 		...computeLunarApogeePerigee(date, lunarNodeMode),
+		...computeEquinoxes(),
 	]);
 }
 

@@ -28,6 +28,10 @@ import ascendantSymbol from "./assets/body-symbols/Ascendant.png"
 import descendantSymbol from "./assets/body-symbols/Descendant.png"
 import midheavenSymbol from "./assets/body-symbols/Midheaven.png"
 import imumCoeliSymbol from "./assets/body-symbols/Imum Coeli.png"
+import vertexSymbol from "./assets/body-symbols/Vertex.png"
+import antivertexSymbol from "./assets/body-symbols/Antivertex.png"
+import vernalEquinoxSymbol from "./assets/body-symbols/Vernal Equinox.png"
+import autumnalEquinoxSymbol from "./assets/body-symbols/Autumnal Equinox.png"
 import lunarAscendingSymbol from "./assets/body-symbols/Lunar Ascending.png"
 import lunarDescendingSymbol from "./assets/body-symbols/Lunar Descending.png"
 import partOfFortuneSymbol from "./assets/body-symbols/Part of Fortune.png"
@@ -114,6 +118,8 @@ export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.PART_OF_FORTUNE] : "Fortuna",
 	[Node.RADAMANTHUS] : "R-manthus",
 	[Node.GKUNHOMDIMA] : "G-Hmdima",
+	[Node.VERNAL_EQUINOX] : "Vernal Equinox",
+	[Node.AUTUMNAL_EQUINOX] : "Autumnal Eq.",
 	//TODO shortnames of hamburg school and minor-minor objects
 }
 
@@ -136,6 +142,10 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
 	[Node.DESCENDANT] : true,
 	[Node.MIDHEAVEN] : true,
 	[Node.IMUM_COELI] : true,
+	[Node.VERTEX] : true,
+	[Node.ANTIVERTEX] : true,
+	[Node.VERNAL_EQUINOX] : true,
+	[Node.AUTUMNAL_EQUINOX] : true,
 	
 	[Node.PART_OF_FORTUNE] : false,
 	
@@ -213,6 +223,10 @@ export const nodeSymbols: Record<Node, string> = {
 	[Node.DESCENDANT] : descendantSymbol,
 	[Node.MIDHEAVEN] : midheavenSymbol,
 	[Node.IMUM_COELI] : imumCoeliSymbol,
+	[Node.VERTEX] : vertexSymbol,
+	[Node.ANTIVERTEX] : antivertexSymbol,
+	[Node.VERNAL_EQUINOX] : vernalEquinoxSymbol,
+	[Node.AUTUMNAL_EQUINOX] : autumnalEquinoxSymbol,
 	[Node.LUNAR_ASCENDING] : lunarAscendingSymbol,
 	[Node.LUNAR_DESCENDING] : lunarDescendingSymbol,
 	[Node.LUNAR_APOGEE] : lunarApogeeSymbol,

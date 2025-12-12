@@ -49,6 +49,11 @@ export const Node = {
 	DESCENDANT: "Descendant",
 	MIDHEAVEN: "Midheaven",
 	IMUM_COELI: "Imum Coeli",
+	// other angles
+	VERTEX: "Vertex",
+	ANTIVERTEX: "Antivertex",
+	VERNAL_EQUINOX: "Vernal Equinox",
+	AUTUMNAL_EQUINOX: "Autumnal Equinox",
 	
 	// arabic parts
 	PART_OF_FORTUNE: "Part of Fortune",
@@ -166,6 +171,10 @@ export const nodeTypes: Record<Node, NodeType> = {
 	[Node.DESCENDANT] : NodeType.POINT,
 	[Node.MIDHEAVEN] : NodeType.POINT,
 	[Node.IMUM_COELI] : NodeType.POINT,
+	[Node.VERTEX] : NodeType.POINT,
+	[Node.ANTIVERTEX] : NodeType.POINT,
+	[Node.VERNAL_EQUINOX] : NodeType.POINT,
+	[Node.AUTUMNAL_EQUINOX] : NodeType.POINT,
 	
 	[Node.PART_OF_FORTUNE] : NodeType.POINT,
 	
@@ -229,6 +238,10 @@ export const nodeDependsOnLocation: Record<Node, boolean> = {
 	[Node.DESCENDANT] : true,
 	[Node.MIDHEAVEN] : true,
 	[Node.IMUM_COELI] : true,
+	[Node.VERTEX] : true,
+	[Node.ANTIVERTEX] : true,
+	[Node.VERNAL_EQUINOX] : false,
+	[Node.AUTUMNAL_EQUINOX] : false,
 	
 	[Node.PART_OF_FORTUNE] : true,
 	
@@ -315,7 +328,11 @@ export const nodeCategories = [
 			Node.ASCENDANT,
 			Node.DESCENDANT,
 			Node.MIDHEAVEN,
-			Node.IMUM_COELI
+			Node.IMUM_COELI,
+			Node.VERTEX,
+			Node.ANTIVERTEX,
+			Node.VERNAL_EQUINOX,
+			Node.AUTUMNAL_EQUINOX
 		]
 	},
 	{
