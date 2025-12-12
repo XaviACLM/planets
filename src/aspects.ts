@@ -803,27 +803,6 @@ export function deleteAspectFromMap(
 
 // XX ensure grand sextiles are drawn properly
 
-//  the business with how error is aggregated into configurations
-// XX update aspectError computation
-// XX update error computation DURING search
-// XX  including post-search error recheck for pairwise-full
-// XX debug the above
-// XX  pairwise full/outer max: many (all?) configurations have nan error
-// XX  pairwise full/outer sum: parallels/contraparallels have nan error
-// XX  pairwise gets absolutely no grands, unclear why
-// XX update search to take max-error-per-aspectKind map
-// XX make ui widget with error kind, error-per-aspect fields (also per-category), and a "recompute" button
-// XX search gets slow for certain errors. be careful with that, maybe cap it.
-// XX actually use minorBAError, instead of just max for everything
-//  fix bugs
-// XX  configurations have error above limit somehow
-// XX   only when they're subaspects. because of the check towards the end of findSubaspects assumes we can use the majorBA whatever
-// XX    fix by using other check depending on aspect.nodes.length
-// XX  and binary aspects too
-// XX   because of line 681, where stuff gets reintroduced
-//   also everything resets back to the initial value when we close/reopen
-//    an issue relating to how prop update forces recomputation - fundamental react question. will have to look into it
-
 //  clean up the aspects code, someday
 
 //  real constellations mode

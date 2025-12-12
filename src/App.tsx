@@ -31,12 +31,9 @@ function App() {
 	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
 	
 	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_MAX);
-	const initialMaxConfigurationErrorDegrees = 3;
-	const initialMaxMajorBAErrorDegrees = 3;
-	const initialMaxMinorBAErrorDegrees = 3;
-	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(initialMaxConfigurationErrorDegrees);
-	const [maxMajorBAErrorDegrees, setMaxMajorBAErrorDegrees] = useState<number>(initialMaxMajorBAErrorDegrees);
-	const [maxMinorBAErrorDegrees, setMaxMinorBAErrorDegrees] = useState<number>(initialMaxMinorBAErrorDegrees);
+	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(3);
+	const [maxMajorBAErrorDegrees, setMaxMajorBAErrorDegrees] = useState<number>(3);
+	const [maxMinorBAErrorDegrees, setMaxMinorBAErrorDegrees] = useState<number>(3);
 	const maxConfigurationError = useMemo(() => maxConfigurationErrorDegrees*Math.PI/180);
 	const maxMajorBAError = useMemo(() => maxMajorBAErrorDegrees*Math.PI/180);
 	const maxMinorBAError = useMemo(() => maxMinorBAErrorDegrees*Math.PI/180);
@@ -298,7 +295,7 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={initialMaxConfigurationErrorDegrees}
+										initialValue={maxConfigurationErrorDegrees}
 										onValidCommit={setMaxConfigurationErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
@@ -311,7 +308,7 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={initialMaxMajorBAErrorDegrees}
+										initialValue={maxMajorBAErrorDegrees}
 										onValidCommit={setMaxMajorBAErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
@@ -324,7 +321,7 @@ function App() {
 									<NumericInputField
 										min={0}
 										max={20}
-										initialValue={initialMaxMinorBAErrorDegrees}
+										initialValue={maxMinorBAErrorDegrees}
 										onValidCommit={setMaxMinorBAErrorDegrees}
 										placeholder="Error"
 										unit={"º"}
