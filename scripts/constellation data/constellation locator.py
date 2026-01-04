@@ -1,4 +1,4 @@
-from math import asin, atan2, sin, cos, tan, pi
+from math import asin, atan2, sin, cos, tan, pi, sqrt
 from matplotlib import pyplot as plt
 
 # data from https://github.com/astronoray/constellation_figures/
@@ -123,6 +123,7 @@ plt.show()
 #let's do straight up gd distance
 
 import numpy as np
+"""
 idxs = []
 lats = []
 lons = []
@@ -149,7 +150,30 @@ for c_idx, constellation_code in enumerate(constellation_codes):
                 idxs.append(c_idx)
                 lats.append(lat)
                 lons.append(lon)
+"""
 
+idxs = []
+xs = []
+ys = []
+for c_idx, constellation_code in enumerate(constellation_codes):
+    constellation = constellation_data[constellation_code]
+    for s1_hip, s2_hip in constellation:
+        lat1, lon1 = eq_to_ecl(*star_data[s1_hip])
+        lat2, lon2 = eq_to_ecl(*star_data[s2_hip])
+        x1, y1, z1 = cos(lon1)*cos(lat1), sin(lon1)*cos(lat1), sin(lat1)
+        x2, y2, z2 = cos(lon2)*cos(lat2), sin(lon2)*cos(lat2), sin(lat2)
+        
+        n1 = sqrt(x1*x1+y1*y1+z1*z1)
+        x1, y1, z1 = x1/n1, y1/n1, z1/n1
+        
+        for k in np.linspace(0,1,1001):
+            x, y, z = x1+k*(x2-x1), y1+k*(y2-y1), z1+k*(z2-z1)
+            n = sqrt(x*x+y*y+z*z)
+            x, y, z = x/n, y/n, z/n
+            idxs.append(c_idx)
+            xs.append(x)
+            ys.append(y)
+"""
 lats = np.array(lats)
 lons = np.array(lons)
 sq_lats = np.square(lats)
@@ -157,6 +181,11 @@ def closest_constellation_idx(lon):
     return idxs[np.argmin(sq_lats+np.square(lons-lon))]
 x_term = np.cos(lons)*np.cos(lats)
 y_term = np.sin(lons)*np.cos(lats)
+def closest_constellation_idx(lon):
+    return idxs[np.argmin(np.arccos(cos(lon)*x_term+sin(lon)*y_term))]
+"""
+x_term = np.array(xs)
+y_term = np.array(ys)
 def closest_constellation_idx(lon):
     return idxs[np.argmin(np.arccos(cos(lon)*x_term+sin(lon)*y_term))]
 
@@ -182,7 +211,6 @@ for current_lon in np.linspace(0,2*pi,1000):
     last_idx = current_idx
     last_lon = current_lon
 
-
 """
 Pisces - 0.6104967379962906 - Aries - 0.8105057114798916 - Taurus - 1.5267759869050548 - Gemini - 2.1033385365075885 - Cancer - 2.444639600917877 - Leo - 3.010281704956398 - Virgo - 3.790183028887541 - Libra - 4.183094543606233 - Scorpio - 4.291067023887651 - Ophiuchus - 4.666857876143661 - Saggitarius - 5.177384974452394 - Capricorn - 5.664644920350497 - Aquarius - 6.137075512573954 - Pisces
 """
@@ -197,3 +225,17 @@ Pisces - 0.6104967379962906 - Aries - 0.8105057114798916 - Taurus - 1.5267759869
 # but again, what's the epoch of our data?
 # oh, also, straight euclidean doesn't make sense here. We need spherical (cosine) distance - redo that.
 # okay, slowly checked that the original data is J2000. good. let's do the cosine stuff now.
+"""
+updated values
+Pisces - 0.6104783869644631 - Aries - 0.8101614932229749 - Taurus - 1.5267809525908373 - Gemini - 2.1033401145729895 - Cancer - 2.4448001259141483 - Leo - 3.010278247795422 - Virgo - 3.790219827108406 - Libra - 4.183094901805898 - Scorpio - 4.291067820699151 -Ophiuchus - 4.666853311206641 - Saggitarius - 5.177420977361285 - Capricorn - 5.664644247062586 - Aquarius - 6.137074041724778 - Pisces
+"""
+
+# great. now about the 'official' constellation borders.
+# wait. i'm realizing now we're still wrong. we interpolated those lines like we were in R2
+# we have to account for sphere geometry.
+
+# ugh let's do this sagain then
+"""
+updated values
+Pisces - 0.610481957714658 - Aries - 0.809283631691531 - Taurus - 1.5267809525908373 - Gemini - 2.1034634737766833 - Cancer - 2.4448001259141483 - Leo - 3.010302580817891 - Virgo - 3.7901704662198483 - Libra - 4.18304646518869 - Scorpio - 4.291068045815738 - Ophiuchus - 4.666853099398361 - Saggitarius - 5.177419308949345 - Capricorn - 5.664778889649456 - Aquarius - 6.137074041724778 - Pisces
+"""
