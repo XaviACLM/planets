@@ -478,8 +478,6 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					})
 				}
 
-				// highlighted aspect
-
 				{/*Zodiac symbol highlighting*/}
 				{Array.from({ length: 12 }).map((_, i) => {
 					const startA = (i/12) * 2 * Math.PI + offset + siderealOffset;

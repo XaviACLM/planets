@@ -11,3 +11,26 @@
 //  degree dits on the wheel
 //  that stuff with the preferred names vs shortnames
 //  circles on the zodiac wheel depending on what binary aspects are selected (mind you this doesn't force recomputation bc selectedAspects is mutable)
+
+orbital nodes for all the physical objects (...)
+midpoints / other hamburg school business
+dignities: rulership/detriment, exaltation/fall
+rulership cycles
+precession
+fixed stars (conjunctions, maybe oppositions)
+inner/outer planets element/mode
+house business
+
+
+bicharts
+parans
+D9s and stuff
+midpoints
+sects
+dignities / hayz / scores
+
+
+
+just realized that POINTWISE_MAX = PAIRWISE_FULL_MAX
+(...what to do with this info)
+obs that that being true depends on how all pairs of nodes within a configuration happen to share an aspect, which is something that just happens to be true
