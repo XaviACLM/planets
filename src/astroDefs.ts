@@ -1,18 +1,34 @@
 export const Zodiac = {
-  Aries: 'Aries',
-  Taurus: 'Taurus', 
-  Gemini: 'Gemini',
-  Cancer: 'Cancer',
-  Leo: 'Leo',
-  Virgo: 'Virgo',
-  Libra: 'Libra',
-  Scorpio: 'Scorpio',
-  Sagittarius: 'Sagittarius',
-  Capricorn: 'Capricorn',
-  Aquarius: 'Aquarius',
-  Pisces: 'Pisces'
+  ARIES: 'Aries',
+  TAURUS: 'Taurus', 
+  GEMINI: 'Gemini',
+  CANCER: 'Cancer',
+  LEO: 'Leo',
+  VIRGO: 'Virgo',
+  LIBRA: 'Libra',
+  SCORPIO: 'Scorpio',
+  OPHIUCHUS: 'Ophiuchus',
+  SAGITTARIUS: 'Sagittarius',
+  CAPRICORN: 'Capricorn',
+  AQUARIUS: 'Aquarius',
+  PISCES: 'Pisces'
 } as const;
 export type Zodiac = typeof Zodiac[keyof typeof Zodiac];
+
+export const standardZodiac: [Zodiac] =[
+	Zodiac.ARIES,
+	Zodiac.TAURUS,
+	Zodiac.GEMINI,
+	Zodiac.CANCER,
+	Zodiac.LEO,
+	Zodiac.VIRGO,
+	Zodiac.LIBRA,
+	Zodiac.SCORPIO,
+	Zodiac.SAGITTARIUS,
+	Zodiac.CAPRICORN,
+	Zodiac.AQUARIUS,
+	Zodiac.PISCES,
+];
 
 export const AstrologyMode = {
 	TROPICAL: "Tropical",
@@ -28,8 +44,61 @@ export const AstrologyMode = {
 	SIDEREAL_SURYASIDDHANTA: "Sidereal - Suryasiddhanta",
 	SIDEREAL_TRUE_CITRA: "Sidereal - True Citra",
 	SIDEREAL_TRUE_REVANTI: "Sidereal - True Revanti",
+	CONSTELLATIONS_CLOSEST: "Constellations - Closest",
+	CONSTELLATIONS_IAU: "Constellations - IAU",
 } as const;
 export type AstrologyMode = typeof AstrologyMode[keyof typeof AstrologyMode];
+
+// https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
+// https://iphemeris.com/blog/document/ayanamsa
+// those missing from the code in scripts, pulling swissephemeris data
+export const ayanamsas: Partial<Record<AstrologyMode, number>> = {
+	// in J2000 ecliptic longitude
+	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
+	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
+	[AstrologyMode.SIDEREAL_RAMAN] : 22.4069, 
+	[AstrologyMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
+	[AstrologyMode.SIDEREAL_YUKTESHWAR] : 22.4778,
+	[AstrologyMode.SIDEREAL_DE_LUCE] : 27.8056,
+	[AstrologyMode.SIDEREAL_HIPPARCHOS] : 20.2461,
+	[AstrologyMode.SIDEREAL_BABYLONIAN] : 24.7867,
+	[AstrologyMode.SIDEREAL_HUBER] : 24.7336,
+	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
+	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
+	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
+}
+
+export const zodiacLongitudeClosest: Record<Zodiac, number> = {
+	[Zodiac.ARIES] : 0.610481957714658,
+	[Zodiac.TAURUS] : 0.809283631691531,
+	[Zodiac.GEMINI] : 1.5267809525908373,
+	[Zodiac.CANCER] : 2.1034634737766833,
+	[Zodiac.LEO] : 2.4448001259141483,
+	[Zodiac.VIRGO] : 3.010302580817891,
+	[Zodiac.LIBRA] : 3.7901704662198483,
+	[Zodiac.SCORPIO] : 4.18304646518869,
+	[Zodiac.OPHIUCHUS] : 4.291068045815738,
+	[Zodiac.SAGITTARIUS] : 4.666853099398361,
+	[Zodiac.CAPRICORN] : 5.177419308949345,
+	[Zodiac.AQUARIUS] : 5.664778889649456,
+	[Zodiac.PISCES] : 6.137074041724778,
+}
+
+export const zodiacLongitudeIAU: Record<Zodiac, number> = {
+	[Zodiac.ARIES] : 0.5006710809308025,
+	[Zodiac.TAURUS] : 0.932292091737694,
+	[Zodiac.GEMINI] : 1.5732392440197722,
+	[Zodiac.CANCER] : 2.059288010209377,
+	[Zodiac.LEO] : 2.4092369528387416,
+	[Zodiac.VIRGO] : 3.034271715326123,
+	[Zodiac.LIBRA] : 3.801490778565342,
+	[Zodiac.SCORPIO] : 4.208082360282873,
+	[Zodiac.OPHIUCHUS] : 4.3220852335887985,
+	[Zodiac.SAGITTARIUS] : 4.646721441014687,
+	[Zodiac.CAPRICORN] : 5.229995888867893,
+	[Zodiac.AQUARIUS] : 5.715748880259971,
+	[Zodiac.PISCES] : 6.13567725989199,
+}
 
 export const Node = {
 	// bodies

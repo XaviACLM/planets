@@ -8,6 +8,7 @@ import leoSymbol from "./assets/zodiac-symbols/Leo.png"
 import virgoSymbol from "./assets/zodiac-symbols/Virgo.png"
 import libraSymbol from "./assets/zodiac-symbols/Libra.png"
 import scorpioSymbol from "./assets/zodiac-symbols/Scorpio.png"
+import ophiuchusSymbol from "./assets/zodiac-symbols/Ophiuchus.png"
 import sagittariusSymbol from "./assets/zodiac-symbols/Sagittarius.png"
 import capricornSymbol from "./assets/zodiac-symbols/Capricorn.png"
 import aquariusSymbol from "./assets/zodiac-symbols/Aquarius.png"
@@ -194,18 +195,19 @@ export const nodeSymbolHideable: Record<Node, boolean> = {
 }
 	
 export const zodiacSymbols: Record<Zodiac, string> = {
-	[Zodiac.Aries] : ariesSymbol,
-	[Zodiac.Taurus] : taurusSymbol,
-	[Zodiac.Gemini] : geminiSymbol,
-	[Zodiac.Cancer] : cancerSymbol,
-	[Zodiac.Leo] : leoSymbol,
-	[Zodiac.Virgo] : virgoSymbol,
-	[Zodiac.Libra] : libraSymbol,
-	[Zodiac.Scorpio] : scorpioSymbol,
-	[Zodiac.Sagittarius] : sagittariusSymbol,
-	[Zodiac.Capricorn] : capricornSymbol,
-	[Zodiac.Aquarius] : aquariusSymbol,
-	[Zodiac.Pisces] : piscesSymbol
+	[Zodiac.ARIES] : ariesSymbol,
+	[Zodiac.TAURUS] : taurusSymbol,
+	[Zodiac.GEMINI] : geminiSymbol,
+	[Zodiac.CANCER] : cancerSymbol,
+	[Zodiac.LEO] : leoSymbol,
+	[Zodiac.VIRGO] : virgoSymbol,
+	[Zodiac.LIBRA] : libraSymbol,
+	[Zodiac.SCORPIO] : scorpioSymbol,
+	[Zodiac.OPHIUCHUS] : ophiuchusSymbol,
+	[Zodiac.SAGITTARIUS] : sagittariusSymbol,
+	[Zodiac.CAPRICORN] : capricornSymbol,
+	[Zodiac.AQUARIUS] : aquariusSymbol,
+	[Zodiac.PISCES] : piscesSymbol
 }
 
 export const nodeSymbols: Record<Node, string> = {

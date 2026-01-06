@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 
 import { type Aspect } from './aspects.ts'
-import { Node, Zodiac, AspectKind } from './astroDefs.ts'
+import { Node, Zodiac, AspectKind, standardZodiac } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
@@ -114,6 +114,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 	}, [nodeAngles]);
 
 	const zodiac: Zodiac[] = Array.from(Object.values(Zodiac));
+	//const zodiac = standardZodiac;
 	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
 	const [hoveredZodiac, setHoveredZodiac] = useState<number | null>(null);

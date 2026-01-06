@@ -3,28 +3,8 @@ import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, R
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { smallBodyParams, orbitalLongitude, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
-import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode, HamburgSchoolMode } from './astroDefs.ts'
+import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode, HamburgSchoolMode, ayanamsas, Zodiac, standardZodiac } from './astroDefs.ts'
 import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
-
-
-// https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
-// https://iphemeris.com/blog/document/ayanamsa
-// those missing from the code in scripts, pulling swissephemeris data
-const Ayanamsas: Partial<Record<AstrologyMode, number>> = {
-	// in J2000 ecliptic longitude
-	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
-	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
-	[AstrologyMode.SIDEREAL_RAMAN] : 22.4069, 
-	[AstrologyMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
-	[AstrologyMode.SIDEREAL_YUKTESHWAR] : 22.4778,
-	[AstrologyMode.SIDEREAL_DE_LUCE] : 27.8056,
-	[AstrologyMode.SIDEREAL_HIPPARCHOS] : 20.2461,
-	[AstrologyMode.SIDEREAL_BABYLONIAN] : 24.7867,
-	[AstrologyMode.SIDEREAL_HUBER] : 24.7336,
-	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
-	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
-	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
-}
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
     const jd = (date.getTime() / 86400000) + 2440587.5;
@@ -290,7 +270,7 @@ function computeAllNodePositions(
 function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
 	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
 	
-	const ayanamsaJ2000 = Ayanamsas[astrologyMode]!;
+	const ayanamsaJ2000 = ayanamsas[astrologyMode]!;
 	
 	const degPerSecondPrecession = 4.426734852389845e-10;
 	const j2000InMillis = Date.UTC(2000, 0, 1, 12, 0, 0);
@@ -418,6 +398,32 @@ export class ZodiacPositions {
 		}
 	}
 
+
+	// isHouseSystemRegular
+	// plus
+	// siderealOffset (possibly null)
+	// or just some sort of ordered map?
+	// maps are ordered by insertion. just use that. construct on startup, like e.else
+	public getZodiacSymbols(): [Zodiac] {
+		if (this.isHouseSystemRegular){
+			return standardZodiac;
+		} else {
+			return Array.from(Object.values(Zodiac));
+		}
+	}
+	
+	public getStartingLongitudeOfZodiacSymbol(zodiac: Zodiac): number {
+		if (this.isHouseSystemRegular){
+			return standardZodiac;
+		} else {
+			return Array.from(Object.values(Zodiac));
+		}
+	}
+	
+	
+	
+	
+	
 	public changeHamburgSchoolMode(newMode: HamburgSchoolMode): ZodiacPositions{
 		if (newMode == this.hamburgSchoolMode) {
 			return this;
@@ -457,4 +463,5 @@ export class ZodiacPositions {
 	public houseCuspsAreDefined(): boolean {
 		return this._houseCuspPositions !== null
 	}
+	
 }
