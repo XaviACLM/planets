@@ -68,6 +68,11 @@ export const ayanamsas: Partial<Record<AstrologyMode, number>> = {
 	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
 }
 
+export const irregularAstrologyModes: AstrologyMode[] = Object.values(AstrologyMode).filter(mode => 
+    mode !== AstrologyMode.TROPICAL && 
+    !(Object.keys(ayanamsas) as AstrologyMode[]).includes(mode)
+) as AstrologyMode[];
+
 export const zodiacLongitudeClosest: Record<Zodiac, number> = {
 	[Zodiac.ARIES] : 0.610481957714658,
 	[Zodiac.TAURUS] : 0.809283631691531,

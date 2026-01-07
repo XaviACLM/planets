@@ -41,22 +41,21 @@ export const AyanamsaDependantHouseSystems: HouseSystem[] = [
 	HouseSystem.WHOLE_SIGN_ARIES,
 ];
 
-function computeWholeSignCuspPositions(angles: AxisAngles, siderealOffset: number){
-	const idx = Math.floor((angles.asc - siderealOffset)/(Math.PI/6));
-	return [
-		normalizeAngleRad(idx*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+1)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+2)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+3)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+4)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+5)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+6)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+7)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+8)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+9)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+10)*Math.PI/6 + siderealOffset),
-		normalizeAngleRad((idx+11)*Math.PI/6 + siderealOffset),
-	];
+// TODO whole sign and whole sign aries
+
+function computeWholeSignCuspPositions(
+	angles: AxisAngles,
+	zodiacSymbolPositions: Map<Zodiac, number>
+) {	
+	const longitudes = Array.from(zodiacSymbolPositions.values());
+	let index = longitudes.findIndex((lon) => lon > angles.asc);
+	if (index === -1 || index === 0) {
+		index = longitudes.length - 1;
+	} else {
+		index = index - 1;
+	}
+	
+	return Array.from({length: longitudes.length}).map((_,i) => longitudes[(index+i)%longitudes.length]);
 }
 
 function computeEqualHousesCuspPositions(angles: AxisAngles){
@@ -110,21 +109,8 @@ function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computeWholeSignAriesCuspPositions(siderealOffset: number){
-	return [
-		normalizeAngleRad(siderealOffset),
-		normalizeAngleRad(1*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(2*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(3*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(4*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(5*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(6*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(7*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(8*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(9*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(10*Math.PI/6 + siderealOffset),
-		normalizeAngleRad(11*Math.PI/6 + siderealOffset),
-	];
+function computeWholeSignAriesCuspPositions(zodiacSymbolPositions: Map<Zodiac, number>){
+	return Array.from(zodiacSymbolPositions.values());
 }
 
 
@@ -507,7 +493,13 @@ function computeTopocentricCuspPositions(date: Date, angles: AxisAngles){
 }
 void computeTopocentricCuspPositions;
 
-export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePosition, houseSystem: HouseSystem, knownNodes: Map<Node, number>, siderealOffset: number): number[] | null{
+export function computeHouseCuspPositions(
+	date: Date,
+	surfacePosition: SurfacePosition,
+	houseSystem: HouseSystem,
+	knownNodes: Map<Node, number>,
+	zodiacSymbolPositions: Map<Zodiac, number>
+): number[] | null {
 	const angles = {
 		asc: knownNodes.get(Node.ASCENDANT)!,
 		dsc: knownNodes.get(Node.DESCENDANT)!,
@@ -516,7 +508,7 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
-			return computeWholeSignCuspPositions(angles, siderealOffset);
+			return computeWholeSignCuspPositions(angles, zodiacSymbolPositions);
 		case HouseSystem.EQUAL_HOUSES:
 			return computeEqualHousesCuspPositions(angles);
 		case HouseSystem.PORPHYRY:
@@ -524,7 +516,7 @@ export function computeHouseCuspPositions(date: Date, surfacePosition: SurfacePo
 		case HouseSystem.EQUAL_HOUSES_VEHLOW:
 			return computeEqualHousesVehlowCuspPositions(angles);
 		case HouseSystem.WHOLE_SIGN_ARIES:
-			return computeWholeSignAriesCuspPositions(siderealOffset);
+			return computeWholeSignAriesCuspPositions(zodiacSymbolPositions);
 		case HouseSystem.KRUSINSKY:
 			return computeKrusinskyCuspPositions(date, surfacePosition);
 		case HouseSystem.REGIOMONTANUS:

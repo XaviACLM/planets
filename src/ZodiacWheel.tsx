@@ -113,11 +113,10 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 		return adjustedMap;
 	}, [nodeAngles]);
 
-	const zodiac: Zodiac[] = Array.from(Object.values(Zodiac));
-	//const zodiac = standardZodiac;
+	const zodiac: Map<Zodiac, number> = zodiacPositions.getZodiacSymbolPositions();
 	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
-	const [hoveredZodiac, setHoveredZodiac] = useState<number | null>(null);
+	const [hoveredZodiac, setHoveredZodiac] = useState<Zodiac | null>(null);
 	
 	return (
 		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
@@ -147,11 +146,11 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 				/>
 				
 				{/*Outer zodiac sector separators*/}
-				{Array.from({ length: 12 }).map((_, i) => {
-					const a = (i/12) * 2 * Math.PI + offset + siderealOffset;
+				{Array.from(zodiac.values()).map((lon, index) => {
+					const a = lon + offset;
 					return (
 						<line
-							key={i}
+							key={index}
 							x1={50 + radius * Math.cos(a)}
 							y1={50 - radius * Math.sin(a)}
 							x2={50 + sectorRadius * Math.cos(a)}
@@ -163,7 +162,12 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					);
 				})}
 				
+				{/* not done. need to account for possibility of 13 houses,
+				    which requires houseCuspAngles.map
+					but then we have to separate out the case where houseCuspAngles===null
+					something analogous for the presweep line and house cusp labels. ugh*/}
 				{/*House separators*/}
+				{/*
 				{Array.from({ length: 12 }).map((_, i) => {
 					let a;
 					if (houseCuspAngles) {
@@ -183,62 +187,107 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						/>
 					);
 				})}
+				*/}
+				
+				{/*House separators*/}
+				{zodiacPositions.houseCuspsAreDefined()
+				&& houseCuspAngles.map((lon, index) => {
+					const a = lon + offset + ( housePresweep ? -Math.PI/36 : 0 ); //5º presweep
+					return (
+						<line
+							key={index}
+							x1={50 + (radius - 3) * Math.cos(a)}
+							y1={50 - (radius - 3) * Math.sin(a)}
+							x2={50 + (aspectRadius + 3) * Math.cos(a)}
+							y2={50 - (aspectRadius + 3) * Math.sin(a)}
+							stroke="white"
+							strokeWidth={strokeWidthTertiary}
+							
+						/>
+					);
+				})}
+				
+				{/*Sign separators if no houses*/}
+				{/*Hidden for now. Might be confusing, not really important to have*/}
+				{/*
+				{!zodiacPositions.houseCuspsAreDefined()
+				&& Array.from(zodiac.values()).map((lon, index) => {
+					const a = lon + offset;
+					return (
+						<line
+							key={index}
+							x1={50 + (radius - 3) * Math.cos(a)}
+							y1={50 - (radius - 3) * Math.sin(a)}
+							x2={50 + (aspectRadius + 3) * Math.cos(a)}
+							y2={50 - (aspectRadius + 3) * Math.sin(a)}
+							stroke="white"
+							strokeWidth={strokeWidthTertiary}
+							
+						/>
+					);
+				})}
+				*/}
 				
 				{/*House presweep line*/}
-				{ housePresweep && zodiacPositions.houseCuspsAreDefined() &&
-					Array.from({ length: 12 }).map((_, i) => {
-						const a = houseCuspAngles![i] + offset;
-						return (
-							<line
-								key={i}
-								x1={50 + (aspectRadius + 3) * Math.cos(a)}
-								y1={50 - (aspectRadius + 3) * Math.sin(a)}
-								x2={50 + (radius - 3) * Math.cos(a)}
-								y2={50 - (radius - 3) * Math.sin(a)}
-								stroke="white"
-								strokeWidth={strokeWidthTertiary}
-								strokeDasharray="0.2,0.5"
-							/>
-						);
-					})
-				}
+				{housePresweep
+				&& zodiacPositions.houseCuspsAreDefined()
+				&& houseCuspAngles.map((lon, index) => {
+					const a = lon + offset;
+					return (
+						<line
+							key={index}
+							x1={50 + (aspectRadius + 3) * Math.cos(a)}
+							y1={50 - (aspectRadius + 3) * Math.sin(a)}
+							x2={50 + (radius - 3) * Math.cos(a)}
+							y2={50 - (radius - 3) * Math.sin(a)}
+							stroke="white"
+							strokeWidth={strokeWidthTertiary}
+							strokeDasharray="0.2,0.5"
+						/>
+					);
+				})}
 				
 				{/*House cusp labels*/}
-				{zodiacPositions.houseCuspsAreDefined() &&
-					Array.from({ length: 12 }).map((_, i) => {
-						const a = houseCuspAngles![i] + offset;
-						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
-						const flip = (r>90 && r<270) && flipText;
-						const adj = flip ? 0.01 : -0.01; //perfect alignment w/ house separators
-						const x = 50 + (radius-1) * Math.cos(a+adj);
-						const y = 50 - (radius-1) * Math.sin(a+adj);
-						const cuspName = "H"+String(i+1)
-						return (
-							<text
-								key={i}
-								x={x}
-								y={y+0.6}
-								width={symbolSize}
-								height={symbolSize}
-								fontSize="1"
-								fontWeight="bold"
-								textAnchor={flip ? "end" : "start"}
-								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-								style={{filter:"invert(1)", fontVariant: "small-caps"}}
-							>
-								{cuspName}
-							</text>
-						);
-					})
-				}
+				{zodiacPositions.houseCuspsAreDefined()
+				&& houseCuspAngles.map((lon, index) => {
+					const a = lon + offset;
+					const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
+					const flip = (r>90 && r<270) && flipText;
+					const adj = flip ? 0.01 : -0.01; //perfect alignment w/ house separators
+					const x = 50 + (radius-1) * Math.cos(a+adj);
+					const y = 50 - (radius-1) * Math.sin(a+adj);
+					const cuspName = "H"+String(index+1)
+					return (
+						<text
+							key={index}
+							x={x}
+							y={y+0.6}
+							//TODO remove
+							//width={symbolSize}
+							//height={symbolSize}
+							fontSize="1"
+							fontWeight="bold"
+							textAnchor={flip ? "end" : "start"}
+							transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
+							style={{filter:"invert(1)", fontVariant: "small-caps"}}
+						>
+							{cuspName}
+						</text>
+					);
+				}) }
 				
 				{/*Zodiac symbols*/}
-				{zodiac.map((symbol, i) => {
-					const a = (i/12) * 2 * Math.PI + offset + Math.PI/12 + siderealOffset;
+				{Array.from(zodiac.entries()).map(([symbol, lon], i, array) => {
+					const nextLon = array[(i + 1)%array.length][1];
+					const a = (
+						lon < nextLon ?
+						(lon+nextLon)/2 :
+						normalizeAngleRad((lon+nextLon)/2+Math.PI)
+					) + offset;
 					const x = 50 + symbolRadius * Math.cos(a);
 					const y = 50 - symbolRadius * Math.sin(a);
 					const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-					const translateY = hoveredZodiac === i ? -1 : 0;
+					const translateY = hoveredZodiac === symbol ? -1 : 0;
 					return (
 						<image
 							key={i}
@@ -259,8 +308,9 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 				
 				{/*Zodiac labels*/}
 				{showSymbolLabels && 
-					zodiac.map((symbol, i) => {
-						const a = ((i+1)/12) * 2 * Math.PI - 0.01 + offset + siderealOffset;
+					Array.from(zodiac.entries()).map(([symbol, _], i, array) => {
+						const lon = array[(i+1)%array.length][1];
+						const a = lon - 0.01 + offset;
 						const x = 50 + sectorRadius * Math.cos(a);
 						const y = 50 - sectorRadius * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
@@ -270,8 +320,9 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 								key={i}
 								x={x}
 								y={flip ? y+1 : y}
-								width={symbolSize}
-								height={symbolSize}
+								//TODO remove
+								//width={symbolSize}
+								//height={symbolSize}
 								fontSize="1.5"
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
@@ -288,7 +339,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 				{adjustedNodeAngles != null && 
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
-						const z = Math.floor((((a-offset-siderealOffset)*6/Math.PI)%12+12)%12);
+						const z = zodiacPositions.getSymbolOfNode(node);
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
@@ -479,10 +530,11 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					})
 				}
 
-				{/*Zodiac symbol highlighting*/}
-				{Array.from({ length: 12 }).map((_, i) => {
-					const startA = (i/12) * 2 * Math.PI + offset + siderealOffset;
-					const endA = ((i+1)/12) * 2 * Math.PI + offset + siderealOffset;
+				{/* Zodiac sector highlighting */}
+				{Array.from(zodiac.entries()).map(([symbol, lon], i, array) => {
+					const nextLon = array[(i + 1)%array.length][1];
+					const startA = lon + offset;
+					const endA = nextLon + offset;
 					
 					const innerStart = {
 						x: 50 + radius * Math.cos(startA),
@@ -516,9 +568,9 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 							key={i}
 							d={pathData}
 							fill="url(#hoverGradient)"
-							fillOpacity={hoveredZodiac === i ? 1 : 0}
+							fillOpacity={hoveredZodiac === symbol ? 1 : 0}
 							stroke="none"
-							onMouseEnter={() => setHoveredZodiac(i)}
+							onMouseEnter={() => setHoveredZodiac(symbol)}
 							onMouseLeave={() => setHoveredZodiac(null)}
 							style={{ transition: "fill-opacity 0.6s ease" }}
 						/>
