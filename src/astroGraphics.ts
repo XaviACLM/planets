@@ -14,6 +14,15 @@ import capricornSymbol from "./assets/zodiac-symbols/Capricorn.png"
 import aquariusSymbol from "./assets/zodiac-symbols/Aquarius.png"
 import piscesSymbol from "./assets/zodiac-symbols/Pisces.png"
 
+import airSymbol from "./assets/element-symbols/Air.png"
+import fireSymbol from "./assets/element-symbols/Fire.png"
+import earthSymbol from "./assets/element-symbols/Earth.png"
+import waterSymbol from "./assets/element-symbols/Water.png"
+
+import cardinalSymbol from "./assets/mode-symbols/Cardinal.png"
+import fixedSymbol from "./assets/mode-symbols/Fixed.png"
+import mutableSymbol from "./assets/mode-symbols/Mutable.png"
+
 import earthSymbol from "./assets/body-symbols/Earth.png"
 import jupiterSymbol from "./assets/body-symbols/Jupiter.png"
 import marsSymbol from "./assets/body-symbols/Mars.png"
