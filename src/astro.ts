@@ -475,10 +475,15 @@ export class ZodiacPositions {
 		return this._zodiacSymbolPositions;
 	}
 	
+	public isZodiacModeRegular(): boolean {
+		return this.siderealOffset !== null;
+	}
+	
 	public getSymbolOfNode(node: Node): number {
+		// TODO what if the node position is null?
 		const lon = this.getNodePosition(node);
-		if (this.isHouseSystemRegular){
-			return standardZodiac[Math.floor((((lon-siderealOffset)*6/Math.PI)%12+12)%12)];
+		if (this.isZodiacModeRegular()){
+			return standardZodiac[Math.floor((((lon-this.siderealOffset)*6/Math.PI)%12+12)%12)];
 		} else {
 			const entries = Array.from(this.getZodiacSymbolPositions().entries());
 			const index = entries.findIndex(([_, zlon]) => zlon > lon);

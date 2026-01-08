@@ -105,6 +105,51 @@ export const zodiacLongitudeIAU: Record<Zodiac, number> = {
 	[Zodiac.PISCES] : 6.13567725989199,
 }
 
+export const Element = {
+  AIR: 'Air',
+  FIRE: 'Fire',
+  EARTH: 'Earth',
+  WATER: 'Water',
+} as const;
+export type Element = typeof Element[keyof typeof Element];
+
+export const Mode = {
+  CARDINAL: 'Cardinal',
+  FIXED: 'Fixed',
+  MUTABLE: 'Mutable',
+} as const;
+export type Mode = typeof Mode[keyof typeof Mode];
+
+export const zodiacElement: Partial<Record<Zodiac, Element>> = {
+	[Zodiac.ARIES] : Element.FIRE,
+	[Zodiac.TAURUS] : Element.EARTH,
+	[Zodiac.GEMINI] : Element.AIR,
+	[Zodiac.CANCER] : Element.WATER,
+	[Zodiac.LEO] : Element.FIRE,
+	[Zodiac.VIRGO] : Element.EARTH,
+	[Zodiac.LIBRA] : Element.AIR,
+	[Zodiac.SCORPIO] : Element.WATER,
+	[Zodiac.SAGITTARIUS] : Element.FIRE,
+	[Zodiac.CAPRICORN] : Element.EARTH,
+	[Zodiac.AQUARIUS] : Element.AIR,
+	[Zodiac.PISCES] : Element.WATER,
+}
+
+export const zodiacMode: Partial<Record<Zodiac, Mode>> = {
+	[Zodiac.ARIES] : Mode.CARDINAL,
+	[Zodiac.TAURUS] : Mode.FIXED,
+	[Zodiac.GEMINI] : Mode.MUTABLE,
+	[Zodiac.CANCER] : Mode.CARDINAL,
+	[Zodiac.LEO] : Mode.FIXED,
+	[Zodiac.VIRGO] : Mode.MUTABLE,
+	[Zodiac.LIBRA] : Mode.CARDINAL,
+	[Zodiac.SCORPIO] : Mode.FIXED,
+	[Zodiac.SAGITTARIUS] : Mode.MUTABLE,
+	[Zodiac.CAPRICORN] : Mode.CARDINAL,
+	[Zodiac.AQUARIUS] : Mode.FIXED,
+	[Zodiac.PISCES] : Mode.MUTABLE,
+}
+
 export const Node = {
 	// bodies
 	SUN: "Sun",
@@ -138,9 +183,6 @@ export const Node = {
 	LUNAR_DESCENDING: "Lunar Descending",
 	LUNAR_APOGEE: "Lunar Apogee", //lilith
 	LUNAR_PERIGEE: "Lunar Perigee", // selene
-	
-	// missing:
-	// secondary angles: anti/vertex, east/west points
 	
 	// minor bodies
 	CERES: "Ceres",
@@ -208,7 +250,7 @@ export const defaultNodes: Node[] = [
 	Node.ERIS,
 ]
 
-export const innerPlanets: Node[] = [
+export const personalPlanets: Node[] = [
 	Node.SUN,
 	Node.MOON,
 	Node.MERCURY,
@@ -216,7 +258,12 @@ export const innerPlanets: Node[] = [
 	Node.MARS,
 ]
 
-export const outerPlanets: Node[] = [
+export const socialPlanets: Node[] = [
+	Node.JUPITER,
+	Node.SATURN,
+]
+
+export const transpersonalPlanets: Node[] = [
 	Node.URANUS,
 	Node.NEPTUNE,
 	Node.PLUTO,
