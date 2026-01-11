@@ -130,4 +130,4 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 	);
 }
 
-export default AspectMenu
+export default AspectMenu;

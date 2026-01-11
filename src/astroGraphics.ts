@@ -1,4 +1,4 @@
-import { Node, Zodiac, AspectKind } from './astroDefs.ts'
+import { Node, Zodiac, AspectKind, Element, Mode } from './astroDefs.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"
@@ -16,7 +16,7 @@ import piscesSymbol from "./assets/zodiac-symbols/Pisces.png"
 
 import airSymbol from "./assets/element-symbols/Air.png"
 import fireSymbol from "./assets/element-symbols/Fire.png"
-import earthSymbol from "./assets/element-symbols/Earth.png"
+import earthElementSymbol from "./assets/element-symbols/Earth.png"
 import waterSymbol from "./assets/element-symbols/Water.png"
 
 import cardinalSymbol from "./assets/mode-symbols/Cardinal.png"
@@ -217,6 +217,19 @@ export const zodiacSymbols: Record<Zodiac, string> = {
 	[Zodiac.CAPRICORN] : capricornSymbol,
 	[Zodiac.AQUARIUS] : aquariusSymbol,
 	[Zodiac.PISCES] : piscesSymbol
+}
+	
+export const elementSymbols: Record<Element, string> = {
+	[Element.AIR] : airSymbol,
+	[Element.FIRE] : fireSymbol,
+	[Element.EARTH] : earthElementSymbol,
+	[Element.WATER] : waterSymbol,
+}
+	
+export const modeSymbols: Record<Mode, string> = {
+	[Mode.CARDINAL] : cardinalSymbol,
+	[Mode.FIXED] : fixedSymbol,
+	[Mode.MUTABLE] : mutableSymbol,
 }
 
 export const nodeSymbols: Record<Node, string> = {

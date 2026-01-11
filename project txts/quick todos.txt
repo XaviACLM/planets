@@ -1,0 +1,10 @@
+change colorcoding:
+	- just white backglow for configurations
+	- just white for minor binaries
+	- pick nicer colors for major binaries
+esoteric mode / normal mode textbox
+finish dominance widget
+dignities widget
+rulership cycles widget
+planet specifics widget
+settings on the right column, show/hide according to button (that and the node/aspect selection)

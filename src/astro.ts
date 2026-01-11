@@ -480,7 +480,7 @@ export class ZodiacPositions {
 	}
 	
 	public getSymbolOfNode(node: Node): number {
-		// TODO what if the node position is null?
+		// this might error out if node is absent - intended behaviour
 		const lon = this.getNodePosition(node);
 		if (this.isZodiacModeRegular()){
 			return standardZodiac[Math.floor((((lon-this.siderealOffset)*6/Math.PI)%12+12)%12)];

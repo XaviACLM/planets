@@ -4,6 +4,7 @@ import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import Slider from './Slider'
 import NumericInputField from './NumericInputField'
+import DominanceChart from './DominanceChart'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
@@ -24,6 +25,8 @@ function App() {
 	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(false);
 	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
 	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
+	const [showElementLabels, setShowElementLabels] = useState<boolean>(true);
+	const [showModeLabels, setShowModeLabels] = useState<boolean>(true);
 	
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
@@ -226,6 +229,28 @@ function App() {
 									id="show-symbol-labels"
 								/>
 								<label htmlFor="show-symbol-labels">Show zodiac symbol labels</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={showElementLabels}
+									onChange={() => setShowElementLabels(!showElementLabels)}
+									id="show-element-labels"
+								/>
+								<label htmlFor="show-element-labels">Show element labels</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={showModeLabels}
+									onChange={() => setShowModeLabels(!showModeLabels)}
+									id="show-mode-labels"
+								/>
+								<label htmlFor="show-mode-labels">Show mode labels</label>
 							</div>
 							<hr/>
 							<div className="checkbox-wrapper">
@@ -454,6 +479,14 @@ function App() {
 			</main>
 			
 			<aside className="sidebar right-sidebar">
+				<div className="module">
+					<DominanceChart
+						zodiacPositions={zodiacPositions}
+						showNodeLabels={showNodeLabels}
+						showElementLabels={showElementLabels}
+						showModeLabels={showModeLabels}
+					/>
+				</div>
 				<div className="module">
 					<NodeSelector
 						selectedItems={selectedNodes}

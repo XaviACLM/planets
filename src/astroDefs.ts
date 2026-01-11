@@ -45,7 +45,7 @@ export const AstrologyMode = {
 	SIDEREAL_TRUE_CITRA: "Sidereal - True Citra",
 	SIDEREAL_TRUE_REVANTI: "Sidereal - True Revanti",
 	CONSTELLATIONS_CLOSEST: "Constellations - Closest",
-	CONSTELLATIONS_IAU: "Constellations - IAU",
+	CONSTELLATIONS_IAU: "Constellations - IAU / Berg",
 } as const;
 export type AstrologyMode = typeof AstrologyMode[keyof typeof AstrologyMode];
 
