@@ -5,11 +5,12 @@ import AspectMenu from './AspectMenu'
 import Slider from './Slider'
 import NumericInputField from './NumericInputField'
 import DominanceChart from './DominanceChart'
+import RulershipPanel from './RulershipPanel'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, defaultNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, initiallySelectedNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, RulershipMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
@@ -31,6 +32,7 @@ function App() {
 	const [flipText, setFlipText] = useState<boolean>(true);
 	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
 	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
+	const [showSignsInRulershipPanel, setShowSignsInRulershipPanel] = useState<boolean>(false);
 	
 	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_MAX);
 	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(3);
@@ -47,6 +49,7 @@ function App() {
 	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
 	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
 	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
+	const [selectedRulershipMode, setSelectedRulershipMode] = useState<RulershipMode>(RulershipMode.MODERN);
 
 
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
@@ -55,7 +58,7 @@ function App() {
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	
-	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( defaultNodes ));
+	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( initiallySelectedNodes ));
 	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
 	
     const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
@@ -252,7 +255,9 @@ function App() {
 								/>
 								<label htmlFor="show-mode-labels">Show mode labels</label>
 							</div>
+							
 							<hr/>
+							
 							<div className="checkbox-wrapper">
 								<input
 									type="checkbox"
@@ -284,6 +289,17 @@ function App() {
 									id="aspects-colorcoded"
 								/>
 								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
+							</div>
+							<br/>
+							<div className="checkbox-wrapper">
+								<input
+									type="checkbox"
+									className="custom-checkbox"
+									checked={showSignsInRulershipPanel}
+									onChange={() => setShowSignsInRulershipPanel(!showSignsInRulershipPanel)}
+									id="show-signs-in-rulership"
+								/>
+								<label htmlFor="show-signs-in-rulership">Show signs in rulership panel</label>
 							</div>
 							
 							<hr/>
@@ -446,6 +462,28 @@ function App() {
 									))}
 								</select>
 							</div>
+							<hr/>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+								<span>Rulerships</span>
+								<select
+									value={selectedRulershipMode}
+									onChange={(e) => setSelectedRulershipMode(e.target.value as RulershipMode)}
+									style={{
+										backgroundColor: "black",
+										color: "white",
+										border: "1px solid white",
+										padding: "8px 12px",
+										borderRadius: "4px",
+										outline: "none",
+									}}
+								>
+									{Object.values(RulershipMode).map(mode =>(
+										<option key={mode} value={mode}>
+											{mode}
+										</option>
+									))}
+								</select>
+							</div>
 						</div>
 					)}
 				</div>
@@ -485,6 +523,15 @@ function App() {
 						showNodeLabels={showNodeLabels}
 						showElementLabels={showElementLabels}
 						showModeLabels={showModeLabels}
+					/>
+				</div>
+				<div className="module">
+					<RulershipPanel
+						zodiacPositions={zodiacPositions}
+						rulershipMode={selectedRulershipMode}
+						showNodeLabels={showNodeLabels}
+						showSymbolLabels={showSymbolLabels}
+						showSignsInRulershipPanel={showSignsInRulershipPanel}
 					/>
 				</div>
 				<div className="module">

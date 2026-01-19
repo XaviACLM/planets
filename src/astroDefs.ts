@@ -228,7 +228,7 @@ export const Node = {
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 
-export const defaultNodes: Node[] = [
+export const initiallySelectedNodes: Node[] = [
 	Node.SUN,
 	Node.MOON,
 	Node.MERCURY,
@@ -267,6 +267,12 @@ export const transpersonalPlanets: Node[] = [
 	Node.URANUS,
 	Node.NEPTUNE,
 	Node.PLUTO,
+]
+
+export const standardNodes: Node[] = [
+	...personalPlanets,
+	...socialPlanets,
+	...transpersonalPlanets,
 ]
 
 export const NodeType = {
@@ -420,6 +426,45 @@ export const LunarNodeMode = {
 	MEAN: "Mean", //meeus
 } as const;
 export type LunarNodeMode = typeof LunarNodeMode[keyof typeof LunarNodeMode];
+
+export const RulershipMode = {
+	CLASSICAL: "Classical",
+	MODERN: "Modern",
+} as const;
+export type RulershipMode = typeof RulershipMode[keyof typeof RulershipMode];
+
+// Here and below Ophiuchus gets assigned to Pluto (common suggestion of Schmidt and Berg)
+export const classicalRulerships: Record<Zodiac, Node> = {
+	[Zodiac.ARIES]: Node.MARS,
+	[Zodiac.TAURUS]: Node.VENUS,
+	[Zodiac.GEMINI]: Node.MERCURY,
+	[Zodiac.CANCER]: Node.MOON,
+	[Zodiac.LEO]: Node.SUN,
+	[Zodiac.VIRGO]: Node.MERCURY,
+	[Zodiac.LIBRA]: Node.VENUS,
+	[Zodiac.SCORPIO]: Node.MARS,
+	[Zodiac.OPHIUCHUS]: Node.PLUTO,
+	[Zodiac.SAGITTARIUS]: Node.JUPITER,
+	[Zodiac.CAPRICORN]: Node.SATURN,
+	[Zodiac.AQUARIUS]: Node.SATURN,
+	[Zodiac.PISCES]: Node.JUPITER,
+};
+
+export const modernRulerships: Record<Zodiac, Node> = {
+	[Zodiac.ARIES]: Node.MARS,
+	[Zodiac.TAURUS]: Node.VENUS,
+	[Zodiac.GEMINI]: Node.MERCURY,
+	[Zodiac.CANCER]: Node.MOON,
+	[Zodiac.LEO]: Node.SUN,
+	[Zodiac.VIRGO]: Node.MERCURY,
+	[Zodiac.LIBRA]: Node.VENUS,
+	[Zodiac.SCORPIO]: Node.PLUTO,
+	[Zodiac.OPHIUCHUS]: Node.PLUTO,
+	[Zodiac.SAGITTARIUS]: Node.JUPITER,
+	[Zodiac.CAPRICORN]: Node.SATURN,
+	[Zodiac.AQUARIUS]: Node.URANUS,
+	[Zodiac.PISCES]: Node.NEPTUNE,
+};
 
 export const HamburgSchoolMode = {
 	WITTE: "Witte/Sieggrün",
