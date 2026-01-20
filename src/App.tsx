@@ -6,6 +6,7 @@ import Slider from './Slider'
 import NumericInputField from './NumericInputField'
 import DominanceChart from './DominanceChart'
 import RulershipPanel from './RulershipPanel'
+import EsotericModePanel from './EsotericModePanel'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
@@ -160,6 +161,13 @@ function App() {
 			</aside>
 			
 			<main className="wheel-area">
+				<EsotericModePanel
+					setShowNodeLabels={setShowNodeLabels}
+					setShowSymbolLabels={setShowSymbolLabels}
+					setShowElementLabels={setShowElementLabels}
+					setShowModeLabels={setShowModeLabels}
+					setShowSignsInRulershipPanel={setShowSignsInRulershipPanel}
+				/>
 				<div className="floating-menu">
 					<button className="floating-menu-button"
 						onClick = {() => {setMenuOpen(!menuOpen)}}
