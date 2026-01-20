@@ -2,65 +2,87 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import Slider from './Slider'
-import NumericInputField from './NumericInputField'
 import DominanceChart from './DominanceChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
+import SettingsMenu from './SettingsMenu'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
-import { LunarNodeMode, AstrologyMode, Node, HamburgSchoolMode, initiallySelectedNodes, AspectKind, defaultAspectKinds, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, RulershipMode } from './astroDefs.ts'
+import { LunarNodeMode, AstrologyMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, RulershipMode } from './astroDefs.ts'
 import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
+import { useSettingsStore } from './settingsStore.ts'
 
 import "./App.css";
 
 function App() {
-	
-	// settings
-	const [selectedHouseSystem, setSelectedHouseSystem] = useState<HouseSystem>(HouseSystem.PLACIDUS);
-	const [housePresweep, setHousePresweep] = useState<boolean>(false);
-	
-	const [showAspectLabels, setShowAspectLabels] = useState<boolean>(false);
-	const [showNodeLabels, setShowNodeLabels] = useState<boolean>(true);
-	const [showSymbolLabels, setShowSymbolLabels] = useState<boolean>(true);
-	const [showElementLabels, setShowElementLabels] = useState<boolean>(true);
-	const [showModeLabels, setShowModeLabels] = useState<boolean>(true);
-	
-	const [flipText, setFlipText] = useState<boolean>(true);
-	const [rotateSymbols, setRotateSymbols] = useState<boolean>(false);
-	const [aspectsColorcoded, setAspectsColorcoded] = useState<boolean>(false);
-	const [showSignsInRulershipPanel, setShowSignsInRulershipPanel] = useState<boolean>(false);
-	
-	const [selectedAspectErrorMode, setSelectedAspectErrorMode] = useState<AspectErrorMode>(AspectErrorMode.POINTWISE_MAX);
-	const [maxConfigurationErrorDegrees, setMaxConfigurationErrorDegrees] = useState<number>(3);
-	const [maxMajorBAErrorDegrees, setMaxMajorBAErrorDegrees] = useState<number>(3);
-	const [maxMinorBAErrorDegrees, setMaxMinorBAErrorDegrees] = useState<number>(3);
+
+	const selectedHouseSystem = useSettingsStore(s => s.selectedHouseSystem);
+	const setSelectedHouseSystem = useSettingsStore(s => s.setSelectedHouseSystem);
+	const housePresweep = useSettingsStore(s => s.housePresweep);
+	const setHousePresweep = useSettingsStore(s => s.setHousePresweep);
+
+	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
+	const setShowAspectLabels = useSettingsStore(s => s.setShowAspectLabels);
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const setShowNodeLabels = useSettingsStore(s => s.setShowNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const setShowSymbolLabels = useSettingsStore(s => s.setShowSymbolLabels);
+	const showElementLabels = useSettingsStore(s => s.showElementLabels);
+	const setShowElementLabels = useSettingsStore(s => s.setShowElementLabels);
+	const showModeLabels = useSettingsStore(s => s.showModeLabels);
+	const setShowModeLabels = useSettingsStore(s => s.setShowModeLabels);
+
+	const flipText = useSettingsStore(s => s.flipText);
+	const setFlipText = useSettingsStore(s => s.setFlipText);
+	const rotateSymbols = useSettingsStore(s => s.rotateSymbols);
+	const setRotateSymbols = useSettingsStore(s => s.setRotateSymbols);
+	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	const setAspectsColorcoded = useSettingsStore(s => s.setAspectsColorcoded);
+	const showSignsInRulershipPanel = useSettingsStore(s => s.showSignsInRulershipPanel);
+	const setShowSignsInRulershipPanel = useSettingsStore(s => s.setShowSignsInRulershipPanel);
+
+	const selectedAspectErrorMode = useSettingsStore(s => s.selectedAspectErrorMode);
+	const setSelectedAspectErrorMode = useSettingsStore(s => s.setSelectedAspectErrorMode);
+	const maxConfigurationErrorDegrees = useSettingsStore(s => s.maxConfigurationErrorDegrees);
+	const setMaxConfigurationErrorDegrees = useSettingsStore(s => s.setMaxConfigurationErrorDegrees);
+	const maxMajorBAErrorDegrees = useSettingsStore(s => s.maxMajorBAErrorDegrees);
+	const setMaxMajorBAErrorDegrees = useSettingsStore(s => s.setMaxMajorBAErrorDegrees);
+	const maxMinorBAErrorDegrees = useSettingsStore(s => s.maxMinorBAErrorDegrees);
+	const setMaxMinorBAErrorDegrees = useSettingsStore(s => s.setMaxMinorBAErrorDegrees);
 	const maxConfigurationError = useMemo(() => maxConfigurationErrorDegrees*Math.PI/180, [maxConfigurationErrorDegrees]);
 	const maxMajorBAError = useMemo(() => maxMajorBAErrorDegrees*Math.PI/180, [maxMajorBAErrorDegrees]);
 	const maxMinorBAError = useMemo(() => maxMinorBAErrorDegrees*Math.PI/180, [maxMinorBAErrorDegrees]);
-	
-	const [aspectPhysicalityFilter, setAspectPhysicalityFilter] = useState<AspectPhysicalityFilter>(AspectPhysicalityFilter.ALL_BUT_ONE_PHYSICAL);
-	const [hamburgPhysical, setHamburgPhysical] = useState<boolean>(false);
-	const [selectedAspectMenuMode, setSelectedAspectMenuMode] = useState<AspectMenuMode>(AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS);
-	
-	const [lunarNodeMode, setLunarNodeMode] = useState<LunarNodeMode>(LunarNodeMode.MEAN);
-	const [hamburgSchoolMode, setHamburgSchoolMode] = useState<HamburgSchoolMode>(HamburgSchoolMode.NEELY);
-	const [selectedAstrologyMode, setSelectedAstrologyMode] = useState<AstrologyMode>(AstrologyMode.TROPICAL);
-	const [selectedRulershipMode, setSelectedRulershipMode] = useState<RulershipMode>(RulershipMode.MODERN);
 
+	const aspectPhysicalityFilter = useSettingsStore(s => s.aspectPhysicalityFilter);
+	const setAspectPhysicalityFilter = useSettingsStore(s => s.setAspectPhysicalityFilter);
+	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
+	const setHamburgPhysical = useSettingsStore(s => s.setHamburgPhysical);
+	const selectedAspectMenuMode = useSettingsStore(s => s.selectedAspectMenuMode);
+	const setSelectedAspectMenuMode = useSettingsStore(s => s.setSelectedAspectMenuMode);
 
+	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
+	const setLunarNodeMode = useSettingsStore(s => s.setLunarNodeMode);
+	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
+	const setHamburgSchoolMode = useSettingsStore(s => s.setHamburgSchoolMode);
+	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
+	const setSelectedAstrologyMode = useSettingsStore(s => s.setSelectedAstrologyMode);
+	const selectedRulershipMode = useSettingsStore(s => s.selectedRulershipMode);
+	const setSelectedRulershipMode = useSettingsStore(s => s.setSelectedRulershipMode);
+
+	const selectedNodes = useSettingsStore(s => s.selectedNodes);
+	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
+	const selectedAspectKinds = useSettingsStore(s => s.selectedAspectKinds);
+	const setSelectedAspectKinds = useSettingsStore(s => s.setSelectedAspectKinds);
+
+	// Local state (not settings)
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
 	const [selectedDate, setSelectedDate] = useState(new Date());
-	
-	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
-	
-	const [selectedNodes, setSelectedNodes] = useState<Set<Node>>(new Set( initiallySelectedNodes ));
-	const [selectedAspectKinds, setSelectedAspectKinds] = useState<Set<AspectKind>>(new Set( defaultAspectKinds ));
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	
     const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
 	
@@ -168,333 +190,12 @@ function App() {
 					setShowModeLabels={setShowModeLabels}
 					setShowSignsInRulershipPanel={setShowSignsInRulershipPanel}
 				/>
-				<div className="floating-menu">
-					<button className="floating-menu-button"
-						onClick = {() => {setMenuOpen(!menuOpen)}}
-					>
-						☰
-					</button>
-					
-					{menuOpen && (
-						<div>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>House system</span>
-								<select
-									value={selectedHouseSystem}
-									onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(HouseSystem).map(system =>(
-										<option key={system} value={system}>
-											{system}
-										</option>
-									))}
-								</select>
-							</div>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={housePresweep}
-									onChange={() => setHousePresweep(!housePresweep)}
-									id="pre-sweep"
-								/>
-								<label htmlFor="pre-sweep">House pre-sweep</label>
-							</div>
-							<hr/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showAspectLabels}
-									onChange={() => setShowAspectLabels(!showAspectLabels)}
-									id="show-aspect-labels"
-								/>
-								<label htmlFor="show-aspect-labels">Show aspect labels</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showNodeLabels}
-									onChange={() => setShowNodeLabels(!showNodeLabels)}
-									id="show-node-labels"
-								/>
-								<label htmlFor="show-node-labels">Show node labels</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showSymbolLabels}
-									onChange={() => setShowSymbolLabels(!showSymbolLabels)}
-									id="show-symbol-labels"
-								/>
-								<label htmlFor="show-symbol-labels">Show zodiac symbol labels</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showElementLabels}
-									onChange={() => setShowElementLabels(!showElementLabels)}
-									id="show-element-labels"
-								/>
-								<label htmlFor="show-element-labels">Show element labels</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showModeLabels}
-									onChange={() => setShowModeLabels(!showModeLabels)}
-									id="show-mode-labels"
-								/>
-								<label htmlFor="show-mode-labels">Show mode labels</label>
-							</div>
-							
-							<hr/>
-							
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={flipText}
-									onChange={() => setFlipText(!flipText)}
-									id="flip-text"
-								/>
-								<label htmlFor="flip-text">Keep text right-side-up</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={rotateSymbols}
-									onChange={() => setRotateSymbols(!rotateSymbols)}
-									id="rotate-symbols"
-								/>
-								<label htmlFor="rotate-symbols">Rotate symbols</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={aspectsColorcoded}
-									onChange={() => setAspectsColorcoded(!aspectsColorcoded)}
-									id="aspects-colorcoded"
-								/>
-								<label htmlFor="aspects-colorcoded">Colorcode aspects</label>
-							</div>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={showSignsInRulershipPanel}
-									onChange={() => setShowSignsInRulershipPanel(!showSignsInRulershipPanel)}
-									id="show-signs-in-rulership"
-								/>
-								<label htmlFor="show-signs-in-rulership">Show signs in rulership panel</label>
-							</div>
-							
-							<hr/>
-							
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>Configuration error</span>
-								<select
-									value={selectedAspectErrorMode}
-									onChange={(e) => setSelectedAspectErrorMode(e.target.value as AspectErrorMode)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(AspectErrorMode).map(system =>(
-										<option key={system} value={system}>
-											{system}
-										</option>
-									))}
-								</select>
-							</div>
-							Maximum error per aspect type:
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								- Configurations:
-								<div style={{maxWidth:'50px'}}>
-									<NumericInputField
-										min={0}
-										max={20}
-										initialValue={maxConfigurationErrorDegrees}
-										onValidCommit={setMaxConfigurationErrorDegrees}
-										placeholder="Error"
-										unit={"º"}
-									/>
-								</div>
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								- Major binary aspects:
-								<div style={{maxWidth:'50px'}}>
-									<NumericInputField
-										min={0}
-										max={20}
-										initialValue={maxMajorBAErrorDegrees}
-										onValidCommit={setMaxMajorBAErrorDegrees}
-										placeholder="Error"
-										unit={"º"}
-									/>
-								</div>
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								- Minor binary aspects:
-								<div style={{maxWidth:'50px'}}>
-									<NumericInputField
-										min={0}
-										max={20}
-										initialValue={maxMinorBAErrorDegrees}
-										onValidCommit={setMaxMinorBAErrorDegrees}
-										placeholder="Error"
-										unit={"º"}
-									/>
-								</div>
-							</div>
-							
-							<hr/>
-							
-							Required # of physical nodes per aspect:
-							<Slider
-								options={Object.values(AspectPhysicalityFilter)}
-								value={aspectPhysicalityFilter}
-								onChange={setAspectPhysicalityFilter}
-							/>
-							<br/>
-							<div className="checkbox-wrapper">
-								<input
-									type="checkbox"
-									className="custom-checkbox"
-									checked={hamburgPhysical}
-									onChange={() => setHamburgPhysical(!hamburgPhysical)}
-									id="hamburg-physical"
-								/>
-								<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>Display aspects</span>
-								<select
-									value={selectedAspectMenuMode}
-									onChange={(e) => setSelectedAspectMenuMode(e.target.value as AspectMenuMode)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(AspectMenuMode).map(system =>(
-										<option key={system} value={system}>
-											{system}
-										</option>
-									))}
-								</select>
-							</div>
-							
-							<hr/>
-							
-							<div className="toggle-switch">
-								<span>Lunar node  mode:</span>
-								<button
-									className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
-									onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
-								>
-									Mean
-								</button>
-								<button
-									className={`toggle-option ${lunarNodeMode === LunarNodeMode.TRUE ? 'active' : ''}`}
-									onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
-								>
-									True
-								</button>
-							</div>
-							<hr/>
-							<div className="toggle-switch">
-								<span>Hamburg school params:</span>
-								<button
-									className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.WITTE ? 'active' : ''}`}
-									onClick={() => setHamburgSchoolMode(HamburgSchoolMode.WITTE)}
-								>
-									Witte
-								</button>
-								<button
-									className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.NEELY ? 'active' : ''}`}
-									onClick={() => setHamburgSchoolMode(HamburgSchoolMode.NEELY)}
-								>
-									Neely
-								</button>
-							</div>
-							<hr/>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>Mode</span>
-								<select
-									value={selectedAstrologyMode}
-									onChange={(e) => setSelectedAstrologyMode(e.target.value as AstrologyMode)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(AstrologyMode).map(system =>(
-										<option key={system} value={system}>
-											{system}
-										</option>
-									))}
-								</select>
-							</div>
-							<hr/>
-							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-								<span>Rulerships</span>
-								<select
-									value={selectedRulershipMode}
-									onChange={(e) => setSelectedRulershipMode(e.target.value as RulershipMode)}
-									style={{
-										backgroundColor: "black",
-										color: "white",
-										border: "1px solid white",
-										padding: "8px 12px",
-										borderRadius: "4px",
-										outline: "none",
-									}}
-								>
-									{Object.values(RulershipMode).map(mode =>(
-										<option key={mode} value={mode}>
-											{mode}
-										</option>
-									))}
-								</select>
-							</div>
-						</div>
-					)}
-				</div>
+				<button
+					className="floating-menu-button"
+					onClick={() => setMenuOpen(!menuOpen)}
+				>
+					{menuOpen ? '✕' : '☰'}
+				</button>
 				<ZodiacWheel
 					showNodeLabels={showNodeLabels}
 					showSymbolLabels={showSymbolLabels}
@@ -525,36 +226,48 @@ function App() {
 			</main>
 			
 			<aside className="sidebar right-sidebar">
-				<div className="module">
-					<DominanceChart
-						zodiacPositions={zodiacPositions}
-						showNodeLabels={showNodeLabels}
-						showElementLabels={showElementLabels}
-						showModeLabels={showModeLabels}
-					/>
-				</div>
-				<div className="module">
-					<RulershipPanel
-						zodiacPositions={zodiacPositions}
-						rulershipMode={selectedRulershipMode}
-						showNodeLabels={showNodeLabels}
-						showSymbolLabels={showSymbolLabels}
-						showSignsInRulershipPanel={showSignsInRulershipPanel}
-					/>
-				</div>
-				<div className="module">
-					<NodeSelector
-						selectedItems={selectedNodes}
-						setSelectedItems={setSelectedNodes}
-						showLabels={showNodeLabels}
-					/>
-				</div>
-				<div className="module">
-					<AspectKindSelector
-						selectedItems={selectedAspectKinds}
-						setSelectedItems={setSelectedAspectKinds}
-						showLabels={showAspectLabels}
-					/>
+				<div className="sidebar-content" key={menuOpen ? 'settings' : 'main'}>
+					{menuOpen ? (
+						<>
+							<div className="module">
+								<NodeSelector
+									selectedItems={selectedNodes}
+									setSelectedItems={setSelectedNodes}
+									showLabels={showNodeLabels}
+								/>
+							</div>
+							<div className="module">
+								<AspectKindSelector
+									selectedItems={selectedAspectKinds}
+									setSelectedItems={setSelectedAspectKinds}
+									showLabels={showAspectLabels}
+								/>
+							</div>
+							<div className="module">
+								<SettingsMenu />
+							</div>
+						</>
+					) : (
+						<>
+							<div className="module">
+								<DominanceChart
+									zodiacPositions={zodiacPositions}
+									showNodeLabels={showNodeLabels}
+									showElementLabels={showElementLabels}
+									showModeLabels={showModeLabels}
+								/>
+							</div>
+							<div className="module">
+								<RulershipPanel
+									zodiacPositions={zodiacPositions}
+									rulershipMode={selectedRulershipMode}
+									showNodeLabels={showNodeLabels}
+									showSymbolLabels={showSymbolLabels}
+									showSignsInRulershipPanel={showSignsInRulershipPanel}
+								/>
+							</div>
+						</>
+					)}
 				</div>
 			</aside>
 		</div>

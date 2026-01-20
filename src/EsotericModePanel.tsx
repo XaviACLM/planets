@@ -23,8 +23,8 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 
 	const panelStyle: React.CSSProperties = {
 		position: 'absolute',
-		top: 20,
-		left: 20,
+		top: '1rem',
+		left: '1rem',
 		backgroundColor: 'black',
 		color: 'white',
 		padding: '12px 16px',
