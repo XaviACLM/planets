@@ -1,0 +1,64 @@
+PHASE 0 
+
+XX tailwind and whatever.
+
+XX decide on the true/mean nodes stuff. is it a config option, or are they different nodes? I know about lilith/artha, but what about selene?
+-> it's fine to keep them different. they _are_ separate, but almost nobody will work with both at once.
+
+PHASE 1
+
+improve modules so that they have title + collapsability + can handle half-collapsibles
+
+give element/mode dominance chart half-collapsed state
+ - in collapsed state, just whether there's a dominant element, whether there's a missing/weak element, same for mode.
+ - so actually not segregated by personal/social/transpersonal, but in the expanded state the complete list already serves as a "complete barchart" kinda
+ - also should the asc/mc be there at all, actually? apparently asc is tradition-dependent and mc usually not there at all. hm...
+
+develop planet panel
+ - first line selects asc/ruler/sun/moon, second line selects from planets (mb compressed away unless mouseover). Maybe some visual indicator that the ruler is the ruler
+ - what info does the panel actually contain? sign+degree, house, condition (dignity state, retrograde/speed, "angularity"), rulership (what info exactly?), aspects (what info exactly?)
+ - start at sun, jump to asc if the user inputs a location.
+
+some hemisphere dominance panel, analogous to element/mode. 
+ - "self oriented vs other-oriented? emphasis above or below horizon? initiating vs reactive?"
+ - key axes: east/west, above/below horizon, quadrants (1-4, 4-7, etc)
+ - personal/social/transpersonal division not meaningful. Only luminaries and planets.
+ - is this redundant with information already easily visible on the chart?
+
+MAYBE a sort of general information panel. Diurnal chart/nocturnal chart, mb what hemisphere, and... that's all? Yeah, I don't know. Honestly just a little "Diurnal chart" or "nocturnal chart" badge floating at the top left of the chart area may be enough.
+
+a panel for house emphasis... or something? It feels to me like this would just be repeating information that's already readily available on the chart, honestly.
+
+MAYBE some subtle highlighting on asc/ruler/luminaries on the chart
+
+PHASE 2
+
+just double-check that the planet information panel has everything we need. sign/angle/house, dignity/angularity/speed(retrograde)/sect, rulership stuff, aspect stuff
+
+PHASE 3 
+
+aspect business already works.
+
+PHASE 4
+
+some panel for fixed stars? or maybe include this info in the per-planet panel
+
+PHASE N-1
+
+toggleable explanation icons
+look through the other todos, i guess
+write some script to make everything 2-space-indent (ensure notepad++ works w this)
+dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
+
+
+
+angularity: we just care if it's close to one of the 4 main angles, and which. Angular - moderately angular - succeedent - cadent (within 5º, 10º, 15º, otherwise)
+they just care if we're in domicile, exaltation, peregrine, detriment or fall. probably distance from the exact position if there is one. bonus track: triplicity, term (bounds), face (decans)
+WHAT information to show in planet-specific panel about: rulership, aspects
+ - rulership: we care about the immediate dispositor, the entire chain, and the final cycle. We can just show the actual chain, terminated in the cycle, have it highlighted in some way
+ - rulership 2: we also care, though a bit less, about the reverse direction: who does it rule _directly?_ (esp if asc or luminary) maybe the transitive information is relevant too.
+ - aspects: not that clear honestly, but like, list if it's in a configuration, and maybe the tightest orb, and just say how many aspects it's in to get an idea if it's connected or isolated.
+the rising setting thing: that's parans, pretty niche, maybe later.
+sect: planets are of diurnal or nocturnal sect, and we note if they follow the chart's alignment or go against it. there's some weird business - mercury changes it's sect depending whetherit is oriental/occidental of the sun. also a planet may go against the chart's sect but still be somewhat in sect if the sect of its sign matches its own sect (aries,gemini,leo,libra,sagittarius,aquarius are masculine/diurnal, the rest feminine/nocturnal). also very slightly in sesct if its in the hemisphere of the chart containing/not containing the sun (for diurnal/nocturnal sect planets). This seems a bit complicated, maybe we stop at the mercury stuff.
+oh and how did that sect business work again? did some planets prefer day/night?
+oh, what was that shit about stuff that was rising/falling? did that have something to do with stars? I forget.

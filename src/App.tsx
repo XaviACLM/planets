@@ -6,6 +6,7 @@ import DominanceChart from './DominanceChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import SettingsMenu from './SettingsMenu'
+import Module, { CollapseState } from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
@@ -228,14 +229,17 @@ function App() {
 						</>
 					) : (
 						<>
-							<div className="w-full bg-black border border-gray-500 text-white">
-								<DominanceChart
-									zodiacPositions={zodiacPositions}
-									showNodeLabels={showNodeLabels}
-									showElementLabels={showElementLabels}
-									showModeLabels={showModeLabels}
-								/>
-							</div>
+							<Module title="Element/Mode Balance" supportsHalfCollapse={true}>
+								{(collapseState) => (
+									<DominanceChart
+										zodiacPositions={zodiacPositions}
+										showNodeLabels={showNodeLabels}
+										showElementLabels={showElementLabels}
+										showModeLabels={showModeLabels}
+										collapseState={collapseState}
+									/>
+								)}
+							</Module>
 							<div className="w-full bg-black border border-gray-500 text-white">
 								<RulershipPanel
 									zodiacPositions={zodiacPositions}

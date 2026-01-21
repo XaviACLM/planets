@@ -2,9 +2,15 @@ change colorcoding:
 	- just white backglow for configurations
 	- just white for minor binaries
 	- pick nicer colors for major binaries
-esoteric mode / normal mode textbox
-finish dominance widget
+XX esoteric mode / normal mode textbox
+XX finish dominance widget
 dignities widget
-rulership cycles widget
+XX rulership cycles widget
 planet specifics widget
-settings on the right column, show/hide according to button (that and the node/aspect selection)
+XX settings on the right column, show/hide according to button (that and the node/aspect selection)
+dits on the outer wheel
+add back the "house divisors even when there's no houses" - otherwise looks too empty
+carefully look through the dispositor graph logic
+XX yellow highlight focus appears upon clicking dropdowns or text fields in the settings - fix this
+and what was that shit with zustand? is settingsStore.ts actually good code? should App.tsx do all that """unpacking""" or wouldn't it make more sense for that to actually be as-needed when passing props? look into this tmr
+make the parallel main line a bit smaller. Maybe display it some other way, actually

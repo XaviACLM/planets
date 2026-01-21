@@ -2,12 +2,16 @@ import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
 import { zodiacSymbols, nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
 import { ZodiacPositions } from './astro.ts'
+import { CollapseState } from './Module.tsx'
+
+const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
 	zodiacPositions: ZodiacPositions,
 	showNodeLabels: boolean,
 	showElementLabels: boolean,
 	showModeLabels: boolean,
+	collapseState?: CollapseState,
 }
 
 const DominanceChart: FC<DominanceChartProps> = ({
@@ -15,6 +19,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 	showNodeLabels,
 	showElementLabels,
 	showModeLabels,
+	collapseState = CollapseState.EXPANDED,
 }) => {
 	const symbolSize = 20;
 	const textSize = 12;
@@ -130,13 +135,15 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		);
 	};
 
-	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, discardedNodes} = useMemo(() => {
+	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes} = useMemo(() => {
 		const nodeElements: Map<Node, Element> = new Map();
 		const nodeModes: Map<Node, Mode> = new Map();
 		const nodesByElement: Map<Element, Node[]> = new Map();
 		const nodesByMode: Map<Mode, Node[]> = new Map();
 		const validSocialPlanets: Node[] = [];
 		const validMainAngles: Node[] = [];
+		const validLuminaries: Node[] = [];
+		const allPlanets: Node[] = [];
 		const discardedNodes: Node[] = [];
 
 		const nodesInConsideration: Node[] = [
@@ -171,6 +178,12 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			if (nodeDependsOnLocation[node]){
 				validMainAngles.push(node);
 			}
+			if (luminaries.includes(node)){
+				validLuminaries.push(node);
+			}
+			if (!nodeDependsOnLocation[node]){
+				allPlanets.push(node);
+			}
 
 			const elem = zodiacElement[z];
 			const mode = zodiacMode[z];
@@ -181,7 +194,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			nodesByMode.get(mode).push(node);
 		}
 
-		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, discardedNodes};
+		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes};
 	},[zodiacPositions]);
 
 	const createCounter = <T extends string>(
@@ -385,6 +398,36 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		);
 	}
 
+	if (collapseState === CollapseState.HALF) {
+		return (
+			<div className="text-white p-4 pt-2 pb-2" style={{ width: 330 }}>
+				<div>
+					{dominanceString(allPlanets)}
+				
+					<hr className="opacity-50 my-2"/>
+				
+					<div className="flex justify-center">
+						{elementBarChart(allPlanets, false)}
+						{modeBarChart(allPlanets, true)}
+					</div>
+				</div>
+
+				<hr className="opacity-50 my-2"/>
+
+				{ validLuminaries.length != 0
+				&& <div>
+					{smallNodeDisplay(validLuminaries)}
+				</div>}
+
+				{ zodiacPositions.hasSurfacePosition()
+				&& validMainAngles.length != 0
+				&& <div>
+					{smallNodeDisplay(validMainAngles)}
+				</div>}
+			</div>
+		);
+	}
+
 	return (
 		<div className="text-white p-4 pt-3 pb-0" style={{ width: 330 }}>
 
@@ -396,6 +439,13 @@ const DominanceChart: FC<DominanceChartProps> = ({
 					{modeBarChart(personalPlanets, true)}
 				</div>
 			</div>
+
+			{ validLuminaries.length != 0
+			&& <div>
+				<div>
+					{smallNodeDisplay(validLuminaries)}
+				</div>
+			</div>}
 
 			{ validSocialPlanets.length != 0
 			&& <div>
