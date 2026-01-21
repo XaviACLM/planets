@@ -21,31 +21,31 @@ const DominanceChart: FC<DominanceChartProps> = ({
 	const textSizeTitle = 14;
 	const strokeWidth = 1;
 	const sectionGap = 10;
-	
+
 	const renderSmallcapsString = (str: string): ReactNode => {
 		return (
-			<span style={{ fontSize: textSize, fontVariant: "small-caps", fontWeight: "bold" }}>
+			<span className="small-caps font-bold" style={{ fontSize: textSize }}>
 				{str}
 			</span>
 		);
 	};
-	
+
 	const renderString = (str: string): ReactNode => {
 		return (
-			<span style={{ fontSize: textSize}}>
+			<span style={{ fontSize: textSize }}>
 				{str}
 			</span>
 		);
 	};
-	
+
 	const renderTitle = (str: string): ReactNode => {
 		return (
-			<span style={{ fontSize: textSizeTitle, fontVariant: "small-caps", fontWeight: "bold", letterSpacing: 0.7 }}>
+			<span className="small-caps font-bold tracking-wide" style={{ fontSize: textSizeTitle }}>
 				{str}
 			</span>
 		);
 	};
-	
+
 	const renderNode = (node: Node): ReactNode => {
 		return showNodeLabels ? (
 			renderSmallcapsString(node)
@@ -55,11 +55,11 @@ const DominanceChart: FC<DominanceChartProps> = ({
 				alt={node}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"invert(1)"}}
+				className="invert inline"
 			/>
 		);
 	};
-	
+
 	const renderElement = (elem: Element): ReactNode => {
 		return showElementLabels ? (
 			renderSmallcapsString(elem)
@@ -69,11 +69,11 @@ const DominanceChart: FC<DominanceChartProps> = ({
 				alt={elem}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"invert(1)"}}
+				className="invert inline"
 			/>
 		);
 	};
-	
+
 	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
 		return showElementLabels ? (
 			<text
@@ -94,7 +94,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			/>
 		);
 	};
-	
+
 	const renderMode = (mode: Mode): ReactNode => {
 		return showModeLabels ? (
 			renderSmallcapsString(mode)
@@ -104,11 +104,11 @@ const DominanceChart: FC<DominanceChartProps> = ({
 				alt={mode}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"invert(1)"}}
+				className="invert inline"
 			/>
 		);
 	};
-	
+
 	const renderModeSVG = (mode: Mode, leftJustify: boolean): ReactNode => {
 		return showModeLabels ? (
 			<text
@@ -129,7 +129,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			/>
 		);
 	};
-	
+
 	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, discardedNodes} = useMemo(() => {
 		const nodeElements: Map<Node, Element> = new Map();
 		const nodeModes: Map<Node, Mode> = new Map();
@@ -138,7 +138,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		const validSocialPlanets: Node[] = [];
 		const validMainAngles: Node[] = [];
 		const discardedNodes: Node[] = [];
-		
+
 		const nodesInConsideration: Node[] = [
 			...personalPlanets,
 			...socialPlanets,
@@ -146,44 +146,44 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			Node.ASCENDANT,
 			Node.MIDHEAVEN,
 		];
-		
+
 		for (const elem of Object.values(Element)){
 			nodesByElement.set(elem, []);
 		}
 		for (const mode of Object.values(Mode)){
 			nodesByMode.set(mode, []);
 		}
-		
+
 		for (const node of nodesInConsideration){
 			if (nodeDependsOnLocation[node] && !zodiacPositions.hasSurfacePosition()){
 				continue;
 			}
-			
+
 			const z = zodiacPositions.getSymbolOfNode(node);
 			if (z == Zodiac.OPHIUCHUS){
 				discardedNodes.push(node);
 				continue;
 			}
-			
+
 			if (socialPlanets.includes(node)){
 				validSocialPlanets.push(node);
 			}
 			if (nodeDependsOnLocation[node]){
 				validMainAngles.push(node);
 			}
-			
+
 			const elem = zodiacElement[z];
 			const mode = zodiacMode[z];
-			
+
 			nodeElements.set(node, elem);
 			nodeModes.set(node, mode);
 			nodesByElement.get(elem).push(node);
 			nodesByMode.get(mode).push(node);
 		}
-		
+
 		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, discardedNodes};
 	},[zodiacPositions]);
-	
+
 	const createCounter = <T extends string>(
 		enumObj: { readonly [key: string]: T },
 		nodeMap: Map<Node, T>
@@ -200,10 +200,10 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			return counts;
 		};
 	};
-	
+
 	const countElements = createCounter(Element, nodeElements);
 	const countModes = createCounter(Mode, nodeModes);
-	
+
 	const createDominantFinder = <T extends string>(
 		countFun: (nodes: Node[]) => Map<T, number>,
 	) => {
@@ -217,33 +217,33 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			return Array.from(counts.entries()).find(([_,count]) => count == maxVal)[0];
 		};
 	};
-	
+
 	const getDominantElement = createDominantFinder(countElements);
 	const getDominantMode = createDominantFinder(countModes);
-	
+
 	const createBarChartCreator = <T extends string>(
 		countFun: (nodes: Node[]) => Map<T, number>,
 		labelRenderer: (k: T, leftJustify: boolean) => ReactNode,
 		showLabels: boolean,
 	) => {
 		return (nodes: Node[], leftJustify: boolean) => {
-			
+
 			const counts: Map<T, number> = countFun(nodes);
 			const totalNodes = nodes.length;
-			
+
 			const width = 135;
 			const labelSpacing = textSize * 4.8;
 			const symbolSpacing = symbolSize * 1.5;
 			const annotationSpacing = showLabels ? labelSpacing : symbolSpacing;
 			const etcSpacing = 5; // annotation to bar
 			const height = symbolSize * counts.size;
-			
+
 			const labelTransform = leftJustify ? (
 				showLabels ? `translate(${annotationSpacing-etcSpacing},14)` : `translate(${etcSpacing},0)`
 			) : (
 				showLabels ? `translate(${width-annotationSpacing+etcSpacing},14)` : `translate(${width-annotationSpacing+etcSpacing},0)`
 			);
-			
+
 			return (
 				<svg width={width} height={height}>
 					{Array.from(counts.entries()).map(([value, count], i) => {
@@ -309,10 +309,10 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			);
 		};
 	};
-	
+
 	const elementBarChart = createBarChartCreator(countElements, renderElementSVG, showElementLabels);
 	const modeBarChart = createBarChartCreator(countModes, renderModeSVG, showModeLabels);
-	
+
 	const dominanceString = (nodes: Node[]): ReactNode => {
 		const dominantElement = getDominantElement(nodes);
 		const dominantMode = getDominantMode(nodes);
@@ -351,13 +351,13 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			}
 		}
 	};
-	
+
 	const smallNodeDisplay = (nodes: Node[]): ReactNode => {
 		return (
-			<div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap"}}>
+			<div className="flex justify-center flex-wrap">
 				{nodes.map((node) => {
 					return (
-						<div key={node} style={{marginLeft:"0.7rem", marginRight:"0.7rem", display: "flex", alignItems: "center", gap:"0.25rem"}}>
+						<div key={node} className="mx-3 flex items-center gap-1">
 							{renderNode(node)}
 							{" | "}
 							{renderElement(nodeElements.get(node))}
@@ -369,7 +369,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			</div>
 		);
 	}
-	
+
 	const listNodes = (nodes: Node[], forceText: boolean): ReactNode => {
 		return (
 			<>
@@ -384,135 +384,95 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			</>
 		);
 	}
-	
+
 	return (
-		<div style={{ width: 330, color: "white", padding: "1rem"}}>
-		
-			<div> 
+		<div className="text-white p-4 pt-3 pb-0" style={{ width: 330 }}>
+
+			<div>
 				{renderTitle("Personal Planets")}
 				{dominanceString(personalPlanets)}
-				<div style={{ display: "flex", justifyContent: "center"  }}>
+				<div className="flex justify-center">
 					{elementBarChart(personalPlanets, false)}
 					{modeBarChart(personalPlanets, true)}
 				</div>
 			</div>
-			
+
 			{ validSocialPlanets.length != 0
 			&& <div>
-				<hr style={{opacity:0.5}}/>
-				
+				<hr className="opacity-50 my-2"/>
+
 				<div>
 					{renderTitle("Social Planets")}
 					{smallNodeDisplay(validSocialPlanets)}
 				</div>
 			</div>}
-			
-			<hr style={{opacity:0.5}}/>
-			
+
+			<hr className="opacity-50 my-2"/>
+
 			<div>
 				{renderTitle("Transpersonal Planets")}
 				{dominanceString(transpersonalPlanets)}
-				<div style={{ display: "flex", justifyContent: "center"  }}>
+				<div className="flex justify-center">
 					{elementBarChart(transpersonalPlanets, false)}
 					{modeBarChart(transpersonalPlanets, true)}
 				</div>
 			</div>
-			
+
 			{ zodiacPositions.hasSurfacePosition()
 			&& validMainAngles.length != 0
 			&& <div>
-				<hr style={{opacity:0.5}}/>
+				<hr className="opacity-50 my-2"/>
 				<div>
 					{renderTitle("Main Angles")}
 					{smallNodeDisplay(validMainAngles)}
 				</div>
 			</div>}
-		
-			<hr style={{opacity:0.5}}/>
-		
-			<div 
-				style={{
-					display: 'grid',
-					overflow: 'hidden',
-					background: "black",
-					width: '100%',
-					gridTemplateColumns: 'auto 1fr',
-					marginTop:"1em",
-					marginBottom:"1em"
-				}}
-			>
+
+			<hr className="opacity-50 my-2"/>
+
+			<div className="grid overflow-hidden bg-black w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
 				{Array.from(nodesByElement.entries()).map(([elem, nodes], index) => (
 					[
-						<div 
+						<div
 							key={`label-${index}`}
-							style={{
-								gridColumn: '1',
-								whiteSpace: 'nowrap',
-								textAlign: 'right',
-								marginRight: '0.5rem',
-								borderRight: '1px solid #999',
-								paddingRight: '0.5rem',
-							}}
+							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-gray-500 pr-2"
 						>
 							{renderElement(elem)}
 						</div>,
-						<div 
+						<div
 							key={`value-${index}`}
-							style={{
-								gridColumn: '2',
-								marginBottom: '0.3rem',
-							}}
+							className="col-start-2 mb-1"
 						>
 							{listNodes(nodes, false)}
 						</div>
 					]
 				))}
 			</div>
-		
-			<hr style={{opacity:0.5}}/>
-			
-			<div 
-				style={{
-					display: 'grid',
-					overflow: 'hidden',
-					background: "black",
-					width: '100%',
-					gridTemplateColumns: 'auto 1fr',
-					marginTop:"1em",
-					marginBottom:"1em"
-				}}
-			>
+
+			<hr className="opacity-50 my-2"/>
+
+			<div className="grid overflow-hidden bg-black w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
 				{Array.from(nodesByMode.entries()).map(([elem, nodes], index) => (
 					[
-						<div 
+						<div
 							key={`label-${index}`}
-							style={{
-								gridColumn: '1',
-								whiteSpace: 'nowrap',
-								textAlign: 'right',
-								marginRight: '0.5rem',
-								borderRight: '1px solid #999',
-								paddingRight: '0.5rem',
-							}}
+							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-gray-500 pr-2"
 						>
 							{renderMode(elem)}
 						</div>,
-						<div 
+						<div
 							key={`value-${index}`}
-							style={{
-								gridColumn: '2',
-								marginBottom: '0.3rem',
-							}}
+							className="col-start-2 mb-1"
 						>
 							{listNodes(nodes, false)}
 						</div>
 					]
 				))}
 			</div>
-			
-			{ (discardedNodes.length != 0) && 
+
+			{ (discardedNodes.length != 0) &&
 				<div>
-					<hr style={{opacity:0.5}}/>
+					<hr className="opacity-50"/>
 					{"※"}
 					{listNodes(discardedNodes, true)}
 					<span style={{fontSize: textSize}}> in Ophiuchus: discarded from analysis.</span>

@@ -1,5 +1,4 @@
-import { useState, useCallback, type ChangeEvent, type KeyboardEvent, useMemo, type FocusEvent, type FC } from 'react';
-import './NumericInputField.css';
+import { useState, useCallback, type ChangeEvent, type KeyboardEvent, type FocusEvent, type FC } from 'react';
 
 interface NumericInputFieldProps {
 	min: number;
@@ -33,7 +32,7 @@ const NumericInputField: FC<NumericInputFieldProps> = ({
 		if (isValid) {
 			setHasError(false);
 			// Clean up the input string to the parsed number's string representation
-			setInputValue(String(parsedNumber)+unit); 
+			setInputValue(String(parsedNumber)+unit);
 			if ( parsedNumber != lastValidValue) {
 				setLastValidValue(parsedNumber);
 				onValidCommit(parsedNumber);
@@ -62,14 +61,12 @@ const NumericInputField: FC<NumericInputFieldProps> = ({
 		}
 	};
 
-	const inputClassName = useMemo(() => {
-		return hasError ? "input-field error" : "input-field";
-	}, [hasError]);
-
 	return (
 		<input
 			type="text"
-			className={inputClassName}
+			className={`w-full bg-transparent border-b py-1 outline-none text-white text-sm font-normal transition-colors box-border ${
+				hasError ? 'border-red-500' : 'border-white'
+			}`}
 			value={inputValue}
 			onChange={handleChange}
 			onKeyDown={handleCommit} // Check for Enter key press

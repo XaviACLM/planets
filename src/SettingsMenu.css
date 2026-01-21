@@ -1,22 +1,4 @@
-.toggle-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toggle-option {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-}
-
-.toggle-option.active {
-  background: #007acc;
-  color: white;
-  border-color: #007acc;
-}
-
+/* Custom checkbox styling - kept as CSS due to pseudo-element complexity */
 .custom-checkbox {
   display: none;
 }
@@ -53,23 +35,4 @@
 .checkbox-wrapper {
   position: relative;
   display: inline-block;
-}
-
-.toggle-switch button {
-  background-color: black;
-  border: 1px solid #333;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 0px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.toggle-switch button:hover {
-  border-color: #666;
-}
-
-.toggle-switch button.active {
-  border-color: white;
-  background-color: #000;
 }

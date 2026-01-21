@@ -33,7 +33,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 
 	const renderSmallcapsString = (str: string): ReactNode => {
 		return (
-			<span style={{ fontSize: textSize, fontVariant: "small-caps", fontWeight: "bold" }}>
+			<span className="small-caps font-bold" style={{ fontSize: textSize }}>
 				{str}
 			</span>
 		);
@@ -49,7 +49,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 
 	const renderTitle = (str: string): ReactNode => {
 		return (
-			<span style={{ fontSize: textSizeTitle, fontVariant: "small-caps", fontWeight: "bold", letterSpacing: 0.7 }}>
+			<span className="small-caps font-bold tracking-wide" style={{ fontSize: textSizeTitle }}>
 				{str}
 			</span>
 		);
@@ -64,7 +64,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 				alt={node}
 				width={symbolSize}
 				height={symbolSize}
-				style={{ filter: "invert(1)", verticalAlign: "middle" }}
+				className="invert align-middle inline"
 			/>
 		);
 	};
@@ -78,17 +78,17 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 				alt={sign}
 				width={symbolSize}
 				height={symbolSize}
-				style={{ filter: "invert(1)", verticalAlign: "middle" }}
+				className="invert align-middle inline"
 			/>
 		);
 	};
 
 	const renderArrow = (): ReactNode => {
-		return <span style={{ fontSize: textSize, margin: "0 0.2rem" }}>{" → "}</span>;
+		return <span className="mx-1" style={{ fontSize: textSize }}>{" → "}</span>;
 	};
 
 	const renderMutualArrow = (): ReactNode => {
-		return <span style={{ fontSize: textSize, margin: "0 0.2rem" }}>{" ⇄ "}</span>;
+		return <span className="mx-1" style={{ fontSize: textSize }}>{" ⇄ "}</span>;
 	};
 
 	// Build the rulership graph and compute final dispositors + chains
@@ -210,7 +210,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 			const parenSize = showSymbolLabels ? textSize * 1 : textSize * 1.5;
 			const parenOpacity = showSymbolLabels ? 0.8 : 0.4;
 			return (
-				<span style={{ whiteSpace: "nowrap" }}>
+				<span className="whitespace-nowrap">
 					{renderNode(node)}
 					<span style={{ fontSize: parenSize, opacity: parenOpacity }}> [</span>
 					{renderSign(sign)}
@@ -224,14 +224,14 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 	const renderFinalDispositor = (fd: FinalDispositor, index: number): ReactNode => {
 		if (fd.type === 'domicile') {
 			return (
-				<div key={index} style={{ marginBottom: "0.3rem" }}>
+				<div key={index} className="mb-1">
 					{renderNodeWithSign(fd.node, fd.sign)}
 					{renderString(" in domicile.")}
 				</div>
 			);
 		} else if (fd.type === 'mutual_reception') {
 			return (
-				<div key={index} style={{ marginBottom: "0.3rem" }}>
+				<div key={index} className="mb-1">
 					{renderNodeWithSign(fd.nodes[0], fd.signs[0])}
 					{renderMutualArrow()}
 					{renderNodeWithSign(fd.nodes[1], fd.signs[1])}
@@ -241,7 +241,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 		} else {
 			// Cycle of length 3+
 			return (
-				<div key={index} style={{ marginBottom: "0.3rem" }}>
+				<div key={index} className="mb-1">
 					{fd.nodes.map((node, i) => (
 						<span key={i}>
 							{renderNodeWithSign(node, fd.signs[i])}
@@ -256,7 +256,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 
 	const renderChain = (chain: ChainStep[], index: number): ReactNode => {
 		return (
-			<div key={index} style={{ marginBottom: "0.3rem", paddingLeft: "1em", textIndent: "-1em" }}>
+			<div key={index} className="mb-1 pl-4" style={{ textIndent: "-1em" }}>
 				{chain.map((step, i) => (
 					i === 0 ? (
 						<span key={i}>
@@ -265,7 +265,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 					) : (
 						<span key={i}>
 							<></>
-							<span style={{ whiteSpace: "nowrap" }}>
+							<span className="whitespace-nowrap">
 								{renderArrow()}
 								{renderNodeWithSign(step.node, step.sign)}
 							</span>
@@ -277,10 +277,10 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 	};
 
 	return (
-		<div style={{ width: 330, color: "white", padding: "1rem" }}>
+		<div className="text-white p-4" style={{ width: 330 }}>
 			<div>
 				{renderTitle("Final Dispositors")}
-				<div style={{ marginTop: "0.5rem" }}>
+				<div className="mt-2">
 					{finalDispositors.length > 0 ? (
 						finalDispositors.map((fd, i) => renderFinalDispositor(fd, i))
 					) : (
@@ -291,10 +291,10 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 
 			{chains.length > 0 && (
 				<>
-					<hr style={{ opacity: 0.5 }} />
+					<hr className="opacity-50 my-2" />
 					<div>
 						{renderTitle("Dispositorship Chains")}
-						<div style={{ marginTop: "0.5rem" }}>
+						<div className="mt-2">
 							{chains.map((chain, i) => renderChain(chain, i))}
 						</div>
 					</div>

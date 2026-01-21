@@ -1,8 +1,6 @@
 import { type Aspect } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
 
-import "./AspectMenu.css";
-
 function createAspectElement(
 	key: number,
 	aspect: Aspect,
@@ -16,16 +14,16 @@ function createAspectElement(
 	const fixedWidth = "90px";
 	const fixedHeight = "20px";
 	const isSubaspect = parentAspect !== null;
-	
+
 	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind]! : [255,255,255];
 	return <div
 		key={key}
-		className="aspect-item"
+		className="flex items-center px-2 cursor-pointer hover:bg-zinc-900 transition-colors duration-300"
 		onMouseEnter={() => {onHover(aspect)}}
 		onMouseLeave={() => {onHover(null)}}
 	>
 		<div
-			className={`aspect-container ${isSubaspect ? 'subaspect' : ''}`}	
+			className={isSubaspect ? 'pl-2.5' : ''}
 			style={{
 				width: fixedWidth,
 				height: fixedHeight,
@@ -33,17 +31,16 @@ function createAspectElement(
 		>
 			{ !showAspectLabels && !aspectsColorcoded &&
 				<img
-					className="aspect-icon"
+					className="ml-5 invert"
 					src={aspectSymbols[aspect.kind]}
 					alt={aspect.kind}
 					width={symbolSize}
 					height={symbolSize}
-					style={{filter:"invert(1)"}}
 				/>
 			}
 			{ !showAspectLabels && aspectsColorcoded &&
 				<div
-					className="aspect-icon"
+					className="ml-5"
 					style={{
 						WebkitMaskImage: `url(${aspectSymbols[aspect.kind]})`,
 						maskImage: `url(${aspectSymbols[aspect.kind]})`,
@@ -57,18 +54,18 @@ function createAspectElement(
 					}}
 				/>
 			}
-			{ showAspectLabels && 
+			{ showAspectLabels &&
 				<label
-					className="aspect-label"
-					style = {{color:aspectsColorcoded ? `rgb(${r}, ${g}, ${b})` : "white"}}
+					className="text-xs whitespace-nowrap font-bold small-caps"
+					style={{color: aspectsColorcoded ? `rgb(${r}, ${g}, ${b})` : "white"}}
 				>
 					{aspect.kind}
 				</label>
 			}
 		</div>
-		
+
 		{/* node icons */}
-		<div className="node-icons">
+		<div className="flex mr-4">
 			{aspect.nodes.map((node, i) => (
 				<img
 					key={i}
@@ -76,8 +73,7 @@ function createAspectElement(
 					alt={node}
 					width={symbolSize}
 					height={symbolSize}
-					className="node-icon"
-					style={{filter:"invert(1)"}}
+					className="w-4 h-4 mr-1 invert"
 				/>
 			))}
 			{Array.from({length: 6-aspect.nodes.length}).map((_, i) => (
@@ -87,21 +83,20 @@ function createAspectElement(
 					alt={"bals"}
 					width={symbolSize}
 					height={symbolSize}
-					className="node-icon"
-					style={{filter:"invert(1)"}}
+					className="w-4 h-4 mr-1 invert"
 				/>
 			))}
 		</div>
-		
+
 		{/* error, quantile */}
-		<div className="aspect-values">
+		<div className="grow text-right text-[0.7em] mr-4">
 			{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
 			 Δ{(aspect.error!*180/Math.PI).toFixed(2)}º
 		</div>
 
 		{/* delete button */}
 		<button
-			className="delete-button"
+			className="border-none bg-transparent cursor-pointer text-white p-0 text-base"
 			onClick={() => onDelete(aspect, parentAspect)}
 		>
 			✕
@@ -116,9 +111,9 @@ function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, on
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void
 }) {
-	
+
 	return (
-		<div className="aspect-menu">
+		<div className="p-2 overflow-y-auto bg-black text-white scrollbar-none">
 			{aspects != null && Array.from(aspects.entries()).map(([aspect, subaspects], index) => {
 				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover);
 				const subaspectElements = subaspects.map((subaspect, subindex) => {

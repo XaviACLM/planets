@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { type CityData, CitySearchEngine } from "./CitySearchEngine.ts"
 
-import "./CitySelector.css";
-
 interface CitySelectorProps {
   startingQueryText: CityData | null;
   onSelect: (city: CityData) => void;
@@ -14,12 +12,12 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 	const [ isLoading, setIsLoading ] = useState<boolean>(false);
 	const [ _selected, setSelected ] = useState<CityData | null>(null);
 	const cseRef = useRef<CitySearchEngine|null>(null);
-	
+
 	useEffect(() => {
 		cseRef.current = new CitySearchEngine();
 	}, []);
-	
-	// 
+
+	//
 	useEffect(() => {
 		if (startingQueryText != null) {
 			setQuery([startingQueryText.cityName, startingQueryText.stateName, startingQueryText.countryName]
@@ -27,13 +25,13 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 			.join(", "));
 		}
 	}, []);
-	
+
 	useEffect(() => {
 		if (!cseRef.current || query.length < 2) {
 			setResults([]);
 			return;
 		}
-		
+
 		const timeout = setTimeout(async () => {
 			if (!cseRef.current) return;
 			setIsLoading(true);
@@ -42,10 +40,10 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 			setResults(res);
 			setIsLoading(false);
 		}, 250);
-		
+
 		return () => clearTimeout(timeout);
 	}, [query]);
-	
+
 	const handleSelect = (cityData: CityData) => {
 		setSelected(cityData);
 		setQuery([cityData.cityName, cityData.stateName, cityData.countryName]
@@ -54,10 +52,11 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 		setResults([]);
 		onSelect(cityData);
 	};
-	
+
 	return (
-		<div className="city-selector">
-			<input className="city-input"
+		<div className="relative w-full text-black font-sans">
+			<input
+				className="w-full bg-transparent border-b border-white py-1 outline-none text-white text-xs font-bold small-caps"
 				type="text"
 				placeholder="Type a city..."
 				value={query}
@@ -66,18 +65,21 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 					setSelected(null);
 				}}
 			/>
-			
-			{isLoading && <div className="dropdown-loading">Loading...</div>}
-			
+
+			{isLoading && <div className="absolute top-full left-0 text-gray-500 text-sm pt-1">Loading...</div>}
+
 			{!isLoading && results.length>0 && (
-				<ul className="dropdown">
+				<ul className="absolute top-full left-0 right-0 bg-black border-t border-gray-800 z-10 list-none m-0 p-0">
 					{results.map((r,i) => {
-						return ( <li className="dropdown-item"
-							key={i}
-							onClick={() => handleSelect(r)}
-						>
-							{r.cityName}, {r.stateName}, {r.countryName}
-						</li> );
+						return (
+							<li
+								className="px-1 border-b border-zinc-900 cursor-pointer text-white text-xs font-bold small-caps hover:bg-zinc-900"
+								key={i}
+								onClick={() => handleSelect(r)}
+							>
+								{r.cityName}, {r.stateName}, {r.countryName}
+							</li>
+						);
 					})}
 				</ul>
 			)}

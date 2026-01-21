@@ -119,11 +119,11 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 	const [hoveredZodiac, setHoveredZodiac] = useState<Zodiac | null>(null);
 	
 	return (
-		<div style={{background: "#000", width:"100vw", height: "100vh"}}>
+		<div className="bg-black w-screen h-screen">
 			<svg
 				viewBox="0 0 100 100"
 				preserveAspectRatio="xMidYMid meet"
-				style={{ width: "100%", height: "100%" }}
+				className="w-full h-full"
 			>
 				<circle cx="50%" cy="50%" r={radius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
 				<circle cx="50%" cy="50%" r={radius-0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>

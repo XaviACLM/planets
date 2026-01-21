@@ -59,23 +59,14 @@ const SettingsMenu: FC = () => {
 	const selectedRulershipMode = useSettingsStore(s => s.selectedRulershipMode);
 	const setSelectedRulershipMode = useSettingsStore(s => s.setSelectedRulershipMode);
 
-	const selectStyle = {
-		backgroundColor: "black",
-		color: "white",
-		border: "1px solid white",
-		padding: "8px 12px",
-		borderRadius: "4px",
-		outline: "none",
-	};
-
 	return (
-		<div style={{ padding: "1rem" }}>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+		<div className="p-4">
+			<div className="flex justify-between items-center">
 				<span>House system</span>
 				<select
 					value={selectedHouseSystem}
 					onChange={(e) => setSelectedHouseSystem(e.target.value as HouseSystem)}
-					style={selectStyle}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(HouseSystem).map(system => (
 						<option key={system} value={system}>
@@ -94,7 +85,9 @@ const SettingsMenu: FC = () => {
 				/>
 				<label htmlFor="pre-sweep">House pre-sweep</label>
 			</div>
-			<hr style={{ opacity: 0.5 }} />
+
+			<hr className="opacity-50 my-2" />
+			
 			<div className="checkbox-wrapper">
 				<input
 					type="checkbox"
@@ -150,7 +143,7 @@ const SettingsMenu: FC = () => {
 				<label htmlFor="show-mode-labels">Show mode labels</label>
 			</div>
 
-			<hr style={{ opacity: 0.5 }} />
+			<hr className="opacity-50 my-2" />
 
 			<div className="checkbox-wrapper">
 				<input
@@ -196,14 +189,14 @@ const SettingsMenu: FC = () => {
 				<label htmlFor="show-signs-in-rulership">Show signs in rulership panel</label>
 			</div>
 
-			<hr style={{ opacity: 0.5 }} />
+			<hr className="opacity-50 my-2" />
 
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<div className="flex justify-between items-center">
 				<span>Configuration error</span>
 				<select
 					value={selectedAspectErrorMode}
 					onChange={(e) => setSelectedAspectErrorMode(e.target.value as AspectErrorMode)}
-					style={selectStyle}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(AspectErrorMode).map(system => (
 						<option key={system} value={system}>
@@ -213,9 +206,9 @@ const SettingsMenu: FC = () => {
 				</select>
 			</div>
 			Maximum error per aspect type:
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<div className="flex justify-between items-center">
 				- Configurations:
-				<div style={{ maxWidth: '50px' }}>
+				<div className="max-w-[50px] mr-5">
 					<NumericInputField
 						min={0}
 						max={20}
@@ -226,9 +219,9 @@ const SettingsMenu: FC = () => {
 					/>
 				</div>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<div className="flex justify-between items-center">
 				- Major binary aspects:
-				<div style={{ maxWidth: '50px' }}>
+				<div className="max-w-[50px] mr-5">
 					<NumericInputField
 						min={0}
 						max={20}
@@ -239,9 +232,9 @@ const SettingsMenu: FC = () => {
 					/>
 				</div>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<div className="flex justify-between items-center">
 				- Minor binary aspects:
-				<div style={{ maxWidth: '50px' }}>
+				<div className="max-w-[50px] mr-5">
 					<NumericInputField
 						min={0}
 						max={20}
@@ -253,7 +246,7 @@ const SettingsMenu: FC = () => {
 				</div>
 			</div>
 
-			<hr style={{ opacity: 0.5 }} />
+			<hr className="opacity-50 my-2" />
 
 			Required # of physical nodes per aspect:
 			<Slider
@@ -272,12 +265,12 @@ const SettingsMenu: FC = () => {
 				/>
 				<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<div className="flex justify-between items-center">
 				<span>Display aspects</span>
 				<select
 					value={selectedAspectMenuMode}
 					onChange={(e) => setSelectedAspectMenuMode(e.target.value as AspectMenuMode)}
-					style={selectStyle}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(AspectMenuMode).map(system => (
 						<option key={system} value={system}>
@@ -287,46 +280,54 @@ const SettingsMenu: FC = () => {
 				</select>
 			</div>
 
-			<hr style={{ opacity: 0.5 }} />
+			<hr className="opacity-50 my-2" />
 
-			<div className="toggle-switch">
+			<div className="flex items-center gap-2 justify-between">
 				<span>Lunar node mode:</span>
-				<button
-					className={`toggle-option ${lunarNodeMode === LunarNodeMode.MEAN ? 'active' : ''}`}
-					onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
-				>
-					Mean
-				</button>
-				<button
-					className={`toggle-option ${lunarNodeMode === LunarNodeMode.TRUE ? 'active' : ''}`}
-					onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
-				>
-					True
-				</button>
+				<div className="flex gap-2">
+					<button
+						className={`bg-black border border-gray-700 text-white px-2 py-0.5 cursor-pointer transition-all hover:border-gray-500 ${lunarNodeMode === LunarNodeMode.MEAN ? 'border-white' : ''}`}
+						onClick={() => setLunarNodeMode(LunarNodeMode.MEAN)}
+					>
+						Mean
+					</button>
+					<button
+						className={`bg-black border border-gray-700 text-white px-2 py-0.5 cursor-pointer transition-all hover:border-gray-500 ${lunarNodeMode === LunarNodeMode.TRUE ? 'border-white' : ''}`}
+						onClick={() => setLunarNodeMode(LunarNodeMode.TRUE)}
+					>
+						True
+					</button>
+				</div>
 			</div>
-			<hr style={{ opacity: 0.5 }} />
-			<div className="toggle-switch">
+			
+			<hr className="opacity-50 my-2" />
+			
+			<div className="flex items-center gap-2">
 				<span>Hamburg school params:</span>
-				<button
-					className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.WITTE ? 'active' : ''}`}
-					onClick={() => setHamburgSchoolMode(HamburgSchoolMode.WITTE)}
-				>
-					Witte
-				</button>
-				<button
-					className={`toggle-option ${hamburgSchoolMode === HamburgSchoolMode.NEELY ? 'active' : ''}`}
-					onClick={() => setHamburgSchoolMode(HamburgSchoolMode.NEELY)}
-				>
-					Neely
-				</button>
+				<div className="flex gap-2">
+					<button
+						className={`bg-black border border-gray-700 text-white px-2 py-0.5 cursor-pointer transition-all hover:border-gray-500 ${hamburgSchoolMode === HamburgSchoolMode.WITTE ? 'border-white' : ''}`}
+						onClick={() => setHamburgSchoolMode(HamburgSchoolMode.WITTE)}
+					>
+						Witte
+					</button>
+					<button
+						className={`bg-black border border-gray-700 text-white px-2 py-0.5 cursor-pointer transition-all hover:border-gray-500 ${hamburgSchoolMode === HamburgSchoolMode.NEELY ? 'border-white' : ''}`}
+						onClick={() => setHamburgSchoolMode(HamburgSchoolMode.NEELY)}
+					>
+						Neely
+					</button>
+				</div>
 			</div>
-			<hr style={{ opacity: 0.5 }} />
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			
+			<hr className="opacity-50 my-2" />
+			
+			<div className="flex justify-between items-center">
 				<span>Mode</span>
 				<select
 					value={selectedAstrologyMode}
 					onChange={(e) => setSelectedAstrologyMode(e.target.value as AstrologyMode)}
-					style={selectStyle}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(AstrologyMode).map(system => (
 						<option key={system} value={system}>
@@ -335,13 +336,15 @@ const SettingsMenu: FC = () => {
 					))}
 				</select>
 			</div>
-			<hr style={{ opacity: 0.5 }} />
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			
+			<hr className="opacity-50 my-2" />
+			
+			<div className="flex justify-between items-center">
 				<span>Rulerships</span>
 				<select
 					value={selectedRulershipMode}
 					onChange={(e) => setSelectedRulershipMode(e.target.value as RulershipMode)}
-					style={selectStyle}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(RulershipMode).map(mode => (
 						<option key={mode} value={mode}>

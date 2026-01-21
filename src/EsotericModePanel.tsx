@@ -21,45 +21,6 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		return null;
 	}
 
-	const panelStyle: React.CSSProperties = {
-		position: 'absolute',
-		top: '1rem',
-		left: '1rem',
-		backgroundColor: 'black',
-		color: 'white',
-		padding: '12px 16px',
-		fontFamily: 'monospace',
-		fontSize: 14,
-		border: '1px solid #777',
-		zIndex: 1000,
-		display: 'flex',
-		alignItems: 'center',
-		gap: '12px',
-	};
-
-	const buttonStyle: React.CSSProperties = {
-		background: 'none',
-		border: 'none',
-		color: 'white',
-		textDecoration: 'underline',
-		cursor: 'pointer',
-		padding: 0,
-		margin: 0,
-		font: 'inherit',
-	};
-
-	const closeButtonStyle: React.CSSProperties = {
-		background: 'none',
-		border: 'none',
-		color: 'white',
-		cursor: 'pointer',
-		padding: 0,
-		margin: 0,
-		fontSize: 16,
-		lineHeight: 1,
-		opacity: 0.7,
-	};
-
 	const enterEsotericMode = () => {
 		setShowNodeLabels(false);
 		setShowSymbolLabels(false);
@@ -83,22 +44,36 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 	};
 
 	return (
-		<div style={panelStyle}>
+		<div className="absolute top-4 left-4 bg-black text-white px-4 py-3 font-mono text-sm border border-gray-500 z-[1000] flex items-center gap-3">
 			{panelState === 'initial' ? (
 				<>
-					<button style={buttonStyle} onClick={enterEsotericMode}>
+					<button
+						className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit]"
+						onClick={enterEsotericMode}
+					>
 						Enter esoteric mode
 					</button>
-					<button style={closeButtonStyle} onClick={dismiss} title="Dismiss">
+					<button
+						className="bg-transparent border-none text-white cursor-pointer p-0 m-0 text-base leading-none opacity-70"
+						onClick={dismiss}
+						title="Dismiss"
+					>
 						✕
 					</button>
 				</>
 			) : (
 				<>
-					<button style={buttonStyle} onClick={exitEsotericMode}>
+					<button
+						className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit]"
+						onClick={exitEsotericMode}
+					>
 						Go back to normal mode
 					</button>
-					<button style={closeButtonStyle} onClick={dismiss} title="Dismiss">
+					<button
+						className="bg-transparent border-none text-white cursor-pointer p-0 m-0 text-base leading-none opacity-70"
+						onClick={dismiss}
+						title="Dismiss"
+					>
 						✕
 					</button>
 				</>
