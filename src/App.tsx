@@ -229,14 +229,18 @@ function App() {
 						</>
 					) : (
 						<>
-							<Module title="Element/Mode Balance" supportsHalfCollapse={true}>
-								{(collapseState) => (
+							<Module
+								title="Element/Mode Balance"
+								startingState={CollapseState.HALF}
+								supportsHalfCollapse={true}
+							>
+								{(abbreviated) => (
 									<DominanceChart
 										zodiacPositions={zodiacPositions}
 										showNodeLabels={showNodeLabels}
 										showElementLabels={showElementLabels}
 										showModeLabels={showModeLabels}
-										collapseState={collapseState}
+										abbreviated={abbreviated}
 									/>
 								)}
 							</Module>

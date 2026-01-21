@@ -9,18 +9,19 @@ export type CollapseState = typeof CollapseState[keyof typeof CollapseState];
 
 type ModuleProps = {
 	title: string,
+	startingState: CollapseState,
 	supportsHalfCollapse?: boolean,
 	children: (collapseState: CollapseState) => ReactNode,
 }
 
 const Module: FC<ModuleProps> = ({
 	title,
+	startingState,
 	supportsHalfCollapse = false,
 	children,
 }) => {
-	const [collapseState, setCollapseState] = useState<CollapseState>(CollapseState.EXPANDED);
+	const [collapseState, setCollapseState] = useState<CollapseState>(startingState);
 
-	// ▼ clicked: expand (show more)
 	const handleExpand = () => {
 		if (collapseState === CollapseState.COLLAPSED) {
 			setCollapseState(supportsHalfCollapse ? CollapseState.HALF : CollapseState.EXPANDED);
@@ -29,7 +30,6 @@ const Module: FC<ModuleProps> = ({
 		}
 	};
 
-	// ▲ clicked: collapse (show less)
 	const handleCollapse = () => {
 		if (collapseState === CollapseState.EXPANDED) {
 			setCollapseState(supportsHalfCollapse ? CollapseState.HALF : CollapseState.COLLAPSED);
@@ -45,24 +45,17 @@ const Module: FC<ModuleProps> = ({
 			{/* title (sideways on the right unless collapsed) */}
 			{collapseState === CollapseState.COLLAPSED ? (
 				<span
-					className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide"
-					style={{
-						top: '50%',
-						left: 12,
-						transform: 'translateY(-50%)',
-					}}
+					className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
 				>
 					{title}
 				</span>
 			) : (
 				<span
-					className="absolute bg-black px-1 text-white text-xs small-caps font-bold tracking-wide"
+					className="absolute -translate-x-0.5 bg-black px-1 text-white text-xs small-caps font-bold tracking-wide left-0 top-1 whitespace-nowrap"
 					style={{
-						left: 0,
-						top: "0.4rem",
-						transform: 'translateX(-51%) rotate(-90deg) translateX(-50%)',
+						transform: 'translateX(-50%) rotate(-90deg) translateX(-50%)',
 						transformOrigin: 'center center',
-						whiteSpace: 'nowrap',
+						willChange: 'transform',
 					}}
 				>
 					{title}
@@ -71,11 +64,9 @@ const Module: FC<ModuleProps> = ({
 			
 			{/* buttons (top border on the right) */}
 			<div
-				className="absolute bg-black px-1 flex gap-1"
+				className="absolute bg-black px-1 flex gap-1 top-0 right-3"
 				style={{
-					top: 0,
-					right: 12,
-					transform: 'translateY(-50%)'
+					transform: 'translateY(-51%)'
 				}}
 			>
 				{collapseState === CollapseState.COLLAPSED ? (
@@ -103,95 +94,8 @@ const Module: FC<ModuleProps> = ({
 				collapseState === CollapseState.COLLAPSED ? 'grid-rows-collapsed' : 'grid-rows-expanded'
 			}`}>
 				<div className="min-h-0 overflow-hidden">
-					{children(collapseState)}
+					{children(collapseState !== CollapseState.EXPANDED)}
 				</div>
-			</div>
-		</div>
-	);
-
-	if (collapseState === CollapseState.COLLAPSED) {
-		return (
-			<div className="relative w-full h-4">
-				{/* The line - centered vertically */}
-				<div className="absolute top-1/2 left-0 right-0 border-t border-gray-500" />
-
-				{/* Title on the line, towards the left */}
-				<span
-					className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide"
-					style={{
-						top: '50%',
-						left: 12,
-						transform: 'translateY(-50%)',
-					}}
-				>
-					{title}
-				</span>
-
-				{/* Down button (expand) on the line, towards the right */}
-				<button
-					className={buttonClass}
-					style={{
-						position: 'absolute',
-						top: '50%',
-						right: 12,
-						transform: 'translateY(-50%)',
-					}}
-					onClick={handleExpand}
-				>
-					▼
-				</button>
-			</div>
-		);
-	}
-
-	// HALF or EXPANDED state
-	const isHalf = collapseState === CollapseState.HALF;
-
-	return (
-		<div className="relative w-full border border-gray-500 bg-black">
-			{/* Title on left border, sideways */}
-			<span
-				className="absolute bg-black px-1 text-white text-xs small-caps font-bold tracking-wide"
-				style={{
-					left: 0,
-					top: "0.4rem",
-					transform: 'translateX(-51%) rotate(-90deg) translateX(-50%)',
-					transformOrigin: 'center center',
-					whiteSpace: 'nowrap',
-				}}
-			>
-				{title}
-			</span>
-
-			{/* Buttons on top border, towards the right */}
-			<div
-				className="absolute bg-black px-1 flex gap-1"
-				style={{
-					top: 0,
-					right: 12,
-					transform: 'translateY(-50%)',
-				}}
-			>
-				{isHalf ? (
-					<>
-						<button className={buttonClass} onClick={handleCollapse}>
-							▲
-						</button>
-						<button className={buttonClass} onClick={handleExpand}>
-							▼
-						</button>
-					</>
-				) : (
-					// EXPANDED: only show collapse button
-					<button className={buttonClass} onClick={handleCollapse}>
-						▲
-					</button>
-				)}
-			</div>
-
-			{/* Content */}
-			<div>
-				{children(collapseState)}
 			</div>
 		</div>
 	);

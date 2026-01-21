@@ -2,7 +2,6 @@ import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
 import { zodiacSymbols, nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
 import { ZodiacPositions } from './astro.ts'
-import { CollapseState } from './Module.tsx'
 
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
@@ -11,7 +10,7 @@ type DominanceChartProps = {
 	showNodeLabels: boolean,
 	showElementLabels: boolean,
 	showModeLabels: boolean,
-	collapseState?: CollapseState,
+	abbreviated: boolean,
 }
 
 const DominanceChart: FC<DominanceChartProps> = ({
@@ -19,7 +18,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 	showNodeLabels,
 	showElementLabels,
 	showModeLabels,
-	collapseState = CollapseState.EXPANDED,
+	abbreviated,
 }) => {
 	const symbolSize = 20;
 	const textSize = 12;
@@ -387,7 +386,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		return (
 			<>
 			{nodes.map((node, i) => {
-				return <span>
+				return <span key={node}>
 					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node)}
 					{(forceText || showNodeLabels) && (i < nodes.length - 1)
 					&& <span style={{fontSize: textSize}}>, </span>
@@ -398,7 +397,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		);
 	}
 
-	if (collapseState === CollapseState.HALF) {
+	if (abbreviated) {
 		return (
 			<div className="text-white p-4 pt-2 pb-2" style={{ width: 330 }}>
 				<div>
