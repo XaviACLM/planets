@@ -19,19 +19,7 @@ develop planet panel
  - what info does the panel actually contain? sign+degree, house, condition (dignity state, retrograde/speed, "angularity"), rulership (what info exactly?), aspects (what info exactly?)
  - start at sun, jump to asc if the user inputs a location.
 
-some hemisphere dominance panel, analogous to element/mode. 
- - "self oriented vs other-oriented? emphasis above or below horizon? initiating vs reactive?"
- - key axes: east/west, above/below horizon, quadrants (1-4, 4-7, etc)
- - personal/social/transpersonal division not meaningful. Only luminaries and planets.
- - is this redundant with information already easily visible on the chart?
-specific plan:
- - endow ZodiacPositions with isAboveHorizon and isRising (really the best name for it I think). what's the specific logic for this, knowing the longitude of the node and asc/dsc (or mc/ic)? might involve a new function in util.ts.
-- draft empty panel with the required props (collapsible), slap it on a new default-half-collapsed module in App.tsx below the element/mode dominance module
-- and the actual contents.
-  - Always starts with a string like "Emphasis west & above horizon", or "West emphasis. No above/below horizon emphasis". Good to have some qualifiers, like "slight" or "strong" for certain fixed relative differences. Might have some complicated logic to decide how to phrase stuff (e.g. "Strong emphasis west & above horizon" vs "Slight west emphasis, strong emphasis above horizon" (note e.g. west emphasis vs emphasis west depending on whether the statements are combined)).
-  - ay ay ay ay ay!
-okay okay:
- - we're sort of happy with this, but not entirely. The chart can look very empty. I gotta tweak its size a little bit and figure out how to make it look a bit fuller ... narrow it with filler dotted rectangles to the sides? sth insane like a lattice of dots that only appears around blanker areas, maybe?
+XX some hemisphere dominance panel, analogous to element/mode. 
 
 MAYBE a sort of general information panel. Diurnal chart/nocturnal chart, mb what hemisphere, and... that's all? Yeah, I don't know. Honestly just a little "Diurnal chart" or "nocturnal chart" badge floating at the top left of the chart area may be enough.
 

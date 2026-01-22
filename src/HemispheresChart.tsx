@@ -3,8 +3,6 @@ import { Node, Zodiac, Element, Mode, standardNodes } from './astroDefs';
 import { nodeSymbols } from './astroGraphics.ts';
 import { ZodiacPositions } from './astro.ts'
 
-const luminaries: Node[] = [Node.SUN, Node.MOON];
-
 type HemispheresChartProps = {
 	zodiacPositions: ZodiacPositions,
 	showNodeLabels: boolean,
@@ -33,8 +31,11 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number) {
 	const horizontalModifier = strengthModifiers[horizontalStrength];
 	const horizontalModifierAdj = strengthModifiersAdj[horizontalStrength];
 	
+	//painful logic to try to make things stay within 1 lines
 	const horizontalStringUsesModifier = horizontalStrength === 1 || horizontalStrength === 3;
+	const verticalStringUsesModifier = verticalStrength === 1 || verticalStrength === 3;
 	const verticalStringLongish = verticalStrength !== 2;
+	const specialCaseTheElision = horizontalStrength === 0 && verticalStringUsesModifier;
 	
 	if (verticalStrength === horizontalStrength) {
 		if (verticalStrength === 0) { // null - null case
@@ -50,8 +51,11 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number) {
 				'No emphasis above/below the horizon'
 			)
 		) : (
-			
-			`${verticalModifier}emphasis ${verticalOrientation === 1 ? 'above' : 'below'} the horizon`
+			specialCaseTheElision ? (
+				`${verticalModifier}emphasis ${verticalOrientation === 1 ? 'above' : 'below'} horizon`
+			) : (
+				`${verticalModifier}emphasis ${verticalOrientation === 1 ? 'above' : 'below'} the horizon`
+			)
 		); 
 		const horizontalString = horizontalStrength === 0 ? (
 			'No east/west emphasis'
@@ -82,53 +86,18 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	const textSize = 12;
 	const strokeWidth = 1;
 
-	const renderSmallcapsString = (str: string): ReactNode => {
-		return (
-			<span className="small-caps font-bold" style={{ fontSize: textSize }}>
-				{str}
-			</span>
-		);
-	};
+	const svgTextProps = {
+		fill: "white",
+		fontSize: textSize,
+		fontVariant: "small-caps",
+		fontWeight: "bold",
+	} as const;
 
 	const renderString = (str: string): ReactNode => {
 		return (
 			<span style={{ fontSize: textSize }}>
 				{str}
 			</span>
-		);
-	};
-
-	const renderNode = (node: Node): ReactNode => {
-		return showNodeLabels ? (
-			renderSmallcapsString(node)
-		) : (
-			<img
-				src={nodeSymbols[node]}
-				alt={node}
-				width={symbolSize}
-				height={symbolSize}
-				className="invert inline"
-			/>
-		);
-	};
-	
-	const renderNodeSVG = (node: Node): ReactNode => {
-		return showNodeLabels ? (
-			<text
-				fill="white"
-				fontSize={textSize}
-				fontVariant="small-caps"
-				fontWeight="bold"
-			>
-				{node}
-			</text>
-		) : (
-			<image
-				href={nodeSymbols[node]}
-				width={symbolSize}
-				height={symbolSize}
-				style={{filter:"invert(1)"}}
-			/>
 		);
 	};
 	
@@ -141,11 +110,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					return (
 						<text
 							key={i}
-							fill="white"
-							fontSize={textSize}
-							textAnchor={"middle"}
-							fontVariant="small-caps"
-							fontWeight="bold"
+							{...svgTextProps}
+							textAnchor="middle"
 							transform={`translate(0,${textInListSpacing*rowOffset+textSize/3})`}
 						>
 							{node}
@@ -163,11 +129,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 							return (
 								<text
 									key={i}
-									fill="white"
-									fontSize={textSize}
-									textAnchor={"end"}
-									fontVariant="small-caps"
-									fontWeight="bold"
+									{...svgTextProps}
+									textAnchor="end"
 									transform={`translate(${-textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{node}
@@ -180,11 +143,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 							return (
 								<text
 									key={i+nLeft}
-									fill="white"
-									fontSize={textSize}
-									textAnchor={"start"}
-									fontVariant="small-caps"
-									fontWeight="bold"
+									{...svgTextProps}
+									textAnchor="start"
 									transform={`translate(${textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{node}
@@ -273,37 +233,13 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					fill="black"
 					stroke="none"
 				/>
-				<text
-					x={"50%"}
-					y={height/2+textSize*0.3}
-					textAnchor={"middle"}
-					fill="white"
-					fontSize={textSize}
-					fontVariant="small-caps"
-					fontWeight="bold"
-				>
+				<text x="50%" y={height/2+textSize*0.3} textAnchor="middle" {...svgTextProps}>
 					{"Horizon"}
 				</text>
-				<text
-					x={"0%"}
-					y={height/2-textSize*0.3}
-					textAnchor={"start"}
-					fill="white"
-					fontSize={textSize}
-					fontVariant="small-caps"
-					fontWeight="bold"
-				>
+				<text x="0%" y={height/2-textSize*0.3} textAnchor="start" {...svgTextProps}>
 					{"West"}
 				</text>
-				<text
-					x={"100%"}
-					y={height/2-textSize*0.3}
-					textAnchor={"end"}
-					fill="white"
-					fontSize={textSize}
-					fontVariant="small-caps"
-					fontWeight="bold"
-				>
+				<text x="100%" y={height/2-textSize*0.3} textAnchor="end" {...svgTextProps}>
 					{"East"}
 				</text>
 				<g transform={`translate(${0.25*width},${0.25*height})`}>
