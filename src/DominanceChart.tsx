@@ -1,6 +1,6 @@
 import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
-import { zodiacSymbols, nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
+import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
 import { ZodiacPositions } from './astro.ts'
 
 const luminaries: Node[] = [Node.SUN, Node.MOON];
@@ -411,16 +411,17 @@ const DominanceChart: FC<DominanceChartProps> = ({
 					</div>
 				</div>
 
-				<hr className="opacity-50 my-2"/>
 
 				{ validLuminaries.length != 0
 				&& <div>
+					<hr className="opacity-50 my-2"/>
 					{smallNodeDisplay(validLuminaries)}
 				</div>}
 
 				{ zodiacPositions.hasSurfacePosition()
 				&& validMainAngles.length != 0
 				&& <div>
+					<hr className="opacity-50 my-2"/>
 					{smallNodeDisplay(validMainAngles)}
 				</div>}
 			</div>

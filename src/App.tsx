@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import DominanceChart from './DominanceChart'
+import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import SettingsMenu from './SettingsMenu'
@@ -244,6 +245,19 @@ function App() {
 									/>
 								)}
 							</Module>
+							{ zodiacPositions.hasSurfacePosition()
+							&& (
+								<Module
+									title="Orientation"
+									startingState={CollapseState.EXPANDED}
+									supportsHalfCollapse={false}
+								>
+									<HemispheresChart
+										zodiacPositions={zodiacPositions}
+										showNodeLabels={showNodeLabels}
+									/>
+								</Module>
+							)}
 							<div className="w-full bg-black border border-gray-500 text-white">
 								<RulershipPanel
 									zodiacPositions={zodiacPositions}

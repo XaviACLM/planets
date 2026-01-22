@@ -94,7 +94,11 @@ const Module: FC<ModuleProps> = ({
 				collapseState === CollapseState.COLLAPSED ? 'grid-rows-collapsed' : 'grid-rows-expanded'
 			}`}>
 				<div className="min-h-0 overflow-hidden">
-					{children(collapseState !== CollapseState.EXPANDED)}
+					{supportsHalfCollapse ? (
+						children(collapseState !== CollapseState.EXPANDED)
+					) : (
+						children
+					)}
 				</div>
 			</div>
 		</div>

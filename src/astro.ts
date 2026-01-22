@@ -535,4 +535,33 @@ export class ZodiacPositions {
 		return this._houseCuspPositions !== null
 	}
 	
+	public isNodeAboveHorizon(node: Node): boolean{
+		if (!this.hasSurfacePosition()) {
+			throw new Error("isNodeAboveHorizon called with no defined surface position");
+		}
+		// error if node is absent - intended
+		const lon = this.getNodePosition(node);
+		const asc = this.getNodePosition(Node.ASCENDANT);
+		const dsc = this.getNodePosition(Node.DESCENDANT);
+		if (asc<dsc){
+			return !((asc < lon)&&(lon < dsc));
+		} else {
+			return ((dsc < lon)&&(lon < asc));
+		}
+	}
+	
+	public isNodeEastern(node: Node): boolean{
+		if (!this.hasSurfacePosition()) {
+			throw new Error("isNodeEastern called with no defined surface position");
+		}
+		// error if node is absent - intended
+		const lon = this.getNodePosition(node);
+		const mc = this.getNodePosition(Node.MIDHEAVEN);
+		const ic = this.getNodePosition(Node.IMUM_COELI);
+		if (mc<ic){
+			return !((mc < lon)&&(lon < ic));
+		} else {
+			return ((ic < lon)&&(lon < mc));
+		}
+	}
 }
