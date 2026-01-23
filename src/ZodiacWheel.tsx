@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
 
+import ZodiacPositions from './zodiacPositions.ts'
 import { type Aspect } from './aspects.ts'
-import { Node, Zodiac, AspectKind, standardZodiac } from './astroDefs.ts'
-import { ZodiacPositions } from './astro.ts'
+import { Node, Zodiac, standardZodiac } from './astroDefs.ts'
+import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
 import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
 
@@ -446,7 +447,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
 					return (
 						<path
-							key={-aspects.indexOf(highlightedAspect)}
+							key={-1000-aspects.indexOf(highlightedAspect)}
 							d={pathData}
 							fill="none"
 							stroke={stroke}

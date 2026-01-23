@@ -1,4 +1,5 @@
-import { Node, Zodiac, AspectKind, Element, Mode } from './astroDefs.ts'
+import { Node, Zodiac, Element, Mode } from './astroDefs.ts'
+import { AspectKind } from './aspectDefs.ts'
 
 import ariesSymbol from "./assets/zodiac-symbols/Aries.png"
 import taurusSymbol from "./assets/zodiac-symbols/Taurus.png"

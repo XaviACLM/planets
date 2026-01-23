@@ -7,12 +7,12 @@ import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import SettingsMenu from './SettingsMenu'
+import ZodiacPositions from './zodiacPositions.ts'
 import Module, { CollapseState } from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
-import { ZodiacPositions } from './astro.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 import { useSettingsStore } from './settingsStore.ts'
@@ -54,7 +54,7 @@ function App() {
 	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
 	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
-	const selectedRulershipMode = useSettingsStore(s => s.selectedRulershipMode);
+	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
 
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
@@ -261,7 +261,7 @@ function App() {
 							<div className="w-full bg-black border border-gray-500 text-white">
 								<RulershipPanel
 									zodiacPositions={zodiacPositions}
-									rulershipMode={selectedRulershipMode}
+									dignityMode={selectedDignityMode}
 									showNodeLabels={showNodeLabels}
 									showSymbolLabels={showSymbolLabels}
 									showSignsInRulershipPanel={showSignsInRulershipPanel}

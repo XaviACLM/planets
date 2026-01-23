@@ -1,5 +1,7 @@
 import { sawtoothSine, normalizeAngleRad, angleShortDistance, TAU } from './util.ts'
-import { Node, AspectKind, AspectPhysicalityFilter, NodeType, nodeTypes, AspectMenuMode, AspectErrorMode, majorBinaryAspectsKinds } from './astroDefs.ts'
+import { Node, NodeType, nodeTypes } from './astroDefs.ts'
+import { AspectKind, majorBinaryAspectsKinds } from './aspectDefs.ts'
+import { AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode } from './settingsDefs.ts'
 
 export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.CONJUNCTION] : [0],

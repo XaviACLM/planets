@@ -1,5 +1,4 @@
 import { Node } from './astroDefs.ts'
-import { HelioVector, Ecliptic, RotateVector, Rotation_ECL_EQJ, Rotation_EQJ_ECT, Vector, AstroTime, Body} from 'astronomy-engine'
 
 // types for orbital elements
 interface OrbitParams {
@@ -412,6 +411,21 @@ export const hamburgSchoolParamsWitte: Partial<Record<Node, OrbitParams>> = {
 // code below is partly from chatgpt.
 // code itself only lightly checked, but results match the data from the jpl api
 
+// helper: convert JS Date to Julian Day (UTC)
+function dateToJulianDay(date: Date): number {
+	const utc = Date.UTC(
+		date.getUTCFullYear(),
+		date.getUTCMonth(),
+		date.getUTCDate(),
+		date.getUTCHours(),
+		date.getUTCMinutes(),
+		date.getUTCSeconds(),
+		date.getUTCMilliseconds()
+	);
+	// Julian Day at Unix epoch (1970-01-01 00:00 UTC) is 2440587.5
+	return utc / 86400000 + 2440587.5;
+}
+
 // helper: solve Kepler's equation for eccentric anomaly E
 function solveKepler(M: number, e: number, tol = 1e-8): number {
 	// M in radians, return E in radians
@@ -426,109 +440,94 @@ function solveKepler(M: number, e: number, tol = 1e-8): number {
 	return E;
 }
 
-// propagate elements to 3D position in heliocentric ecliptic (J2000)
-function positionFromKepler(
-  elems: OrbitParams,
-  targetJD: number
-): { x: number; y: number; z: number } {
+export type OrbitalState = {
+	x: number; y: number; z: number;
+	vx: number; vy: number; vz: number;
+};
+
+// propagate elements to 3D position and velocity in heliocentric ecliptic J2000
+// position in AU, velocity in AU/day
+export function stateFromKepler(elems: OrbitParams, date: Date): OrbitalState {
 	const { a, e, i, om, w, ma, epoch } = elems;
+	const jd = dateToJulianDay(date);
 
 	// convert degrees to radians
 	const i_rad = i * Math.PI / 180;
 	const om_rad = om * Math.PI / 180;
 	const w_rad = w * Math.PI / 180;
 
-	// mean motion n (rad/day), from Kepler's third law: n = sqrt(μ / a^3)
-	// For Solar System, μ ≈ k^2, where k = Gaussian gravitational constant = 0.01720209895 AU^1.5/day
+	// Gaussian gravitational constant: k = 0.01720209895 AU^1.5/day
+	// μ = k² AU³/day²
 	const k = 0.01720209895;
+
+	// mean motion n (rad/day), from Kepler's third law: n = sqrt(μ / a^3) = k / a^1.5
 	const n = k / Math.sqrt(a * a * a);
 
-	const dt = (targetJD - epoch); // days
+	const dt = (jd - epoch); // days
 	const M = (ma * Math.PI / 180) + n * dt;
 	const M_norm = ((M % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
 	const E = solveKepler(M_norm, e);
 
 	// true anomaly ν
+	const sinHalfE = Math.sin(E / 2);
+	const cosHalfE = Math.cos(E / 2);
 	const ν = 2 * Math.atan2(
-		Math.sqrt(1 + e) * Math.sin(E / 2),
-		Math.sqrt(1 - e) * Math.cos(E / 2)
+		Math.sqrt(1 + e) * sinHalfE,
+		Math.sqrt(1 - e) * cosHalfE
 	);
+	const sinν = Math.sin(ν);
+	const cosν = Math.cos(ν);
 
 	// distance r
 	const r = a * (1 - e * Math.cos(E));
 
 	// position in orbital plane (perihelion at ν = 0)
-	const x_orb = r * Math.cos(ν);
-	const y_orb = r * Math.sin(ν);
+	const x_orb = r * cosν;
+	const y_orb = r * sinν;
 
-	// now rotate from orbital plane to ecliptic plane:
+	// velocity in orbital plane
+	// v⃗ = (μ/h)(-sin(ν), e + cos(ν), 0) where h = sqrt(μ * a * (1 - e²))
+	// μ/h = k / sqrt(a * (1 - e²))
+	const sqrtOneMinusE2 = Math.sqrt(1 - e * e);
+	const velFactor = k / Math.sqrt(a * sqrtOneMinusE2 * sqrtOneMinusE2); // = k / sqrt(a * (1 - e²))
+	const vx_orb = -velFactor * sinν;
+	const vy_orb = velFactor * (e + cosν);
+
+	// precompute trig for rotations
+	const cosW = Math.cos(w_rad);
+	const sinW = Math.sin(w_rad);
+	const cosI = Math.cos(i_rad);
+	const sinI = Math.sin(i_rad);
+	const cosOm = Math.cos(om_rad);
+	const sinOm = Math.sin(om_rad);
+
+	// rotate from orbital plane to ecliptic plane:
 	// 1) argument of periapsis w
-	const x1 = x_orb * Math.cos(w_rad) - y_orb * Math.sin(w_rad);
-	const y1 = x_orb * Math.sin(w_rad) + y_orb * Math.cos(w_rad);
+	const x1 = x_orb * cosW - y_orb * sinW;
+	const y1 = x_orb * sinW + y_orb * cosW;
+	const vx1 = vx_orb * cosW - vy_orb * sinW;
+	const vy1 = vx_orb * sinW + vy_orb * cosW;
+
 	// 2) inclination i
-	const z2 = y1 * Math.sin(i_rad);
-	const y2 = y1 * Math.cos(i_rad);
+	const y2 = y1 * cosI;
+	const z2 = y1 * sinI;
+	const vy2 = vy1 * cosI;
+	const vz2 = vy1 * sinI;
+
 	// 3) longitude of ascending node om
-	const x3 = x1 * Math.cos(om_rad) - y2 * Math.sin(om_rad);
-	const y3 = x1 * Math.sin(om_rad) + y2 * Math.cos(om_rad);
+	const x3 = x1 * cosOm - y2 * sinOm;
+	const y3 = x1 * sinOm + y2 * cosOm;
 	const z3 = z2;
+	const vx3 = vx1 * cosOm - vy2 * sinOm;
+	const vy3 = vx1 * sinOm + vy2 * cosOm;
+	const vz3 = vz2;
 
-	return { x: x3, y: y3, z: z3 };
+	return { x: x3, y: y3, z: z3, vx: vx3, vy: vy3, vz: vz3 };
 }
 
-// convert cartesian to spherical ecliptic longitude (degrees)
-function eclipticLongitudeFromPosition(pos: { x: number; y: number; z: number }): number {
-	const { x, y } = pos;
-	let lon = Math.atan2(y, x) * 180 / Math.PI;
-	if (lon < 0) lon += 360;
-	return lon;
-}
-
-// main function: elements + date → ecliptic longitude
-export function orbitalLongitude(
-  elems: OrbitParams,
-  date: Date
-): number {
-	// convert JS Date to Julian Day
-	const jd = dateToJulianDay(date);
-
-	// heliocentric ecliptic J2000
-	const pos = positionFromKepler(elems, jd);
-
-	const earthEqj2000 = HelioVector(Body.Earth, date);
-	const earthEclj2000 = Ecliptic(earthEqj2000)
-	
-	// geocentric ecl j2000
-	const posgeo = {
-		x: pos.x - earthEclj2000.vec.x,
-		y: pos.y - earthEclj2000.vec.y,
-		z: pos.z - earthEclj2000.vec.z,
-	}
-	
-	// astronomy-engine doesn't provide an ec j2000 -> ect rotation matrix
-	// (or an ect1 -> ect2, for that matter)
-	// so we go ec j2000 -> eq j2000 -> ect_today
-	// we could skip v and pass posgeo directly (since it has the x,y,z attrs) but this is improper+dangerous
-	const v = new Vector(posgeo.x, posgeo.y, posgeo.z, new AstroTime(date))
-	const posEqj = RotateVector(Rotation_ECL_EQJ(), v);
-	const posEct = RotateVector(Rotation_EQJ_ECT(date), posEqj);
-	const lon = eclipticLongitudeFromPosition(posEct);
-
-	return lon;
-}
-
-// helper: convert JS Date to Julian Day (UTC)
-function dateToJulianDay(date: Date): number {
-	const utc = Date.UTC(
-		date.getUTCFullYear(),
-		date.getUTCMonth(),
-		date.getUTCDate(),
-		date.getUTCHours(),
-		date.getUTCMinutes(),
-		date.getUTCSeconds(),
-		date.getUTCMilliseconds()
-	);
-	// Julian Day at Unix epoch (1970-01-01 00:00 UTC) is 2440587.5
-	return utc / 86400000 + 2440587.5;
+// position-only version for callers that don't need velocity
+export function positionFromKepler(elems: OrbitParams, date: Date): { x: number; y: number; z: number } {
+	const state = stateFromKepler(elems, date);
+	return { x: state.x, y: state.y, z: state.z };
 }

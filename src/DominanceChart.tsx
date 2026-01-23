@@ -1,7 +1,7 @@
 import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
 import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
-import { ZodiacPositions } from './astro.ts'
+import ZodiacPositions from './zodiacPositions.ts'
 
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 

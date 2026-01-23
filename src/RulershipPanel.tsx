@@ -1,11 +1,12 @@
 import { useMemo, FC, ReactNode } from 'react';
-import { Node, Zodiac, standardNodes, RulershipMode, classicalRulerships, modernRulerships } from './astroDefs';
+import { Node, Zodiac, standardNodes, classicalRulerships, modernRulerships } from './astroDefs';
+import { DignityMode } from './settingsDefs';
 import { zodiacSymbols, nodeSymbols } from './astroGraphics.ts';
-import { ZodiacPositions } from './astro.ts';
+import ZodiacPositions from './zodiacPositions.ts';
 
 type RulershipPanelProps = {
 	zodiacPositions: ZodiacPositions;
-	rulershipMode: RulershipMode;
+	dignityMode: DignityMode;
 	showNodeLabels: boolean;
 	showSymbolLabels: boolean;
 	showSignsInRulershipPanel: boolean;
@@ -20,7 +21,7 @@ type ChainStep = { node: Node; sign: Zodiac };
 
 const RulershipPanel: FC<RulershipPanelProps> = ({
 	zodiacPositions,
-	rulershipMode,
+	dignityMode,
 	showNodeLabels,
 	showSymbolLabels,
 	showSignsInRulershipPanel,
@@ -29,7 +30,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 	const textSize = 12;
 	const textSizeTitle = 14;
 
-	const rulerships = rulershipMode === RulershipMode.CLASSICAL ? classicalRulerships : modernRulerships;
+	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
 
 	const renderSmallcapsString = (str: string): ReactNode => {
 		return (

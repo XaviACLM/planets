@@ -421,18 +421,6 @@ export interface SurfacePosition {
 	longitude: number
 }
 
-export const LunarNodeMode = {
-	TRUE: "True", //geometric
-	MEAN: "Mean", //meeus
-} as const;
-export type LunarNodeMode = typeof LunarNodeMode[keyof typeof LunarNodeMode];
-
-export const RulershipMode = {
-	CLASSICAL: "Classical",
-	MODERN: "Modern",
-} as const;
-export type RulershipMode = typeof RulershipMode[keyof typeof RulershipMode];
-
 // Here and below Ophiuchus gets assigned to Pluto (common suggestion of Schmidt and Berg)
 export const classicalRulerships: Record<Zodiac, Node> = {
 	[Zodiac.ARIES]: Node.MARS,
@@ -465,12 +453,6 @@ export const modernRulerships: Record<Zodiac, Node> = {
 	[Zodiac.AQUARIUS]: Node.URANUS,
 	[Zodiac.PISCES]: Node.NEPTUNE,
 };
-
-export const HamburgSchoolMode = {
-	WITTE: "Witte/Sieggrün",
-	NEELY: "Neely",
-} as const;
-export type HamburgSchoolMode = typeof HamburgSchoolMode[keyof typeof HamburgSchoolMode];
 
 export const nodeCategories = [
 	{
@@ -567,137 +549,6 @@ export const nodeCategories = [
 		]
 	}
 ];
-
-export const AspectKind = {
-	// major binary
-	CONJUNCTION: "Conjunction", // 0
-	OPPOSITION: "Opposition", // 1/2
-	TRINE: "Trine", // 1/3
-	SQUARE: "Square", // 1/4
-	SEXTILE: "Sextile", // 1/6
-	PARALLEL: "Parallel",  // same eq. latitude
-	CONTRAPARALLEL: "Contraparallel", // opposite eq. latitude
-	
-	// minor binary
-    VIGINTILE: "Vigintile", // 1/20
-    SEMISEXTILE: "Semisextile", // 1/12
-    UNDECILE: "Undecile", // 1/11
-    DECILE: "Decile", // 1/10
-    NOVILE: "Novile", // 1/9
-    SEMISQUARE: "Semisquare", // 1/8
-    SEPTILE: "Septile", // 1/7
-    QUINTILE: "Quintile", // 1/5
-    BINOVILE: "Binovile", // 2/9
-    BISEPTILE: "Biseptile", // 2/7
-    TREDECILE: "Tredecile", // 3/10
-    SESQUIQUADRATE: "Sesquiquadrate", // 3/8
-    BIQUINTILE: "Biquintile", // 2/5
-    QUINCUNX: "Quincunx", // 5/12
-    TRISEPTILE: "Triseptile", // 3/7
-    QUADRANOVILE: "Quadranovile", // 4/9
-	
-	// configurations
-	GRAND_TRINE: "Grand Trine", // 3 in trines
-	GRAND_SQUARE: "Grand Square", // 4 in consecutive squares
-	GRAND_SEXTILE: "Grand Sextile", // 6 in consecutive sextiles
-	T_SQUARE: "T-Square", // a square missing one node
-	MYSTIC_RECTANGLE: "Mystic Rectangle", // grand sextile missing two opposed nodes
-	FINGER_OF_YOD: "Finger of Yod", // two nodes in sextile are quincunx a third
-	KITE: "Kite", // grand sextile missing nodes 1 and 3
-} as const;
-export type AspectKind = typeof AspectKind[keyof typeof AspectKind];
-
-export const majorBinaryAspectsKinds: AspectKind[] = [
-	AspectKind.CONJUNCTION,
-	AspectKind.OPPOSITION,
-	AspectKind.TRINE,
-	AspectKind.SQUARE,
-	AspectKind.SEXTILE,
-	AspectKind.PARALLEL,
-	AspectKind.CONTRAPARALLEL,
-]
-
-export const aspectKindCategories = [
-	{
-		name: 'Configurations',
-		items: [
-			AspectKind.GRAND_TRINE,
-			AspectKind.GRAND_SQUARE,
-			AspectKind.GRAND_SEXTILE,
-			AspectKind.T_SQUARE,
-			AspectKind.MYSTIC_RECTANGLE,
-			AspectKind.FINGER_OF_YOD,
-			AspectKind.KITE,
-		]
-	},
-	{
-		name: 'Major Binary',
-		items: majorBinaryAspectsKinds
-	},
-	{
-		name: 'Minor Binary',
-		items: [
-			AspectKind.VIGINTILE,
-			AspectKind.SEMISEXTILE,
-			AspectKind.UNDECILE,
-			AspectKind.DECILE,
-			AspectKind.NOVILE,
-			AspectKind.SEMISQUARE,
-			AspectKind.SEPTILE,
-			AspectKind.QUINTILE,
-			AspectKind.BINOVILE,
-			AspectKind.BISEPTILE,
-			AspectKind.TREDECILE,
-			AspectKind.SESQUIQUADRATE,
-			AspectKind.BIQUINTILE,
-			AspectKind.QUINCUNX,
-			AspectKind.TRISEPTILE,
-			AspectKind.QUADRANOVILE,
-		]
-	},
- ];
-
-export const defaultAspectKinds: AspectKind[] = [
-	AspectKind.GRAND_TRINE,
-	AspectKind.GRAND_SQUARE,
-	AspectKind.GRAND_SEXTILE,
-	AspectKind.T_SQUARE,
-	AspectKind.MYSTIC_RECTANGLE,
-	AspectKind.FINGER_OF_YOD,
-	AspectKind.KITE,
-	AspectKind.CONJUNCTION,
-	AspectKind.OPPOSITION,
-	AspectKind.TRINE,
-	AspectKind.SQUARE,
-	AspectKind.SEXTILE,
-	AspectKind.PARALLEL,
-	AspectKind.CONTRAPARALLEL,
-]
-
-export const AspectPhysicalityFilter = {
-	ALL_PHYSICAL: "All",
-	ALL_BUT_ONE_PHYSICAL: "All but one",
-	ONE_PHYSICAL: "One",
-	NO_PHYSICAL: "None",
-} as const;
-export type AspectPhysicalityFilter = typeof AspectPhysicalityFilter[keyof typeof AspectPhysicalityFilter];
-
-export const AspectMenuMode = {
-	SHOW_ALL: "All",
-	SHOW_ONLY_MAXIMAL: "Only maximal",
-	SHOW_MAXIMAL_WITH_SUBMENUS: "Maximal with submenus",
-} as const;
-export type AspectMenuMode = typeof AspectMenuMode[keyof typeof AspectMenuMode];
-
-export const AspectErrorMode = {
-	POINTWISE_MAX: "Pointwise max",
-	POINTWISE_SUM: "Pointwise sum",
-	PAIRWISE_OUTER_MAX: "Pairwise outer max",
-	PAIRWISE_OUTER_SUM: "Pairwise outer sum",
-	PAIRWISE_FULL_MAX: "Pairwise full max",
-	PAIRWISE_FULL_SUM: "Pairwise full sum",
-} as const;
-export type AspectErrorMode = typeof AspectErrorMode[keyof typeof AspectErrorMode];
 
 export const fixedStars: Record<string, number> = {
 	// in J2000 ecliptic longitude

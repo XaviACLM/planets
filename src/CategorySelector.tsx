@@ -1,5 +1,6 @@
 import { type FC } from 'react';
-import { Node, AspectKind, nodeCategories, aspectKindCategories } from './astroDefs';
+import { Node, nodeCategories } from './astroDefs';
+import { AspectKind, aspectKindCategories } from './aspectDefs';
 import { nodeSymbols, nodeShortName, aspectSymbols, aspectKindShortName } from './astroGraphics';
 
 interface SelectorProps<T extends string | number> {

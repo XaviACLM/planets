@@ -2,7 +2,8 @@ import { FC } from 'react';
 import Slider from './Slider';
 import NumericInputField from './NumericInputField';
 import { HouseSystem } from './houses.ts';
-import { LunarNodeMode, AstrologyMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, RulershipMode } from './astroDefs.ts';
+import { AstrologyMode } from './astroDefs.ts';
+import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode } from './settingsDefs.ts';
 import { useSettingsStore } from './settingsStore.ts';
 
 import "./SettingsMenu.css"
@@ -56,8 +57,8 @@ const SettingsMenu: FC = () => {
 	const setHamburgSchoolMode = useSettingsStore(s => s.setHamburgSchoolMode);
 	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
 	const setSelectedAstrologyMode = useSettingsStore(s => s.setSelectedAstrologyMode);
-	const selectedRulershipMode = useSettingsStore(s => s.selectedRulershipMode);
-	const setSelectedRulershipMode = useSettingsStore(s => s.setSelectedRulershipMode);
+	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
+	const setSelectedDignityMode = useSettingsStore(s => s.setSelectedDignityMode);
 
 	return (
 		<div className="p-4">
@@ -340,13 +341,13 @@ const SettingsMenu: FC = () => {
 			<hr className="opacity-50 my-2" />
 			
 			<div className="flex justify-between items-center">
-				<span>Rulerships</span>
+				<span>Dignities</span>
 				<select
-					value={selectedRulershipMode}
-					onChange={(e) => setSelectedRulershipMode(e.target.value as RulershipMode)}
+					value={selectedDignityMode}
+					onChange={(e) => setSelectedDignityMode(e.target.value as DignityMode)}
 					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
-					{Object.values(RulershipMode).map(mode => (
+					{Object.values(DignityMode).map(mode => (
 						<option key={mode} value={mode}>
 							{mode}
 						</option>

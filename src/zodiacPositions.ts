@@ -2,9 +2,11 @@ import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, R
 
 import { normalizeAngleRad } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
-import { smallBodyParams, orbitalLongitude, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte} from './astroFromOrbitalParams.ts'
-import { AstrologyMode, Node, type SurfacePosition, LunarNodeMode, HamburgSchoolMode, ayanamsas, Zodiac, standardZodiac, irregularAstrologyModes, zodiacLongitudeClosest, zodiacLongitudeIAU } from './astroDefs.ts'
+import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
+import { AstrologyMode, Node, type SurfacePosition, ayanamsas, Zodiac, standardZodiac, irregularAstrologyModes, zodiacLongitudeClosest, zodiacLongitudeIAU, classicalRulerships, modernRulerships } from './astroDefs.ts'
+import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
 import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
+import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude } from './astronomyUtils.ts'
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
     const jd = (date.getTime() / 86400000) + 2440587.5;
@@ -136,68 +138,44 @@ function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, n
 	]);
 }
 
-export function computeEquinoxes(): Map<Node, number> {
+function computeEquinoxes(): Map<Node, number> {
 	return new Map<Node, number>([
 		[Node.VERNAL_EQUINOX, 0],
 		[Node.AUTUMNAL_EQUINOX, Math.PI]
 	]);
 }
 
-// for the astronomy engine
-const nodeToBody: Partial<Record<Node, Body>> = {
-	[Node.SUN]: Body.Sun,
-	[Node.MOON]: Body.Moon,
-	[Node.MERCURY]: Body.Mercury,
-	[Node.VENUS]: Body.Venus,
-	[Node.MARS]: Body.Mars,
-	[Node.JUPITER]: Body.Jupiter,
-	[Node.SATURN]: Body.Saturn,
-	[Node.URANUS]: Body.Uranus,
-	[Node.NEPTUNE]: Body.Neptune,
-	[Node.PLUTO]: Body.Pluto,
-};
-
 function computePhysicalNodePositions(date: Date): Map<Node, number> {
-	
-	const correctForAberration = true;
-	
 	const nodeAngles = new Map<Node, number>();
-		
 	for ( const [node, body] of Object.entries(nodeToBody)) {
-		
-		//returns geocentric EQJ2000 vector. also stores date
-		const eqj = GeoVector(body, date, correctForAberration)
-		
-		// accepts EQJ2000 vector w date and turns into ECT (ecliptic of date)
-		const etc = Ecliptic(eqj);
-		
-		nodeAngles.set(node as Node, (etc.elon)/360*2*Math.PI);
+		const lon = bodyToGeocentricLongitude(body, date);
+		nodeAngles.set(node as Node, lon);
 	}
-	
 	return nodeAngles;
 }
 
+
 function computeSmallObjectPositions(date: Date): Map<Node, number> {
 	const nodeAngles = new Map<Node, number>();
-		
-	for ( const [node, params] of Object.entries(smallBodyParams)) {
-		const lonDeg = orbitalLongitude(params, date);
-		nodeAngles.set(node as Node, lonDeg*Math.PI/180);
+
+	for (const [node, params] of Object.entries(smallBodyParams)) {
+		const lon = orbitalParamsToGeocentricLongitude(params, date);
+		nodeAngles.set(node as Node, lon);
 	}
-	
-	return nodeAngles;	
+
+	return nodeAngles;
 }
 
 function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: HamburgSchoolMode): Map<Node, number> {
 	const nodeAngles = new Map<Node, number>();
-	
+
 	const hamburgSchoolParams = hamburgSchoolMode == HamburgSchoolMode.NEELY ? hamburgSchoolParamsNeely : hamburgSchoolParamsWitte;
-	for ( const [node, params] of Object.entries(hamburgSchoolParams)) {
-		const lonDeg = orbitalLongitude(params, date);
-		nodeAngles.set(node as Node, lonDeg*Math.PI/180);
+	for (const [node, params] of Object.entries(hamburgSchoolParams)) {
+		const lon = orbitalParamsToGeocentricLongitude(params, date);
+		nodeAngles.set(node as Node, lon);
 	}
-	
-	return nodeAngles;	
+
+	return nodeAngles;
 }
 	
 function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node, number> {
@@ -326,7 +304,7 @@ interface ZodiacPositionsConstructorArgs {
 	zodiacSymbolPositions?: Map<Zodiac, number>;
 }
 
-export class ZodiacPositions {
+class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
 	private readonly _houseCuspPositions: number[] | null;
 	private readonly _zodiacSymbolPositions: Map<Zodiac, number>;
@@ -565,3 +543,5 @@ export class ZodiacPositions {
 		}
 	}
 }
+
+export default ZodiacPositions;

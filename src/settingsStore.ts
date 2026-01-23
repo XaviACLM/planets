@@ -1,18 +1,8 @@
 import { create } from 'zustand';
 import { HouseSystem } from './houses.ts';
-import {
-	LunarNodeMode,
-	AstrologyMode,
-	Node,
-	HamburgSchoolMode,
-	initiallySelectedNodes,
-	AspectKind,
-	defaultAspectKinds,
-	AspectPhysicalityFilter,
-	AspectMenuMode,
-	AspectErrorMode,
-	RulershipMode
-} from './astroDefs.ts';
+import { Node, initiallySelectedNodes, AstrologyMode } from './astroDefs.ts';
+import { AspectKind, defaultAspectKinds } from './aspectDefs.ts';
+import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode } from './settingsDefs.ts';
 
 interface SettingsState {
 	// House settings
@@ -68,8 +58,8 @@ interface SettingsState {
 	setHamburgSchoolMode: (v: HamburgSchoolMode) => void;
 	selectedAstrologyMode: AstrologyMode;
 	setSelectedAstrologyMode: (v: AstrologyMode) => void;
-	selectedRulershipMode: RulershipMode;
-	setSelectedRulershipMode: (v: RulershipMode) => void;
+	selectedDignityMode: DignityMode;
+	setSelectedDignityMode: (v: DignityMode) => void;
 
 	// Selections
 	selectedNodes: Set<Node>;
@@ -133,8 +123,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setHamburgSchoolMode: (v) => set({ hamburgSchoolMode: v }),
 	selectedAstrologyMode: AstrologyMode.TROPICAL,
 	setSelectedAstrologyMode: (v) => set({ selectedAstrologyMode: v }),
-	selectedRulershipMode: RulershipMode.MODERN,
-	setSelectedRulershipMode: (v) => set({ selectedRulershipMode: v }),
+	selectedDignityMode: DignityMode.MODERN,
+	setSelectedDignityMode: (v) => set({ selectedDignityMode: v }),
 
 	// Selections
 	selectedNodes: new Set(initiallySelectedNodes),

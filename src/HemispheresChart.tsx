@@ -1,7 +1,7 @@
 import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, standardNodes } from './astroDefs';
 import { nodeSymbols } from './astroGraphics.ts';
-import { ZodiacPositions } from './astro.ts'
+import ZodiacPositions from './zodiacPositions.ts'
 
 type HemispheresChartProps = {
 	zodiacPositions: ZodiacPositions,
