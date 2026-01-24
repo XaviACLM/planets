@@ -565,7 +565,7 @@ class ZodiacPositions {
 			}
 		});
 		// might be faster to sort them (1 single slice) and do a zodiac-like approach but seems like premature optimization
-		for (const i=0; i<houseLimits.length-1; i++){
+		for (let i = 0; i < houseLimits.length-1; i++){
 			const houseStart = houseLimits[i];
 			const houseEnd = houseLimits[i+1];
 			if ( anglesLieInShortArc(houseStart, lon, houseEnd) ) {

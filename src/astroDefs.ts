@@ -592,3 +592,20 @@ export const fixedStars: Record<string, number> = {
 	["Unukalhai"] : 232.071,
 	["Fomalhaut"] : 333.856, //not behenian, but royal
 }
+
+export const Sect = {
+	DIURNAL: "Diurnal",
+	NOCTURNAL: "Nocturnal",
+	VARIABLE: "Variable",
+} as const;
+export type Sect = typeof Sect[keyof typeof Sect];
+
+export const planetSects: Partial<Record<Node, Sect>> = {
+	[Node.SUN]: Sect.DIURNAL,
+	[Node.JUPITER]: Sect.DIURNAL,
+	[Node.SATURN]: Sect.DIURNAL,
+	[Node.MOON]: Sect.NOCTURNAL,
+	[Node.VENUS]: Sect.NOCTURNAL,
+	[Node.MARS]: Sect.NOCTURNAL,
+	[Node.MERCURY]: Sect.VARIABLE,
+};

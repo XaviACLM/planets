@@ -4,7 +4,7 @@ import { Node } from './astroDefs.ts';
 import { HamburgSchoolMode } from './settingsDefs.ts';
 import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams } from './astroFromOrbitalParams.ts';
 
-export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolMode: HamburgSchoolMode): number | null {
+export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolMode: HamburgSchoolMode): number {
 	// Moon is a special case - GeoMoonState gives us geocentric EQJ directly
 	if (node === Node.MOON) {
 		const moonState = GeoMoonState(date);
@@ -33,9 +33,6 @@ export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolM
 
 	// For standard planets, use HelioState (already in EQJ)
 	const body = nodeToBody[node];
-	if (!body) {
-		return null;
-	}
 
 	const planetState = HelioState(body, date);
 	const stateEQJ: SimpleState = {

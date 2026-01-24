@@ -50,6 +50,7 @@ const configurationAspectKinds = Object.entries(aspectKindAngles)
 // consider symmetries on each configuration.
 // consider the eq. classes of vertices under these
 // we provide the indices of a set of representatives of these classes
+// (this _could_ be defined in terms of the angles but...)
 const startingVertices: Partial<Record<AspectKind, number[]>> = {
 	[AspectKind.GRAND_TRINE]: [0],
 	[AspectKind.GRAND_SQUARE]: [0],
@@ -138,8 +139,6 @@ function aspectError(
 		const p2 = sawtoothSine(nodePositions.get(n[1])!);
 		return Math.abs(aspect.kind == AspectKind.PARALLEL ? p1-p2 : p1+p2);
 	}
-	
-	//TODO the business
 	
 	const k = n.length;
 	const angles = [0, ...aspectKindAngles[aspect.kind]!.map(angle => angle * TAU)];
@@ -794,4 +793,34 @@ export function deleteAspectFromMap(
 		newMap.set(parentAspect, otherSubaspects.filter(subaspect => subaspect != aspect));
 	}
 	return newMap;
+}
+
+export function filterAspectsByNode(
+	subaspectMap: Map<Aspect, Aspect[]>,
+	node: Node
+){
+	const containsNode = (aspect: Aspect) => aspect.nodes.includes(node);
+	return new Map(Array.from(subaspectMap.entries())
+		.filter(([aspect, _subaspects]) => containsNode(aspect))
+		.map(([aspect, subaspects]) => [aspect, subaspects.filter(containsNode)])
+	)
+}
+
+interface aspectsSummaryData {
+	nAspects: number;
+	nConfigurations: number;
+	nodes: Set<Node>;
+}
+
+export function getAspectsSummaryData(
+	subaspectMap: Map<Aspect, Aspect[]>
+): aspectsSummaryData {
+	const allAspects = Array.from(subaspectMap.entries()).flatMap(([aspect, subaspects]) => [aspect, ...subaspects]);
+	
+	const nAspects = allAspects.length;
+	const nConfigurations = allAspects.filter(aspect => configurationAspectKinds.includes(aspect.kind)).length;
+	
+	const nodes = new Set(allAspects.flatMap(aspect => aspect.nodes));
+	
+	return {nAspects, nConfigurations, nodes};
 }

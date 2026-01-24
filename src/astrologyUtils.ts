@@ -1,7 +1,25 @@
-import { classicalRulerships, modernRulerships, Node, traditionalHouseAngularities, HouseAngularity } from './astroDefs.ts';
+import { classicalRulerships, modernRulerships, Node, traditionalHouseAngularities, HouseAngularity, Sect, planetSects } from './astroDefs.ts';
 import { DignityMode, HouseAngularityMode } from './settingsDefs.ts';
 import { angleShortDistance } from '.util.ts';
 import ZodiacPositions from './zodiacPositions';
+
+export function getChartSect(zodiacPositions): Sect {
+	return zodiacPositions.isAboveHorizon(Node.SUN) ? Sect.DIURNAL : Sect.NOCTURNAL;
+}
+
+export function isInSect(node: Node, zodiacPositions: ZodiacPositions): boolean | null{
+	const nodeSect = planetSects[node];
+	if (nodeSect === undefined) {
+		return null;
+	}
+	const chartSect = getChartSect(zodiacPositions);
+	if (nodeSect == Sect.VARIABLE){
+		const variableNodeSect = isTrailing(node, Node.SUN) ? Sect.NOCTURNAL : Sect.DIURNAL;
+		return chartSect == variableNodeSect;
+	} else {
+		return chartSect == nodeSect;
+	}
+}
 
 export function getChartRuler(zodiacPositions: ZodiacPositions, dignityMode: DignityMode): Node | null {
 	if (!zodiacPositions.hasSurfacePosition()) {
@@ -44,7 +62,7 @@ export function getAngleProximity(node: Node, zodiacPositions: ZodiacPositions):
 	}
 }
 
-export function isTrailing(trailingNode: Node, leadingNode: Node, zodiacPositions: ZodiacPositions): boolean {
+function isTrailing(trailingNode: Node, leadingNode: Node, zodiacPositions: ZodiacPositions): boolean {
 	// returns true if trailingNode is trailing leadingNode (up to 180º)
 	// errors out if either node is absent
 	const trailingLon = zodiacPositions.getNodePosition(trailingNode);
