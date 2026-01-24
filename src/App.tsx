@@ -8,6 +8,7 @@ import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import SettingsMenu from './SettingsMenu'
 import ZodiacPositions from './zodiacPositions.ts'
+import { RulershipGraph } from './rulershipGraph.ts'
 import Module, { CollapseState } from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
@@ -67,7 +68,11 @@ function App() {
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
+    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode, housePresweep));
+	
+	const rulershipGraph = useMemo<RulershipGraph>(() => {
+		return RulershipGraph.create(zodiacPositions, selectedDignityMode);
+	}, [zodiacPositions, selectedDignityMode])
 
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
@@ -122,6 +127,9 @@ function App() {
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
 	}, [hamburgSchoolMode])
+	useEffect(() => {
+		setZodiacPositions(zodiacPositions.changeHousePresweep(housePresweep));
+	}, [housePresweep])
 
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
@@ -260,8 +268,7 @@ function App() {
 							)}
 							<div className="w-full bg-black border border-gray-500 text-white">
 								<RulershipPanel
-									zodiacPositions={zodiacPositions}
-									dignityMode={selectedDignityMode}
+									rulershipGraph={rulershipGraph}
 									showNodeLabels={showNodeLabels}
 									showSymbolLabels={showSymbolLabels}
 									showSignsInRulershipPanel={showSignsInRulershipPanel}

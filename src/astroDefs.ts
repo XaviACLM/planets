@@ -550,6 +550,29 @@ export const nodeCategories = [
 	}
 ];
 
+export const HouseAngularity = {
+	ANGULAR: "Angular",
+	SUCCEDENT: "Succedent",
+	CADENT: "Cadent",
+} as const;
+export type HouseAngularity = typeof HouseAngularity[keyof typeof HouseAngularity];
+
+export const traditionalHouseAngularities: HouseAngularity[] = [
+	HouseAngularity.ANGULAR,
+	HouseAngularity.SUCCEDENT,
+	HouseAngularity.CADENT,
+	HouseAngularity.ANGULAR,
+	HouseAngularity.SUCCEDENT,
+	HouseAngularity.CADENT,
+	HouseAngularity.ANGULAR,
+	HouseAngularity.SUCCEDENT,
+	HouseAngularity.CADENT,
+	HouseAngularity.ANGULAR,
+	HouseAngularity.SUCCEDENT,
+	HouseAngularity.CADENT,
+	null, //13th house
+]
+
 export const fixedStars: Record<string, number> = {
 	// in J2000 ecliptic longitude
 	["Aldebaran"] : 69.785,

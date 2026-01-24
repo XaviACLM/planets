@@ -110,7 +110,7 @@ export function angleShortDistance(a: number, b: number) {
 }
 
 export function anglesLieInShortArc(a: number, b: number, c:number) {
-	// checks that the AC arc that is <pi contains b, i.e. a->b->c is short
+	// checks that the AC arc that is <pi and contains b, i.e. a->b->c is short
 	const error = angleShortDistance(a, b) + angleShortDistance(b, c) - angleShortDistance(a,c);
 	return error < 1e-10;
 }

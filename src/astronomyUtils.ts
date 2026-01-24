@@ -1,19 +1,8 @@
 import { StateVector, Vector, Body, GeoVector, Ecliptic, GeoMoonState, HelioState, AstroTime, Rotation_ECL_EQJ, Rotation_EQJ_ECT, RotateState, RotateVector } from 'astronomy-engine';
 
-import { classicalRulerships, modernRulerships, Node } from './astroDefs.ts';
-import { DignityMode, HamburgSchoolMode } from './settingsDefs.ts';
+import { Node } from './astroDefs.ts';
+import { HamburgSchoolMode } from './settingsDefs.ts';
 import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams } from './astroFromOrbitalParams.ts';
-import ZodiacPositions from './zodiacPositions';
-
-// not astronomy, but this will move to a new rulerships.ts file soon
-export function getChartRuler(zodiacPositions: ZodiacPositions, dignityMode: DignityMode): Node | null {
-	if (!zodiacPositions.hasSurfacePosition()) {
-		return null;
-	}
-	const ascendantSign = zodiacPositions.getSymbolOfNode(Node.ASCENDANT) as unknown as Zodiac;
-	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
-	return rulerships[ascendantSign];
-}
 
 export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolMode: HamburgSchoolMode): number | null {
 	// Moon is a special case - GeoMoonState gives us geocentric EQJ directly

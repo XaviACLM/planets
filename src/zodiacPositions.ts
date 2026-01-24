@@ -298,6 +298,7 @@ interface ZodiacPositionsConstructorArgs {
 	houseSystem: HouseSystem;
 	astrologyMode: AstrologyMode;
 	hamburgSchoolMode: HamburgSchoolMode;
+	housePresweep: boolean;
 	nodePositions?: Map<Node, number>;
 	houseCuspPositions?: number[] | null;
 	siderealOffset?: number | null;
@@ -316,6 +317,7 @@ class ZodiacPositions {
 	public readonly siderealOffset: number;
 	public readonly astrologyMode: AstrologyMode;
 	public readonly hamburgSchoolMode: HamburgSchoolMode;
+	public readonly housePresweep: boolean;
 	
 	constructor( config: ZodiacPositionsConstructorArgs ){
 		this.surfacePosition = config.surfacePosition;
@@ -324,6 +326,7 @@ class ZodiacPositions {
 		this.houseSystem = config.houseSystem;
 		this.astrologyMode = config.astrologyMode;
 		this.hamburgSchoolMode = config.hamburgSchoolMode;
+		this.housePresweep = config.housePresweep;
 		
 		// best be explicit ab whether siderealOffset is undefined/null
 		if (config.siderealOffset === undefined) {
@@ -364,6 +367,7 @@ class ZodiacPositions {
 		houseSystem: HouseSystem,
 		astrologyMode: AstrologyMode,
 		hamburgSchoolMode: HamburgSchoolMode,
+		housePresweep: boolean,
 	): ZodiacPositions {
 		return new ZodiacPositions({
 			date,
@@ -371,7 +375,8 @@ class ZodiacPositions {
 			lunarNodeMode,
 			houseSystem,
 			astrologyMode,
-			hamburgSchoolMode
+			hamburgSchoolMode,
+			housePresweep
 		});
 	}
 	
@@ -383,6 +388,7 @@ class ZodiacPositions {
 			houseSystem: this.houseSystem,
 			astrologyMode: this.astrologyMode,
 			hamburgSchoolMode: this.hamburgSchoolMode,
+			housePresweep: this.housePresweep,
 			nodePositions: this._nodePositions,
 			houseCuspPositions: this._houseCuspPositions,
 			siderealOffset: this.siderealOffset,
@@ -391,7 +397,7 @@ class ZodiacPositions {
 		});
 	}
 
-	public changeLunarNodeMode(newMode: LunarNodeMode): ZodiacPositions{
+	public changeLunarNodeMode(newMode: LunarNodeMode): ZodiacPositions {
 		if (newMode == this.lunarNodeMode) {
 			return this;
 		}
@@ -401,7 +407,7 @@ class ZodiacPositions {
 		return this.copyWith({lunarNodeMode: newMode, nodePositions: newNodePositions});
 	}
 	
-	public changeHouseSystem(newSystem: HouseSystem): ZodiacPositions{
+	public changeHouseSystem(newSystem: HouseSystem): ZodiacPositions {
 		if (newSystem == this.houseSystem) {
 			return this;
 		}
@@ -411,7 +417,11 @@ class ZodiacPositions {
 		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
 	}
 	
-	public changeAstrologyMode(newAstrologyMode: AstrologyMode): ZodiacPositions{
+	public changeHousePresweep(newHousePresweep: boolean): ZodiacPositions {
+		return this.copyWith({housePresweep: newHousePresweep});
+	}
+	
+	public changeAstrologyMode(newAstrologyMode: AstrologyMode): ZodiacPositions {
 		if (newAstrologyMode == this.astrologyMode) {
 			return this;
 		}
@@ -513,7 +523,7 @@ class ZodiacPositions {
 		return this._houseCuspPositions !== null
 	}
 	
-	public isNodeAboveHorizon(node: Node): boolean{
+	public isNodeAboveHorizon(node: Node): boolean {
 		if (!this.hasSurfacePosition()) {
 			throw new Error("isNodeAboveHorizon called with no defined surface position");
 		}
@@ -528,7 +538,7 @@ class ZodiacPositions {
 		}
 	}
 	
-	public isNodeEastern(node: Node): boolean{
+	public isNodeEastern(node: Node): boolean {
 		if (!this.hasSurfacePosition()) {
 			throw new Error("isNodeEastern called with no defined surface position");
 		}
@@ -541,6 +551,28 @@ class ZodiacPositions {
 		} else {
 			return ((ic < lon)&&(lon < mc));
 		}
+	}
+	
+	public getHouseOfNode(node: Node): number {
+		// errors out if node is absent
+		const lon = this.getNodePosition(node);
+		const houseLimits = this._houseCuspPositions.map(cusp => {
+			if (this.housePresweep){
+				const limit = cusp - 5*Math.PI/180;
+				return limit > 0 ? limit : limit + 2*Math.PI;
+			} else {
+				return cusp;
+			}
+		});
+		// might be faster to sort them (1 single slice) and do a zodiac-like approach but seems like premature optimization
+		for (const i=0; i<houseLimits.length-1; i++){
+			const houseStart = houseLimits[i];
+			const houseEnd = houseLimits[i+1];
+			if ( anglesLieInShortArc(houseStart, lon, houseEnd) ) {
+				return i+1;
+			}
+		}
+		return houseLimits.length;
 	}
 }
 

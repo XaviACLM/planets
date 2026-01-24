@@ -40,3 +40,10 @@ export const AspectErrorMode = {
 	PAIRWISE_FULL_SUM: "Pairwise full sum",
 } as const;
 export type AspectErrorMode = typeof AspectErrorMode[keyof typeof AspectErrorMode];
+
+export const HouseAngularityMode = {
+	TRADITIONAL: "Traditional",
+	VERIFIED: "Verified",
+	DYNAMIC: "Dynamic",
+} as const;
+export type HouseAngularityMode = typeof HouseAngularityMode[keyof typeof HouseAngularityMode];
