@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { HouseSystem } from './houses.ts';
 import { Node, initiallySelectedNodes, AstrologyMode } from './astroDefs.ts';
 import { AspectKind, defaultAspectKinds } from './aspectDefs.ts';
-import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode } from './settingsDefs.ts';
+import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode, HouseAngularityMode } from './settingsDefs.ts';
 
 interface SettingsState {
 	// House settings
@@ -22,8 +22,8 @@ interface SettingsState {
 	setShowElementLabels: (v: boolean) => void;
 	showModeLabels: boolean;
 	setShowModeLabels: (v: boolean) => void;
-	showSignsInRulershipPanel: boolean;
-	setShowSignsInRulershipPanel: (v: boolean) => void;
+	showSignsInDispositorChains: boolean;
+	setShowSignsInDispositorChains: (v: boolean) => void;
 
 	// Display options
 	flipText: boolean;
@@ -60,6 +60,8 @@ interface SettingsState {
 	setSelectedAstrologyMode: (v: AstrologyMode) => void;
 	selectedDignityMode: DignityMode;
 	setSelectedDignityMode: (v: DignityMode) => void;
+	selectedHouseAngularityMode: HouseAngularityMode;
+	setSelectedHouseAngularityMode: (v: HouseAngularityMode) => void;
 
 	// Selections
 	selectedNodes: Set<Node>;
@@ -87,8 +89,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setShowElementLabels: (v) => set({ showElementLabels: v }),
 	showModeLabels: true,
 	setShowModeLabels: (v) => set({ showModeLabels: v }),
-	showSignsInRulershipPanel: false,
-	setShowSignsInRulershipPanel: (v) => set({ showSignsInRulershipPanel: v }),
+	showSignsInDispositorChains: false,
+	setShowSignsInDispositorChains: (v) => set({ showSignsInDispositorChains: v }),
 
 	// Display options
 	flipText: true,
@@ -125,6 +127,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setSelectedAstrologyMode: (v) => set({ selectedAstrologyMode: v }),
 	selectedDignityMode: DignityMode.MODERN,
 	setSelectedDignityMode: (v) => set({ selectedDignityMode: v }),
+	selectedHouseAngularityMode: HouseAngularityMode.TRADITIONAL,
+	setSelectedHouseAngularityMode: (v) => set({ selectedHouseAngularityMode: v }),
 
 	// Selections
 	selectedNodes: new Set(initiallySelectedNodes),

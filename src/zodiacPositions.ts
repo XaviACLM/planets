@@ -1,6 +1,6 @@
 import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
 
-import { normalizeAngleRad } from './util.ts'
+import { normalizeAngleRad, anglesLieInShortArc } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
 import { AstrologyMode, Node, type SurfacePosition, ayanamsas, Zodiac, standardZodiac, irregularAstrologyModes, zodiacLongitudeClosest, zodiacLongitudeIAU, classicalRulerships, modernRulerships } from './astroDefs.ts'
@@ -467,7 +467,7 @@ class ZodiacPositions {
 		return this.siderealOffset !== null;
 	}
 	
-	public getSymbolOfNode(node: Node): number {
+	public getSymbolOfNode(node: Node): Zodiac {
 		// this might error out if node is absent - intended behaviour
 		const lon = this.getNodePosition(node);
 		if (this.isZodiacModeRegular()){
@@ -475,13 +475,30 @@ class ZodiacPositions {
 		} else {
 			const entries = Array.from(this.getZodiacSymbolPositions().entries());
 			const index = entries.findIndex(([_, zlon]) => zlon > lon);
-			if (index === -1 || index === 0) {
+			if (index === -1 || index === 0) { // first is already bigger or all are smaller: last sign (the one across the v.equinox)
 				return entries[entries.length - 1][0];
 			} else {
 				return entries[index - 1][0];
 			}
 		}
 	}
+	
+	public getNodePositionWithinSign(node: Node): number {
+		// this might error out if node is absent - intended behaviour
+		const lon = this.getNodePosition(node);
+		if (this.isZodiacModeRegular()){
+			return normalizeAngleRad(lon - this.siderealOffset)%(Math.PI/6);
+		} else {
+			const values = Array.from(this.getZodiacSymbolPositions().values());
+			const index = values.findIndex(zlon => zlon > lon);
+			if (index === -1 || index === 0) {
+				return normalizeAngleRad(lon - values[values.length-1]);
+			} else {
+				return lon - values[index - 1];
+			}
+		}
+		
+	} 
 	
 	public changeHamburgSchoolMode(newMode: HamburgSchoolMode): ZodiacPositions{
 		if (newMode == this.hamburgSchoolMode) {

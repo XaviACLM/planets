@@ -125,3 +125,22 @@ export function sawtoothSine(x: number): number{
 		return x - 2*Math.PI;
 	}
 }
+
+// Formats radians as degrees/minutes string, e.g. "15°23'"
+// If includeSeconds is true, includes seconds: "15°23'45""
+export function formatAngle(
+	radians: number,
+	includeSeconds: boolean = false
+): string {
+	const totalDegrees = (radians * 180) / Math.PI;
+	const degrees = Math.floor(totalDegrees);
+	const remainingMinutes = (totalDegrees - degrees) * 60;
+	const minutes = Math.floor(remainingMinutes);
+
+	if (!includeSeconds) {
+		return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'`;
+	}
+
+	const seconds = Math.round((remainingMinutes - minutes) * 60);
+	return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"`;
+}

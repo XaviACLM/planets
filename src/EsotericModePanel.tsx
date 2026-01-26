@@ -5,7 +5,7 @@ type EsotericModePanelProps = {
 	setShowSymbolLabels: (value: boolean) => void;
 	setShowElementLabels: (value: boolean) => void;
 	setShowModeLabels: (value: boolean) => void;
-	setShowSignsInRulershipPanel: (value: boolean) => void;
+	setShowSignsInDispositorChains: (value: boolean) => void;
 };
 
 const EsotericModePanel: FC<EsotericModePanelProps> = ({
@@ -13,7 +13,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 	setShowSymbolLabels,
 	setShowElementLabels,
 	setShowModeLabels,
-	setShowSignsInRulershipPanel,
+	setShowSignsInDispositorChains,
 }) => {
 	const [panelState, setPanelState] = useState<'initial' | 'esoteric' | 'hidden'>('initial');
 
@@ -26,7 +26,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowSymbolLabels(false);
 		setShowElementLabels(false);
 		setShowModeLabels(false);
-		setShowSignsInRulershipPanel(true);
+		setShowSignsInDispositorChains(true);
 		setPanelState('esoteric');
 	};
 
@@ -35,7 +35,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowSymbolLabels(true);
 		setShowElementLabels(true);
 		setShowModeLabels(true);
-		setShowSignsInRulershipPanel(false);
+		setShowSignsInDispositorChains(false);
 		setPanelState('hidden');
 	};
 

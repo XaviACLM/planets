@@ -7,6 +7,7 @@ import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import SettingsMenu from './SettingsMenu'
+import PlanetPanel from './PlanetPanel.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
 import Module, { CollapseState } from './Module'
@@ -37,8 +38,8 @@ function App() {
 	const flipText = useSettingsStore(s => s.flipText);
 	const rotateSymbols = useSettingsStore(s => s.rotateSymbols);
 	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
-	const showSignsInRulershipPanel = useSettingsStore(s => s.showSignsInRulershipPanel);
-	const setShowSignsInRulershipPanel = useSettingsStore(s => s.setShowSignsInRulershipPanel);
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	const setShowSignsInDispositorChains = useSettingsStore(s => s.setShowSignsInDispositorChains);
 
 	const selectedAspectErrorMode = useSettingsStore(s => s.selectedAspectErrorMode);
 	const maxConfigurationErrorDegrees = useSettingsStore(s => s.maxConfigurationErrorDegrees);
@@ -56,6 +57,7 @@ function App() {
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
 	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
 	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
+	const selectedHouseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
 
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
@@ -177,7 +179,7 @@ function App() {
 					setShowSymbolLabels={setShowSymbolLabels}
 					setShowElementLabels={setShowElementLabels}
 					setShowModeLabels={setShowModeLabels}
-					setShowSignsInRulershipPanel={setShowSignsInRulershipPanel}
+					setShowSignsInDispositorChains={setShowSignsInDispositorChains}
 				/>
 				<button
 					className="absolute top-4 right-4 text-white bg-black border border-gray-500 hover:border-gray-400 p-2 pl-4 pr-4"
@@ -239,6 +241,26 @@ function App() {
 					) : (
 						<>
 							<Module
+								title="Planet Info"
+								startingState={CollapseState.EXPANDED}
+								supportsHalfCollapse={false}
+							>
+								<PlanetPanel
+									zodiacPositions={zodiacPositions}
+									rulershipGraph={rulershipGraph}
+									aspects={aspects}
+									date={selectedDate}
+									dignityMode={selectedDignityMode}
+									housesAngularityMode={selectedHouseAngularityMode}
+									hamburgSchoolMode={hamburgSchoolMode}
+									showNodeLabels={showNodeLabels}
+									showSymbolLabels={showSymbolLabels}
+									showElementLabels={showElementLabels}
+									showModeLabels={showModeLabels}
+									showSignsInDispositorChains={showSignsInDispositorChains}
+								/>
+							</Module>
+							<Module
 								title="Element/Mode Balance"
 								startingState={CollapseState.HALF}
 								supportsHalfCollapse={true}
@@ -271,7 +293,7 @@ function App() {
 									rulershipGraph={rulershipGraph}
 									showNodeLabels={showNodeLabels}
 									showSymbolLabels={showSymbolLabels}
-									showSignsInRulershipPanel={showSignsInRulershipPanel}
+									showSignsInDispositorChains={showSignsInDispositorChains}
 								/>
 							</div>
 						</>

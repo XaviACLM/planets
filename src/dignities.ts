@@ -1,4 +1,5 @@
-import { Node, Zodiac, DignityMode } from './astroDefs.ts';
+import { Node, Zodiac } from './astroDefs.ts';
+import { DignityMode } from './settingsDefs.ts';
 import ZodiacPositions from './zodiacPositions.ts';
 
 export const Dignity = {

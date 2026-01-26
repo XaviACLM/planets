@@ -1,10 +1,10 @@
 import { classicalRulerships, modernRulerships, Node, traditionalHouseAngularities, HouseAngularity, Sect, planetSects } from './astroDefs.ts';
 import { DignityMode, HouseAngularityMode } from './settingsDefs.ts';
-import { angleShortDistance } from '.util.ts';
+import { angleShortDistance } from './util.ts';
 import ZodiacPositions from './zodiacPositions';
 
 export function getChartSect(zodiacPositions): Sect {
-	return zodiacPositions.isAboveHorizon(Node.SUN) ? Sect.DIURNAL : Sect.NOCTURNAL;
+	return zodiacPositions.isNodeAboveHorizon(Node.SUN) ? Sect.DIURNAL : Sect.NOCTURNAL;
 }
 
 export function isInSect(node: Node, zodiacPositions: ZodiacPositions): boolean | null{
@@ -14,7 +14,7 @@ export function isInSect(node: Node, zodiacPositions: ZodiacPositions): boolean 
 	}
 	const chartSect = getChartSect(zodiacPositions);
 	if (nodeSect == Sect.VARIABLE){
-		const variableNodeSect = isTrailing(node, Node.SUN) ? Sect.NOCTURNAL : Sect.DIURNAL;
+		const variableNodeSect = isTrailing(node, Node.SUN, zodiacPositions) ? Sect.NOCTURNAL : Sect.DIURNAL;
 		return chartSect == variableNodeSect;
 	} else {
 		return chartSect == nodeSect;
@@ -30,13 +30,13 @@ export function getChartRuler(zodiacPositions: ZodiacPositions, dignityMode: Dig
 	return rulerships[ascendantSign];
 }
 
-interface angleProximityInfo {
+interface AngleProximityInfo {
 	closestAngle: Node;
 	distance: number;
 	passed: boolean;
 }
 
-export function getAngleProximity(node: Node, zodiacPositions: ZodiacPositions): angleProximityInfo {
+export function getAngleProximity(node: Node, zodiacPositions: ZodiacPositions): AngleProximityInfo {
 	//will throw error for absent node / surface position
 	const lon = zodiacPositions.getNodePosition(node);
 	
@@ -57,7 +57,7 @@ export function getAngleProximity(node: Node, zodiacPositions: ZodiacPositions):
 		return { closestAngle: Node.IMUM_COELI, distance: minD, passed: isTrailing(Node.IMUM_COELI, node, zodiacPositions)}
 	} else if (minD == dDsc) {
 		return { closestAngle: Node.DESCENDANT, distance: minD, passed: isTrailing(Node.DESCENDANT, node, zodiacPositions)}
-	} else if {
+	} else {
 		return { closestAngle: Node.MIDHEAVEN, distance: minD, passed: isTrailing(Node.MIDHEAVEN, node, zodiacPositions)}
 	}
 }

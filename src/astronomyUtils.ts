@@ -2,7 +2,7 @@ import { StateVector, Vector, Body, GeoVector, Ecliptic, GeoMoonState, HelioStat
 
 import { Node } from './astroDefs.ts';
 import { HamburgSchoolMode } from './settingsDefs.ts';
-import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams } from './astroFromOrbitalParams.ts';
+import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams, smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts';
 
 export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolMode: HamburgSchoolMode): number {
 	// Moon is a special case - GeoMoonState gives us geocentric EQJ directly

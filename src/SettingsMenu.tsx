@@ -3,7 +3,7 @@ import Slider from './Slider';
 import NumericInputField from './NumericInputField';
 import { HouseSystem } from './houses.ts';
 import { AstrologyMode } from './astroDefs.ts';
-import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode } from './settingsDefs.ts';
+import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode, HouseAngularityMode } from './settingsDefs.ts';
 import { useSettingsStore } from './settingsStore.ts';
 
 import "./SettingsMenu.css"
@@ -25,8 +25,8 @@ const SettingsMenu: FC = () => {
 	const setShowElementLabels = useSettingsStore(s => s.setShowElementLabels);
 	const showModeLabels = useSettingsStore(s => s.showModeLabels);
 	const setShowModeLabels = useSettingsStore(s => s.setShowModeLabels);
-	const showSignsInRulershipPanel = useSettingsStore(s => s.showSignsInRulershipPanel);
-	const setShowSignsInRulershipPanel = useSettingsStore(s => s.setShowSignsInRulershipPanel);
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInRulershipPanel);
+	const setShowSignsInDispositorChains = useSettingsStore(s => s.setShowSignsInDispositorChains);
 
 	const flipText = useSettingsStore(s => s.flipText);
 	const setFlipText = useSettingsStore(s => s.setFlipText);
@@ -59,6 +59,8 @@ const SettingsMenu: FC = () => {
 	const setSelectedAstrologyMode = useSettingsStore(s => s.setSelectedAstrologyMode);
 	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
 	const setSelectedDignityMode = useSettingsStore(s => s.setSelectedDignityMode);
+	const selectedHouseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
+	const setSelectedHouseAngularityMode = useSettingsStore(s => s.setSelectedHouseAngularityMode);
 
 	return (
 		<div className="p-4">
@@ -183,11 +185,11 @@ const SettingsMenu: FC = () => {
 				<input
 					type="checkbox"
 					className="custom-checkbox"
-					checked={showSignsInRulershipPanel}
-					onChange={() => setShowSignsInRulershipPanel(!showSignsInRulershipPanel)}
+					checked={showSignsInDispositorChains}
+					onChange={() => setShowSignsInDispositorChains(!showSignsInDispositorChains)}
 					id="show-signs-in-rulership"
 				/>
-				<label htmlFor="show-signs-in-rulership">Show signs in rulership panel</label>
+				<label htmlFor="show-signs-in-rulership">Show signs in dispositor chains</label>
 			</div>
 
 			<hr className="opacity-50 my-2" />
@@ -348,6 +350,23 @@ const SettingsMenu: FC = () => {
 					className="bg-black text-white border border-white px-1 py-1 outline-none"
 				>
 					{Object.values(DignityMode).map(mode => (
+						<option key={mode} value={mode}>
+							{mode}
+						</option>
+					))}
+				</select>
+			</div>
+			
+			<hr className="opacity-50 my-2" />
+			
+			<div className="flex justify-between items-center">
+				<span>House angularity</span>
+				<select
+					value={selectedHouseAngularityMode}
+					onChange={(e) => setSelectedHouseAngularityMode(e.target.value as HouseAngularityMode)}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
+				>
+					{Object.values(HouseAngularityMode).map(mode => (
 						<option key={mode} value={mode}>
 							{mode}
 						</option>

@@ -50,23 +50,46 @@ function constructRulershipGraphInternals(zodiacPositions: ZodiacPositions, dign
 		}
 	}
 	
-	return { sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor };
+	const signedFinalDispositors = finalDispositors.map(nodes => {
+		return {
+			nodes: nodes,
+			signs: nodes.map(node => sign.get(node)),
+		}
+	})
+	
+	return { rulerships, sign, ruledBy, rules, leafNodes, finalDispositors: signedFinalDispositors, isFinalDispositor };
+}
+
+export interface FinalDispositors {
+	nodes: Node[];
+	signs: Zodiac[];
 }
 
 export interface DispositorChain {
-	chain: Node[];
+	nodes: Node[];
+	signs: Zodiac[];
 	cycleStartIndex: number;
+}
+
+export function getFinalDispositorsOfChain(dispositorChain: DispositorChain): FinalDispositors {
+	const idx = dispositorChain.cycleStartIndex;
+	const len = dispositorChain.nodes.length;
+	return {
+		nodes: dispositorChain.nodes.slice(idx, len),
+		signs: dispositorChain.signs.slice(idx, len),
+	}
 }
 
 interface RulershipGraphConstructorArgs {
 	zodiacPositions: ZodiacPositions,
 	dignityMode: DignityMode,
 	// internal
+	_rulerships?: Map<Zodiac, Node>;
 	_sign?: Map<Node, Zodiac>;
 	_ruledBy?: Map<Node, Node>;
 	_rules?: Map<Node, Node[]>;
 	_leafNodes?: Node[];
-	_finalDispositors?: Node[][];
+	_finalDispositors?: FinalDispositors[];
 	_isFinalDispositor?: Map<Node, boolean>;
 }
 
@@ -74,6 +97,7 @@ export class RulershipGraph {
 	public readonly zodiacPositions: ZodiacPositions;
 	public readonly dignityMode: DignityMode;
 	
+	private readonly _rulerships: Map<Zodiac, Node>;
 	private readonly _sign: Map<Node, Zodiac>;
 	private readonly _ruledBy: Map<Node, Node>;
 	private readonly _rules: Map<Node, Node[]>;
@@ -86,6 +110,8 @@ export class RulershipGraph {
 		this.dignityMode = config.dignityMode;
 		
 		if (config._ruledBy) {
+			this._rulerships = config._rulerships;
+			this._sign = config._sign;
 			this._ruledBy = config._ruledBy;
 			this._rules = config._rules;
 			this._leafNodes = config._leafNodes;
@@ -93,7 +119,8 @@ export class RulershipGraph {
 			this._isFinalDispositor = config._isFinalDispositor;
 			return;
 		} else {
-			const { sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor } = constructRulershipGraphInternals(this.zodiacPositions, this.dignityMode);
+			const { rulerships, sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor } = constructRulershipGraphInternals(this.zodiacPositions, this.dignityMode);
+			this._rulerships = rulerships;
 			this._sign = sign;
 			this._ruledBy = ruledBy;
 			this._rules = rules;
@@ -118,6 +145,7 @@ export class RulershipGraph {
 			zodiacPositions: this.zodiacPositions,
 			dignityMode: this.dignityMode,
 			//internal
+			_rulerships: this._rulerships,
 			_sign: this._sign,
 			_ruledBy: this._ruledBy,
 			_rules: this._rules,
@@ -148,8 +176,18 @@ export class RulershipGraph {
 			currentNode = this._ruledBy.get(currentNode);
 		}
 		return {
-			chain: chain,
+			nodes: chain,
+			signs: chain.map(node => this._sign.get(node)),
 			cycleStartIndex: firstFinalDispositorIdx,
+		}
+	}
+	
+	public getDispositorChainForNonstandardNode(node: node, sign: Zodiac): DispositorChain {
+		const chain = this.getDispositorChain(this._rulerships[sign]);
+		return {
+			nodes: [node, ...chain.nodes],
+			signs: [sign, ...chain.signs],
+			cycleStartIndex: chain.cycleStartIndex + 1,
 		}
 	}
 	
@@ -179,9 +217,5 @@ export class RulershipGraph {
 	
 	public getFinalDispositors(): Node[][]{
 		return this._finalDispositors;
-	}
-	
-	public getSign(node: Node): Zodiac {
-		return this._sign.get(node);
 	}
 }

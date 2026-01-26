@@ -454,6 +454,13 @@ export const modernRulerships: Record<Zodiac, Node> = {
 	[Zodiac.PISCES]: Node.NEPTUNE,
 };
 
+export const mainAngles = [
+	Node.ASCENDANT,
+	Node.IMUM_COELI,
+	Node.DESCENDANT,
+	Node.MIDHEAVEN,
+];
+
 export const nodeCategories = [
 	{
 		name: 'Major Bodies',
@@ -473,10 +480,7 @@ export const nodeCategories = [
 	{
 		name: 'Primary Angles',
 		items: [
-			Node.ASCENDANT,
-			Node.DESCENDANT,
-			Node.MIDHEAVEN,
-			Node.IMUM_COELI,
+			...mainAngles,
 			Node.VERTEX,
 			Node.ANTIVERTEX,
 			Node.VERNAL_EQUINOX,
