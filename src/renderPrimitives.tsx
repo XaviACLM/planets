@@ -221,23 +221,23 @@ export const renderFinalDispositors = (
 	if (fd.nodes.length === 1) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			{!withText && renderHookedArrow({ fontSize })}
 			{withText && renderString(" in domicile.", { fontSize })}
 		</span>);
 	} else if (fd.nodes.length === 2) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			{renderMutualArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, 1, { size, fontSize })}
 			{withText && renderString(" in reception.", { fontSize })}
 		</span>);
 	} else {
 		contents = (<>
 			<span key={key} className="whitespace-nowrap">
 				{includeLeadingArrow && renderArrow({ fontSize })}
-				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, { size, fontSize })}
+				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			</span>
 			{Array.from({length: fd.nodes.length}).map((_, i) => {
 				const node = fd.nodes[(i+1)%fd.nodes.length];
@@ -249,7 +249,7 @@ export const renderFinalDispositors = (
 	
 	if (standalone) {
 		return (
-			<div key={key} className="mb-1 pl-4" style={{ textIndent: "-1em" }}>
+			<div key={key}>
 				{contents}
 			</div>
 		);
@@ -270,7 +270,7 @@ export const renderDispositorChain = (
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 	const stopAtIndex = chain.cycleStartIndex + (includeFinalDispositors ? 0 : 1); 
 	return (
-		<div key={key} className="mb-1 pl-4" style={{ textIndent: "-1em" }}>
+		<div key={key}>
 			{chain.nodes.slice(0, stopAtIndex).map((node, i) => (
 				i === 0 ? (
 					<span key={i}>
@@ -305,18 +305,20 @@ interface SelectorButtonProps {
 export const SelectorButton = ({
 	selected,
 	disabled = false,
+	highlighted = false,
 	onClick,
 	title,
 	children,
 }: SelectorButtonProps): ReactNode => {
-	const baseClasses = "bg-transparent border p-1.5 text-white cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
+	const baseClasses = "bg-transparent border-1 p-1.5 text-white cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
 	const hoverClasses = disabled ? "" : "hover:border-gray-500 hover:bg-white/10";
 	const borderClass = selected ? "border-white" : "border-gray-800";
 	const disabledClasses = disabled ? "opacity-40 cursor-not-allowed" : "";
+	const highlightedClasses = highlighted ? "border-3 border-double" : "";
 
 	return (
 		<button
-			className={`${baseClasses} ${hoverClasses} ${borderClass} ${disabledClasses}`}
+			className={`${baseClasses} ${hoverClasses} ${borderClass} ${disabledClasses} ${highlightedClasses}`}
 			onClick={disabled ? undefined : onClick}
 			title={title}
 			disabled={disabled}
@@ -332,20 +334,21 @@ export const NodeSelectorButton = ({
 	showLabel,
 	selected,
 	disabled = false,
+	highlighted = false,
 	onClick,
-	subtitle,
 }: {
 	node: Node;
 	showLabel: boolean;
 	selected: boolean;
 	disabled?: boolean;
+	highlighted?: boolean;
 	onClick: () => void;
-	subtitle?: string;
 }): ReactNode => {
 	return (
 		<SelectorButton
 			selected={selected}
 			disabled={disabled}
+			highlighted={highlighted}
 			onClick={onClick}
 			title={node}
 		>
@@ -360,9 +363,6 @@ export const NodeSelectorButton = ({
 						alt={node}
 						className="w-5 h-5 object-contain invert"
 					/>
-				)}
-				{subtitle && (
-					<span className="text-[9px] opacity-60 whitespace-nowrap">{subtitle}</span>
 				)}
 			</span>
 		</SelectorButton>

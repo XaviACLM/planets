@@ -21,6 +21,7 @@ import { useSettingsStore } from './settingsStore.ts'
 
 function App() {
 
+	// TODO get this out of here and from the props and just get the settings state where it's needed directly
 	const selectedHouseSystem = useSettingsStore(s => s.selectedHouseSystem);
 	const setSelectedHouseSystem = useSettingsStore(s => s.setSelectedHouseSystem);
 	const housePresweep = useSettingsStore(s => s.housePresweep);
@@ -220,23 +221,35 @@ function App() {
 				<div className="flex flex-col gap-2 animate-slide-in-right" key={menuOpen ? 'settings' : 'main'}>
 					{menuOpen ? (
 						<>
-							<div className="w-full bg-black border border-gray-500 text-white">
+							<Module
+								title="Node Selector"
+								startingState={CollapseState.COLLAPSED}
+								supportsHalfCollapse={false}
+							>
 								<NodeSelector
 									selectedItems={selectedNodes}
 									setSelectedItems={setSelectedNodes}
 									showLabels={showNodeLabels}
 								/>
-							</div>
-							<div className="w-full bg-black border border-gray-500 text-white">
+							</Module>
+							<Module
+								title="Aspect Selector"
+								startingState={CollapseState.COLLAPSED}
+								supportsHalfCollapse={false}
+							>
 								<AspectKindSelector
 									selectedItems={selectedAspectKinds}
 									setSelectedItems={setSelectedAspectKinds}
 									showLabels={showAspectLabels}
 								/>
-							</div>
-							<div className="w-full bg-black border border-gray-500 text-white">
+							</Module>
+							<Module
+								title="General Settings"
+								startingState={CollapseState.EXPANDED}
+								supportsHalfCollapse={false}
+							>
 								<SettingsMenu />
-							</div>
+							</Module>
 						</>
 					) : (
 						<>
@@ -250,14 +263,6 @@ function App() {
 									rulershipGraph={rulershipGraph}
 									aspects={aspects}
 									date={selectedDate}
-									dignityMode={selectedDignityMode}
-									housesAngularityMode={selectedHouseAngularityMode}
-									hamburgSchoolMode={hamburgSchoolMode}
-									showNodeLabels={showNodeLabels}
-									showSymbolLabels={showSymbolLabels}
-									showElementLabels={showElementLabels}
-									showModeLabels={showModeLabels}
-									showSignsInDispositorChains={showSignsInDispositorChains}
 								/>
 							</Module>
 							<Module
@@ -288,14 +293,18 @@ function App() {
 									/>
 								</Module>
 							)}
-							<div className="w-full bg-black border border-gray-500 text-white">
+							<Module
+								title="Rulership graph"
+								startingState={CollapseState.EXPANDED}
+								supportsHalfCollapse={false}
+							>
 								<RulershipPanel
 									rulershipGraph={rulershipGraph}
 									showNodeLabels={showNodeLabels}
 									showSymbolLabels={showSymbolLabels}
 									showSignsInDispositorChains={showSignsInDispositorChains}
 								/>
-							</div>
+							</Module>
 						</>
 					)}
 				</div>

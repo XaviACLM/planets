@@ -41,7 +41,7 @@ const Module: FC<ModuleProps> = ({
 	const buttonClass = "bg-black text-white text-xs px-1 cursor-pointer hover:text-gray-300";
 
 	return (
-		<div className={`relative w-full border border-gray-500 bg-black ${collapseState === CollapseState.COLLAPSED ? 'my-1 first:mt-2' : ''}`}>
+		<div className={`relative w-full border border-gray-500 bg-black my-1 ${collapseState === CollapseState.COLLAPSED ? 'first:mt-2 last:mb-2' : ''}`}>
 			{/* title (sideways on the right unless collapsed) */}
 			{collapseState === CollapseState.COLLAPSED ? (
 				<span

@@ -47,3 +47,22 @@ export const HouseAngularityMode = {
 	DYNAMIC: "Dynamic",
 } as const;
 export type HouseAngularityMode = typeof HouseAngularityMode[keyof typeof HouseAngularityMode];
+
+export const TriplicityMode = {
+	DOROTHEAN: "Dorothean",
+	PTOLEMAIC_LILLY: "Ptolemaic / Lilly",
+} as const;
+export type TriplicityMode = typeof TriplicityMode[keyof typeof TriplicityMode];
+
+export const FaceMode = {
+	CHALDEAN_PTOLEMAIC: "Chaldean / Ptolemaic",
+	MODERN: "Modern",
+} as const;
+export type FaceMode = typeof FaceMode[keyof typeof FaceMode];
+
+export const BoundsMode = {
+	EGYPTIAN: "Egyptian",
+	PTOLEMAIC: "Ptolemaic",
+	CHALDEAN: "Chaldean",
+} as const;
+export type BoundsMode = typeof BoundsMode[keyof typeof BoundsMode];

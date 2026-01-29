@@ -3,7 +3,18 @@ import Slider from './Slider';
 import NumericInputField from './NumericInputField';
 import { HouseSystem } from './houses.ts';
 import { AstrologyMode } from './astroDefs.ts';
-import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode, HouseAngularityMode } from './settingsDefs.ts';
+import {
+	LunarNodeMode,
+	HamburgSchoolMode,
+	AspectPhysicalityFilter,
+	AspectMenuMode,
+	AspectErrorMode,
+	DignityMode,
+	HouseAngularityMode,
+	TriplicityMode,
+	FaceMode,
+	BoundsMode
+} from './settingsDefs.ts';
 import { useSettingsStore } from './settingsStore.ts';
 
 import "./SettingsMenu.css"
@@ -57,8 +68,18 @@ const SettingsMenu: FC = () => {
 	const setHamburgSchoolMode = useSettingsStore(s => s.setHamburgSchoolMode);
 	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
 	const setSelectedAstrologyMode = useSettingsStore(s => s.setSelectedAstrologyMode);
+	
 	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
 	const setSelectedDignityMode = useSettingsStore(s => s.setSelectedDignityMode);
+	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
+	const setUseExtendedDignities = useSettingsStore(s => s.setUseExtendedDignities);
+	const triplicityMode = useSettingsStore(s => s.triplicityMode);
+	const setTriplicityMode = useSettingsStore(s => s.setTriplicityMode);
+	const faceMode = useSettingsStore(s => s.faceMode);
+	const setFaceMode = useSettingsStore(s => s.setFaceMode);
+	const boundsMode = useSettingsStore(s => s.boundsMode);
+	const setBoundsMode = useSettingsStore(s => s.setBoundsMode);
+	
 	const selectedHouseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
 	const setSelectedHouseAngularityMode = useSettingsStore(s => s.setSelectedHouseAngularityMode);
 
@@ -194,7 +215,7 @@ const SettingsMenu: FC = () => {
 
 			<hr className="opacity-50 my-2" />
 
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center my-1">
 				<span>Configuration error</span>
 				<select
 					value={selectedAspectErrorMode}
@@ -268,7 +289,7 @@ const SettingsMenu: FC = () => {
 				/>
 				<label htmlFor="hamburg-physical">Hamburg objects considered physical</label>
 			</div>
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center my-1">
 				<span>Display aspects</span>
 				<select
 					value={selectedAspectMenuMode}
@@ -325,7 +346,7 @@ const SettingsMenu: FC = () => {
 			
 			<hr className="opacity-50 my-2" />
 			
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center my-1">
 				<span>Mode</span>
 				<select
 					value={selectedAstrologyMode}
@@ -342,7 +363,7 @@ const SettingsMenu: FC = () => {
 			
 			<hr className="opacity-50 my-2" />
 			
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center my-1">
 				<span>Dignities</span>
 				<select
 					value={selectedDignityMode}
@@ -356,10 +377,62 @@ const SettingsMenu: FC = () => {
 					))}
 				</select>
 			</div>
+			<div className="checkbox-wrapper">
+				<input
+					type="checkbox"
+					className="custom-checkbox"
+					checked={useExtendedDignities}
+					onChange={() => setUseExtendedDignities(!useExtendedDignities)}
+					id="use-extended-dignities"
+				/>
+				<label htmlFor="use-extended-dignities">Use extended dignities</label>
+			</div>
+			<div className="flex justify-between items-center my-1">
+				<span>Triplicity</span>
+				<select
+					value={triplicityMode}
+					onChange={(e) => setSelectedDignityMode(e.target.value as TriplicityMode)}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
+				>
+					{Object.values(TriplicityMode).map(mode => (
+						<option key={mode} value={mode}>
+							{mode}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className="flex justify-between items-center my-1">
+				<span>Bounds</span>
+				<select
+					value={boundsMode}
+					onChange={(e) => setSelectedDignityMode(e.target.value as BoundsMode)}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
+				>
+					{Object.values(BoundsMode).map(mode => (
+						<option key={mode} value={mode}>
+							{mode}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className="flex justify-between items-center my-1">
+				<span>Faces</span>
+				<select
+					value={faceMode}
+					onChange={(e) => setSelectedDignityMode(e.target.value as FaceMode)}
+					className="bg-black text-white border border-white px-1 py-1 outline-none"
+				>
+					{Object.values(FaceMode).map(mode => (
+						<option key={mode} value={mode}>
+							{mode}
+						</option>
+					))}
+				</select>
+			</div>
 			
 			<hr className="opacity-50 my-2" />
 			
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center my-1">
 				<span>House angularity</span>
 				<select
 					value={selectedHouseAngularityMode}

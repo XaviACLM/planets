@@ -2,7 +2,18 @@ import { create } from 'zustand';
 import { HouseSystem } from './houses.ts';
 import { Node, initiallySelectedNodes, AstrologyMode } from './astroDefs.ts';
 import { AspectKind, defaultAspectKinds } from './aspectDefs.ts';
-import { LunarNodeMode, HamburgSchoolMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode, DignityMode, HouseAngularityMode } from './settingsDefs.ts';
+import {
+	LunarNodeMode,
+	HamburgSchoolMode,
+	AspectPhysicalityFilter,
+	AspectMenuMode,
+	AspectErrorMode,
+	DignityMode,
+	HouseAngularityMode,
+	TriplicityMode,
+	BoundsMode,
+	FaceMode,
+} from './settingsDefs.ts';
 
 interface SettingsState {
 	// House settings
@@ -62,6 +73,15 @@ interface SettingsState {
 	setSelectedDignityMode: (v: DignityMode) => void;
 	selectedHouseAngularityMode: HouseAngularityMode;
 	setSelectedHouseAngularityMode: (v: HouseAngularityMode) => void;
+	// TODO do away with all the "selected" stuff. wordy and very unnecessary
+	useExtendedDignities: boolean;
+	setUseExtendedDignities: (v: boolean) => void;
+	triplicityMode: TriplicityMode;
+	setTriplicityMode: (v: TriplicityMode) => void;
+	boundsMode: BoundsMode;
+	setBoundsMode: (v: BoundsMode) => void;
+	faceMode: FaceMode;
+	setFaceMode: (v: FaceMode) => void;
 
 	// Selections
 	selectedNodes: Set<Node>;
@@ -129,6 +149,14 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setSelectedDignityMode: (v) => set({ selectedDignityMode: v }),
 	selectedHouseAngularityMode: HouseAngularityMode.TRADITIONAL,
 	setSelectedHouseAngularityMode: (v) => set({ selectedHouseAngularityMode: v }),
+	useExtendedDignities: false,
+	setUseExtendedDignities: (v) => set({ useExtendedDignities: v }),
+	triplicityMode: TriplicityMode.PTOLEMAIC_LILLY,
+	setTriplicityMode: (v) => set({ triplicityMode: v }),
+	boundsMode: BoundsMode.PTOLEMAIC,
+	setBoundsMode: (v) => set({ boundsMode: v }),
+	faceMode: FaceMode.MODERN,
+	setFaceMode: (v) => set({ faceMode: v }),
 
 	// Selections
 	selectedNodes: new Set(initiallySelectedNodes),

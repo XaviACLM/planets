@@ -1,12 +1,11 @@
 import { useState, useMemo, FC } from 'react';
-import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes } from './astroDefs';
+import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect } from './astroDefs';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode } from './settingsDefs';
-import ZodiacPositions from './zodiacPositions';
-import { RulershipGraph } from './rulershipGraph';
+import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
-import { getChartRuler, getHouseAngularities, getAngleProximity, isInSect } from './astrologyUtils';
+import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect } from './astrologyUtils';
 import { getEclipticLongitudeSpeed } from './astronomyUtils';
-import { getDignityState } from './dignities';
+import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
 import {
 	renderTitle,
@@ -19,25 +18,34 @@ import {
 	renderArrow,
 	NodeSelectorButton,
 	renderDispositorChain,
+	renderFinalDispositors,
 } from './renderPrimitives';
+import { nodeImages, radialShadow, nodeSymbols } from './astroGraphics.ts'
+import { useSettingsStore } from './settingsStore.ts'
+import ZodiacPositions from './zodiacPositions';
 
 // Opinionated thresholds
 const STATIONARY_THRESHOLD_DEG_PER_DAY = 0.1; // degrees/day - planet considered stationary below this
 const ANGLE_PROXIMITY_THRESHOLD_DEG = 10; // degrees - show "near angle" info within this distance
-									
+
+/*
+TODO
+
+from dignities.ts
+getBoundsLord, getFaceLord, getTriplicityRole
+-> Node, Node, TriplicityRole.DIURNAL/NOCTURNAL/PARTICIPATING
+
+set up the settings too. from astroDefs.ts
+TriplicityMode, FaceMode, BoundsMode
+
+then add the info. then organize it as planned. then make things look nicer
+*/
+					
 type PlanetPanelProps = {
 	zodiacPositions: ZodiacPositions;
 	rulershipGraph: RulershipGraph;
 	aspects: Map<Aspect, Aspect[]>;
 	date: Date;
-	dignityMode: DignityMode;
-	houseAngularityMode: HouseAngularityMode;
-	hamburgSchoolMode: HamburgSchoolMode;
-	showNodeLabels: boolean;
-	showSymbolLabels: boolean;
-	showElementLabels: boolean;
-	showModeLabels: boolean;
-	showSignsInDispositorChains: boolean;
 };
 
 const PlanetPanel: FC<PlanetPanelProps> = ({
@@ -45,15 +53,24 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	rulershipGraph,
 	aspects,
 	date,
-	dignityMode,
-	houseAngularityMode,
-	hamburgSchoolMode,
-	showNodeLabels,
-	showSymbolLabels,
-	showElementLabels,
-	showModeLabels,
-	showSignsInDispositorChains,
 }) => {
+	
+	const dignityMode = useSettingsStore(s => s.dignityMode);
+	const houseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
+	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
+	
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const showElementLabels = useSettingsStore(s => s.showElementLabels);
+	const showModeLabels = useSettingsStore(s => s.showModeLabels);
+	// TODO why doesn't this work?
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	
+	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
+	const triplicityMode = useSettingsStore(s => s.triplicityMode);
+	const faceMode = useSettingsStore(s => s.faceMode);
+	const boundsMode = useSettingsStore(s => s.boundsMode);
+	
 	const hasSurfacePosition = zodiacPositions.hasSurfacePosition();
 	const chartRuler = useMemo(
 		() => getChartRuler(zodiacPositions, dignityMode),
@@ -64,38 +81,55 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const [selectedNode, setSelectedNode] = useState<Node>(
 		hasSurfacePosition ? Node.ASCENDANT : Node.SUN
 	);
+	
+	const isStandardNode = standardNodes.includes(selectedNode);
 
+	type SelectorButtonSpecs = {node: Node | null, highlight: boolean, disabled: boolean}
+	
 	// Quick selector buttons: ASC, Ruler, Sun, Moon
-	const selectorButtons: Array<{
-		node: Node | null;
-		subtitle?: string;
-		disabled: boolean;
-	}> = useMemo(() => [
+	const selectorButtonsPrimary: Array<SelectorButtonSpecs> = useMemo(() => [
 		{
 			node: Node.ASCENDANT,
+			highlight: false,
 			disabled: !hasSurfacePosition,
 		},
 		{
 			node: chartRuler,
-			subtitle: "(ruler)",
+			highlight: true,
 			disabled: !chartRuler,
 		},
 		{
 			node: Node.SUN,
+			highlight: false,
 			disabled: false,
 		},
 		{
 			node: Node.MOON,
+			highlight: false,
 			disabled: false,
 		},
-	].filter(item => item.node != chartRuler || item.subtitle != undefined), [hasSurfacePosition, chartRuler]);
+	].filter(item => item.node != chartRuler || item.highlight), [hasSurfacePosition, chartRuler]);
+	
+	const selectorButtonsSecondary: Array<SelectorButtonSpecs> = useMemo(() => standardNodes.filter(
+			node => ![Node.SUN, Node.MOON, chartRuler].includes(node)
+		).map(node => {
+			return {
+				node: node,
+				highlight: false,
+				disabled: false,
+			}
+		}), [chartRuler]);
 
 	// Get sign and position for selected node
 	const nodeSign = zodiacPositions.getSymbolOfNode(selectedNode);
 	const positionInSign = zodiacPositions.getNodePositionWithinSign(selectedNode);
 	const formattedPosition = formatAngle(positionInSign);
 
+	const faceLord = getFaceLord(selectedNode, zodiacPositions, faceMode);
+	const boundLord = getBoundLord(selectedNode, zodiacPositions, boundsMode);
+
 	// Get house placement (if location defined)
+	// TODO whether this is defined is a bit more complicated
 	const houseNumber = hasSurfacePosition
 		? zodiacPositions.getHouseOfNode(selectedNode)
 		: null;
@@ -113,6 +147,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		() => getDignityState(selectedNode, zodiacPositions, dignityMode),
 		[selectedNode, zodiacPositions, dignityMode]
 	);
+	
+	const triplicityRole = (hasSurfacePosition && standardNodes.includes(selectedNode)) ? getTriplicityRole(selectedNode, zodiacPositions, triplicityMode) : null;
 
 	// 2.2 Speed & Retrograde
 	const speedRadPerDay = useMemo(() => {
@@ -141,28 +177,29 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const showAngleProximity = angleProximityDeg !== null && angleProximityDeg <= ANGLE_PROXIMITY_THRESHOLD_DEG && !mainAngles.includes(selectedNode);
 
 	// 2.4 Rulership chain
-	const dispositorChain = useMemo(() => {
-		if (standardNodes.includes(selectedNode)) {
-			return rulershipGraph.getDispositorChain(selectedNode);
+	const { isFinalDispositor, dispositorChain } = useMemo(() => {
+		if (isStandardNode) {
+			const isFinalDispositor = rulershipGraph.isFinalDispositor(selectedNode);
+			const chain = rulershipGraph.getDispositorChain(selectedNode);
+			return {
+				isFinalDispositor,
+				dispositorChain: isFinalDispositor ? getFinalDispositorsOfChain(chain) : chain,
+			};
 		} else {
-			return rulershipGraph.getDispositorChainForNonstandardNode(selectedNode, nodeSign);
+			return {
+				isFinalDispositor: false,
+				dispositorChain: rulershipGraph.getDispositorChainForNonstandardNode(selectedNode, nodeSign)
+			};
 		}
 	}, [selectedNode, rulershipGraph]);
 
 	const ruledNodes = useMemo(() => {
-		try {
-			return rulershipGraph.getRuledNodes(selectedNode, false);
-		} catch {
-			return null;
-		}
+		return isStandardNode ? rulershipGraph.getRuledNodes(selectedNode, false) : null;
 	}, [selectedNode, rulershipGraph]);
 
 	const transitivelyRuledNodes = useMemo(() => {
-		try {
-			return rulershipGraph.getRuledNodes(selectedNode, true);
-		} catch {
-			return null;
-		}
+		// TODO remove all these fucking try-catches
+		return isStandardNode ? rulershipGraph.getRuledNodes(selectedNode, true) : null;
 	}, [selectedNode, rulershipGraph]);
 
 	// 2.5 Aspects summary
@@ -175,10 +212,13 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	}, [aspects, selectedNode]);
 
 	// 2.6 Sect
-	const inSect = useMemo(() => {
-		if (!hasSurfacePosition) return null;
-		return isInSect(selectedNode, zodiacPositions);
-	}, [selectedNode, zodiacPositions, hasSurfacePosition]);
+	const { chartIsDiurnal, inSect } = useMemo(() => {
+		if (!hasSurfacePosition) {return { chartIsDiurnal: null, inSect: null }};
+		return {
+			chartIsDiurnal: getChartSect(zodiacPositions) === Sect.DIURNAL,
+			inSect: isInSect(selectedNode, zodiacPositions)
+		};
+	}, [selectedNode, zodiacPositions]);
 
 	const formatOrdinal = (n: number): string => {
 		const suffixes = ["th", "st", "nd", "rd"];
@@ -196,21 +236,78 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		}
 		const verb = verbs[angleProximityInfo.closestAngle][angleProximityInfo.passed ? 1 : 0];
 		return (
-			<div className="mt-1">
+			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
 				{renderNode(angleProximity.closestAngle, showNodeLabels)}
-				{renderString(`)`)}
+				{renderString(`).`)}
 			</div>
 		);
 	};
-
-	return (
-		<div className="text-white p-4" style={{ width: 330 }}>
-			{/* Planet Selector */}
-			<div className="mb-4">
+	
+	const nodeGraphicSVG = () => {
+		const planetImageWidth = 115;
+		const largeSymbolWidth = 60;
+		const padding = 5;
+		
+		const sunScaling = 10/9; // measured from images to match outer edges
+		const sunD = planetImageWidth*(1/2)*(1/sunScaling - 1);
+		const imageTransform = selectedNode === Node.SUN ? `scale(${sunScaling}, ${sunScaling}) translate(${sunD}, ${sunD})` : "";
+		
+		return (
+			<svg width={planetImageWidth+2*padding} height={planetImageWidth+2*padding} overflow={"visible"} className="">
+				{isStandardNode ? (<>
+					<image
+						key={0}
+						x={padding}
+						y={padding}
+						href={nodeImages[selectedNode]}
+						width={planetImageWidth}
+						height={planetImageWidth}
+						opacity={0.8}
+						transform={imageTransform}
+						
+					/>
+					<image
+						key={1}
+						x={padding}
+						y={padding}
+						href={radialShadow}
+						width={planetImageWidth}
+						height={planetImageWidth}
+						opacity={0.8}
+					/>
+				</>) : (<>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.5} stroke="#222"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="#222"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.4} stroke="#222"/>
+				</>)}
+				<image
+					key={2}
+					x={padding}
+					y={padding}
+					href={nodeSymbols[selectedNode]}
+					width={largeSymbolWidth}
+					height={largeSymbolWidth}
+					filter={"url(#invertedGlow)"}
+					transform={`translate(${(planetImageWidth-largeSymbolWidth)/2},${(planetImageWidth-largeSymbolWidth)/2})`}
+				/>
+				<defs>
+					<filter id="invertedGlow" x="-200%" y="-200%" width="400%" height="400%">
+						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
+						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="rgb(255, 255, 255)"/>
+						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="rgb(255, 255, 255)"/>
+					</filter>
+				</defs>
+			</svg>
+		);
+	}
+	
+	const selectorButtonList = (buttonSpecs: SelectorButtonSpecs[]) => {
+		return (
+			<div className="mb-2">
 				<div className="flex flex-wrap gap-1.5">
-					{selectorButtons.map((btn, idx) => (
+					{buttonSpecs.map((btn, idx) => (
 						btn.disabled ? (
 							<button
 								key={idx}
@@ -226,142 +323,178 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 								showLabel={showNodeLabels}
 								selected={selectedNode === btn.node}
 								disabled={btn.disabled}
+								highlighted={btn.highlight}
 								onClick={() => setSelectedNode(btn.node!)}
-								subtitle={btn.subtitle}
 							/>
 						)
 					))}
 				</div>
 			</div>
-
-			<hr className="opacity-50 my-2" />
-
-			{/* Basic Info */}
+		);
+	}
+	
+	const renderRuledNodes = (ruledNodes: Node[], transitively: boolean) => {
+		const allNodes = ruledNodes.length === standardNodes.length - 1;
+		return (
 			<div>
-				{renderTitle(String(selectedNode))}
-
-				{/* Sign and Position */}
-				<div className="mt-2">
-					{renderSign(nodeSign, showSymbolLabels)}
-					{renderString(" ")}
-					{renderSmallcapsString(formattedPosition)}
-					{renderString(" (")}
-					{renderElement(zodiacElement[nodeSign], showElementLabels)}
-					{renderString(", ")}
-					{renderMode(zodiacMode[nodeSign], showModeLabels)}
-					{renderString(")")}
-				</div>
-
-				{/* House Placement */}
-				{houseNumber && (
-					<div className="mt-1">
-						{renderString(`${formatOrdinal(houseNumber)} House`)}
-						{angularity && (
-							<>
-								{renderString(" · ")}
-								{renderSmallcapsString(angularity)}
-							</>
-						)}
-					</div>
-				)}
-
-				{/* 2.1 Dignity */}
-				{dignityState && (
-					<div className="mt-1">
-						{renderSmallcapsString(dignityState.dignity)}
-						{dignityState.degreeOffset !== undefined && (
-							renderString(` (${dignityState.degreeOffset > 0 ? "+" : ""}${dignityState.degreeOffset.toFixed(0)}° from exact)`)
-						)}
-					</div>
-				)}
-
-				{/* 2.2 Speed & Retrograde */}
-				{speedDegPerDay !== null && (
-					<div className="mt-1">
-						{isStationary ? (
-							renderSmallcapsString("Stationary")
-						) : isRetrograde ? (
-							renderSmallcapsString("Retrograde")
-						) : (
-							renderSmallcapsString("Direct")
-						)}
-						{renderString(` (${Math.abs(speedDegPerDay).toFixed(2)}°/day)`)}
-					</div>
-				)}
-
-				{/* 2.3 Angle Proximity */}
-				{showAngleProximity && angleProximity && (
-					<div className="mt-1">
-						{formatAngleProximity(angleProximity)}
-					</div>
-				)}
-
-				{/* 2.6 Sect */}
-				{inSect !== null && (
-					<div className="mt-1">
-						{renderSmallcapsString(inSect ? "In Sect" : "Out of Sect")}
-					</div>
+				{renderString(transitively ? "Transitively rules" : "Rules")}
+				{renderString(allNodes? " all nodes." : ": ")}
+				{!allNodes && ruledNodes.map((node, i) => (
+					<span key={i}>
+						{i > 0 && renderString(", ")}
+						{renderNode(node, showNodeLabels)}
+					</span>
+				))}
+			</div>
+		);
+	}
+	
+	const renderDignity = (dignityState: DignityState) => {
+		const descriptiveStr = {
+			[Dignity.DOMICILE] : "In Domicile",
+			[Dignity.EXALTATION] : "Exalted",
+			[Dignity.DETRIMENT] : "In Detriment",
+			[Dignity.FALL] : "In Fall",
+			[Dignity.PEREGRINE] : "Peregrine",
+		}[dignityState.dignity];
+		return (
+			<div>
+				{renderString(descriptiveStr)}
+				{dignityState.degreeOffset !== undefined ? (
+					renderString(` (${dignityState.degreeOffset > 0 ? "+" : ""}${dignityState.degreeOffset.toFixed(0)}° from exact)`)
+				) : (
+					null
 				)}
 			</div>
+		);
+	}
 
-			{/* 2.4 Rulership Chain */}
-			{dispositorChain && (
-				<>
-					<hr className="opacity-50 my-2" />
-					<div>
-						{renderTitle("Dispositor Chain")}
-						<div className="mt-2 pl-4" style={{ textIndent: "-1em" }}>
-							{renderDispositorChain(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)}
-						</div>
-						{ruledNodes && ruledNodes.length > 0 && (
-							<div className="mt-2">
-								{renderString("Rules: ")}
-								{ruledNodes.map((node, i) => (
-									<span key={i}>
-										{i > 0 && renderString(", ")}
-										{renderNode(node, showNodeLabels)}
-									</span>
-								))}
-							</div>
-						)}
-						{transitivelyRuledNodes && transitivelyRuledNodes.length > ruledNodes?.length && (
-							<div className="mt-1">
-								{renderString("Transitively rules: ")}
-								{transitivelyRuledNodes.map((node, i) => (
-									<span key={i}>
-										{i > 0 && renderString(", ")}
-										{renderNode(node, showNodeLabels)}
-									</span>
-								))}
-							</div>
-						)}
+	return (
+		<div className="text-white p-4" style={{ width: 330 }}>
+			{/* Planet Selector */}
+			
+			{selectorButtonList(selectorButtonsPrimary)}
+			{selectorButtonList(selectorButtonsSecondary)}
+
+			<hr className="opacity-50 my-2" />
+			
+			<div className="flex gap-5">
+				{nodeGraphicSVG()}
+				{/* POSITION / SIGN, POSITION WITHIN SIGN */}
+				<div className="text-right flex-grow">
+					
+					{/* Sign and Position */}
+					<div className="mt-2">
+						{renderSign(nodeSign, showSymbolLabels)}
+						{renderString(" · ")}
+						{renderSmallcapsString(formattedPosition)}
 					</div>
-				</>
-			)}
-
-			{/* 2.5 Aspects Summary */}
-			{aspectsSummary.nAspects > 0 && (
-				<>
-					<hr className="opacity-50 my-2" />
-					<div>
-						{renderTitle("Aspects")}
-						<div className="mt-2">
-							{renderString(`In ${aspectsSummary.nAspects} aspect${aspectsSummary.nAspects !== 1 ? "s" : ""}`)}
-							{aspectsSummary.nConfigurations > 0 && (
-								renderString(` (${aspectsSummary.nConfigurations} configuration${aspectsSummary.nConfigurations !== 1 ? "s" : ""})`)
+				
+					{/* House, house angularity*/}
+					{houseNumber && (
+						<div>
+							{renderString(`${formatOrdinal(houseNumber)} House`)}
+							{angularity && (
+								<>
+									{renderString(" · ")}
+									{renderString(angularity)}
+								</>
 							)}
 						</div>
-						{aspectsSummary.nodes.size > 0 && (
-							<div className="mt-1">
-								{renderString("With: ")}
-								{Array.from(aspectsSummary.nodes).map((node, i) => (
-									<span key={i}>
-										{i > 0 && renderString(", ")}
-										{renderNode(node, showNodeLabels)}
-									</span>
-								))}
-							</div>
-						)}
+					)}
+					
+					{/* Dignity */}
+					{dignityState && renderDignity(dignityState)}
+					
+					{useExtendedDignities && (triplicityRole !== null) && (
+						<div>
+							{renderString(`Triplicity Ruler (${triplicityRole})`)}
+						</div>
+					)}
+
+					{/* Speed / Retrograde */}
+					{speedDegPerDay !== null && (
+						<div>
+							{isStationary ? (
+								renderString("Stationary")
+							) : isRetrograde ? (
+								renderString("Retrograde")
+							) : (
+								renderString("Direct")
+							)}
+							{renderString(` (${Math.abs(speedDegPerDay).toFixed(2)}°/day)`)}
+						</div>
+					)}
+
+					{/* Sect */}
+					{inSect !== null && (
+						<div>
+							{renderString(inSect ? "In Sect" : "Out of Sect")}
+							{false && renderString(chartIsDiurnal ? " (Diurnal Chart)" : " (Nocturnal Chart)")}
+						</div>
+					)}
+				
+				</div>
+			</div>
+					
+			{/* Extended dignities (face and bound, not triplicity)*/}
+			{useExtendedDignities && ( faceLord === boundLord ? (
+				<div className="text-wrap">
+					{renderString("In the face & bound of ")}
+					{renderNode(faceLord, showNodeLabels)}
+					{renderString(".")}
+				</div>
+			) : (
+				<div>
+					{renderString("In the face of ")}
+					{renderNode(faceLord, showNodeLabels)}
+					{renderString(" & the bound of ")}
+					{renderNode(boundLord, showNodeLabels)}
+					{renderString(".")}
+				</div>
+			))}
+					
+			{/* Angle Proximity */}
+			{showAngleProximity && angleProximity && formatAngleProximity(angleProximity)}
+
+			{/* Aspects Summary */}
+			{aspectsSummary.nAspects > 0 ? (
+				<>
+					{renderString(`In ${aspectsSummary.nAspects} aspect${aspectsSummary.nAspects !== 1 ? "s" : ""}`)}
+					{aspectsSummary.nConfigurations > 0 && (
+						renderString(` (${aspectsSummary.nConfigurations} configuration${aspectsSummary.nConfigurations !== 1 ? "s" : ""})`)
+					)}
+					{renderString(", with ")}
+					{Array.from(aspectsSummary.nodes).map((node, i) => (
+						<span key={i}>
+							{i > 0 && renderString(", ")}
+							{renderNode(node, showNodeLabels)}
+						</span>
+					))}
+					{renderString(".")}
+				</>
+			) : (
+				renderString("Not in any aspects.")
+			)}
+
+			{/* Rulership Chain */}
+			{dispositorChain && (
+				<>
+					<hr className="opacity-50 mt-4" />
+					<span className="absolute -translate-y-4 translate-x-2 bg-black px-1">
+						{renderSmallcapsString("Dispositorship")}
+					</span>
+					<div>
+						<div className="mt-2">
+							{isFinalDispositor ? (
+								renderFinalDispositors(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)
+							) : (
+								renderDispositorChain(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)
+							)}
+						</div>
+						{ruledNodes && ruledNodes.length === 0 && renderString("Not ruling any planet or luminary.")}
+						{ruledNodes && ruledNodes.length > 0 && renderRuledNodes(ruledNodes, false)}
+						{transitivelyRuledNodes && transitivelyRuledNodes.length > ruledNodes.length && renderRuledNodes(transitivelyRuledNodes, true)}
 					</div>
 				</>
 			)}
@@ -370,3 +503,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 };
 
 export default PlanetPanel;
+
+
+//<span
+//	className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
+//>
+//	{title}
+//</span>

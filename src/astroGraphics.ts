@@ -119,7 +119,21 @@ import tSquareSymbol from "./assets/aspect-symbols/T-Square.png"
 
 import dotSymbol from "./assets/general-symbols/Dot.png"
 
-export { earthSymbol, dotSymbol };
+import earthImage from "./assets/planet-images/Earth.png" //unused
+import jupiterImage from "./assets/planet-images/Jupiter.png"
+import marsImage from "./assets/planet-images/Mars.png"
+import mercuryImage from "./assets/planet-images/Mercury.png"
+import moonImage from "./assets/planet-images/Moon.png"
+import neptuneImage from "./assets/planet-images/Neptune.png"
+import plutoImage from "./assets/planet-images/Pluto.png"
+import saturnImage from "./assets/planet-images/Saturn.png"
+import sunImage from "./assets/planet-images/Sun.png"
+import uranusImage from "./assets/planet-images/Uranus.png"
+import venusImage from "./assets/planet-images/Venus.png"
+
+import radialShadow from "./assets/other/Radial Shadow.png"
+
+export { earthSymbol, dotSymbol, radialShadow };
 
 export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
@@ -292,6 +306,20 @@ export const nodeSymbols: Record<Node, string> = {
     [Node.CHAOS] : chaosSymbol,
     [Node.RADAMANTHUS] : radamanthusSymbol,
     [Node.GKUNHOMDIMA] : gkunhomdimaSymbol,
+}
+
+export const nodeImages: Record<Node, string> = {
+	[Node.SUN] : sunImage,
+	[Node.MOON] : moonImage,
+	[Node.MERCURY] : mercuryImage,
+	[Node.VENUS] : venusImage,
+	[Node.MARS] : marsImage,
+	[Node.EARTH] : earthImage,
+	[Node.JUPITER] : jupiterImage,
+	[Node.SATURN] : saturnImage,
+	[Node.URANUS] : uranusImage,
+	[Node.NEPTUNE] : neptuneImage,
+	[Node.PLUTO] : plutoImage,
 }
 
 export const aspectSymbols: Record<AspectKind, string> = {

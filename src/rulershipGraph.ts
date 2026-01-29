@@ -198,9 +198,17 @@ export class RulershipGraph {
 		}
 		// otherwise, some tree search
 		const transitivelyRuledNodes: Node[] = [];
-		const nodesToExpand: Node[] = this._rules.get(node);
+		const nodesToExpand: Node[] = [...this._rules.get(node)];
+		const visited = [node];
 		while (nodesToExpand.length > 0) {
 			const currentNode = nodesToExpand.pop();
+			if (this._isFinalDispositor.get(currentNode)){
+				if (visited.includes(currentNode)){
+					continue;
+				} else {
+					visited.push(currentNode);
+				}
+			}
 			transitivelyRuledNodes.push(currentNode);
 			// no satisfying way to do this in js
 			for (const otherNode of this._rules.get(currentNode)){
@@ -208,7 +216,6 @@ export class RulershipGraph {
 			}
 		}
 		return transitivelyRuledNodes;
-		
 	}
 	
 	public getLeafNodes(): Node[]{
@@ -217,5 +224,9 @@ export class RulershipGraph {
 	
 	public getFinalDispositors(): Node[][]{
 		return this._finalDispositors;
+	}
+	
+	public isFinalDispositor(node: Node): boolean{
+		return this._isFinalDispositor.get(node);
 	}
 }

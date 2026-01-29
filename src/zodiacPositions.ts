@@ -467,9 +467,7 @@ class ZodiacPositions {
 		return this.siderealOffset !== null;
 	}
 	
-	public getSymbolOfNode(node: Node): Zodiac {
-		// this might error out if node is absent - intended behaviour
-		const lon = this.getNodePosition(node);
+	public _getSymbolAtLongitude(lon: number): Zodiac {
 		if (this.isZodiacModeRegular()){
 			return standardZodiac[Math.floor((((lon-this.siderealOffset)*6/Math.PI)%12+12)%12)];
 		} else {
@@ -483,19 +481,21 @@ class ZodiacPositions {
 		}
 	}
 	
+	public getSymbolOfNode(node: Node): Zodiac {
+		// will error out if node is absent (intended)
+		const lon = this.getNodePosition(node);
+		return this._getSymbolAtLongitude(lon);
+	}
+	
 	public getNodePositionWithinSign(node: Node): number {
 		// this might error out if node is absent - intended behaviour
 		const lon = this.getNodePosition(node);
 		if (this.isZodiacModeRegular()){
+			// this should give the same results as the next branch but something something faster/more readable
 			return normalizeAngleRad(lon - this.siderealOffset)%(Math.PI/6);
 		} else {
-			const values = Array.from(this.getZodiacSymbolPositions().values());
-			const index = values.findIndex(zlon => zlon > lon);
-			if (index === -1 || index === 0) {
-				return normalizeAngleRad(lon - values[values.length-1]);
-			} else {
-				return lon - values[index - 1];
-			}
+			const sign = this._getSymbolAtLongitude(lon);
+			return lon - this._zodiacSymbolPositions[sign];
 		}
 		
 	} 
