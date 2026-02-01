@@ -25,7 +25,7 @@ export function getChartRuler(zodiacPositions: ZodiacPositions, dignityMode: Dig
 	if (!zodiacPositions.hasSurfacePosition()) {
 		return null;
 	}
-	const ascendantSign = zodiacPositions.getSymbolOfNode(Node.ASCENDANT) as unknown as Zodiac;
+	const ascendantSign = zodiacPositions.getSymbolOfNode(Node.ASCENDANT);
 	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
 	return rulerships[ascendantSign];
 }
@@ -70,7 +70,7 @@ function isTrailing(trailingNode: Node, leadingNode: Node, zodiacPositions: Zodi
 	if ( trailingLon > Math.PI ) {
 		return (trailingLon > leadingLon) && (leadingLon > trailingLon - Math.PI);
 	} else {
-		return (trailingLon > leadingLon) || (leadingLon > trailingLon + MATH.PI);
+		return (trailingLon > leadingLon) || (leadingLon > trailingLon + Math.PI);
 	}
 }
 

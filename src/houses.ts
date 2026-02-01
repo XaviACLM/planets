@@ -41,8 +41,6 @@ export const AyanamsaDependantHouseSystems: HouseSystem[] = [
 	HouseSystem.WHOLE_SIGN_ARIES,
 ];
 
-// TODO whole sign and whole sign aries
-
 function computeWholeSignCuspPositions(
 	angles: AxisAngles,
 	zodiacSymbolPositions: Map<Zodiac, number>

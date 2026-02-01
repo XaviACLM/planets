@@ -1,6 +1,7 @@
 import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
 import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
+import { renderNode } from './renderPrimitives.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 
 const luminaries: Node[] = [Node.SUN, Node.MOON];
@@ -47,20 +48,6 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			<span className="small-caps font-bold tracking-wide" style={{ fontSize: textSizeTitle }}>
 				{str}
 			</span>
-		);
-	};
-
-	const renderNode = (node: Node): ReactNode => {
-		return showNodeLabels ? (
-			renderSmallcapsString(node)
-		) : (
-			<img
-				src={nodeSymbols[node]}
-				alt={node}
-				width={symbolSize}
-				height={symbolSize}
-				className="invert inline"
-			/>
 		);
 	};
 
@@ -369,8 +356,8 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			<div className="flex justify-center flex-wrap">
 				{nodes.map((node) => {
 					return (
-						<div key={node} className="mx-3 flex items-center gap-1">
-							{renderNode(node)}
+						<div key={node} className="mx-2 flex items-center gap-1">
+							{renderNode(node, showNodeLabels, true)}
 							{" | "}
 							{renderElement(nodeElements.get(node))}
 							{" · "}
@@ -387,7 +374,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 			<>
 			{nodes.map((node, i) => {
 				return <span key={node}>
-					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node)}
+					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node, showNodeLabels)}
 					{(forceText || showNodeLabels) && (i < nodes.length - 1)
 					&& <span style={{fontSize: textSize}}>, </span>
 					}

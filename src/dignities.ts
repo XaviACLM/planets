@@ -126,7 +126,7 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 		return null;
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node) as unknown as Zodiac;
+	const sign = zodiacPositions.getSymbolOfNode(node);
 	const position = zodiacPositions.getNodePosition(node);
 	const signStartPositions = zodiacPositions.getZodiacSymbolPositions();
 	const signStart = signStartPositions.get(sign)!;
@@ -207,7 +207,7 @@ export function getTriplicityRole(node: Node, zodiacPositions: ZodiacPositions, 
 		throw new Error(`getTriplicityRole is only valid for planets and luminaries, got: ${node}`);
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node) as unknown as Zodiac;
+	const sign = zodiacPositions.getSymbolOfNode(node);
 	const elem = zodiacElement[sign];
 	const triplicityData = triplicityDataByMode[triplicityMode];
 	const rulers = triplicityData[elem];
@@ -467,7 +467,6 @@ const ptolemaicBoundsData: Partial<BoundsData> = {
 		{ upToDegree: 25, lord: Node.MARS },
 		{ upToDegree: 30, lord: Node.SATURN },
 	]
-	// TODO: fill in remaining signs
 };
 
 // https://astrolibrary.org/library/tetrabiblos/tetrabiblos-23/

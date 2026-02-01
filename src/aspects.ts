@@ -602,22 +602,11 @@ export function findAspects(
 	}
 
 	return subaspects;
-
-	// doesn't print anything, so it looks like the error we compute on-the-fly is already good
-	// which is odd, I don't see why that should be the case with irregular configurations
-	// might revisit this at some point
-	//for ( const aspect of aspectList ){
-	//	const computedError = aspectError(aspect, nodePositions) - 1e-10;
-	//	if (computedError > aspect.error){
-	//		console.log(aspect.kind, aspect.error, computedError);
-	//	}
-	//}
 }
 
 export function ensureNoDuplicates(
 	subaspectMap: Map<Aspect, Aspect[]>
 ){
-	// TODO also sort by error
 	const excludedAspects = new AspectGroup();
     const sortedEntries = Array.from(subaspectMap.entries())
         .sort(([a, _sa], [b, _sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error! - b.error!));

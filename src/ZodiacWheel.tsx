@@ -5,7 +5,7 @@ import { type Aspect } from './aspects.ts'
 import { Node, Zodiac, standardZodiac } from './astroDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
-import { nodeSymbolHideable, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors } from './astroGraphics.ts'
+import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
 
 function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRadius: number){
 	const as: number[] = aspect.nodes
@@ -263,9 +263,6 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 							key={index}
 							x={x}
 							y={y+0.6}
-							//TODO remove
-							//width={symbolSize}
-							//height={symbolSize}
 							fontSize="1"
 							fontWeight="bold"
 							textAnchor={flip ? "end" : "start"}
@@ -321,9 +318,6 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 								key={i}
 								x={x}
 								y={flip ? y+1 : y}
-								//TODO remove
-								//width={symbolSize}
-								//height={symbolSize}
 								fontSize="1.5"
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
@@ -345,7 +339,7 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-						if ( showNodeLabels && nodeSymbolHideable[node] ) {
+						if ( showNodeLabels && nodesWithRedundantSymbols.includes(node) ) {
 							return null;
 						}
 						
@@ -412,9 +406,9 @@ function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep
 						const y = 50 - planetRadius * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 						const flip = (r>90 && r<270) && flipText;
-						const nodeName = nodeShortName[node] || node;
+						const nodeName = nodeShortName[node] || nodePreferredName[node] || node;
 						let px = x;
-						if ( nodeSymbolHideable[node] ) {
+						if ( nodesWithRedundantSymbols.includes(node) ) {
 							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
 						}
 						return (

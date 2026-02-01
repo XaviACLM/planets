@@ -223,7 +223,7 @@ export const Node = {
     TYPHON: "Typhon",
     CHAOS: "Chaos",
     RADAMANTHUS: "Radamanthus",
-    GKUNHOMDIMA: "Gkunhomdima",
+    GKUNHOMDIMA: "Gǃkúnǁʼhòmdímà",
 	
 } as const;
 export type Node = typeof Node[keyof typeof Node];

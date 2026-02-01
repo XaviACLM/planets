@@ -175,13 +175,7 @@ function App() {
 			</aside>
 
 			<main className="flex-1 relative flex items-center justify-center overflow-hidden">
-				<EsotericModePanel
-					setShowNodeLabels={setShowNodeLabels}
-					setShowSymbolLabels={setShowSymbolLabels}
-					setShowElementLabels={setShowElementLabels}
-					setShowModeLabels={setShowModeLabels}
-					setShowSignsInDispositorChains={setShowSignsInDispositorChains}
-				/>
+				<EsotericModePanel/>
 				<button
 					className="absolute top-4 right-4 text-white bg-black border border-gray-500 hover:border-gray-400 p-2 pl-4 pr-4"
 					onClick={() => setMenuOpen(!menuOpen)}

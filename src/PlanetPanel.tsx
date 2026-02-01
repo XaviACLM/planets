@@ -19,6 +19,7 @@ import {
 	NodeSelectorButton,
 	renderDispositorChain,
 	renderFinalDispositors,
+	renderCommaSeparatedNodeList
 } from './renderPrimitives';
 import { nodeImages, radialShadow, nodeSymbols } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
@@ -27,19 +28,6 @@ import ZodiacPositions from './zodiacPositions';
 // Opinionated thresholds
 const STATIONARY_THRESHOLD_DEG_PER_DAY = 0.1; // degrees/day - planet considered stationary below this
 const ANGLE_PROXIMITY_THRESHOLD_DEG = 10; // degrees - show "near angle" info within this distance
-
-/*
-TODO
-
-from dignities.ts
-getBoundsLord, getFaceLord, getTriplicityRole
--> Node, Node, TriplicityRole.DIURNAL/NOCTURNAL/PARTICIPATING
-
-set up the settings too. from astroDefs.ts
-TriplicityMode, FaceMode, BoundsMode
-
-then add the info. then organize it as planned. then make things look nicer
-*/
 					
 type PlanetPanelProps = {
 	zodiacPositions: ZodiacPositions;
@@ -63,7 +51,6 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
 	const showElementLabels = useSettingsStore(s => s.showElementLabels);
 	const showModeLabels = useSettingsStore(s => s.showModeLabels);
-	// TODO why doesn't this work?
 	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
@@ -166,11 +153,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {
 		if (!hasSurfacePosition) return null;
-		try {
-			return getAngleProximity(selectedNode, zodiacPositions);
-		} catch {
-			return null;
-		}
+		return getAngleProximity(selectedNode, zodiacPositions);
 	}, [selectedNode, zodiacPositions, hasSurfacePosition]);
 
 	const angleProximityDeg = angleProximity ? (angleProximity.distance * 180 / Math.PI) : null;
@@ -198,7 +181,6 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	}, [selectedNode, rulershipGraph]);
 
 	const transitivelyRuledNodes = useMemo(() => {
-		// TODO remove all these fucking try-catches
 		return isStandardNode ? rulershipGraph.getRuledNodes(selectedNode, true) : null;
 	}, [selectedNode, rulershipGraph]);
 
@@ -239,7 +221,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
-				{renderNode(angleProximity.closestAngle, showNodeLabels)}
+				{renderNode(angleProximity.closestAngle, showNodeLabels, true)}
 				{renderString(`).`)}
 			</div>
 		);
@@ -308,44 +290,43 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<div className="mb-2">
 				<div className="flex flex-wrap gap-1.5">
 					{buttonSpecs.map((btn, idx) => (
-						btn.disabled ? (
-							<button
-								key={idx}
-								className="bg-transparent border border-gray-800 p-1.5 text-white opacity-40 cursor-not-allowed flex items-center justify-center small-caps"
-								disabled
-							>
-								<span className="text-xs font-medium whitespace-nowrap opacity-60">{btn.node || "Ruler"}</span>
-							</button>
-						) : (
-							<NodeSelectorButton
-								key={idx}
-								node={btn.node}
-								showLabel={showNodeLabels}
-								selected={selectedNode === btn.node}
-								disabled={btn.disabled}
-								highlighted={btn.highlight}
-								onClick={() => setSelectedNode(btn.node!)}
-							/>
-						)
+						<NodeSelectorButton
+							key={idx}
+							node={btn.node || "Ruler"}
+							showLabel={showNodeLabels || !btn.node}
+							selected={selectedNode === btn.node}
+							disabled={btn.disabled}
+							highlighted={btn.highlight}
+							onClick={() => setSelectedNode(btn.node!)}
+						/>
 					))}
 				</div>
 			</div>
 		);
 	}
 	
-	const renderRuledNodes = (ruledNodes: Node[], transitively: boolean) => {
-		const allNodes = ruledNodes.length === standardNodes.length - 1;
+	const renderRuledNodes = (ruledNodes: Node[], transitivelyRuledNodes: Node[]) => {
+		if (ruledNodes.length === 0){
+			return renderString("Not ruling any planet or luminary.");
+		}
+		
+		const rulesAllNodes = ruledNodes.length === standardNodes.length - 1;
+		const transitivelyRulesAllNodes = transitivelyRuledNodes.length === standardNodes.length - 1;
+		const transitivelyRulesAnyNodes = transitivelyRuledNodes.length > ruledNodes.length ;
+		const exclusivelyTransitivelyRuledNodes = transitivelyRulesAnyNodes ? transitivelyRuledNodes.filter(n => !ruledNodes.includes(n)) : [];
 		return (
-			<div>
-				{renderString(transitively ? "Transitively rules" : "Rules")}
-				{renderString(allNodes? " all nodes." : ": ")}
-				{!allNodes && ruledNodes.map((node, i) => (
-					<span key={i}>
-						{i > 0 && renderString(", ")}
-						{renderNode(node, showNodeLabels)}
-					</span>
-				))}
-			</div>
+			<span>
+				{renderString("Rules ")}
+				{rulesAllNodes && renderString("all planets & luminaries")}
+				{!rulesAllNodes && renderCommaSeparatedNodeList(ruledNodes, showNodeLabels)}
+				{renderString(".")}
+				{transitivelyRulesAnyNodes && (<>
+					{renderString(" Transitively rules ")}
+					{transitivelyRulesAllNodes && renderString("all planets & luminaries")}
+					{!transitivelyRulesAllNodes && renderCommaSeparatedNodeList(exclusivelyTransitivelyRuledNodes, showNodeLabels)}
+					{renderString(".")}
+				</>)}
+			</span>
 		);
 	}
 	
@@ -390,7 +371,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						{renderSmallcapsString(formattedPosition)}
 					</div>
 				
-					{/* House, house angularity*/}
+					{/* House, house angularity */}
 					{houseNumber && (
 						<div>
 							{renderString(`${formatOrdinal(houseNumber)} House`)}
@@ -402,6 +383,9 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 							)}
 						</div>
 					)}
+					
+					{/* Chart ruler */}
+					{selectedNode === chartRuler && (<div className="underline">{renderString("Chart Ruler")}</div>)}
 					
 					{/* Dignity */}
 					{dignityState && renderDignity(dignityState)}
@@ -492,9 +476,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 								renderDispositorChain(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)
 							)}
 						</div>
-						{ruledNodes && ruledNodes.length === 0 && renderString("Not ruling any planet or luminary.")}
-						{ruledNodes && ruledNodes.length > 0 && renderRuledNodes(ruledNodes, false)}
-						{transitivelyRuledNodes && transitivelyRuledNodes.length > ruledNodes.length && renderRuledNodes(transitivelyRuledNodes, true)}
+						{isStandardNode && renderRuledNodes(ruledNodes, transitivelyRuledNodes)}
 					</div>
 				</>
 			)}
@@ -503,10 +485,3 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 };
 
 export default PlanetPanel;
-
-
-//<span
-//	className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
-//>
-//	{title}
-//</span>

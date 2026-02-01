@@ -10,7 +10,6 @@ function constructRulershipGraphInternals(zodiacPositions: ZodiacPositions, dign
 		
 	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
 	
-	// TODO this code is kinda inelegant. a lot of this could be functionalish one-linerish i bet
 	const rules: Map<Node, Node[]> = new Map(standardNodes.map(node => [node, []]));
 	const ruledBy = new Map<Node, Node>();
 	const sign = new Map<Node, Zodiac>();
@@ -192,9 +191,8 @@ export class RulershipGraph {
 	}
 	
 	public getRuledNodes(node: Node, transitive: boolean): Node[]{
-		// TODO unclear how this should work with final dispositors, esp. if not in single reception
 		if (!transitive){
-			return this._rules.get(node);
+			return this._rules.get(node).filter(n => n !== node);
 		}
 		// otherwise, some tree search
 		const transitivelyRuledNodes: Node[] = [];

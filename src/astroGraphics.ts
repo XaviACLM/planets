@@ -143,80 +143,64 @@ export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.PART_OF_FORTUNE] : "Fortuna",
 	[Node.RADAMANTHUS] : "R-manthus",
 	[Node.GKUNHOMDIMA] : "G-Hmdima",
-	[Node.VERNAL_EQUINOX] : "Vernal Equinox",
+	[Node.VERNAL_EQUINOX] : "Vernal Eq.",
 	[Node.AUTUMNAL_EQUINOX] : "Autumnal Eq.",
-	//TODO shortnames of hamburg school and minor-minor objects
+}
+
+export const nodePreferredName: Partial<Record<Node, String>> = {
+	[Node.LUNAR_ASCENDING] : "Lunar North",
+	[Node.LUNAR_DESCENDING] : "Lunar South",
+	[Node.LUNAR_APOGEE] : "Lilith",
+	[Node.LUNAR_PERIGEE] : "Selene",
 }
 
 export const aspectKindShortName: Partial<Record<AspectKind, String>> = {
 }
 
-export const nodeSymbolHideable: Record<Node, boolean> = {
-	[Node.SUN] : false,
-	[Node.MOON] : false,
-	[Node.MERCURY] : false,
-	[Node.VENUS] : false,
-	[Node.MARS] : false,
-	[Node.JUPITER] : false,
-	[Node.SATURN] : false,
-	[Node.URANUS] : false,
-	[Node.NEPTUNE] : false,
-	[Node.PLUTO] : false,
-	
-	[Node.ASCENDANT] : true,
-	[Node.DESCENDANT] : true,
-	[Node.MIDHEAVEN] : true,
-	[Node.IMUM_COELI] : true,
-	[Node.VERTEX] : true,
-	[Node.ANTIVERTEX] : true,
-	[Node.VERNAL_EQUINOX] : true,
-	[Node.AUTUMNAL_EQUINOX] : true,
-	
-	[Node.PART_OF_FORTUNE] : false,
-	
-	[Node.LUNAR_ASCENDING] : false,
-	[Node.LUNAR_DESCENDING] : false,
-	[Node.LUNAR_APOGEE] : false,
-	[Node.LUNAR_PERIGEE] : false,
-	
-	[Node.CERES] : false,
-	[Node.CHIRON] : false,
-	[Node.ERIS] : false,
-	[Node.HAUMEA] : false,
-	[Node.JUNO] : false,
-	[Node.MAKEMAKE] : false,
-	[Node.PALLAS] : false,
-	[Node.SEDNA] : false,
-	[Node.VESTA] : false,
-	
-	[Node.CUPIDO] : false,
-	[Node.HADES] : false,
-	[Node.ZEUS] : false,
-	[Node.KRONOS] : false,
-	[Node.APOLLON] : false,
-	[Node.ADMETOS] : false,
-	[Node.VULCANUS] : false,
-	[Node.POSEIDON] : false,
-	
-    [Node.ASTRAEA] : false,
-    [Node.HYGIEA] : false,
-    [Node.PHOLUS] : false,
-    [Node.NESSUS] : false,
-    [Node.CHARIKLO] : false,
-    [Node.HYLONOME] : false,
-    [Node.CYLLARUS] : false,
-    [Node.GONGGONG] : false,
-    [Node.QUAOAR] : false,
-    [Node.ORCUS] : false,
-    [Node.SALACIA] : false,
-    [Node.VARDA] : false,
-    [Node.IXION] : false,
-    [Node.VARUNA] : false,
-    [Node.TYPHON] : false,
-    [Node.CHAOS] : false,
-    [Node.RADAMANTHUS] : false,
-    [Node.GKUNHOMDIMA] : false,
-}
+export const nodesWithRedundantSymbols: Node[] = [
+	Node.ASCENDANT,
+	Node.DESCENDANT,
+	Node.MIDHEAVEN,
+	Node.IMUM_COELI,
+	Node.VERTEX,
+	Node.ANTIVERTEX,
+	Node.VERNAL_EQUINOX,
+	Node.AUTUMNAL_EQUINOX
+];
+
+/*
+TODO remove this comment
+not too sure how to do this stuff.
+when DO we use article?
+when not in a list? No, that's not right.
+When within a sentence? That makes sense. renderNode will get an arg for that and include the "the" (NOT as smallcaps - right?)
+So are we okay with it working like that for ASC/DSC/MC/IC? Well, let's think - when would it actually show up?
+I don't think it can show up anywhere other than the "In 2 aspects, with etc etc" list. Here... hm, I'm not too sure.
+We could make it toggleable but this would be kind of a pain.
+We can keep them without an article. I think this is fine.
+and how the fuck do we handle the POF thing? 
+oh nevermind, let's go back. that example WAS a list, I don't think we want to use "the SUN" there. Yeah it's gotta be a sentence and not within a list.
+I think it would be fine to keep ASCDSCetc then. Let's do that.
+So what about the PoF business?
+(also: do we use "the" in sentence-context single-element lists? maybe maybe maybe. but anyway:)
+So what about the PoF business?
+very troublesome. admitting article is a property of the node, not the name. How do we handle this? I'm not big on having huge str list of namesAdmittingArticle and calling it a day
+...but maybe we need to?
+actually nevermind that's fine. shortnames will never be used in an area where we're writing entire sentences. And preferred names always override names. So we're good.
+*/
+export const nodesAdmittingArticle: Node[] = [
+	Node.SUN,
+	Node.MOON,
+	Node.ASCENDANT,
+	Node.IMUM_COELI,
+	Node.DESCENDANT,
+	Node.MIDHEAVEN,
+	Node.VERTEX,
+	Node.ANTIVERTEX,
+	Node.VERNAL_EQUINOX,
+	Node.AUTUMNAL_EQUINOX,
+	Node.PART_OF_FORTUNE,
+];
 	
 export const zodiacSymbols: Record<Zodiac, string> = {
 	[Zodiac.ARIES] : ariesSymbol,

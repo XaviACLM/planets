@@ -1,20 +1,18 @@
 import { useState, FC } from 'react';
-
+import { useSettingsStore } from './settingsStore.ts'
+	
 type EsotericModePanelProps = {
-	setShowNodeLabels: (value: boolean) => void;
-	setShowSymbolLabels: (value: boolean) => void;
-	setShowElementLabels: (value: boolean) => void;
-	setShowModeLabels: (value: boolean) => void;
-	setShowSignsInDispositorChains: (value: boolean) => void;
 };
 
 const EsotericModePanel: FC<EsotericModePanelProps> = ({
-	setShowNodeLabels,
-	setShowSymbolLabels,
-	setShowElementLabels,
-	setShowModeLabels,
-	setShowSignsInDispositorChains,
 }) => {
+	const setShowNodeLabels = useSettingsStore(s => s.setShowNodeLabels);
+	const setShowSymbolLabels = useSettingsStore(s => s.setShowSymbolLabels);
+	const setShowElementLabels = useSettingsStore(s => s.setShowElementLabels);
+	const setShowModeLabels = useSettingsStore(s => s.setShowModeLabels);
+	const setShowSignsInDispositorChains = useSettingsStore(s => s.setShowSignsInDispositorChains);
+	const setUseExtendedDignities = useSettingsStore(s => s.setUseExtendedDignities);
+	
 	const [panelState, setPanelState] = useState<'initial' | 'esoteric' | 'hidden'>('initial');
 
 	if (panelState === 'hidden') {
@@ -27,6 +25,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowElementLabels(false);
 		setShowModeLabels(false);
 		setShowSignsInDispositorChains(true);
+		setUseExtendedDignities(true);
 		setPanelState('esoteric');
 	};
 
@@ -36,6 +35,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowElementLabels(true);
 		setShowModeLabels(true);
 		setShowSignsInDispositorChains(false);
+		setUseExtendedDignities(false);
 		setPanelState('hidden');
 	};
 

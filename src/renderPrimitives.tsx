@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Node, Zodiac, Mode, Element } from './astroDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
-import { zodiacSymbols, nodeSymbols, nodeShortName, elementSymbols, modeSymbols } from './astroGraphics';
+import { zodiacSymbols, nodeSymbols, nodePreferredName, elementSymbols, modeSymbols, nodesWithRedundantSymbols } from './astroGraphics';
 
 // Default sizes - can be overridden via optional params
 const DEFAULT_TEXT_SIZE = 12;
@@ -55,12 +55,13 @@ export const renderTitle = (
 export const renderNode = (
 	node: Node,
 	showLabel: boolean,
+	forceTextForSpecialNodes: boolean = false, //asc, etc
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	if (showLabel) {
-		const label = nodeShortName[node] ?? node;
-		return renderSmallcapsString(String(label), { fontSize });
+	if (showLabel || (forceTextForSpecialNodes && nodesWithRedundantSymbols.includes(node))) {
+		const label = nodePreferredName[node] || node;
+		return renderSmallcapsString(String(label), options={ fontSize });
 	}
 	return (
 		<img
@@ -72,6 +73,24 @@ export const renderNode = (
 		/>
 	);
 };
+	
+export const renderCommaSeparatedNodeList = (
+	nodes: Node[],
+	showLabels: boolean,
+	options: SymbolRenderOptions & TextRenderOptions = {}
+): ReactNode => {
+	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
+	return (
+		<>
+			{nodes.map((node, i) => (
+				<span key={i}>
+					{i > 0 && renderString(", ")}
+					{renderNode(node, showLabels, options={ size, fontSize })}
+				</span>
+			))}
+		</>
+	);
+}
 
 export const renderSign = (
 	sign: Zodiac,
@@ -80,7 +99,7 @@ export const renderSign = (
 ): ReactNode => {
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 	if (showLabel) {
-		return renderSmallcapsString(sign, { fontSize });
+		return renderSmallcapsString(sign, options={ fontSize });
 	}
 	return (
 		<img
@@ -100,7 +119,7 @@ export const renderElement = (
 ): ReactNode => {
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 	if (showLabel) {
-		return renderSmallcapsString(elem, { fontSize });
+		return renderSmallcapsString(elem, options={ fontSize });
 	}
 	return (
 		<img
@@ -120,7 +139,7 @@ export const renderMode = (
 ): ReactNode => {
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 	if (showLabel) {
-		return renderSmallcapsString(mode, { fontSize });
+		return renderSmallcapsString(mode, options={ fontSize });
 	}
 	return (
 		<img
@@ -167,7 +186,7 @@ export const renderNodeWithSign = (
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 
 	if (!showSign) {
-		return renderNode(node, showNodeLabel, { size, fontSize });
+		return renderNode(node, showNodeLabel, options={ size, fontSize });
 	}
 
 	const parenSize = showSignLabel ? fontSize : fontSize * 1.5;
@@ -175,9 +194,9 @@ export const renderNodeWithSign = (
 
 	return (
 		<span key={key} className="whitespace-nowrap">
-			{renderNode(node, showNodeLabel, { size, fontSize })}
+			{renderNode(node, showNodeLabel, options={ size, fontSize })}
 			<span style={{ fontSize: parenSize, opacity: parenOpacity }}> [</span>
-			{renderSign(sign, showSignLabel, { size, fontSize })}
+			{renderSign(sign, showSignLabel, options={ size, fontSize })}
 			<span style={{ fontSize: parenSize, opacity: parenOpacity }}>]</span>
 		</span>
 	);
@@ -199,7 +218,7 @@ export const renderUnwrappableDispositorChainSegment = (
 			<></> {/* need an element we can linebreak on (for some reason zwsp doesn't work) */}
 			<span className="whitespace-nowrap">
 				{useDoubleArrow ? renderDoubleArrow({ fontSize }) : renderArrow({ fontSize })}
-				{renderNodeWithSign(node, sign, showSigns, showNodeLabels, showSignLabels, { size, fontSize })}
+				{renderNodeWithSign(node, sign, showSigns, showNodeLabels, showSignLabels, options={ size, fontSize })}
 			</span>
 		</span>
 	);
@@ -221,28 +240,28 @@ export const renderFinalDispositors = (
 	if (fd.nodes.length === 1) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
 			{!withText && renderHookedArrow({ fontSize })}
 			{withText && renderString(" in domicile.", { fontSize })}
 		</span>);
 	} else if (fd.nodes.length === 2) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
 			{renderMutualArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, 1, { size, fontSize })}
+			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, 1, options={ size, fontSize })}
 			{withText && renderString(" in reception.", { fontSize })}
 		</span>);
 	} else {
 		contents = (<>
 			<span key={key} className="whitespace-nowrap">
 				{includeLeadingArrow && renderArrow({ fontSize })}
-				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
+				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
 			</span>
 			{Array.from({length: fd.nodes.length}).map((_, i) => {
 				const node = fd.nodes[(i+1)%fd.nodes.length];
 				const sign = fd.signs[(i+1)%fd.nodes.length];
-				return renderUnwrappableDispositorChainSegment(node, sign, true, showSigns, showNodeLabels, showSignLabels, i, { size, fontSize });
+				return renderUnwrappableDispositorChainSegment(node, sign, true, showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize });
 			})}
 		</>);
 	}
@@ -274,10 +293,10 @@ export const renderDispositorChain = (
 			{chain.nodes.slice(0, stopAtIndex).map((node, i) => (
 				i === 0 ? (
 					<span key={i}>
-						{renderNodeWithSign(node, chain.signs[i], showSigns, showNodeLabels, showSignLabels, i, { size, fontSize })}
+						{renderNodeWithSign(node, chain.signs[i], showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize })}
 					</span>
 				) : (
-					renderUnwrappableDispositorChainSegment(node, chain.signs[i], false, showSigns, showNodeLabels, showSignLabels, i, { size, fontSize })
+					renderUnwrappableDispositorChainSegment(node, chain.signs[i], false, showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize })
 				)
 			))}
 			{includeFinalDispositors && renderFinalDispositors(
@@ -312,8 +331,8 @@ export const SelectorButton = ({
 }: SelectorButtonProps): ReactNode => {
 	const baseClasses = "bg-transparent border-1 p-1.5 text-white cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
 	const hoverClasses = disabled ? "" : "hover:border-gray-500 hover:bg-white/10";
-	const borderClass = selected ? "border-white" : "border-gray-800";
-	const disabledClasses = disabled ? "opacity-40 cursor-not-allowed" : "";
+	const borderClass = selected ? "border-white" : "border-white/30";
+	const disabledClasses = disabled ? "opacity-40" : "";
 	const highlightedClasses = highlighted ? "border-3 border-double" : "";
 
 	return (
@@ -321,7 +340,6 @@ export const SelectorButton = ({
 			className={`${baseClasses} ${hoverClasses} ${borderClass} ${disabledClasses} ${highlightedClasses}`}
 			onClick={disabled ? undefined : onClick}
 			title={title}
-			disabled={disabled}
 		>
 			{children}
 		</button>
@@ -352,10 +370,10 @@ export const NodeSelectorButton = ({
 			onClick={onClick}
 			title={node}
 		>
-			<span className="flex flex-col items-center">
+			<span className={`flex flex-col items-center ${disabled ? "cursor-not-allowed" : ""}`}>
 				{showLabel ? (
 					<span className="text-xs font-medium whitespace-nowrap">
-						{nodeShortName[node] ?? node}
+						{nodePreferredName[node] || node}
 					</span>
 				) : (
 					<img
