@@ -6,6 +6,7 @@ import { Node, Zodiac, standardZodiac } from './astroDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
 import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
+import { useSettingsStore } from './settingsStore.ts'
 
 function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRadius: number){
 	const as: number[] = aspect.nodes
@@ -49,18 +50,18 @@ function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRad
 	}
 }
 
-function ZodiacWheel({ showNodeLabels, showSymbolLabels, flipText, housePresweep, rotateSymbols, aspectsColorcoded, zodiacPositions, selectedNodes, aspects, highlightedAspect}: {
-	showNodeLabels: boolean,
-	showSymbolLabels: boolean,
-	flipText: boolean,
-	housePresweep: boolean,
-	rotateSymbols: boolean,
-	aspectsColorcoded: boolean,
+function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 	zodiacPositions: ZodiacPositions,
-	selectedNodes: Set<Node>,
 	aspects: Aspect[],
 	highlightedAspect: Aspect | null
 }) {
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const flipText = useSettingsStore(s => s.flipText);
+	const housePresweep = useSettingsStore(s => s.housePresweep);
+	const rotateSymbols = useSettingsStore(s => s.rotateSymbols);
+	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	
 	const sectorRadius = 48;
 	const symbolRadius = 43.5;

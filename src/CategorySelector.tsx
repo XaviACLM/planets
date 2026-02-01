@@ -2,6 +2,7 @@ import { type FC } from 'react';
 import { Node, nodeCategories } from './astroDefs';
 import { AspectKind, aspectKindCategories } from './aspectDefs';
 import { nodeSymbols, nodeShortName, aspectSymbols, aspectKindShortName } from './astroGraphics';
+import { useSettingsStore } from './settingsStore';
 
 interface SelectorProps<T extends string | number> {
 	selectedItems: Set<T>;
@@ -68,20 +69,28 @@ const Selector = <T extends string | number>({
 
 
 
-export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'symbols' | 'labels'>> = (props) => (
-	<Selector
-		{...props}
-		categories={nodeCategories}
-		symbols={nodeSymbols}
-		labels={nodeShortName}
-	/>
-);
+export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'symbols' | 'labels' | 'showLabels'>> = (props) => {
+	const showLabels = useSettingsStore(s => s.showNodeLabels);
+	return (
+		<Selector
+			{...props}
+			showLabels={showLabels}
+			categories={nodeCategories}
+			symbols={nodeSymbols}
+			labels={nodeShortName}
+		/>
+	);
+};
 
-export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'symbols' | 'labels'>> = (props) => (
-	<Selector
-		{...props}
-		categories={aspectKindCategories}
-		symbols={aspectSymbols}
-		labels={aspectKindShortName}
-	/>
-);
+export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'symbols' | 'labels' | 'showLabels'>> = (props) => {
+	const showLabels = useSettingsStore(s => s.showAspectLabels);
+	return (
+		<Selector
+			{...props}
+			showLabels={showLabels}
+			categories={aspectKindCategories}
+			symbols={aspectSymbols}
+			labels={aspectKindShortName}
+		/>
+	);
+};

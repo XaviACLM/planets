@@ -21,28 +21,11 @@ import { useSettingsStore } from './settingsStore.ts'
 
 function App() {
 
-	// TODO get this out of here and from the props and just get the settings state where it's needed directly
-	const selectedHouseSystem = useSettingsStore(s => s.selectedHouseSystem);
-	const setSelectedHouseSystem = useSettingsStore(s => s.setSelectedHouseSystem);
+	// Settings needed for computations in App
+	const houseSystem = useSettingsStore(s => s.houseSystem);
+	const setHouseSystem = useSettingsStore(s => s.setHouseSystem);
 	const housePresweep = useSettingsStore(s => s.housePresweep);
-
-	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
-	const setShowNodeLabels = useSettingsStore(s => s.setShowNodeLabels);
-	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
-	const setShowSymbolLabels = useSettingsStore(s => s.setShowSymbolLabels);
-	const showElementLabels = useSettingsStore(s => s.showElementLabels);
-	const setShowElementLabels = useSettingsStore(s => s.setShowElementLabels);
-	const showModeLabels = useSettingsStore(s => s.showModeLabels);
-	const setShowModeLabels = useSettingsStore(s => s.setShowModeLabels);
-
-	const flipText = useSettingsStore(s => s.flipText);
-	const rotateSymbols = useSettingsStore(s => s.rotateSymbols);
-	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
-	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
-	const setShowSignsInDispositorChains = useSettingsStore(s => s.setShowSignsInDispositorChains);
-
-	const selectedAspectErrorMode = useSettingsStore(s => s.selectedAspectErrorMode);
+	const aspectErrorMode = useSettingsStore(s => s.aspectErrorMode);
 	const maxConfigurationErrorDegrees = useSettingsStore(s => s.maxConfigurationErrorDegrees);
 	const maxMajorBAErrorDegrees = useSettingsStore(s => s.maxMajorBAErrorDegrees);
 	const maxMinorBAErrorDegrees = useSettingsStore(s => s.maxMinorBAErrorDegrees);
@@ -52,13 +35,12 @@ function App() {
 
 	const aspectPhysicalityFilter = useSettingsStore(s => s.aspectPhysicalityFilter);
 	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
-	const selectedAspectMenuMode = useSettingsStore(s => s.selectedAspectMenuMode);
+	const aspectMenuMode = useSettingsStore(s => s.aspectMenuMode);
 
 	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
-	const selectedAstrologyMode = useSettingsStore(s => s.selectedAstrologyMode);
-	const selectedDignityMode = useSettingsStore(s => s.selectedDignityMode);
-	const selectedHouseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
+	const astrologyMode = useSettingsStore(s => s.astrologyMode);
+	const dignityMode = useSettingsStore(s => s.dignityMode);
 
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
@@ -71,16 +53,16 @@ function App() {
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode, housePresweep));
-	
+    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
+
 	const rulershipGraph = useMemo<RulershipGraph>(() => {
-		return RulershipGraph.create(zodiacPositions, selectedDignityMode);
-	}, [zodiacPositions, selectedDignityMode])
+		return RulershipGraph.create(zodiacPositions, dignityMode);
+	}, [zodiacPositions, dignityMode])
 
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions(), selectedAspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
-	}, [zodiacPositions, selectedAspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
+		return findAspects(zodiacPositions.getNodePositions(), aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
+	}, [zodiacPositions, aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
 
 	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
 	const filteredAspects = useMemo(() => {
@@ -91,7 +73,7 @@ function App() {
 			selectedAspectKinds,
 			aspectPhysicalityFilter,
 			hamburgPhysical,
-			selectedAspectErrorMode,
+			aspectErrorMode,
 			maxConfigurationError,
 			maxMajorBAError,
 			maxMinorBAError
@@ -100,11 +82,11 @@ function App() {
 		// any change fullAspects recomputation which will force filteredAspects recomputation anyway
 	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
 
-	// aspects, filtered, in the format imposed by the selected aspect menu mode
-	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(formatAspects(filteredAspects, selectedAspectMenuMode));
+	// aspects, filtered, in the format imposed by the aspect menu mode
+	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(formatAspects(filteredAspects, aspectMenuMode));
 	useEffect(() => {
-		setAspects(formatAspects(filteredAspects, selectedAspectMenuMode));
-	}, [filteredAspects, selectedAspectMenuMode])
+		setAspects(formatAspects(filteredAspects, aspectMenuMode));
+	}, [filteredAspects, aspectMenuMode])
 
 	// aspects, flattened down to a single list for processing in UI components
 	// (this might be possible to do w/ enforced redundancy but unnecessary and much too complicated, even considering the above)
@@ -114,19 +96,19 @@ function App() {
 
 	// recompute zodiac whenever date or time changes
 	useEffect(() => {
-		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, selectedHouseSystem, selectedAstrologyMode, hamburgSchoolMode));
+		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
 	}, [selectedCity, selectedDate])
 
 	// handlers for changing config details in the zodiac positions that only require partial recomputation
 	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeHouseSystem(selectedHouseSystem));
-	}, [selectedHouseSystem])
+		setZodiacPositions(zodiacPositions.changeHouseSystem(houseSystem));
+	}, [houseSystem])
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
 	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeAstrologyMode(selectedAstrologyMode));
-	}, [selectedAstrologyMode])
+		setZodiacPositions(zodiacPositions.changeAstrologyMode(astrologyMode));
+	}, [astrologyMode])
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
 	}, [hamburgSchoolMode])
@@ -166,8 +148,6 @@ function App() {
 				<div className="w-full bg-black border border-gray-500 text-white">
 					<AspectMenu
 						aspects={aspects}
-						showAspectLabels={showAspectLabels}
-						aspectsColorcoded={aspectsColorcoded}
 						onHover={(aspect) => {setHighlightedAspect(aspect)}}
 						onDelete={handleAspectDeletion}
 					/>
@@ -183,14 +163,7 @@ function App() {
 					{menuOpen ? '✕' : '☰'}
 				</button>
 				<ZodiacWheel
-					showNodeLabels={showNodeLabels}
-					showSymbolLabels={showSymbolLabels}
-					flipText={flipText}
-					housePresweep={housePresweep}
-					rotateSymbols={rotateSymbols}
-					aspectsColorcoded={aspectsColorcoded}
 					zodiacPositions={zodiacPositions}
-					selectedNodes={selectedNodes}
 					aspects={flattenedAspects}
 					highlightedAspect={highlightedAspect}
 				/>
@@ -198,9 +171,9 @@ function App() {
 				{zodiacPositions.houseSystemUndefinedForPosition() &&
 					<div className="absolute bottom-5 right-5 bg-black text-white px-4 py-3 font-mono text-sm border border-gray-500 z-[1000] max-w-[400px] leading-relaxed">
 						<span>
-							Selected house system ({selectedHouseSystem}) is not defined for the selected time and location.{" "}
+							Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
 							<button
-								onClick={() => setSelectedHouseSystem(HouseSystem.PORPHYRY)}
+								onClick={() => setHouseSystem(HouseSystem.PORPHYRY)}
 								className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit] inline hover:text-gray-300 active:text-gray-500"
 							>
 								Switch to Porphyry
@@ -223,7 +196,6 @@ function App() {
 								<NodeSelector
 									selectedItems={selectedNodes}
 									setSelectedItems={setSelectedNodes}
-									showLabels={showNodeLabels}
 								/>
 							</Module>
 							<Module
@@ -234,7 +206,6 @@ function App() {
 								<AspectKindSelector
 									selectedItems={selectedAspectKinds}
 									setSelectedItems={setSelectedAspectKinds}
-									showLabels={showAspectLabels}
 								/>
 							</Module>
 							<Module
@@ -267,9 +238,6 @@ function App() {
 								{(abbreviated) => (
 									<DominanceChart
 										zodiacPositions={zodiacPositions}
-										showNodeLabels={showNodeLabels}
-										showElementLabels={showElementLabels}
-										showModeLabels={showModeLabels}
 										abbreviated={abbreviated}
 									/>
 								)}
@@ -283,7 +251,6 @@ function App() {
 								>
 									<HemispheresChart
 										zodiacPositions={zodiacPositions}
-										showNodeLabels={showNodeLabels}
 									/>
 								</Module>
 							)}
@@ -294,9 +261,6 @@ function App() {
 							>
 								<RulershipPanel
 									rulershipGraph={rulershipGraph}
-									showNodeLabels={showNodeLabels}
-									showSymbolLabels={showSymbolLabels}
-									showSignsInDispositorChains={showSignsInDispositorChains}
 								/>
 							</Module>
 						</>

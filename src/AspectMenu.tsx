@@ -1,5 +1,6 @@
 import { type Aspect } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
+import { useSettingsStore } from './settingsStore.ts'
 
 function createAspectElement(
 	key: number,
@@ -104,13 +105,13 @@ function createAspectElement(
 	</div>;
 }
 
-function AspectMenu({ aspects, showAspectLabels, aspectsColorcoded, onDelete, onHover }: {
+function AspectMenu({ aspects, onDelete, onHover }: {
 	aspects: Map<Aspect,Aspect[]>,
-	showAspectLabels: boolean,
-	aspectsColorcoded: boolean,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void
 }) {
+	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
+	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
 
 	return (
 		<div className="p-2 overflow-y-auto bg-black text-white scrollbar-none">

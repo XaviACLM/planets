@@ -44,7 +44,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 }) => {
 	
 	const dignityMode = useSettingsStore(s => s.dignityMode);
-	const houseAngularityMode = useSettingsStore(s => s.selectedHouseAngularityMode);
+	const houseAngularityMode = useSettingsStore(s => s.houseAngularityMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
 	
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);

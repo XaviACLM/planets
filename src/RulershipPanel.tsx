@@ -3,20 +3,18 @@ import { Node, Zodiac } from './astroDefs';
 import { zodiacSymbols, nodeSymbols } from './astroGraphics.ts';
 import { type DispositorChain, RulershipGraph } from './rulershipGraph.ts';
 import { renderTitle, renderFinalDispositors, renderDispositorChain } from './renderPrimitives';
+import { useSettingsStore } from './settingsStore.ts'
 
 type RulershipPanelProps = {
 	rulershipGraph: RulershipGraph;
-	showNodeLabels: boolean;
-	showSymbolLabels: boolean;
-	showSignsInDispositorChains: boolean;
 };
 
 const RulershipPanel: FC<RulershipPanelProps> = ({
 	rulershipGraph,
-	showNodeLabels,
-	showSymbolLabels,
-	showSignsInDispositorChains,
 }) => {
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
 	return (
 		<div className="text-white p-4" style={{ width: 330 }}>
 			<div>

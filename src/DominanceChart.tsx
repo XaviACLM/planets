@@ -3,24 +3,22 @@ import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transperso
 import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
 import { renderNode } from './renderPrimitives.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
+import { useSettingsStore } from './settingsStore.ts'
 
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
 	zodiacPositions: ZodiacPositions,
-	showNodeLabels: boolean,
-	showElementLabels: boolean,
-	showModeLabels: boolean,
 	abbreviated: boolean,
 }
 
 const DominanceChart: FC<DominanceChartProps> = ({
 	zodiacPositions,
-	showNodeLabels,
-	showElementLabels,
-	showModeLabels,
 	abbreviated,
 }) => {
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showElementLabels = useSettingsStore(s => s.showElementLabels);
+	const showModeLabels = useSettingsStore(s => s.showModeLabels);
 	const symbolSize = 20;
 	const textSize = 12;
 	const textSizeTitle = 14;

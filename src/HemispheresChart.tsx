@@ -2,10 +2,10 @@ import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, standardNodes } from './astroDefs';
 import { nodeSymbols } from './astroGraphics.ts';
 import ZodiacPositions from './zodiacPositions.ts'
+import { useSettingsStore } from './settingsStore.ts'
 
 type HemispheresChartProps = {
 	zodiacPositions: ZodiacPositions,
-	showNodeLabels: boolean,
 }
 
 function capitalize(sentence: string): string {
@@ -78,8 +78,8 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number) {
 
 const HemispheresChart: FC<HemispheresChartProps> = ({
 	zodiacPositions,
-	showNodeLabels,
 }) => {
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const symbolSize = 20;
 	const nodeSpacing = 27;
 	const textInListSpacing = 18;

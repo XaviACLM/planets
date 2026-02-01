@@ -17,8 +17,8 @@ import {
 
 interface SettingsState {
 	// House settings
-	selectedHouseSystem: HouseSystem;
-	setSelectedHouseSystem: (v: HouseSystem) => void;
+	houseSystem: HouseSystem;
+	setHouseSystem: (v: HouseSystem) => void;
 	housePresweep: boolean;
 	setHousePresweep: (v: boolean) => void;
 
@@ -45,8 +45,8 @@ interface SettingsState {
 	setAspectsColorcoded: (v: boolean) => void;
 
 	// Aspect error settings
-	selectedAspectErrorMode: AspectErrorMode;
-	setSelectedAspectErrorMode: (v: AspectErrorMode) => void;
+	aspectErrorMode: AspectErrorMode;
+	setAspectErrorMode: (v: AspectErrorMode) => void;
 	maxConfigurationErrorDegrees: number;
 	setMaxConfigurationErrorDegrees: (v: number) => void;
 	maxMajorBAErrorDegrees: number;
@@ -59,21 +59,20 @@ interface SettingsState {
 	setAspectPhysicalityFilter: (v: AspectPhysicalityFilter) => void;
 	hamburgPhysical: boolean;
 	setHamburgPhysical: (v: boolean) => void;
-	selectedAspectMenuMode: AspectMenuMode;
-	setSelectedAspectMenuMode: (v: AspectMenuMode) => void;
+	aspectMenuMode: AspectMenuMode;
+	setAspectMenuMode: (v: AspectMenuMode) => void;
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode;
 	setLunarNodeMode: (v: LunarNodeMode) => void;
 	hamburgSchoolMode: HamburgSchoolMode;
 	setHamburgSchoolMode: (v: HamburgSchoolMode) => void;
-	selectedAstrologyMode: AstrologyMode;
-	setSelectedAstrologyMode: (v: AstrologyMode) => void;
-	selectedDignityMode: DignityMode;
-	setSelectedDignityMode: (v: DignityMode) => void;
-	selectedHouseAngularityMode: HouseAngularityMode;
-	setSelectedHouseAngularityMode: (v: HouseAngularityMode) => void;
-	// TODO do away with all the "selected" stuff. wordy and very unnecessary
+	astrologyMode: AstrologyMode;
+	setAstrologyMode: (v: AstrologyMode) => void;
+	dignityMode: DignityMode;
+	setDignityMode: (v: DignityMode) => void;
+	houseAngularityMode: HouseAngularityMode;
+	setHouseAngularityMode: (v: HouseAngularityMode) => void;
 	useExtendedDignities: boolean;
 	setUseExtendedDignities: (v: boolean) => void;
 	triplicityMode: TriplicityMode;
@@ -93,8 +92,8 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>((set) => ({
 	// House settings
-	selectedHouseSystem: HouseSystem.PLACIDUS,
-	setSelectedHouseSystem: (v) => set({ selectedHouseSystem: v }),
+	houseSystem: HouseSystem.PLACIDUS,
+	setHouseSystem: (v) => set({ houseSystem: v }),
 	housePresweep: false,
 	setHousePresweep: (v) => set({ housePresweep: v }),
 
@@ -121,8 +120,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setAspectsColorcoded: (v) => set({ aspectsColorcoded: v }),
 
 	// Aspect error settings
-	selectedAspectErrorMode: AspectErrorMode.POINTWISE_MAX,
-	setSelectedAspectErrorMode: (v) => set({ selectedAspectErrorMode: v }),
+	aspectErrorMode: AspectErrorMode.POINTWISE_MAX,
+	setAspectErrorMode: (v) => set({ aspectErrorMode: v }),
 	maxConfigurationErrorDegrees: 3,
 	setMaxConfigurationErrorDegrees: (v) => set({ maxConfigurationErrorDegrees: v }),
 	maxMajorBAErrorDegrees: 3,
@@ -135,20 +134,20 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setAspectPhysicalityFilter: (v) => set({ aspectPhysicalityFilter: v }),
 	hamburgPhysical: false,
 	setHamburgPhysical: (v) => set({ hamburgPhysical: v }),
-	selectedAspectMenuMode: AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS,
-	setSelectedAspectMenuMode: (v) => set({ selectedAspectMenuMode: v }),
+	aspectMenuMode: AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS,
+	setAspectMenuMode: (v) => set({ aspectMenuMode: v }),
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode.MEAN,
 	setLunarNodeMode: (v) => set({ lunarNodeMode: v }),
 	hamburgSchoolMode: HamburgSchoolMode.NEELY,
 	setHamburgSchoolMode: (v) => set({ hamburgSchoolMode: v }),
-	selectedAstrologyMode: AstrologyMode.TROPICAL,
-	setSelectedAstrologyMode: (v) => set({ selectedAstrologyMode: v }),
-	selectedDignityMode: DignityMode.MODERN,
-	setSelectedDignityMode: (v) => set({ selectedDignityMode: v }),
-	selectedHouseAngularityMode: HouseAngularityMode.TRADITIONAL,
-	setSelectedHouseAngularityMode: (v) => set({ selectedHouseAngularityMode: v }),
+	astrologyMode: AstrologyMode.TROPICAL,
+	setAstrologyMode: (v) => set({ astrologyMode: v }),
+	dignityMode: DignityMode.MODERN,
+	setDignityMode: (v) => set({ dignityMode: v }),
+	houseAngularityMode: HouseAngularityMode.TRADITIONAL,
+	setHouseAngularityMode: (v) => set({ houseAngularityMode: v }),
 	useExtendedDignities: false,
 	setUseExtendedDignities: (v) => set({ useExtendedDignities: v }),
 	triplicityMode: TriplicityMode.PTOLEMAIC_LILLY,
