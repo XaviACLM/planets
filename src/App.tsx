@@ -17,6 +17,7 @@ import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
+import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
 import {
@@ -150,7 +151,7 @@ function App() {
 
 	return (
 		<div className="flex h-screen w-screen overflow-hidden bg-theme-bg">
-			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none animate-slide-in-left">
+			<Sidebar side="left">
 				<div className="w-full bg-theme-bg border border-theme-border text-theme-text px-1">
 					<CitySelector
 						startingQueryText={selectedCity}
@@ -178,7 +179,7 @@ function App() {
 						onDelete={handleAspectDeletion}
 					/>
 				</Module>
-			</aside>
+			</Sidebar>
 
 			<main className="flex-1 relative flex items-center justify-center overflow-hidden">
 				<EsotericModePanel/>
@@ -210,85 +211,83 @@ function App() {
 
 			</main>
 
-			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none relative">
-				<div className="flex flex-col gap-2 animate-slide-in-right" key={menuOpen ? 'settings' : 'main'}>
-					{menuOpen ? (
-						<>
+			<Sidebar side="right" animationKey={menuOpen ? 'settings' : 'main'}>
+				{menuOpen ? (
+					<>
+						<Module
+							title="Node Selector"
+							initialDisplayIndex={0}
+							helpContent={<NodeSelectorHelp />}
+						>
+							<NodeSelector
+								selectedItems={selectedNodes}
+								setSelectedItems={setSelectedNodes}
+							/>
+						</Module>
+						<Module
+							title="Aspect Selector"
+							initialDisplayIndex={0}
+							helpContent={<AspectSelectorHelp />}
+						>
+							<AspectKindSelector
+								selectedItems={selectedAspectKinds}
+								setSelectedItems={setSelectedAspectKinds}
+							/>
+						</Module>
+						<Module
+							title="General Settings"
+							helpContent={<GeneralSettingsHelp />}
+						>
+							<MainSettingsMenu />
+						</Module>
+					</>
+				) : (
+					<>
+						<Module
+							title="Planet Info"
+							settingsMenu={PlanetSettingsMenu}
+							helpContent={<PlanetInfoHelp />}
+						>
+							<PlanetPanel
+								zodiacPositions={zodiacPositions}
+								rulershipGraph={rulershipGraph}
+								aspects={aspects}
+								date={selectedDate}
+							/>
+						</Module>
+						<Module
+							title="Element/Mode Balance"
+							initialDisplayIndex={1}
+							settingsMenu={DominanceSettingsMenu}
+							helpContent={<DominanceChartHelp />}
+						>
+							<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
+							<DominanceChart zodiacPositions={zodiacPositions} />
+						</Module>
+						{ zodiacPositions.hasSurfacePosition()
+						&& (
 							<Module
-								title="Node Selector"
-								initialDisplayIndex={0}
-								helpContent={<NodeSelectorHelp />}
+								title="Orientation"
+								settingsMenu={HemisphereSettingsMenu}
+								helpContent={<OrientationHelp />}
 							>
-								<NodeSelector
-									selectedItems={selectedNodes}
-									setSelectedItems={setSelectedNodes}
-								/>
-							</Module>
-							<Module
-								title="Aspect Selector"
-								initialDisplayIndex={0}
-								helpContent={<AspectSelectorHelp />}
-							>
-								<AspectKindSelector
-									selectedItems={selectedAspectKinds}
-									setSelectedItems={setSelectedAspectKinds}
-								/>
-							</Module>
-							<Module
-								title="General Settings"
-								helpContent={<GeneralSettingsHelp />}
-							>
-								<MainSettingsMenu />
-							</Module>
-						</>
-					) : (
-						<>
-							<Module
-								title="Planet Info"
-								settingsMenu={PlanetSettingsMenu}
-								helpContent={<PlanetInfoHelp />}
-							>
-								<PlanetPanel
+								<HemispheresChart
 									zodiacPositions={zodiacPositions}
-									rulershipGraph={rulershipGraph}
-									aspects={aspects}
-									date={selectedDate}
 								/>
 							</Module>
-							<Module
-								title="Element/Mode Balance"
-								initialDisplayIndex={1}
-								settingsMenu={DominanceSettingsMenu}
-								helpContent={<DominanceChartHelp />}
-							>
-								<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
-								<DominanceChart zodiacPositions={zodiacPositions} />
-							</Module>
-							{ zodiacPositions.hasSurfacePosition()
-							&& (
-								<Module
-									title="Orientation"
-									settingsMenu={HemisphereSettingsMenu}
-									helpContent={<OrientationHelp />}
-								>
-									<HemispheresChart
-										zodiacPositions={zodiacPositions}
-									/>
-								</Module>
-							)}
-							<Module
-								title="Rulership Graph"
-								settingsMenu={RulershipSettingsMenu}
-								helpContent={<RulershipGraphHelp />}
-							>
-								<RulershipPanel
-									rulershipGraph={rulershipGraph}
-								/>
-							</Module>
-						</>
-					)}
-				</div>
-			</aside>
+						)}
+						<Module
+							title="Rulership Graph"
+							settingsMenu={RulershipSettingsMenu}
+							helpContent={<RulershipGraphHelp />}
+						>
+							<RulershipPanel
+								rulershipGraph={rulershipGraph}
+							/>
+						</Module>
+					</>
+				)}
+			</Sidebar>
 		</div>
 	)
 
