@@ -1,11 +1,12 @@
 import { type FC, type ReactNode, Children, useState } from 'react';
 import { useUIStore } from './uiStore';
+import InfoModal from './InfoModal';
 
 type ModuleProps = {
 	title: string;
 	initialDisplayIndex?: number;
 	settingsMenu?: FC;
-	helpKey?: string;
+	helpContent?: ReactNode;
 	children: ReactNode;
 };
 
@@ -13,7 +14,7 @@ const Module: FC<ModuleProps> = ({
 	title,
 	initialDisplayIndex,
 	settingsMenu: SettingsMenu,
-	helpKey,
+	helpContent,
 	children,
 }) => {
 	const childArray = Children.toArray(children);
@@ -26,8 +27,9 @@ const Module: FC<ModuleProps> = ({
 	const displayIndex = useUIStore(s => s.moduleDisplayStates[title]) ?? defaultIndex;
 	const setDisplayState = useUIStore(s => s.setModuleDisplayState);
 
-	// Local state for settings panel (transient, doesn't need persistence)
+	// Local state for settings and help panels (transient, doesn't need persistence)
 	const [settingsOpen, setSettingsOpen] = useState(false);
+	const [helpOpen, setHelpOpen] = useState(false);
 
 	const isCollapsed = displayIndex === 0;
 
@@ -76,13 +78,13 @@ const Module: FC<ModuleProps> = ({
 			)}
 
 			{/* Left button group: help and settings (only when not collapsed) */}
-			{!isCollapsed && (helpKey || SettingsMenu) && (
+			{!isCollapsed && (helpContent || SettingsMenu) && (
 				<div
 					className="absolute bg-black px-1 flex gap-1 top-0 left-3"
 					style={{ transform: 'translateY(-51%)' }}
 				>
-					{helpKey && (
-						<button className={buttonClass} onClick={() => { /* TODO: open help modal */ }}>
+					{helpContent && (
+						<button className={buttonClass} onClick={() => setHelpOpen(true)}>
 							?
 						</button>
 					)}
@@ -137,6 +139,17 @@ const Module: FC<ModuleProps> = ({
 						<SettingsMenu />
 					</div>
 				</div>
+			)}
+
+			{/* Help modal */}
+			{helpContent && (
+				<InfoModal
+					isOpen={helpOpen}
+					onClose={() => setHelpOpen(false)}
+					title={title}
+				>
+					{helpContent}
+				</InfoModal>
 			)}
 		</div>
 	);

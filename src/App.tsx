@@ -18,6 +18,15 @@ import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspec
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 import { useSettingsStore } from './settingsStore.ts'
+import {
+	PlanetInfoHelp,
+	DominanceChartHelp,
+	OrientationHelp,
+	RulershipGraphHelp,
+	NodeSelectorHelp,
+	AspectSelectorHelp,
+	GeneralSettingsHelp,
+} from './helpContent'
 
 function App() {
 
@@ -191,6 +200,7 @@ function App() {
 							<Module
 								title="Node Selector"
 								initialDisplayIndex={0}
+								helpContent={<NodeSelectorHelp />}
 							>
 								<NodeSelector
 									selectedItems={selectedNodes}
@@ -200,6 +210,7 @@ function App() {
 							<Module
 								title="Aspect Selector"
 								initialDisplayIndex={0}
+								helpContent={<AspectSelectorHelp />}
 							>
 								<AspectKindSelector
 									selectedItems={selectedAspectKinds}
@@ -208,6 +219,7 @@ function App() {
 							</Module>
 							<Module
 								title="General Settings"
+								helpContent={<GeneralSettingsHelp />}
 							>
 								<MainSettingsMenu />
 							</Module>
@@ -217,6 +229,7 @@ function App() {
 							<Module
 								title="Planet Info"
 								settingsMenu={PlanetSettingsMenu}
+								helpContent={<PlanetInfoHelp />}
 							>
 								<PlanetPanel
 									zodiacPositions={zodiacPositions}
@@ -229,6 +242,7 @@ function App() {
 								title="Element/Mode Balance"
 								initialDisplayIndex={1}
 								settingsMenu={DominanceSettingsMenu}
+								helpContent={<DominanceChartHelp />}
 							>
 								<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
 								<DominanceChart zodiacPositions={zodiacPositions} />
@@ -238,6 +252,7 @@ function App() {
 								<Module
 									title="Orientation"
 									settingsMenu={HemisphereSettingsMenu}
+									helpContent={<OrientationHelp />}
 								>
 									<HemispheresChart
 										zodiacPositions={zodiacPositions}
@@ -247,6 +262,7 @@ function App() {
 							<Module
 								title="Rulership graph"
 								settingsMenu={RulershipSettingsMenu}
+								helpContent={<RulershipGraphHelp />}
 							>
 								<RulershipPanel
 									rulershipGraph={rulershipGraph}
