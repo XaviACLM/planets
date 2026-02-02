@@ -413,9 +413,16 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 					}
 						
 					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
+		
+					const stroke = (() => {
+						const color = aspectKindColors[highlightedAspect.kind];
+						if (!aspectsColorcoded || color === undefined){
+							return "var(--color-text)";
+						}
+						const [r,g,b] =  color;
+						return `rgb(${r},${g},${b})`;
+					})();
 					
-					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
-					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
 					return (
 						<path
 							key={-1000-aspects.indexOf(highlightedAspect)}
@@ -453,8 +460,15 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						`L ${x2} ${y2}`
 					].join(" ");	
 		
-					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
-					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
+					const stroke = (() => {
+						const color = aspectKindColors[highlightedAspect.kind];
+						if (!aspectsColorcoded || color === undefined){
+							return "var(--color-text)";
+						}
+						const [r,g,b] =  color;
+						return `rgb(${r},${g},${b})`;
+					})();
+					
 					return (
 						<path
 							key={-1000000}
@@ -486,8 +500,15 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						
 						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
 						
-						const [r,g,b] = aspectKindColors[aspect.kind]!;
-						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
+						const stroke = (() => {
+							const color = aspectKindColors[aspect.kind];
+							if (!aspectsColorcoded || color === undefined){
+								return "var(--color-text)";
+							}
+							const [r,g,b] =  color;
+							return `rgb(${r},${g},${b})`;
+						})();
+						
 						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 						
 						return (

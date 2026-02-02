@@ -319,36 +319,10 @@ export const aspectSymbols: Record<AspectKind, string> = {
 }
 
 export const aspectKindColors: Partial<Record<AspectKind, [number, number, number]>> = {
-	//conjunction and contra/parallels don't require color
-	[AspectKind.GRAND_TRINE] : [31, 0, 256],
-	[AspectKind.GRAND_SQUARE] : [10, 256, 0],
-	[AspectKind.GRAND_SEXTILE] : [5, 114, 256],
-	[AspectKind.FINGER_OF_YOD] : [214, 99, 0],
-	[AspectKind.KITE] : [198, 0, 256],
-	[AspectKind.MYSTIC_RECTANGLE] : [256, 83, 188],
-	[AspectKind.T_SQUARE] : [0, 235, 188],
-	
-	[AspectKind.OPPOSITION] : [256, 240, 15],
-	[AspectKind.TRINE] : [73, 41, 245],
-	[AspectKind.SQUARE] : [41, 120, 62],
-	[AspectKind.SEXTILE] : [156, 156, 135],
-	[AspectKind.PARALLEL] : [256, 99, 78],
-	[AspectKind.CONTRAPARALLEL] : [36, 78, 130],
-	
-	[AspectKind.BINOVILE] : [120, 67, 88],
-	[AspectKind.BIQUINTILE] : [0, 67, 67],
-	[AspectKind.BISEPTILE] : [0, 151, 0],
-	[AspectKind.DECILE] : [99, 182, 31],
-	[AspectKind.NOVILE] : [208, 26, 125],
-	[AspectKind.QUADRANOVILE] : [256, 47, 26],
-	[AspectKind.QUINCUNX] : [0, 57, 188],
-	[AspectKind.QUINTILE] : [114, 120, 256],
-	[AspectKind.SEMISEXTILE] : [88, 78, 0],
-	[AspectKind.SEMISQUARE] : [135, 256, 135],
-	[AspectKind.SEPTILE] : [256, 156, 256],
-	[AspectKind.SESQUIQUADRATE] : [161, 57, 245],
-	[AspectKind.TREDECILE] : [0, 26, 256],
-	[AspectKind.TRISEPTILE] : [256, 161, 41],
-	[AspectKind.UNDECILE] : [104, 26, 120],
-	[AspectKind.VIGINTILE] : [36, 156, 182],
+	[AspectKind.OPPOSITION] : [31, 119, 180],
+	[AspectKind.TRINE] : [255, 127, 14],
+	[AspectKind.SQUARE] : [44, 160, 44],
+	[AspectKind.SEXTILE] : [214, 39, 40],
+	[AspectKind.PARALLEL] : [148, 103, 189],
+	[AspectKind.CONTRAPARALLEL] : [140, 86, 75],
 }

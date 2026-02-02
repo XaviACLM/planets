@@ -277,12 +277,12 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						</feComponentTransfer>
 					</filter>
 					<radialGradient id="outerShadow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-						<stop offset="89%" stop-color="var(--color-text)"/>
-						<stop offset="100%" stop-color="var(--color-bg)"/>
+						<stop offset="89%" stopColor="var(--color-text)"/>
+						<stop offset="100%" stopColor="var(--color-bg)"/>
 					</radialGradient>
 					<radialGradient id="innerShadow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-						<stop offset="0%" stop-color="var(--color-bg)"/>
-						<stop offset="100%" stop-color="var(--color-bg)" stop-opacity="0"/>
+						<stop offset="0%" stopColor="var(--color-bg)"/>
+						<stop offset="100%" stopColor="var(--color-bg)" stopOpacity="0"/>
 					</radialGradient>
 				</defs>
 			</svg>
