@@ -54,7 +54,7 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 	};
 
 	return (
-		<div className="relative w-full text-black font-sans">
+		<div className="relative w-full">
 			<input
 				className="w-full bg-transparent border-b border-theme-text py-1 outline-none text-theme-text text-xs font-bold small-caps"
 				type="text"
@@ -73,7 +73,7 @@ export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps)
 					{results.map((r,i) => {
 						return (
 							<li
-								className="px-1 border-b border-zinc-900 cursor-pointer text-theme-text text-xs font-bold small-caps hover:bg-zinc-900"
+								className="px-1 border-b border-zinc-900 cursor-pointer text-theme-text text-xs font-bold small-caps hover:bg-gray-500/20"
 								key={i}
 								onClick={() => handleSelect(r)}
 							>

@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
-import { Node, Zodiac, Mode, Element } from './astroDefs';
+import { Node, Zodiac, Mode, Element, mainAngles } from './astroDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
-import { zodiacSymbols, nodeSymbols, nodePreferredName, elementSymbols, modeSymbols, nodesWithRedundantSymbols } from './astroGraphics';
+import { zodiacSymbols, nodeSymbols, nodePreferredName, elementSymbols, modeSymbols, nodesWithRedundantSymbols, nodesAdmittingArticle } from './astroGraphics';
+import { useSettingsStore } from './settingsStore';
 
 // Default sizes - can be overridden via optional params
 const DEFAULT_TEXT_SIZE = 12;
@@ -52,16 +53,43 @@ export const renderTitle = (
 	);
 };
 
+interface RenderNodeOptions {
+	showLabel?: boolean;
+	withArticle?: boolean;
+	forceText?: boolean; // force text for special nodes like Asc, etc.
+	size?: number;
+	fontSize?: number;
+}
+
+// Helper to determine if "the" should be prepended to a node name
+const shouldUseArticle = (node: Node, withArticle: boolean): boolean => {
+	if (!withArticle || !nodesAdmittingArticle.includes(node)) {
+		return false;
+	}
+	if (mainAngles.includes(node)) {
+		return useSettingsStore.getState().useArticleForMainAngles;
+	}
+	return true;
+};
+
 export const renderNode = (
 	node: Node,
-	showLabel: boolean,
-	forceTextForSpecialNodes: boolean = false, //asc, etc
-	options: SymbolRenderOptions & TextRenderOptions = {}
+	options: RenderNodeOptions = {}
 ): ReactNode => {
-	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	if (showLabel || (forceTextForSpecialNodes && nodesWithRedundantSymbols.includes(node))) {
+	const {
+		showLabel,
+		withArticle = false,
+		forceText = false,
+		size = DEFAULT_SYMBOL_SIZE,
+		fontSize = DEFAULT_TEXT_SIZE
+	} = options;
+	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showNodeLabels;
+	if (resolvedShowLabel || (forceText && nodesWithRedundantSymbols.includes(node))) {
 		const label = nodePreferredName[node] || node;
-		return renderSmallcapsString(String(label), options={ fontSize });
+		if (shouldUseArticle(node, withArticle)) {
+			return <>{renderString("the ", { fontSize })}{renderSmallcapsString(String(label), { fontSize })}</>;
+		}
+		return renderSmallcapsString(String(label), { fontSize });
 	}
 	return (
 		<img
@@ -76,16 +104,17 @@ export const renderNode = (
 	
 export const renderCommaSeparatedNodeList = (
 	nodes: Node[],
-	showLabels: boolean,
+	showLabels?: boolean,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
+	const resolvedShowLabels = showLabels ?? useSettingsStore.getState().showNodeLabels;
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 	return (
 		<>
 			{nodes.map((node, i) => (
 				<span key={i}>
 					{i > 0 && renderString(", ")}
-					{renderNode(node, showLabels, options={ size, fontSize })}
+					{renderNode(node, { showLabel: resolvedShowLabels, size, fontSize })}
 				</span>
 			))}
 		</>
@@ -94,12 +123,13 @@ export const renderCommaSeparatedNodeList = (
 
 export const renderSign = (
 	sign: Zodiac,
-	showLabel: boolean,
+	showLabel?: boolean,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
+	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showSymbolLabels;
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	if (showLabel) {
-		return renderSmallcapsString(sign, options={ fontSize });
+	if (resolvedShowLabel) {
+		return renderSmallcapsString(sign, { fontSize });
 	}
 	return (
 		<img
@@ -114,12 +144,13 @@ export const renderSign = (
 
 export const renderElement = (
 	elem: Element,
-	showLabel: boolean,
+	showLabel?: boolean,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
+	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showElementLabels;
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	if (showLabel) {
-		return renderSmallcapsString(elem, options={ fontSize });
+	if (resolvedShowLabel) {
+		return renderSmallcapsString(elem, { fontSize });
 	}
 	return (
 		<img
@@ -134,12 +165,13 @@ export const renderElement = (
 
 export const renderMode = (
 	mode: Mode,
-	showLabel: boolean,
+	showLabel?: boolean,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
+	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showModeLabels;
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	if (showLabel) {
-		return renderSmallcapsString(mode, options={ fontSize });
+	if (resolvedShowLabel) {
+		return renderSmallcapsString(mode, { fontSize });
 	}
 	return (
 		<img
@@ -177,26 +209,29 @@ export const renderDoubleArrow = (options: TextRenderOptions = {}): ReactNode =>
 export const renderNodeWithSign = (
 	node: Node,
 	sign: Zodiac,
-	showSign: boolean,
-	showNodeLabel: boolean,
-	showSignLabel: boolean,
+	showSign?: boolean,
+	showNodeLabel?: boolean,
+	showSignLabel?: boolean,
 	key: number = 0,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
+	const resolvedShowSign = showSign ?? useSettingsStore.getState().showSignsInDispositorChains;
+	const resolvedShowNodeLabel = showNodeLabel ?? useSettingsStore.getState().showNodeLabels;
+	const resolvedShowSignLabel = showSignLabel ?? useSettingsStore.getState().showSymbolLabels;
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
 
-	if (!showSign) {
-		return renderNode(node, showNodeLabel, options={ size, fontSize });
+	if (!resolvedShowSign) {
+		return renderNode(node, { showLabel: resolvedShowNodeLabel, size, fontSize });
 	}
 
-	const parenSize = showSignLabel ? fontSize : fontSize * 1.5;
-	const parenOpacity = showSignLabel ? 0.8 : 0.4;
+	const parenSize = resolvedShowSignLabel ? fontSize : fontSize * 1.5;
+	const parenOpacity = resolvedShowSignLabel ? 0.8 : 0.4;
 
 	return (
 		<span key={key} className="whitespace-nowrap">
-			{renderNode(node, showNodeLabel, options={ size, fontSize })}
+			{renderNode(node, { showLabel: resolvedShowNodeLabel, size, fontSize })}
 			<span style={{ fontSize: parenSize, opacity: parenOpacity }}> [</span>
-			{renderSign(sign, showSignLabel, options={ size, fontSize })}
+			{renderSign(sign, resolvedShowSignLabel, { size, fontSize })}
 			<span style={{ fontSize: parenSize, opacity: parenOpacity }}>]</span>
 		</span>
 	);
@@ -206,9 +241,9 @@ export const renderUnwrappableDispositorChainSegment = (
 	node: Node,
 	sign: Zodiac,
 	useDoubleArrow: boolean,
-	showSigns: boolean,
-	showNodeLabels: boolean,
-	showSignLabels: boolean,
+	showSigns?: boolean,
+	showNodeLabels?: boolean,
+	showSignLabels?: boolean,
 	key: number = 0,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
@@ -218,7 +253,7 @@ export const renderUnwrappableDispositorChainSegment = (
 			<></> {/* need an element we can linebreak on (for some reason zwsp doesn't work) */}
 			<span className="whitespace-nowrap">
 				{useDoubleArrow ? renderDoubleArrow({ fontSize }) : renderArrow({ fontSize })}
-				{renderNodeWithSign(node, sign, showSigns, showNodeLabels, showSignLabels, options={ size, fontSize })}
+				{renderNodeWithSign(node, sign, showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			</span>
 		</span>
 	);
@@ -227,9 +262,9 @@ export const renderUnwrappableDispositorChainSegment = (
 export const renderFinalDispositors = (
 	fd: FinalDispositors,
 	standalone: boolean,
-	showSigns: boolean,
-	showNodeLabels: boolean,
-	showSignLabels: boolean,
+	showSigns?: boolean,
+	showNodeLabels?: boolean,
+	showSignLabels?: boolean,
 	key: number = 0,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
@@ -240,28 +275,28 @@ export const renderFinalDispositors = (
 	if (fd.nodes.length === 1) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			{!withText && renderHookedArrow({ fontSize })}
 			{withText && renderString(" in domicile.", { fontSize })}
 		</span>);
 	} else if (fd.nodes.length === 2) {
 		contents = (<span key={key} className="whitespace-nowrap">
 			{includeLeadingArrow && renderArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
+			{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			{renderMutualArrow({ fontSize })}
-			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, 1, options={ size, fontSize })}
+			{renderNodeWithSign(fd.nodes[1], fd.signs[1], showSigns, showNodeLabels, showSignLabels, 1, { size, fontSize })}
 			{withText && renderString(" in reception.", { fontSize })}
 		</span>);
 	} else {
 		contents = (<>
 			<span key={key} className="whitespace-nowrap">
 				{includeLeadingArrow && renderArrow({ fontSize })}
-				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, options={ size, fontSize })}
+				{renderNodeWithSign(fd.nodes[0], fd.signs[0], showSigns, showNodeLabels, showSignLabels, 0, { size, fontSize })}
 			</span>
 			{Array.from({length: fd.nodes.length}).map((_, i) => {
 				const node = fd.nodes[(i+1)%fd.nodes.length];
 				const sign = fd.signs[(i+1)%fd.nodes.length];
-				return renderUnwrappableDispositorChainSegment(node, sign, true, showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize });
+				return renderUnwrappableDispositorChainSegment(node, sign, true, showSigns, showNodeLabels, showSignLabels, i, { size, fontSize });
 			})}
 		</>);
 	}
@@ -280,23 +315,23 @@ export const renderFinalDispositors = (
 export const renderDispositorChain = (
 	chain: DispositorChain,
 	includeFinalDispositors: boolean,
-	showSigns: boolean,
-	showNodeLabels: boolean,
-	showSignLabels: boolean,
+	showSigns?: boolean,
+	showNodeLabels?: boolean,
+	showSignLabels?: boolean,
 	key: number = 0,
 	options: SymbolRenderOptions & TextRenderOptions = {}
 ): ReactNode => {
 	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
-	const stopAtIndex = chain.cycleStartIndex + (includeFinalDispositors ? 0 : 1); 
+	const stopAtIndex = chain.cycleStartIndex + (includeFinalDispositors ? 0 : 1);
 	return (
 		<div key={key}>
 			{chain.nodes.slice(0, stopAtIndex).map((node, i) => (
 				i === 0 ? (
 					<span key={i}>
-						{renderNodeWithSign(node, chain.signs[i], showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize })}
+						{renderNodeWithSign(node, chain.signs[i], showSigns, showNodeLabels, showSignLabels, i, { size, fontSize })}
 					</span>
 				) : (
-					renderUnwrappableDispositorChainSegment(node, chain.signs[i], false, showSigns, showNodeLabels, showSignLabels, i, options={ size, fontSize })
+					renderUnwrappableDispositorChainSegment(node, chain.signs[i], false, showSigns, showNodeLabels, showSignLabels, i, { size, fontSize })
 				)
 			))}
 			{includeFinalDispositors && renderFinalDispositors(
@@ -305,6 +340,7 @@ export const renderDispositorChain = (
 				showSigns,
 				showNodeLabels,
 				showSignLabels,
+				0,
 				{ size, fontSize }
 			)}
 		</div>

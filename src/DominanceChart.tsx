@@ -225,7 +225,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 			const totalNodes = nodes.length;
 
 			const width = 135;
-			const labelSpacing = textSize * 4.8;
+			const labelSpacing = textSize * 5.4;
 			const symbolSpacing = symbolSize * 1.5;
 			const annotationSpacing = showLabels ? labelSpacing : symbolSpacing;
 			const etcSpacing = 5; // annotation to bar
@@ -351,7 +351,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				{nodes.map((node) => {
 					return (
 						<div key={node} className="mx-2 flex items-center gap-1">
-							{renderNode(node, showNodeLabels, true)}
+							{renderNode(node, { showLabel: showNodeLabels, forceText: true })}
 							{" | "}
 							{renderElement(nodeElements.get(node))}
 							{" · "}
@@ -368,7 +368,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 			<>
 			{nodes.map((node, i) => {
 				return <span key={node}>
-					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node, showNodeLabels)}
+					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node, { showLabel: showNodeLabels })}
 					{(forceText || showNodeLabels) && (i < nodes.length - 1)
 					&& <span style={{fontSize: textSize}}>, </span>
 					}

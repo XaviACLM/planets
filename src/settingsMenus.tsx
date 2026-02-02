@@ -55,6 +55,7 @@ const mainSettingsSpec: SettingsItem[] = [
 	checkbox('rotateSymbols', 'Rotate symbols'),
 	checkbox('aspectsColorcoded', 'Colorcode aspects'),
 	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
+	checkbox('useArticleForMainAngles', 'Use "the" for main angles'),
 
 	separator(),
 

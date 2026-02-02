@@ -36,6 +36,8 @@ interface SettingsState {
 	setShowModeLabels: (v: boolean) => void;
 	showSignsInDispositorChains: boolean;
 	setShowSignsInDispositorChains: (v: boolean) => void;
+	useArticleForMainAngles: boolean;
+	setUseArticleForMainAngles: (v: boolean) => void;
 
 	// Display options
 	theme: Theme;
@@ -113,6 +115,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setShowModeLabels: (v) => set({ showModeLabels: v }),
 	showSignsInDispositorChains: false,
 	setShowSignsInDispositorChains: (v) => set({ showSignsInDispositorChains: v }),
+	useArticleForMainAngles: false,
+	setUseArticleForMainAngles: (v) => set({ useArticleForMainAngles: v }),
 
 	// Display options
 	theme: Theme.DARK,

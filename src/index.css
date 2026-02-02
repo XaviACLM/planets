@@ -36,6 +36,7 @@
 
 /* Parchment theme */
 :root.theme-parchment {
+  font-family: ui-serif, Georgia, serif;
   --color-text: #3d2914;
   --color-bg: #f5e6d3;
   --color-border: #8b7355;

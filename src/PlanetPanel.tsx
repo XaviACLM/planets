@@ -221,7 +221,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
-				{renderNode(angleProximity.closestAngle, showNodeLabels, true)}
+				{renderNode(angleProximity.closestAngle, { showLabel: showNodeLabels, forceText: true })}
 				{renderString(`).`)}
 			</div>
 		);
@@ -425,15 +425,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			{useExtendedDignities && ( faceLord === boundLord ? (
 				<div className="text-wrap">
 					{renderString("In the face & bound of ")}
-					{renderNode(faceLord, showNodeLabels)}
+					{renderNode(faceLord, { withArticle: true })}
 					{renderString(".")}
 				</div>
 			) : (
 				<div>
 					{renderString("In the face of ")}
-					{renderNode(faceLord, showNodeLabels)}
+					{renderNode(faceLord, { withArticle: true })}
 					{renderString(" & the bound of ")}
-					{renderNode(boundLord, showNodeLabels)}
+					{renderNode(boundLord, { withArticle: true })}
 					{renderString(".")}
 				</div>
 			))}
@@ -452,7 +452,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					{Array.from(aspectsSummary.nodes).map((node, i) => (
 						<span key={i}>
 							{i > 0 && renderString(", ")}
-							{renderNode(node, showNodeLabels)}
+							{renderNode(node, { showLabel: showNodeLabels })}
 						</span>
 					))}
 					{renderString(".")}
