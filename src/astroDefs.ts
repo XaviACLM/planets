@@ -49,61 +49,10 @@ export const AstrologyMode = {
 } as const;
 export type AstrologyMode = typeof AstrologyMode[keyof typeof AstrologyMode];
 
-// https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
-// https://iphemeris.com/blog/document/ayanamsa
-// those missing from the code in scripts, pulling swissephemeris data
-export const ayanamsas: Partial<Record<AstrologyMode, number>> = {
-	// in J2000 ecliptic longitude
-	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
-	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
-	[AstrologyMode.SIDEREAL_RAMAN] : 22.4069, 
-	[AstrologyMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
-	[AstrologyMode.SIDEREAL_YUKTESHWAR] : 22.4778,
-	[AstrologyMode.SIDEREAL_DE_LUCE] : 27.8056,
-	[AstrologyMode.SIDEREAL_HIPPARCHOS] : 20.2461,
-	[AstrologyMode.SIDEREAL_BABYLONIAN] : 24.7867,
-	[AstrologyMode.SIDEREAL_HUBER] : 24.7336,
-	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
-	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
-	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
-}
-
-export const irregularAstrologyModes: AstrologyMode[] = Object.values(AstrologyMode).filter(mode => 
-	mode !== AstrologyMode.TROPICAL && 
-	!(Object.keys(ayanamsas) as AstrologyMode[]).includes(mode)
-) as AstrologyMode[];
-
-export const zodiacLongitudeClosest: Record<Zodiac, number> = {
-	[Zodiac.ARIES] : 0.610481957714658,
-	[Zodiac.TAURUS] : 0.809283631691531,
-	[Zodiac.GEMINI] : 1.5267809525908373,
-	[Zodiac.CANCER] : 2.1034634737766833,
-	[Zodiac.LEO] : 2.4448001259141483,
-	[Zodiac.VIRGO] : 3.010302580817891,
-	[Zodiac.LIBRA] : 3.7901704662198483,
-	[Zodiac.SCORPIO] : 4.18304646518869,
-	[Zodiac.OPHIUCHUS] : 4.291068045815738,
-	[Zodiac.SAGITTARIUS] : 4.666853099398361,
-	[Zodiac.CAPRICORN] : 5.177419308949345,
-	[Zodiac.AQUARIUS] : 5.664778889649456,
-	[Zodiac.PISCES] : 6.137074041724778,
-}
-
-export const zodiacLongitudeIAU: Record<Zodiac, number> = {
-	[Zodiac.ARIES] : 0.5006710809308025,
-	[Zodiac.TAURUS] : 0.932292091737694,
-	[Zodiac.GEMINI] : 1.5732392440197722,
-	[Zodiac.CANCER] : 2.059288010209377,
-	[Zodiac.LEO] : 2.4092369528387416,
-	[Zodiac.VIRGO] : 3.034271715326123,
-	[Zodiac.LIBRA] : 3.801490778565342,
-	[Zodiac.SCORPIO] : 4.208082360282873,
-	[Zodiac.OPHIUCHUS] : 4.3220852335887985,
-	[Zodiac.SAGITTARIUS] : 4.646721441014687,
-	[Zodiac.CAPRICORN] : 5.229995888867893,
-	[Zodiac.AQUARIUS] : 5.715748880259971,
-	[Zodiac.PISCES] : 6.13567725989199,
-}
+export const irregularAstrologyModes: AstrologyMode[] = [
+	AstrologyMode.CONSTELLATIONS_CLOSEST, 
+	AstrologyMode.CONSTELLATIONS_IAU
+];
 
 export const Element = {
   AIR: 'Air',
@@ -553,26 +502,6 @@ export const traditionalHouseAngularities: HouseAngularity[] = [
 	HouseAngularity.CADENT,
 	null, //13th house
 ]
-
-export const fixedStars: Record<string, number> = {
-	// in J2000 ecliptic longitude
-	["Aldebaran"] : 69.785,
-	["Algol"] : 56.163,
-	["Sirius"] : 104.077,
-	["Procyon"] : 115.781,
-	["Regulus"] : 149.825,
-	["Alkaid"] : 176.929,
-	["Alcyone"] : 59.988,
-	["Capella"] : 81.854,
-	["Spica"] : 203.837,
-	["Arcturus"] : 204.229,
-	["Alphecca"] : 222.291,
-	["Antares"] : 249.758,
-	["Vega"] : 285.312,
-	["Deneb Algedi"] : 323.538,
-	["Unukalhai"] : 232.071,
-	["Fomalhaut"] : 333.856, //not behenian, but royal
-}
 
 export const Sect = {
 	DIURNAL: "Diurnal",

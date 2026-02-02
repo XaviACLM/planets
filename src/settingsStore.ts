@@ -66,6 +66,9 @@ interface SettingsState {
 	setHamburgPhysical: (v: boolean) => void;
 	aspectMenuMode: AspectMenuMode;
 	setAspectMenuMode: (v: AspectMenuMode) => void;
+	
+	stationarySpeedPercentageThreshold: number;
+	setStationarySpeedPercentageThreshold: (v: number) => void;
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode;
@@ -145,6 +148,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setHamburgPhysical: (v) => set({ hamburgPhysical: v }),
 	aspectMenuMode: AspectMenuMode.SHOW_MAXIMAL_WITH_SUBMENUS,
 	setAspectMenuMode: (v) => set({ aspectMenuMode: v }),
+	
+	stationarySpeedPercentageThreshold: 30,
+	setStationarySpeedPercentageThreshold: (v) => set({ stationarySpeedPercentageThreshold: v }),
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode.MEAN,

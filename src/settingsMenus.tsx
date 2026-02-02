@@ -99,6 +99,10 @@ const mainSettingsSpec: SettingsItem[] = [
 	dropdown('faceMode', 'Faces', Object.values(FaceMode)),
 
 	separator(),
+	
+	numeric('stationarySpeedPercentageThreshold', 'Stationary speed threshold:', 0, 200, '%'),
+
+	separator(),
 
 	// House angularity
 	dropdown('houseAngularityMode', 'House angularity', Object.values(HouseAngularityMode)),

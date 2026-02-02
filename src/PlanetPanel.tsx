@@ -1,5 +1,6 @@
 import { useState, useMemo, FC } from 'react';
 import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect } from './astroDefs';
+import { nodeAverageSpeed } from './astroData';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
@@ -27,7 +28,6 @@ import { useUIStore } from './uiStore.ts'
 import ZodiacPositions from './zodiacPositions';
 
 // Opinionated thresholds
-const STATIONARY_THRESHOLD_DEG_PER_DAY = 0.1; // degrees/day - planet considered stationary below this
 const ANGLE_PROXIMITY_THRESHOLD_DEG = 10; // degrees - show "near angle" info within this distance
 					
 type PlanetPanelProps = {
@@ -54,6 +54,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const triplicityMode = useSettingsStore(s => s.triplicityMode);
 	const faceMode = useSettingsStore(s => s.faceMode);
 	const boundsMode = useSettingsStore(s => s.boundsMode);
+	const stationarySpeedFractionThreshold = useSettingsStore(s => s.stationarySpeedPercentageThreshold)/100;
 	
 	const theme = useSettingsStore(s => s.theme);
 	const isDarkTheme = theme === Theme.DARK;
@@ -144,9 +145,9 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		}
 	}, [selectedNode, date, hamburgSchoolMode]);
 
+	const isStationary = speedRadPerDay !== null && Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]*stationarySpeedFractionThreshold;
+	const isRetrograde = speedRadPerDay !== null && !isStationary && speedRadPerDay < 0;
 	const speedDegPerDay = speedRadPerDay !== null ? (speedRadPerDay * 180 / Math.PI) : null;
-	const isRetrograde = speedDegPerDay !== null && speedDegPerDay < -STATIONARY_THRESHOLD_DEG_PER_DAY;
-	const isStationary = speedDegPerDay !== null && Math.abs(speedDegPerDay) < STATIONARY_THRESHOLD_DEG_PER_DAY;
 
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {
