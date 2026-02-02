@@ -228,28 +228,6 @@ export const Node = {
 } as const;
 export type Node = typeof Node[keyof typeof Node];
 
-export const initiallySelectedNodes: Node[] = [
-	Node.SUN,
-	Node.MOON,
-	Node.MERCURY,
-	Node.VENUS,
-	Node.MARS,
-	Node.JUPITER,
-	Node.SATURN,
-	Node.URANUS,
-	Node.NEPTUNE,
-	Node.PLUTO,
-	Node.ASCENDANT,
-	Node.DESCENDANT,
-	Node.MIDHEAVEN,
-	Node.IMUM_COELI,
-	Node.LUNAR_ASCENDING,
-	Node.LUNAR_APOGEE,
-	Node.PART_OF_FORTUNE,
-	Node.CERES,
-	Node.ERIS,
-]
-
 export const personalPlanets: Node[] = [
 	Node.SUN,
 	Node.MOON,
@@ -273,6 +251,23 @@ export const standardNodes: Node[] = [
 	...personalPlanets,
 	...socialPlanets,
 	...transpersonalPlanets,
+]
+
+export const mainAngles = [
+	Node.ASCENDANT,
+	Node.IMUM_COELI,
+	Node.DESCENDANT,
+	Node.MIDHEAVEN,
+];
+
+export const initiallySelectedNodes: Node[] = [
+	...standardNodes,
+	...mainAngles,
+	Node.LUNAR_ASCENDING,
+	Node.LUNAR_APOGEE,
+	Node.PART_OF_FORTUNE,
+	Node.CERES,
+	Node.ERIS,
 ]
 
 export const NodeType = {
@@ -454,28 +449,10 @@ export const modernRulerships: Record<Zodiac, Node> = {
 	[Zodiac.PISCES]: Node.NEPTUNE,
 };
 
-export const mainAngles = [
-	Node.ASCENDANT,
-	Node.IMUM_COELI,
-	Node.DESCENDANT,
-	Node.MIDHEAVEN,
-];
-
 export const nodeCategories = [
 	{
 		name: 'Major Bodies',
-		items: [
-			Node.SUN,
-			Node.MOON,
-			Node.MERCURY,
-			Node.VENUS,
-			Node.MARS,
-			Node.JUPITER,
-			Node.SATURN,
-			Node.URANUS,
-			Node.NEPTUNE,
-			Node.PLUTO
-		]
+		items: standardNodes,
 	},
 	{
 		name: 'Primary Angles',

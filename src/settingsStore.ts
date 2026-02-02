@@ -13,6 +13,7 @@ import {
 	TriplicityMode,
 	BoundsMode,
 	FaceMode,
+	Theme,
 } from './settingsDefs.ts';
 
 interface SettingsState {
@@ -37,6 +38,8 @@ interface SettingsState {
 	setShowSignsInDispositorChains: (v: boolean) => void;
 
 	// Display options
+	theme: Theme;
+	setTheme: (v: Theme) => void;
 	flipText: boolean;
 	setFlipText: (v: boolean) => void;
 	rotateSymbols: boolean;
@@ -112,6 +115,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setShowSignsInDispositorChains: (v) => set({ showSignsInDispositorChains: v }),
 
 	// Display options
+	theme: Theme.DARK,
+	setTheme: (v) => set({ theme: v }),
 	flipText: true,
 	setFlipText: (v) => set({ flipText: v }),
 	rotateSymbols: false,

@@ -51,7 +51,7 @@ const Slider = <T extends string>({
 						key={option}
 						className={`font-mono text-xs cursor-pointer text-center flex-1 select-none px-0.5 py-1 transition-colors duration-200 ${
 							value === option
-								? 'text-white font-medium'
+								? 'text-theme-text font-medium'
 								: 'text-gray-500 hover:text-gray-300'
 						}`}
 						onClick={() => onChange(option)}

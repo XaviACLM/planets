@@ -69,7 +69,7 @@ export const renderNode = (
 			alt={node}
 			width={size}
 			height={size}
-			className="invert align-middle inline"
+			className="icon-filter align-middle inline"
 		/>
 	);
 };
@@ -107,7 +107,7 @@ export const renderSign = (
 			alt={sign}
 			width={size}
 			height={size}
-			className="invert align-middle inline"
+			className="icon-filter align-middle inline"
 		/>
 	);
 };
@@ -127,7 +127,7 @@ export const renderElement = (
 			alt={elem}
 			width={size}
 			height={size}
-			className="invert align-middle inline"
+			className="icon-filter align-middle inline"
 		/>
 	);
 };
@@ -147,7 +147,7 @@ export const renderMode = (
 			alt={mode}
 			width={size}
 			height={size}
-			className="invert align-middle inline"
+			className="icon-filter align-middle inline"
 		/>
 	);
 };
@@ -329,9 +329,9 @@ export const SelectorButton = ({
 	title,
 	children,
 }: SelectorButtonProps): ReactNode => {
-	const baseClasses = "bg-transparent border-1 p-1.5 text-white cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
-	const hoverClasses = disabled ? "" : "hover:border-gray-500 hover:bg-white/10";
-	const borderClass = selected ? "border-white" : "border-white/30";
+	const baseClasses = "bg-transparent border-1 p-1.5 text-theme-text cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
+	const hoverClasses = disabled ? "" : "hover:border-theme-border hover:bg-white/10";
+	const borderClass = selected ? "border-theme-text" : "border-theme-text/30";
 	const disabledClasses = disabled ? "opacity-40" : "";
 	const highlightedClasses = highlighted ? "border-3 border-double" : "";
 
@@ -379,7 +379,7 @@ export const NodeSelectorButton = ({
 					<img
 						src={nodeSymbols[node]}
 						alt={node}
-						className="w-5 h-5 object-contain invert"
+						className="w-5 h-5 object-contain icon-filter"
 					/>
 				)}
 			</span>

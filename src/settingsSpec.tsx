@@ -84,7 +84,7 @@ const DropdownItem: FC<{ stateKey: EnumSettingKeys; label: string; options: read
 			<select
 				value={value}
 				onChange={(e) => setter(e.target.value)}
-				className="bg-black text-white border border-white px-1 py-1 outline-none"
+				className="bg-theme-bg text-theme-text border border-theme-text px-1 py-1 outline-none"
 			>
 				{options.map(option => (
 					<option key={option} value={option}>
@@ -123,7 +123,7 @@ const ToggleButtonsItem: FC<{ stateKey: EnumSettingKeys; label: string; options:
 				{options.map(option => (
 					<button
 						key={option}
-						className={`bg-black border border-gray-700 text-white px-2 py-0.5 cursor-pointer transition-all hover:border-gray-500 ${value === option ? 'border-white' : ''}`}
+						className={`bg-theme-bg border border-gray-700 text-theme-text px-2 py-0.5 cursor-pointer transition-all hover:border-theme-border ${value === option ? 'border-theme-text' : ''}`}
 						onClick={() => setter(option)}
 					>
 						{option}

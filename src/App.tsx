@@ -18,6 +18,7 @@ import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspec
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 import { useSettingsStore } from './settingsStore.ts'
+import { Theme } from './settingsDefs.ts'
 import {
 	PlanetInfoHelp,
 	DominanceChartHelp,
@@ -55,6 +56,16 @@ function App() {
 	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
 	const selectedAspectKinds = useSettingsStore(s => s.selectedAspectKinds);
 	const setSelectedAspectKinds = useSettingsStore(s => s.setSelectedAspectKinds);
+
+	const theme = useSettingsStore(s => s.theme);
+
+	// Sync theme to document element
+	useEffect(() => {
+		document.documentElement.classList.remove('theme-parchment');
+		if (theme === Theme.PARCHMENT) {
+			document.documentElement.classList.add('theme-parchment');
+		}
+	}, [theme]);
 
 	// Local state (not settings)
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
@@ -137,9 +148,9 @@ function App() {
 	}
 
 	return (
-		<div className="flex h-screen w-screen overflow-hidden bg-black">
-			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-black overflow-y-auto overflow-x-hidden scrollbar-none animate-slide-in-left">
-				<div className="w-full bg-black border border-gray-500 text-white">
+		<div className="flex h-screen w-screen overflow-hidden bg-theme-bg">
+			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none animate-slide-in-left">
+				<div className="w-full bg-theme-bg border border-theme-border text-theme-text">
 					<CitySelector
 						startingQueryText={selectedCity}
 						onSelect={(city) => {
@@ -149,12 +160,12 @@ function App() {
 					<input
 						aria-label="Date and time"
 						type="datetime-local"
-						className="text-black text-sm invert small-caps"
+						className="text-black text-sm icon-filter small-caps"
 						value={toZonedTime(selectedDate, currentTimezone).toISOString().slice(0, 16)}
 						onChange={(e) => setSelectedDate(fromZonedTime(new Date(e.target.value), currentTimezone))}
 					/>
 				</div>
-				<div className="w-full bg-black border border-gray-500 text-white">
+				<div className="w-full bg-theme-bg border border-theme-border text-theme-text">
 					<AspectMenu
 						aspects={aspects}
 						onHover={(aspect) => {setHighlightedAspect(aspect)}}
@@ -166,7 +177,7 @@ function App() {
 			<main className="flex-1 relative flex items-center justify-center overflow-hidden">
 				<EsotericModePanel/>
 				<button
-					className="absolute top-4 right-4 text-white bg-black border border-gray-500 hover:border-gray-400 p-2 pl-4 pr-4"
+					className="absolute top-4 right-4 text-theme-text bg-theme-bg border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4"
 					onClick={() => setMenuOpen(!menuOpen)}
 				>
 					{menuOpen ? '✕' : '☰'}
@@ -178,12 +189,12 @@ function App() {
 				/>
 
 				{zodiacPositions.houseSystemUndefinedForPosition() &&
-					<div className="absolute bottom-5 right-5 bg-black text-white px-4 py-3 font-mono text-sm border border-gray-500 z-[1000] max-w-[400px] leading-relaxed">
+					<div className="absolute bottom-5 right-5 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] max-w-[400px] leading-relaxed">
 						<span>
 							Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
 							<button
 								onClick={() => setHouseSystem(HouseSystem.PORPHYRY)}
-								className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit] inline hover:text-gray-300 active:text-gray-500"
+								className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
 							>
 								Switch to Porphyry
 							</button>
@@ -193,7 +204,7 @@ function App() {
 
 			</main>
 
-			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-black overflow-y-auto overflow-x-hidden scrollbar-none relative">
+			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none relative">
 				<div className="flex flex-col gap-2 animate-slide-in-right" key={menuOpen ? 'settings' : 'main'}>
 					{menuOpen ? (
 						<>

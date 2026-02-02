@@ -168,26 +168,6 @@ export const nodesWithRedundantSymbols: Node[] = [
 	Node.AUTUMNAL_EQUINOX
 ];
 
-/*
-TODO remove this comment
-not too sure how to do this stuff.
-when DO we use article?
-when not in a list? No, that's not right.
-When within a sentence? That makes sense. renderNode will get an arg for that and include the "the" (NOT as smallcaps - right?)
-So are we okay with it working like that for ASC/DSC/MC/IC? Well, let's think - when would it actually show up?
-I don't think it can show up anywhere other than the "In 2 aspects, with etc etc" list. Here... hm, I'm not too sure.
-We could make it toggleable but this would be kind of a pain.
-We can keep them without an article. I think this is fine.
-and how the fuck do we handle the POF thing? 
-oh nevermind, let's go back. that example WAS a list, I don't think we want to use "the SUN" there. Yeah it's gotta be a sentence and not within a list.
-I think it would be fine to keep ASCDSCetc then. Let's do that.
-So what about the PoF business?
-(also: do we use "the" in sentence-context single-element lists? maybe maybe maybe. but anyway:)
-So what about the PoF business?
-very troublesome. admitting article is a property of the node, not the name. How do we handle this? I'm not big on having huge str list of namesAdmittingArticle and calling it a day
-...but maybe we need to?
-actually nevermind that's fine. shortnames will never be used in an area where we're writing entire sentences. And preferred names always override names. So we're good.
-*/
 export const nodesAdmittingArticle: Node[] = [
 	Node.SUN,
 	Node.MOON,

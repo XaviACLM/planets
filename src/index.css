@@ -1,21 +1,47 @@
 @import "tailwindcss";
 
+@theme {
+  /* Theme color utilities: bg-theme-bg, text-theme-text, border-theme-border */
+  --color-theme-text: var(--color-text);
+  --color-theme-bg: var(--color-bg);
+  --color-theme-border: var(--color-border);
+  --color-theme-border-light: var(--color-border-light);
+}
+
 * {
   box-sizing: border-box;
 }
 
 :root {
+  /* Theme CSS variables - default (dark) theme */
+  --color-text: #ffffff;
+  --color-bg: #000000;
+  --color-border: #6b7280;
+  --color-border-light: #9ca3af;
+  --border-radius: 0px;
+  --icon-filter: invert(1);
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color: #fff;
-  background-color: #000;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Parchment theme */
+:root.theme-parchment {
+  --color-text: #3d2914;
+  --color-bg: #f5e6d3;
+  --color-border: #8b7355;
+  --color-border-light: #a08060;
+  --border-radius: 4px;
+  --icon-filter: invert(0);
 }
 
 body {
@@ -39,6 +65,11 @@ button:focus-visible {
 /* Custom utilities */
 .small-caps {
   font-variant: small-caps;
+}
+
+/* Theme-aware icon filter (replaces hardcoded 'invert') */
+.icon-filter {
+  filter: var(--icon-filter);
 }
 
 .scrollbar-none {

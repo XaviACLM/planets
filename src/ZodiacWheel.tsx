@@ -7,6 +7,7 @@ import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
 import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
+import { Theme } from './settingsDefs.ts'
 
 function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRadius: number){
 	const as: number[] = aspect.nodes
@@ -62,6 +63,8 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 	const rotateSymbols = useSettingsStore(s => s.rotateSymbols);
 	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
+	const theme = useSettingsStore(s => s.theme);
+	const isDarkTheme = theme === Theme.DARK;
 	
 	const sectorRadius = 48;
 	const symbolRadius = 43.5;
@@ -121,21 +124,21 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 	const [hoveredZodiac, setHoveredZodiac] = useState<Zodiac | null>(null);
 	
 	return (
-		<div className="bg-black w-screen h-screen">
+		<div className="bg-theme-bg w-screen h-screen">
 			<svg
 				viewBox="0 0 100 100"
 				preserveAspectRatio="xMidYMid meet"
 				className="w-full h-full"
 			>
-				<circle cx="50%" cy="50%" r={radius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={radius-0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
+				<circle cx="50%" cy="50%" r={radius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={radius-0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
 				
-				<circle cx="50%" cy="50%" r={aspectRadius} stroke="white" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="white" strokeWidth={strokeWidthSecondary} fill="none"/>
+				<circle cx="50%" cy="50%" r={aspectRadius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
 				
-				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
-				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
-				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="white" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
+				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
+				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
+				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
 
 				<image
 					key={0}
@@ -144,7 +147,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 					y={50-symbolSize/2}
 					width={symbolSize}
 					height={symbolSize}
-					style={{filter:"invert(1)"}}
+					style={{filter:"var(--icon-filter)"}}
 				/>
 				
 				{/*Outer zodiac sector separators*/}
@@ -157,39 +160,12 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							y1={50 - radius * Math.sin(a)}
 							x2={50 + sectorRadius * Math.cos(a)}
 							y2={50 - sectorRadius * Math.sin(a)}
-							stroke="white"
+							stroke="var(--color-text)"
 							strokeWidth={strokeWidthPrimary}
 							
 						/>
 					);
 				})}
-				
-				{/* not done. need to account for possibility of 13 houses,
-				    which requires houseCuspAngles.map
-					but then we have to separate out the case where houseCuspAngles===null
-					something analogous for the presweep line and house cusp labels. ugh*/}
-				{/*House separators*/}
-				{/*
-				{Array.from({ length: 12 }).map((_, i) => {
-					let a;
-					if (houseCuspAngles) {
-						if (housePresweep) { a = houseCuspAngles[i] + offset - Math.PI/36 // 5 degree presweep
-						} else { a = houseCuspAngles[i] + offset; }
-					} else { a = (i/12) * 2 * Math.PI - offset + siderealOffset + 0.028; } // ?
-					return (
-						<line
-							key={i}
-							x1={50 + (radius - 3) * Math.cos(a)}
-							y1={50 - (radius - 3) * Math.sin(a)}
-							x2={50 + (aspectRadius + 3) * Math.cos(a)}
-							y2={50 - (aspectRadius + 3) * Math.sin(a)}
-							stroke="white"
-							strokeWidth={strokeWidthTertiary}
-							
-						/>
-					);
-				})}
-				*/}
 				
 				{/*House separators*/}
 				{zodiacPositions.houseCuspsAreDefined()
@@ -202,7 +178,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							y1={50 - (radius - 3) * Math.sin(a)}
 							x2={50 + (aspectRadius + 3) * Math.cos(a)}
 							y2={50 - (aspectRadius + 3) * Math.sin(a)}
-							stroke="white"
+							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
 							
 						/>
@@ -222,7 +198,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							y1={50 - (radius - 3) * Math.sin(a)}
 							x2={50 + (aspectRadius + 3) * Math.cos(a)}
 							y2={50 - (aspectRadius + 3) * Math.sin(a)}
-							stroke="white"
+							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
 							
 						/>
@@ -242,7 +218,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							y1={50 - (aspectRadius + 3) * Math.sin(a)}
 							x2={50 + (radius - 3) * Math.cos(a)}
 							y2={50 - (radius - 3) * Math.sin(a)}
-							stroke="white"
+							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
 							strokeDasharray="0.2,0.5"
 						/>
@@ -260,7 +236,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 					const y = 50 - (radius-1) * Math.sin(a+adj);
 					const cuspName = "H"+String(index+1)
 					return (
-						<text
+						<text fill="var(--color-text)"
 							key={index}
 							x={x}
 							y={y+0.6}
@@ -268,7 +244,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							fontWeight="bold"
 							textAnchor={flip ? "end" : "start"}
 							transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-							style={{filter:"invert(1)", fontVariant: "small-caps"}}
+							style={{fontVariant: "small-caps"}}
 						>
 							{cuspName}
 						</text>
@@ -297,7 +273,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							height={symbolSize}
 							style={{
 								transition: "transform 0.5s ease",
-								filter:"invert(1)",
+								filter:"var(--icon-filter)",
 								transform: `rotate(${r}deg) translateY(${translateY}px)`,
 								transformOrigin: `${x}px ${y}px`
 							}}
@@ -315,7 +291,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 						const flip = (r>90 && r<270) && flipText;
 						return (
-							<text
+							<text fill="var(--color-text)"
 								key={i}
 								x={x}
 								y={flip ? y+1 : y}
@@ -323,7 +299,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
 								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-								style={{filter:"invert(1)", fontVariant: "small-caps"}}
+								style={{fontVariant: "small-caps"}}
 							>
 								{symbol}
 							</text>
@@ -344,11 +320,11 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							return null;
 						}
 						
-						let filter: string;
+						let filter: string | undefined;
 						if (z == hoveredZodiac || (highlightedAspect != null && highlightedAspect.nodes.includes(node))) {
 							filter = "url(#shadowAndInverted)";
 						} else {
-							filter = "url(#invert)";
+							filter = isDarkTheme ? "url(#invert)" : undefined;
 						}
 						
 						return (
@@ -392,7 +368,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								key={i}
 								d={pathData}
 								fill="none"
-								stroke="white"
+								stroke="var(--color-text)"
 								strokeWidth={strokeWidthPrimary}
 							/>
 						);
@@ -413,7 +389,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
 						}
 						return (
-							<text
+							<text fill="var(--color-text)"
 								key={i}
 								x={flip ? px-0.6-symbolSize/2 : px+0.6+symbolSize/2}
 								y={y+0.6}
@@ -421,7 +397,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
 								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-								style={{filter:"invert(1)", fontVariant: "small-caps"}}
+								style={{fontVariant: "small-caps"}}
 							>
 								{nodeName}
 							</text>
@@ -439,7 +415,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
 					
 					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
-					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
 					return (
 						<path
 							key={-1000-aspects.indexOf(highlightedAspect)}
@@ -478,7 +454,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 					].join(" ");	
 		
 					const [r,g,b] = aspectKindColors[highlightedAspect.kind]!;
-					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+					const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
 					return (
 						<path
 							key={-1000000}
@@ -511,7 +487,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
 						
 						const [r,g,b] = aspectKindColors[aspect.kind]!;
-						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "white";
+						const stroke = aspectsColorcoded ? `rgb(${r},${g},${b})` : "var(--color-text)";
 						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 						
 						return (
@@ -575,22 +551,24 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 				<defs>
 					// this radial gradient is from deepseek - I don't understand it too well.
 					<radialGradient id="hoverGradient" cx="50%" cy="50%" r={sectorRadius+"%"} gradientUnits="userSpaceOnUse">
-						<stop offset="35%" stopColor="rgba(255,255,255,0.9)"/>
-						<stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+						<stop offset="35%" stopColor={isDarkTheme ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.8)"}/>
+						<stop offset="100%" stopColor={isDarkTheme ? "rgba(255,255,255,0)" : "rgba(0,0,0,0)"}/>
 					</radialGradient>
 					<filter id="path-glow" x="-400%" y="-400%" width="800%" height="800%">
-						<feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+						<feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+						<feFlood floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={isDarkTheme ? 0.8 : 0.5} result="color"/>
+						<feComposite in="color" in2="blur" operator="in" result="glow"/>
 						<feMerge>
-							<feMergeNode in="blur"/>
+							<feMergeNode in="glow"/>
 						</feMerge>
 					</filter>
 					<filter id="shadowAndInverted" x="-200%" y="-200%" width="400%" height="400%">
-						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
-						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
-						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor="rgb(255, 255, 255)"/>
+						{isDarkTheme && <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>}
+						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={isDarkTheme ? 1 : 0.6}/>
+						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={isDarkTheme ? 1 : 0.6}/>
 					</filter>
 					<filter id="invert">
-						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
+						{isDarkTheme && <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>}
 					</filter>
 				</defs>
 			</svg>

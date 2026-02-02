@@ -1,6 +1,7 @@
 import { type Aspect } from './aspects.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
+import { Theme } from './settingsDefs.ts'
 
 function createAspectElement(
 	key: number,
@@ -9,17 +10,18 @@ function createAspectElement(
 	aspectsColorcoded: boolean,
 	parentAspect: Aspect | null,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
-	onHover: (aspect: Aspect | null) => void
+	onHover: (aspect: Aspect | null) => void,
+	fallbackColor: [number, number, number]
 ){
 	const symbolSize = 20;
 	const fixedWidth = "90px";
 	const fixedHeight = "20px";
 	const isSubaspect = parentAspect !== null;
 
-	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind]! : [255,255,255];
+	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind]! : fallbackColor;
 	return <div
 		key={key}
-		className="flex items-center px-2 cursor-pointer hover:bg-zinc-900 transition-colors duration-300"
+		className="flex items-center px-2 cursor-pointer hover:bg-gray-500/20 transition-colors duration-300"
 		onMouseEnter={() => {onHover(aspect)}}
 		onMouseLeave={() => {onHover(null)}}
 	>
@@ -32,7 +34,7 @@ function createAspectElement(
 		>
 			{ !showAspectLabels && !aspectsColorcoded &&
 				<img
-					className="ml-5 invert"
+					className="ml-5 icon-filter"
 					src={aspectSymbols[aspect.kind]}
 					alt={aspect.kind}
 					width={symbolSize}
@@ -74,7 +76,7 @@ function createAspectElement(
 					alt={node}
 					width={symbolSize}
 					height={symbolSize}
-					className="w-4 h-4 mr-1 invert"
+					className="w-4 h-4 mr-1 icon-filter"
 				/>
 			))}
 			{Array.from({length: 6-aspect.nodes.length}).map((_, i) => (
@@ -84,7 +86,7 @@ function createAspectElement(
 					alt={"bals"}
 					width={symbolSize}
 					height={symbolSize}
-					className="w-4 h-4 mr-1 invert"
+					className="w-4 h-4 mr-1 icon-filter"
 				/>
 			))}
 		</div>
@@ -97,7 +99,7 @@ function createAspectElement(
 
 		{/* delete button */}
 		<button
-			className="border-none bg-transparent cursor-pointer text-white p-0 text-base"
+			className="border-none bg-transparent cursor-pointer text-theme-text p-0 text-base"
 			onClick={() => onDelete(aspect, parentAspect)}
 		>
 			✕
@@ -112,13 +114,15 @@ function AspectMenu({ aspects, onDelete, onHover }: {
 }) {
 	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
 	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	const theme = useSettingsStore(s => s.theme);
+	const fallbackColor: [number, number, number] = theme === Theme.DARK ? [255, 255, 255] : [61, 41, 20];
 
 	return (
-		<div className="p-2 overflow-y-auto bg-black text-white scrollbar-none">
+		<div className="p-2 overflow-y-auto bg-theme-bg text-theme-text scrollbar-none">
 			{aspects != null && Array.from(aspects.entries()).map(([aspect, subaspects], index) => {
-				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover);
+				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover, fallbackColor);
 				const subaspectElements = subaspects.map((subaspect, subindex) => {
-					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, aspect, onDelete, onHover);
+					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, aspect, onDelete, onHover, fallbackColor);
 				})
 				return [aspectElement, ...subaspectElements]
 			})}

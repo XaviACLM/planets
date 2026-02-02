@@ -66,3 +66,9 @@ export const BoundsMode = {
 	CHALDEAN: "Chaldean",
 } as const;
 export type BoundsMode = typeof BoundsMode[keyof typeof BoundsMode];
+
+export const Theme = {
+	DARK: "Dark",
+	PARCHMENT: "Parchment",
+} as const;
+export type Theme = typeof Theme[keyof typeof Theme];

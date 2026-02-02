@@ -351,7 +351,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	}
 
 	return (
-		<div className="text-white p-4" style={{ width: 330 }}>
+		<div className="text-theme-text p-4" style={{ width: 330 }}>
 			{/* Planet Selector */}
 			
 			{selectorButtonList(selectorButtonsPrimary)}
@@ -465,7 +465,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			{dispositorChain && (
 				<>
 					<hr className="opacity-50 mt-4" />
-					<span className="absolute -translate-y-4 translate-x-2 bg-black px-1">
+					<span className="absolute -translate-y-4 translate-x-2 bg-theme-bg px-1">
 						{renderSmallcapsString("Dispositorship")}
 					</span>
 					<div>

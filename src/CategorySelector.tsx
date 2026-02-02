@@ -35,7 +35,7 @@ const Selector = <T extends string | number>({
 	};
 
 	return (
-		<div className="p-4 text-white">
+		<div className="p-4 text-theme-text">
 			{categories.map(category => (
 				<div key={category.name} className="mb-2.5">
 					<label className="text-sm font-bold text-gray-400 tracking-wide small-caps">{category.name}</label>
@@ -46,8 +46,8 @@ const Selector = <T extends string | number>({
 							return (
 								<button
 									key={item}
-									className={`bg-transparent border p-1.5 text-white cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none hover:border-gray-500 hover:bg-white/10 ${
-										isSelected ? 'border-white' : 'border-gray-800'
+									className={`bg-transparent border p-1.5 text-theme-text cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none hover:border-theme-border hover:bg-white/10 ${
+										isSelected ? 'border-theme-text' : 'border-gray-800'
 									}`}
 									onClick={() => handleToggle(item)}
 									title={String(item)}
@@ -55,7 +55,7 @@ const Selector = <T extends string | number>({
 									{showLabels ? (
 										<span className="text-xs font-medium whitespace-nowrap">{labels[item] || String(item)}</span>
 									) : (
-										symbol && <img src={symbol} alt={String(item)} className="w-5 h-5 object-contain invert" />
+										symbol && <img src={symbol} alt={String(item)} className="w-5 h-5 object-contain icon-filter" />
 									)}
 								</button>
 							);

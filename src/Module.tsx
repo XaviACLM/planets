@@ -49,24 +49,24 @@ const Module: FC<ModuleProps> = ({
 		setSettingsOpen(!settingsOpen);
 	};
 
-	const buttonClass = "bg-black text-white text-xs px-1 cursor-pointer hover:text-gray-300";
+	const buttonClass = "bg-theme-bg text-theme-text text-xs px-1 cursor-pointer hover:opacity-70";
 
 	// Determine which buttons to show
 	const showExpandButton = displayIndex < maxIndex;
 	const showCollapseButton = displayIndex > 0;
 
 	return (
-		<div className={`relative w-full border border-gray-500 bg-black my-1 ${isCollapsed ? 'first:mt-2 last:mb-2' : ''}`}>
+		<div className={`relative w-full border border-theme-border bg-theme-bg my-1 ${isCollapsed ? 'first:mt-2 last:mb-2 border-b-0' : ''}`}>
 			{/* Title: centered when collapsed, sideways on left when expanded */}
 			{isCollapsed ? (
 				<span
-					className="absolute bg-black px-2 text-white text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
+					className="absolute bg-theme-bg px-2 text-theme-text text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
 				>
 					{title}
 				</span>
 			) : (
 				<span
-					className="absolute -translate-x-0.5 bg-black px-1 text-white text-xs small-caps font-bold tracking-wide left-0 top-1 whitespace-nowrap"
+					className="absolute -translate-x-0.5 bg-theme-bg px-1 text-theme-text text-xs small-caps font-bold tracking-wide left-0 top-1 whitespace-nowrap"
 					style={{
 						transform: 'translateX(-50%) rotate(-90deg) translateX(-50%)',
 						transformOrigin: 'center center',
@@ -78,42 +78,44 @@ const Module: FC<ModuleProps> = ({
 			)}
 
 			{/* Left button group: help and settings (only when not collapsed) */}
-			{!isCollapsed && (helpContent || SettingsMenu) && (
-				<div
-					className="absolute bg-black px-1 flex gap-1 top-0 left-3"
-					style={{ transform: 'translateY(-51%)' }}
-				>
-					{helpContent && (
-						<button className={buttonClass} onClick={() => setHelpOpen(true)}>
-							?
-						</button>
-					)}
-					{SettingsMenu && (
-						<button
-							className={`${buttonClass} ${settingsOpen ? 'text-gray-400' : ''}`}
-							onClick={toggleSettings}
-						>
-							☰
-						</button>
-					)}
-				</div>
-			)}
+
 
 			{/* Right button group: collapse/expand arrows */}
 			<div
-				className="absolute bg-black px-1 flex gap-1 top-0 right-3"
+				className="absolute px-1 flex gap-1 -top-0.5 right-3"
 				style={{ transform: 'translateY(-51%)' }}
 			>
-				{showCollapseButton && (
-					<button className={buttonClass} onClick={handleCollapse}>
-						▲
-					</button>
+				{!isCollapsed && (helpContent || SettingsMenu) && (
+					<div className="mr-3">
+						{helpContent && (
+							<button className={buttonClass} onClick={() => setHelpOpen(true)}>
+								?
+							</button>
+						)}
+						
+						{SettingsMenu && (
+							<button
+								className={`${buttonClass} ${settingsOpen ? 'text-gray-400' : ''}`}
+								onClick={toggleSettings}
+							>
+								☰
+							</button>
+						)}
+					</div>
 				)}
-				{showExpandButton && (
-					<button className={buttonClass} onClick={handleExpand}>
-						▼
-					</button>
-				)}
+			
+				<div>
+					{showCollapseButton && (
+						<button className={buttonClass} onClick={handleCollapse}>
+							▲
+						</button>
+					)}
+					{showExpandButton && (
+						<button className={buttonClass} onClick={handleExpand}>
+							▼
+						</button>
+					)}
+				</div>
 			</div>
 
 			{/* Content */}
@@ -128,10 +130,10 @@ const Module: FC<ModuleProps> = ({
 
 			{/* Settings panel */}
 			{!isCollapsed && settingsOpen && SettingsMenu && (
-				<div className="border-t border-gray-500">
+				<div className="border-t border-theme-border">
 					<div className="relative">
 						<button
-							className="absolute top-2 right-2 text-white text-xs hover:text-gray-300 cursor-pointer"
+							className="absolute top-2 right-2 text-theme-text text-xs hover:opacity-70 cursor-pointer"
 							onClick={() => setSettingsOpen(false)}
 						>
 							✕

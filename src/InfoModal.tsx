@@ -31,20 +31,20 @@ const InfoModal: FC<InfoModalProps> = ({ isOpen, onClose, title, children }) => 
 			onClick={onClose}
 		>
 			{/* Backdrop with blur */}
-			<div className="absolute inset-0 bg-black/10 backdrop-blur-xs" />
+			<div className="absolute inset-0 bg-theme-bg/10 backdrop-blur-xs" />
 
 			{/* Modal content */}
 			<div
-				className="relative bg-black border border-gray-500 max-w-[500px] max-h-[80vh] overflow-y-auto m-4"
+				className="relative bg-theme-bg border border-theme-border max-w-[500px] max-h-[80vh] overflow-y-auto m-4"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Header */}
-				<div className="sticky top-0 bg-black border-b border-gray-500 px-4 py-2 flex justify-between items-center">
-					<span className="text-white text-sm small-caps font-bold tracking-wide">
+				<div className="sticky top-0 bg-theme-bg border-b border-theme-border px-4 py-2 flex justify-between items-center">
+					<span className="text-theme-text text-sm small-caps font-bold tracking-wide">
 						{title}
 					</span>
 					<button
-						className="text-white text-lg hover:text-gray-300 cursor-pointer leading-none"
+						className="text-theme-text text-lg hover:text-gray-300 cursor-pointer leading-none"
 						onClick={onClose}
 					>
 						✕
@@ -52,7 +52,7 @@ const InfoModal: FC<InfoModalProps> = ({ isOpen, onClose, title, children }) => 
 				</div>
 
 				{/* Body */}
-				<div className="p-4 text-white text-sm leading-relaxed">
+				<div className="p-4 text-theme-text text-sm leading-relaxed">
 					{children}
 				</div>
 			</div>

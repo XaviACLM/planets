@@ -87,7 +87,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	const strokeWidth = 1;
 
 	const svgTextProps = {
-		fill: "white",
+		fill: "var(--color-text)",
 		fontSize: textSize,
 		fontVariant: "small-caps",
 		fontWeight: "bold",
@@ -213,7 +213,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					y1={"0%"}
 					x2={"50%"}
 					y2={"100%"}
-					stroke="white"
+					stroke="var(--color-text)"
 					strokeWidth={strokeWidth}
 				/>
 				<line
@@ -221,7 +221,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					y1={"50%"}
 					x2={"100%"}
 					y2={"50%"}
-					stroke="white"
+					stroke="var(--color-text)"
 					strokeWidth={strokeWidth}
 				/>
 				{/*labels + background*/}
@@ -230,7 +230,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					y={height/2-textSize*0.7}
 					width={textSize*4.6}
 					height={textSize*1.4}
-					fill="black"
+					fill="var(--color-bg)"
 					stroke="none"
 				/>
 				<text x="50%" y={height/2+textSize*0.3} textAnchor="middle" {...svgTextProps}>
@@ -266,8 +266,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					y={0}
 					width={width}
 					height={height}
-					fill="#777"
-					stroke="white"
+					fill="var(--color-text)"
+					stroke="var(--color-text)"
 					strokeWidth={strokeWidth}
 					mask={"url(#mask-stripe2)"}
 				/>
@@ -300,7 +300,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	};
 		
 	return (
-		<div className="text-white p-4 pt-3" style={{ width: 330 }}>
+		<div className="text-theme-text p-4 pt-3" style={{ width: 330 }}>
 		
 			{renderString(createEmphasisString(verticalDiff, horizontalDiff))}
 			

@@ -64,8 +64,8 @@ const NumericInputField: FC<NumericInputFieldProps> = ({
 	return (
 		<input
 			type="text"
-			className={`w-full bg-transparent border-b py-1 outline-none text-white text-sm font-normal transition-colors box-border ${
-				hasError ? 'border-red-500' : 'border-white'
+			className={`w-full bg-transparent border-b py-1 outline-none text-theme-text text-sm font-normal transition-colors box-border ${
+				hasError ? 'border-red-500' : 'border-theme-text'
 			}`}
 			value={inputValue}
 			onChange={handleChange}

@@ -14,8 +14,8 @@
   content: '';
   width: 16px;
   height: 16px;
-  border: 1px solid white;
-  background-color: black;
+  border: 1px solid var(--color-text);
+  background-color: var(--color-bg);
   border-radius: 0px;
   display: inline-block;
   transition: all 0.2s ease;
@@ -27,8 +27,8 @@
   left: 4px;
   width: 9px;
   height: 4px;
-  border-left: 2px solid white;
-  border-bottom: 2px solid white;
+  border-left: 2px solid var(--color-text);
+  border-bottom: 2px solid var(--color-text);
   transform: rotate(-45deg);
 }
 

@@ -44,17 +44,17 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 	};
 
 	return (
-		<div className="absolute top-4 left-4 bg-black text-white px-4 py-3 font-mono text-sm border border-gray-500 z-[1000] flex items-center gap-3">
+		<div className="absolute top-4 left-4 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] flex items-center gap-3">
 			{panelState === 'initial' ? (
 				<>
 					<button
-						className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit]"
+						className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit]"
 						onClick={enterEsotericMode}
 					>
 						Enter esoteric mode
 					</button>
 					<button
-						className="bg-transparent border-none text-white cursor-pointer p-0 m-0 text-base leading-none opacity-70"
+						className="bg-transparent border-none text-theme-text cursor-pointer p-0 m-0 text-base leading-none opacity-70"
 						onClick={dismiss}
 						title="Dismiss"
 					>
@@ -64,13 +64,13 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 			) : (
 				<>
 					<button
-						className="bg-transparent border-none text-white underline cursor-pointer p-0 m-0 font-[inherit]"
+						className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit]"
 						onClick={exitEsotericMode}
 					>
 						Go back to normal mode
 					</button>
 					<button
-						className="bg-transparent border-none text-white cursor-pointer p-0 m-0 text-base leading-none opacity-70"
+						className="bg-transparent border-none text-theme-text cursor-pointer p-0 m-0 text-base leading-none opacity-70"
 						onClick={dismiss}
 						title="Dismiss"
 					>

@@ -54,7 +54,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				alt={elem}
 				width={symbolSize}
 				height={symbolSize}
-				className="invert inline"
+				className="icon-filter inline"
 			/>
 		);
 	};
@@ -62,7 +62,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
 		return showElementLabels ? (
 			<text
-				fill="white"
+				fill="var(--color-text)"
 				fontSize={textSize}
 				textAnchor={leftJustify ? "start" : "end"}
 				fontVariant="small-caps"
@@ -75,7 +75,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				href={elementSymbols[elem]}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"invert(1)"}}
+				style={{filter:"icon-filter(1)"}}
 			/>
 		);
 	};
@@ -89,7 +89,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				alt={mode}
 				width={symbolSize}
 				height={symbolSize}
-				className="invert inline"
+				className="icon-filter inline"
 			/>
 		);
 	};
@@ -97,7 +97,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 	const renderModeSVG = (mode: Mode, leftJustify: boolean): ReactNode => {
 		return showModeLabels ? (
 			<text
-				fill="white"
+				fill="var(--color-text)"
 				fontSize={textSize}
 				textAnchor={leftJustify ? "start" : "end"}
 				fontVariant="small-caps"
@@ -110,7 +110,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				href={modeSymbols[mode]}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"invert(1)"}}
+				style={{filter:"icon-filter(1)"}}
 			/>
 		);
 	};
@@ -249,7 +249,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 									width={barWidth}
 									height={symbolSize*0.7}
 									fill="none"
-									stroke="white"
+									stroke="var(--color-text)"
 									strokeWidth={strokeWidth}
 								/>
 								<rect
@@ -257,8 +257,8 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 									y={symbolSize*0.15}
 									width={barWidth}
 									height={symbolSize*0.7}
-									fill="white"
-									stroke="white"
+									fill="var(--color-text)"
+									stroke="var(--color-text)"
 									strokeWidth={strokeWidth}
 									mask={"url(#mask-stripe)"}
 								/>
@@ -267,7 +267,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 									y1={symbolSize/2}
 									x2={leftJustify ? width : width - annotationSpacing - barWidth}
 									y2={symbolSize/2}
-									stroke="white"
+									stroke="var(--color-text)"
 									strokeWidth={strokeWidth/2}
 								/>
 								<g transform={labelTransform}>{labelRenderer(value, !leftJustify)}</g>
@@ -416,7 +416,7 @@ export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPosition
 	} = useDominanceData(zodiacPositions);
 
 	return (
-		<div className="text-white p-4 pt-2 pb-2" style={{ width: 330 }}>
+		<div className="text-theme-text p-4 pt-2 pb-2" style={{ width: 330 }}>
 			<div>
 				{dominanceString(allPlanets)}
 
@@ -467,7 +467,7 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 	} = useDominanceData(zodiacPositions);
 
 	return (
-		<div className="text-white p-4 pt-3 pb-0" style={{ width: 330 }}>
+		<div className="text-theme-text p-4 pt-3 pb-0" style={{ width: 330 }}>
 
 			<div>
 				{renderTitle("Personal Planets")}
@@ -518,12 +518,12 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 
 			<hr className="opacity-50 my-2"/>
 
-			<div className="grid overflow-hidden bg-black w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
+			<div className="grid overflow-hidden bg-theme-bg w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
 				{Array.from(nodesByElement.entries()).map(([elem, nodes], index) => (
 					[
 						<div
 							key={`label-${index}`}
-							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-gray-500 pr-2"
+							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-theme-border pr-2"
 						>
 							{renderElement(elem)}
 						</div>,
@@ -539,12 +539,12 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 
 			<hr className="opacity-50 my-2"/>
 
-			<div className="grid overflow-hidden bg-black w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
+			<div className="grid overflow-hidden bg-theme-bg w-full my-4" style={{ gridTemplateColumns: 'auto 1fr' }}>
 				{Array.from(nodesByMode.entries()).map(([elem, nodes], index) => (
 					[
 						<div
 							key={`label-${index}`}
-							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-gray-500 pr-2"
+							className="col-start-1 whitespace-nowrap text-right mr-2 border-r border-theme-border pr-2"
 						>
 							{renderMode(elem)}
 						</div>,

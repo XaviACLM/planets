@@ -11,7 +11,8 @@ import {
 	HouseAngularityMode,
 	TriplicityMode,
 	FaceMode,
-	BoundsMode
+	BoundsMode,
+	Theme,
 } from './settingsDefs.ts';
 import {
 	SettingsRenderer,
@@ -48,6 +49,8 @@ const mainSettingsSpec: SettingsItem[] = [
 	separator(),
 
 	// Display options
+	dropdown('theme', 'Theme', Object.values(Theme)),
+	separator(),
 	checkbox('flipText', 'Keep text right-side-up'),
 	checkbox('rotateSymbols', 'Rotate symbols'),
 	checkbox('aspectsColorcoded', 'Colorcode aspects'),
