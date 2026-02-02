@@ -168,7 +168,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 						href={nodeSymbols[node]}
 						width={symbolSize}
 						height={symbolSize}
-						style={{filter:"invert(1)"}}
+						style={{filter:"var(--icon-filter)"}}
 						transform={`translate(${colOffset*nodeSpacing-symbolSize/2},${rowOffset*nodeSpacing-symbolSize/2})`}
 					/>
 				);

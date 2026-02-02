@@ -6,7 +6,7 @@ import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolPara
 import { AstrologyMode, Node, type SurfacePosition, ayanamsas, Zodiac, standardZodiac, irregularAstrologyModes, zodiacLongitudeClosest, zodiacLongitudeIAU, classicalRulerships, modernRulerships } from './astroDefs.ts'
 import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
 import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
-import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude } from './astronomyUtils.ts'
+import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude } from './astronomyUtil.ts'
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
     const jd = (date.getTime() / 86400000) + 2440587.5;

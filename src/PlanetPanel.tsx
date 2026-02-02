@@ -1,10 +1,10 @@
 import { useState, useMemo, FC } from 'react';
 import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect } from './astroDefs';
-import { DignityMode, HouseAngularityMode, HamburgSchoolMode } from './settingsDefs';
+import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
-import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect } from './astrologyUtils';
-import { getEclipticLongitudeSpeed } from './astronomyUtils';
+import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect } from './astrologyUtil';
+import { getEclipticLongitudeSpeed } from './astronomyUtil';
 import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
 import {
@@ -21,8 +21,9 @@ import {
 	renderFinalDispositors,
 	renderCommaSeparatedNodeList
 } from './renderPrimitives';
-import { nodeImages, radialShadow, nodeSymbols } from './astroGraphics.ts'
+import { nodeImages, nodeSymbols } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
+import { useUIStore } from './uiStore.ts'
 import ZodiacPositions from './zodiacPositions';
 
 // Opinionated thresholds
@@ -54,16 +55,17 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const faceMode = useSettingsStore(s => s.faceMode);
 	const boundsMode = useSettingsStore(s => s.boundsMode);
 	
+	const theme = useSettingsStore(s => s.theme);
+	const isDarkTheme = theme === Theme.DARK;
+	
 	const hasSurfacePosition = zodiacPositions.hasSurfacePosition();
 	const chartRuler = useMemo(
 		() => getChartRuler(zodiacPositions, dignityMode),
 		[zodiacPositions, dignityMode]
 	);
 
-	// Default to Sun, or ASC if location is defined
-	const [selectedNode, setSelectedNode] = useState<Node>(
-		hasSurfacePosition ? Node.ASCENDANT : Node.SUN
-	);
+	const selectedNode = useUIStore(s => s.selectedNodeInPlanetPanel);
+	const setSelectedNode = useUIStore(s => s.setSelectedNodeInPlanetPanel);
 	
 	const isStandardNode = standardNodes.includes(selectedNode);
 
@@ -234,6 +236,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		
 		return (
 			<svg width={planetImageWidth+2*padding} height={planetImageWidth+2*padding} overflow={"visible"} className="">
+				<circle cx="50%" cy="50%" r={planetImageWidth/2+padding} fill="url(#outerShadow)" opacity="0.4"/>
+				<circle cx="50%" cy="50%" r={planetImageWidth*(0.5-0.01)} fill="var(--color-bg)"/>
 				{isStandardNode ? (<>
 					<image
 						key={0}
@@ -242,23 +246,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						href={nodeImages[selectedNode]}
 						width={planetImageWidth}
 						height={planetImageWidth}
-						opacity={0.8}
+						opacity={1}
+						filter={isDarkTheme ? "" : "invert(1)"}
 						transform={imageTransform}
-						
 					/>
-					<image
-						key={1}
-						x={padding}
-						y={padding}
-						href={radialShadow}
-						width={planetImageWidth}
-						height={planetImageWidth}
-						opacity={0.8}
-					/>
+					<circle cx="50%" cy="50%" r={planetImageWidth/2} fill="url(#innerShadow)" filter="url(#boost-alpha)" opacity="1"/>
 				</>) : (<>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.5} stroke="#222"/>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="#222"/>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.4} stroke="#222"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5" fill="none"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="var(--color-text)" opacity="0.5" fill="none"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 				</>)}
 				<image
 					key={2}
@@ -267,15 +263,27 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					href={nodeSymbols[selectedNode]}
 					width={largeSymbolWidth}
 					height={largeSymbolWidth}
-					filter={"url(#invertedGlow)"}
+					filter={isDarkTheme ? "invert(1) url(#glow)" : "url(#glow)"}
 					transform={`translate(${(planetImageWidth-largeSymbolWidth)/2},${(planetImageWidth-largeSymbolWidth)/2})`}
 				/>
 				<defs>
-					<filter id="invertedGlow" x="-200%" y="-200%" width="400%" height="400%">
-						<feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
-						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="rgb(255, 255, 255)"/>
-						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="rgb(255, 255, 255)"/>
+					<filter id="glow" x="-200%" y="-200%" width="400%" height="400%">
+						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="var(--color-text)"/>
+						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="var(--color-text)"/>
 					</filter>
+					<filter id="boost-alpha">
+						<feComponentTransfer>
+							<feFuncA type="table" tableValues="0 0.4 0.7 0.8 0.9"/>
+						</feComponentTransfer>
+					</filter>
+					<radialGradient id="outerShadow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+						<stop offset="89%" stop-color="var(--color-text)"/>
+						<stop offset="100%" stop-color="var(--color-bg)"/>
+					</radialGradient>
+					<radialGradient id="innerShadow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+						<stop offset="0%" stop-color="var(--color-bg)"/>
+						<stop offset="100%" stop-color="var(--color-bg)" stop-opacity="0"/>
+					</radialGradient>
 				</defs>
 			</svg>
 		);

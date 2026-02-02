@@ -131,9 +131,7 @@ import sunImage from "./assets/planet-images/Sun.png"
 import uranusImage from "./assets/planet-images/Uranus.png"
 import venusImage from "./assets/planet-images/Venus.png"
 
-import radialShadow from "./assets/other/Radial Shadow.png"
-
-export { earthSymbol, dotSymbol, radialShadow };
+export { earthSymbol, dotSymbol };
 
 export const nodeShortName: Partial<Record<Node, String>> = {
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
@@ -168,6 +166,7 @@ export const nodesWithRedundantSymbols: Node[] = [
 	Node.AUTUMNAL_EQUINOX
 ];
 
+// note the main angles will be specifically excluded from using article depending on config
 export const nodesAdmittingArticle: Node[] = [
 	Node.SUN,
 	Node.MOON,

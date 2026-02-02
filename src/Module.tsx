@@ -5,6 +5,7 @@ import InfoModal from './InfoModal';
 type ModuleProps = {
 	title: string;
 	initialDisplayIndex?: number;
+	invert?: boolean;
 	settingsMenu?: FC;
 	helpContent?: ReactNode;
 	children: ReactNode;
@@ -13,6 +14,7 @@ type ModuleProps = {
 const Module: FC<ModuleProps> = ({
 	title,
 	initialDisplayIndex,
+	invert=false,
 	settingsMenu: SettingsMenu,
 	helpContent,
 	children,
@@ -61,6 +63,17 @@ const Module: FC<ModuleProps> = ({
 			{isCollapsed ? (
 				<span
 					className="absolute bg-theme-bg px-2 text-theme-text text-xs small-caps font-bold tracking-wide top-1/2 left-3 -translate-y-1/2"
+				>
+					{title}
+				</span>
+			) : invert ? (
+				<span
+					className="absolute translate-x-0.5 bg-theme-bg px-1 text-theme-text text-xs small-caps font-bold tracking-wide right-0 top-1 whitespace-nowrap"
+					style={{
+						transform: 'translateX(50%) rotate(90deg) translateX(50%)',
+						transformOrigin: 'center center',
+						willChange: 'transform',
+					}}
 				>
 					{title}
 				</span>

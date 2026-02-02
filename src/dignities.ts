@@ -1,6 +1,6 @@
 import { Node, Zodiac, Element, zodiacElement, standardNodes, irregularAstrologyModes, Sect, standardZodiac } from './astroDefs.ts';
 import { DignityMode, TriplicityMode, FaceMode, BoundsMode } from './settingsDefs.ts';
-import { getChartSect } from './astrologyUtils.ts';
+import { getChartSect } from './astrologyUtil.ts';
 import ZodiacPositions from './zodiacPositions.ts';
 
 export const Dignity = {

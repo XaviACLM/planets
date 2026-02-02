@@ -27,6 +27,7 @@ import {
 	NodeSelectorHelp,
 	AspectSelectorHelp,
 	GeneralSettingsHelp,
+	AspectMenuHelp,
 } from './helpContent'
 
 function App() {
@@ -150,7 +151,7 @@ function App() {
 	return (
 		<div className="flex h-screen w-screen overflow-hidden bg-theme-bg">
 			<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none animate-slide-in-left">
-				<div className="w-full bg-theme-bg border border-theme-border text-theme-text">
+				<div className="w-full bg-theme-bg border border-theme-border text-theme-text px-1">
 					<CitySelector
 						startingQueryText={selectedCity}
 						onSelect={(city) => {
@@ -165,13 +166,18 @@ function App() {
 						onChange={(e) => setSelectedDate(fromZonedTime(new Date(e.target.value), currentTimezone))}
 					/>
 				</div>
-				<div className="w-full bg-theme-bg border border-theme-border text-theme-text">
+				<Module
+					title="Aspects"
+					initialDisplayIndex={1}
+					invert={true}
+					helpContent={<AspectMenuHelp />}
+				>
 					<AspectMenu
 						aspects={aspects}
 						onHover={(aspect) => {setHighlightedAspect(aspect)}}
 						onDelete={handleAspectDeletion}
 					/>
-				</div>
+				</Module>
 			</aside>
 
 			<main className="flex-1 relative flex items-center justify-center overflow-hidden">
@@ -271,7 +277,7 @@ function App() {
 								</Module>
 							)}
 							<Module
-								title="Rulership graph"
+								title="Rulership Graph"
 								settingsMenu={RulershipSettingsMenu}
 								helpContent={<RulershipGraphHelp />}
 							>

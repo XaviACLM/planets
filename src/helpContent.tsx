@@ -75,3 +75,12 @@ export const GeneralSettingsHelp: FC = () => (
 		</P>
 	</>
 );
+
+export const AspectMenuHelp: FC = () => (
+	<>
+		<H2>Aspect menu</H2>
+		<P>
+			TODO: Explain this and that.
+		</P>
+	</>
+);
