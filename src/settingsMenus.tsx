@@ -25,7 +25,11 @@ import {
 	text,
 } from './settingsSpec';
 
-import "./SettingsMenu.css"
+import './SettingsMenu.css';
+
+// ============================================================================
+// Main Settings Menu
+// ============================================================================
 
 const mainSettingsSpec: SettingsItem[] = [
 	// House settings
@@ -96,8 +100,76 @@ const mainSettingsSpec: SettingsItem[] = [
 	dropdown('houseAngularityMode', 'House angularity', Object.values(HouseAngularityMode)),
 ];
 
-const SettingsMenu: FC = () => {
+export const MainSettingsMenu: FC = () => {
 	return <SettingsRenderer spec={mainSettingsSpec} />;
 };
 
-export default SettingsMenu;
+// ============================================================================
+// Module Settings Menus
+// ============================================================================
+
+// Element/Mode Balance (Dominance Chart) settings
+const dominanceSettingsSpec: SettingsItem[] = [
+	checkbox('showNodeLabels', 'Show node labels'),
+	checkbox('showElementLabels', 'Show element labels'),
+	checkbox('showModeLabels', 'Show mode labels'),
+	separator(),
+	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
+];
+
+export const DominanceSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={dominanceSettingsSpec} />;
+};
+
+// Orientation (Hemispheres) settings
+const hemisphereSettingsSpec: SettingsItem[] = [
+	checkbox('showNodeLabels', 'Show node labels'),
+];
+
+export const HemisphereSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={hemisphereSettingsSpec} />;
+};
+
+// Rulership Graph settings
+const rulershipSettingsSpec: SettingsItem[] = [
+	dropdown('dignityMode', 'Dignities', Object.values(DignityMode)),
+	separator(),
+	checkbox('showNodeLabels', 'Show node labels'),
+	checkbox('showSymbolLabels', 'Show zodiac symbol labels'),
+	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
+	separator(),
+	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
+];
+
+export const RulershipSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={rulershipSettingsSpec} />;
+};
+
+// Planet Panel settings
+const planetSettingsSpec: SettingsItem[] = [
+	checkbox('useExtendedDignities', 'Use extended dignities'),
+
+	separator(),
+
+	// Label visibility
+	checkbox('showNodeLabels', 'Show node labels'),
+	checkbox('showSymbolLabels', 'Show zodiac symbol labels'),
+	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
+
+	separator(),
+
+	// Dignities
+	dropdown('dignityMode', 'Dignities', Object.values(DignityMode)),
+	dropdown('triplicityMode', 'Triplicity', Object.values(TriplicityMode)),
+	dropdown('boundsMode', 'Bounds', Object.values(BoundsMode)),
+	dropdown('faceMode', 'Faces', Object.values(FaceMode)),
+
+	separator(),
+
+	// House angularity
+	dropdown('houseAngularityMode', 'House angularity', Object.values(HouseAngularityMode)),
+];
+
+export const PlanetSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={planetSettingsSpec} />;
+};

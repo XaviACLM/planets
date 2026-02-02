@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useId } from 'react';
 import Slider from './Slider';
 import NumericInputField from './NumericInputField';
 import { useSettingsStore } from './settingsStore';
@@ -55,7 +55,8 @@ export const text = (content: string): SettingsItem => ({ type: 'text', content 
 export const title = (content: string): SettingsItem => ({ type: 'title', content });
 
 // Individual item renderers
-const CheckboxItem: FC<{ stateKey: BooleanSettingKeys; label: string; id: string }> = ({ stateKey, label, id }) => {
+const CheckboxItem: FC<{ stateKey: BooleanSettingKeys; label: string }> = ({ stateKey, label }) => {
+	const id = useId();
 	const value = useSettingsStore(s => s[stateKey] as boolean);
 	const setter = useSettingsStore(s => s[`set${stateKey.charAt(0).toUpperCase()}${stateKey.slice(1)}` as keyof SettingsState] as (v: boolean) => void);
 
@@ -156,14 +157,12 @@ const NumericItem: FC<{ stateKey: NumberSettingKeys; label: string; min: number;
 
 // Main renderer component
 export const SettingsRenderer: FC<{ spec: SettingsItem[] }> = ({ spec }) => {
-	let checkboxCounter = 0;
-
 	return (
 		<div className="p-4">
 			{spec.map((item, index) => {
 				switch (item.type) {
 					case 'checkbox':
-						return <CheckboxItem key={index} stateKey={item.key} label={item.label} id={`checkbox-${checkboxCounter++}`} />;
+						return <CheckboxItem key={index} stateKey={item.key} label={item.label} />;
 					case 'dropdown':
 						return <DropdownItem key={index} stateKey={item.key} label={item.label} options={item.options} />;
 					case 'slider':

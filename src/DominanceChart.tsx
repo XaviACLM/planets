@@ -9,13 +9,10 @@ const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
 	zodiacPositions: ZodiacPositions,
-	abbreviated: boolean,
 }
 
-const DominanceChart: FC<DominanceChartProps> = ({
-	zodiacPositions,
-	abbreviated,
-}) => {
+// Custom hook containing all shared logic for dominance charts
+const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showElementLabels = useSettingsStore(s => s.showElementLabels);
 	const showModeLabels = useSettingsStore(s => s.showModeLabels);
@@ -23,7 +20,6 @@ const DominanceChart: FC<DominanceChartProps> = ({
 	const textSize = 12;
 	const textSizeTitle = 14;
 	const strokeWidth = 1;
-	const sectionGap = 10;
 
 	const renderSmallcapsString = (str: string): ReactNode => {
 		return (
@@ -382,36 +378,93 @@ const DominanceChart: FC<DominanceChartProps> = ({
 		);
 	}
 
-	if (abbreviated) {
-		return (
-			<div className="text-white p-4 pt-2 pb-2" style={{ width: 330 }}>
-				<div>
-					{dominanceString(allPlanets)}
-				
-					<hr className="opacity-50 my-2"/>
-				
-					<div className="flex justify-center">
-						{elementBarChart(allPlanets, false)}
-						{modeBarChart(allPlanets, true)}
-					</div>
+	return {
+		showNodeLabels,
+		textSize,
+		nodeElements,
+		nodeModes,
+		nodesByElement,
+		nodesByMode,
+		validSocialPlanets,
+		validMainAngles,
+		validLuminaries,
+		allPlanets,
+		discardedNodes,
+		elementBarChart,
+		modeBarChart,
+		dominanceString,
+		smallNodeDisplay,
+		listNodes,
+		renderTitle,
+		renderElement,
+		renderMode,
+		zodiacPositions,
+	};
+};
+
+// Abbreviated view component
+export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
+	const {
+		validLuminaries,
+		validMainAngles,
+		allPlanets,
+		elementBarChart,
+		modeBarChart,
+		dominanceString,
+		smallNodeDisplay,
+		zodiacPositions: zp,
+	} = useDominanceData(zodiacPositions);
+
+	return (
+		<div className="text-white p-4 pt-2 pb-2" style={{ width: 330 }}>
+			<div>
+				{dominanceString(allPlanets)}
+
+				<hr className="opacity-50 my-2"/>
+
+				<div className="flex justify-center">
+					{elementBarChart(allPlanets, false)}
+					{modeBarChart(allPlanets, true)}
 				</div>
-
-
-				{ validLuminaries.length != 0
-				&& <div>
-					<hr className="opacity-50 my-2"/>
-					{smallNodeDisplay(validLuminaries)}
-				</div>}
-
-				{ zodiacPositions.hasSurfacePosition()
-				&& validMainAngles.length != 0
-				&& <div>
-					<hr className="opacity-50 my-2"/>
-					{smallNodeDisplay(validMainAngles)}
-				</div>}
 			</div>
-		);
-	}
+
+
+			{ validLuminaries.length != 0
+			&& <div>
+				<hr className="opacity-50 my-2"/>
+				{smallNodeDisplay(validLuminaries)}
+			</div>}
+
+			{ zp.hasSurfacePosition()
+			&& validMainAngles.length != 0
+			&& <div>
+				<hr className="opacity-50 my-2"/>
+				{smallNodeDisplay(validMainAngles)}
+			</div>}
+		</div>
+	);
+};
+
+// Full view component
+const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
+	const {
+		textSize,
+		nodesByElement,
+		nodesByMode,
+		validSocialPlanets,
+		validMainAngles,
+		validLuminaries,
+		discardedNodes,
+		elementBarChart,
+		modeBarChart,
+		dominanceString,
+		smallNodeDisplay,
+		listNodes,
+		renderTitle,
+		renderElement,
+		renderMode,
+		zodiacPositions: zp,
+	} = useDominanceData(zodiacPositions);
 
 	return (
 		<div className="text-white p-4 pt-3 pb-0" style={{ width: 330 }}>
@@ -453,7 +506,7 @@ const DominanceChart: FC<DominanceChartProps> = ({
 				</div>
 			</div>
 
-			{ zodiacPositions.hasSurfacePosition()
+			{ zp.hasSurfacePosition()
 			&& validMainAngles.length != 0
 			&& <div>
 				<hr className="opacity-50 my-2"/>

@@ -2,15 +2,15 @@ import { useState, useEffect, useMemo } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import DominanceChart from './DominanceChart'
+import DominanceChart, { AbridgedDominanceChart } from './DominanceChart'
 import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
-import SettingsMenu from './SettingsMenu'
+import { MainSettingsMenu, DominanceSettingsMenu, PlanetSettingsMenu, RulershipSettingsMenu, HemisphereSettingsMenu } from './settingsMenus'
 import PlanetPanel from './PlanetPanel.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
-import Module, { CollapseState } from './Module'
+import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
@@ -190,8 +190,7 @@ function App() {
 						<>
 							<Module
 								title="Node Selector"
-								startingState={CollapseState.COLLAPSED}
-								supportsHalfCollapse={false}
+								initialDisplayIndex={0}
 							>
 								<NodeSelector
 									selectedItems={selectedNodes}
@@ -200,8 +199,7 @@ function App() {
 							</Module>
 							<Module
 								title="Aspect Selector"
-								startingState={CollapseState.COLLAPSED}
-								supportsHalfCollapse={false}
+								initialDisplayIndex={0}
 							>
 								<AspectKindSelector
 									selectedItems={selectedAspectKinds}
@@ -210,18 +208,15 @@ function App() {
 							</Module>
 							<Module
 								title="General Settings"
-								startingState={CollapseState.EXPANDED}
-								supportsHalfCollapse={false}
 							>
-								<SettingsMenu />
+								<MainSettingsMenu />
 							</Module>
 						</>
 					) : (
 						<>
 							<Module
 								title="Planet Info"
-								startingState={CollapseState.EXPANDED}
-								supportsHalfCollapse={false}
+								settingsMenu={PlanetSettingsMenu}
 							>
 								<PlanetPanel
 									zodiacPositions={zodiacPositions}
@@ -232,22 +227,17 @@ function App() {
 							</Module>
 							<Module
 								title="Element/Mode Balance"
-								startingState={CollapseState.HALF}
-								supportsHalfCollapse={true}
+								initialDisplayIndex={1}
+								settingsMenu={DominanceSettingsMenu}
 							>
-								{(abbreviated) => (
-									<DominanceChart
-										zodiacPositions={zodiacPositions}
-										abbreviated={abbreviated}
-									/>
-								)}
+								<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
+								<DominanceChart zodiacPositions={zodiacPositions} />
 							</Module>
 							{ zodiacPositions.hasSurfacePosition()
 							&& (
 								<Module
 									title="Orientation"
-									startingState={CollapseState.EXPANDED}
-									supportsHalfCollapse={false}
+									settingsMenu={HemisphereSettingsMenu}
 								>
 									<HemispheresChart
 										zodiacPositions={zodiacPositions}
@@ -256,8 +246,7 @@ function App() {
 							)}
 							<Module
 								title="Rulership graph"
-								startingState={CollapseState.EXPANDED}
-								supportsHalfCollapse={false}
+								settingsMenu={RulershipSettingsMenu}
 							>
 								<RulershipPanel
 									rulershipGraph={rulershipGraph}
