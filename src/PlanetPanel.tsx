@@ -48,10 +48,6 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
 	
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
-	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
-	const showElementLabels = useSettingsStore(s => s.showElementLabels);
-	const showModeLabels = useSettingsStore(s => s.showModeLabels);
-	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
 	const triplicityMode = useSettingsStore(s => s.triplicityMode);
@@ -221,7 +217,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
-				{renderNode(angleProximity.closestAngle, { showLabel: showNodeLabels, forceText: true })}
+				{renderNode(angleProximity.closestAngle, { forceText: true })}
 				{renderString(`).`)}
 			</div>
 		);
@@ -318,12 +314,12 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<span>
 				{renderString("Rules ")}
 				{rulesAllNodes && renderString("all planets & luminaries")}
-				{!rulesAllNodes && renderCommaSeparatedNodeList(ruledNodes, showNodeLabels)}
+				{!rulesAllNodes && renderCommaSeparatedNodeList(ruledNodes)}
 				{renderString(".")}
 				{transitivelyRulesAnyNodes && (<>
 					{renderString(" Transitively rules ")}
 					{transitivelyRulesAllNodes && renderString("all planets & luminaries")}
-					{!transitivelyRulesAllNodes && renderCommaSeparatedNodeList(exclusivelyTransitivelyRuledNodes, showNodeLabels)}
+					{!transitivelyRulesAllNodes && renderCommaSeparatedNodeList(exclusivelyTransitivelyRuledNodes)}
 					{renderString(".")}
 				</>)}
 			</span>
@@ -366,7 +362,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					
 					{/* Sign and Position */}
 					<div className="mt-2">
-						{renderSign(nodeSign, showSymbolLabels)}
+						{renderSign(nodeSign)}
 						{renderString(" · ")}
 						{renderSmallcapsString(formattedPosition)}
 					</div>
@@ -452,7 +448,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					{Array.from(aspectsSummary.nodes).map((node, i) => (
 						<span key={i}>
 							{i > 0 && renderString(", ")}
-							{renderNode(node, { showLabel: showNodeLabels })}
+							{renderNode(node)}
 						</span>
 					))}
 					{renderString(".")}
@@ -471,9 +467,9 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					<div>
 						<div className="mt-2">
 							{isFinalDispositor ? (
-								renderFinalDispositors(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)
+								renderFinalDispositors(dispositorChain, true)
 							) : (
-								renderDispositorChain(dispositorChain, true, showSignsInDispositorChains, showNodeLabels, showSymbolLabels)
+								renderDispositorChain(dispositorChain, true)
 							)}
 						</div>
 						{isStandardNode && renderRuledNodes(ruledNodes, transitivelyRuledNodes)}
