@@ -431,7 +431,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 									requestAnimationFrame(() => {
 										node.style.opacity = "1";
 									});
-								 }
+								}
 							}}
 						/>
 					);
@@ -470,7 +470,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 									requestAnimationFrame(() => {
 										node.style.opacity = "1";
 									});
-								 }
+								}
 							}}
 						/>
 					);

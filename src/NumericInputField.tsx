@@ -70,7 +70,7 @@ const NumericInputField: FC<NumericInputFieldProps> = ({
 			value={inputValue}
 			onChange={handleChange}
 			onKeyDown={handleCommit} // Check for Enter key press
-			onBlur={handleCommit}    // Check for loss of focus
+			onBlur={handleCommit}	// Check for loss of focus
 			placeholder={placeholder}
 			aria-invalid={hasError}
 		/>

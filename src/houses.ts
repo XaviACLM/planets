@@ -149,9 +149,9 @@ function computeEclipticAngles(ps: vec3[]): number[] {
 }
 
 function cycleToStart(angles: number[], start: number): number[] {
-    const sorted = [...angles].sort((a, b) => a - b);
-    const i = sorted.findIndex((angle, idx) => angle < start && start < sorted[idx + 1]);
-    return i === -1 ? sorted : [...sorted.slice(i), ...sorted.slice(0, i)];
+	const sorted = [...angles].sort((a, b) => a - b);
+	const i = sorted.findIndex((angle, idx) => angle < start && start < sorted[idx + 1]);
+	return i === -1 ? sorted : [...sorted.slice(i), ...sorted.slice(0, i)];
 }
 
 function computeSpaceBasedSystemCuspPositions(

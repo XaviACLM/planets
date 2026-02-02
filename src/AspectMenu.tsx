@@ -94,7 +94,7 @@ function createAspectElement(
 		{/* error, quantile */}
 		<div className="grow text-right text-[0.7em] mr-4">
 			{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
-			 Δ{(aspect.error!*180/Math.PI).toFixed(2)}º
+			Δ{(aspect.error!*180/Math.PI).toFixed(2)}º
 		</div>
 
 		{/* delete button */}

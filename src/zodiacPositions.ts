@@ -9,57 +9,57 @@ import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geo
 import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude } from './astronomyUtil.ts'
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
-    const jd = (date.getTime() / 86400000) + 2440587.5;
-    const t = (jd - 2451545.0) / 36525.0;
-    
-    // again Meeus Ch. 47
-    const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
-    const perigee = (omega % 360) * Math.PI / 180;
-    
-    return new Map<Node, number>([
-        [Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
-        [Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
-    ]);
+	const jd = (date.getTime() / 86400000) + 2440587.5;
+	const t = (jd - 2451545.0) / 36525.0;
+	
+	// again Meeus Ch. 47
+	const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
+	const perigee = (omega % 360) * Math.PI / 180;
+	
+	return new Map<Node, number>([
+		[Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
+		[Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
+	]);
 }
 
 function computeLunarApogeePerigeeExact(date: Date): Map<Node, number> {
-    const s = GeoMoonState(date);
-    
-    const GM = 8.887692587023177e-10;  // earth's gravitational parameter in AU^3 / day^2
-    const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
-    
-    // angular momentum
-    const h = {
-        x: s.y * s.vz - s.z * s.vy,
-        y: s.z * s.vx - s.x * s.vz,
-        z: s.x * s.vy - s.y * s.vx
-    };
-    
-    // eccentricity vector points toward perigee
-    const rVec = {x: s.x, y: s.y, z: s.z};
-    const vVec = {x: s.vx, y: s.vy, z: s.vz};
-    
-    // e = (v x h)/GM - r/mod(r)
-    const vxh = {
-        x: vVec.y * h.z - vVec.z * h.y,
-        y: vVec.z * h.x - vVec.x * h.z,
-        z: vVec.x * h.y - vVec.y * h.x
-    };
-    const e = {
-        x: vxh.x/GM - rVec.x/r,
-        y: vxh.y/GM - rVec.y/r,
-        z: vxh.z/GM - rVec.z/r,
-		t: MakeTime(date)
-    };
-    
+	const s = GeoMoonState(date);
 	
-    const eEcl = Ecliptic(new Vector(e.x, e.y, e.z, e.t)).vec;
-    const omega = Math.atan2(eEcl.y, eEcl.x);
-    
-    return new Map<Node, number>([
-        [Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
-        [Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
-    ]);
+	const GM = 8.887692587023177e-10;  // earth's gravitational parameter in AU^3 / day^2
+	const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
+	
+	// angular momentum
+	const h = {
+		x: s.y * s.vz - s.z * s.vy,
+		y: s.z * s.vx - s.x * s.vz,
+		z: s.x * s.vy - s.y * s.vx
+	};
+	
+	// eccentricity vector points toward perigee
+	const rVec = {x: s.x, y: s.y, z: s.z};
+	const vVec = {x: s.vx, y: s.vy, z: s.vz};
+	
+	// e = (v x h)/GM - r/mod(r)
+	const vxh = {
+		x: vVec.y * h.z - vVec.z * h.y,
+		y: vVec.z * h.x - vVec.x * h.z,
+		z: vVec.x * h.y - vVec.y * h.x
+	};
+	const e = {
+		x: vxh.x/GM - rVec.x/r,
+		y: vxh.y/GM - rVec.y/r,
+		z: vxh.z/GM - rVec.z/r,
+		t: MakeTime(date)
+	};
+	
+	
+	const eEcl = Ecliptic(new Vector(e.x, e.y, e.z, e.t)).vec;
+	const omega = Math.atan2(eEcl.y, eEcl.x);
+	
+	return new Map<Node, number>([
+		[Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
+		[Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
+	]);
 }
 
 function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{

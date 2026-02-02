@@ -9,22 +9,22 @@ export const AspectKind = {
 	CONTRAPARALLEL: "Contraparallel", // opposite eq. latitude
 	
 	// minor binary
-    VIGINTILE: "Vigintile", // 1/20
-    SEMISEXTILE: "Semisextile", // 1/12
-    UNDECILE: "Undecile", // 1/11
-    DECILE: "Decile", // 1/10
-    NOVILE: "Novile", // 1/9
-    SEMISQUARE: "Semisquare", // 1/8
-    SEPTILE: "Septile", // 1/7
-    QUINTILE: "Quintile", // 1/5
-    BINOVILE: "Binovile", // 2/9
-    BISEPTILE: "Biseptile", // 2/7
-    TREDECILE: "Tredecile", // 3/10
-    SESQUIQUADRATE: "Sesquiquadrate", // 3/8
-    BIQUINTILE: "Biquintile", // 2/5
-    QUINCUNX: "Quincunx", // 5/12
-    TRISEPTILE: "Triseptile", // 3/7
-    QUADRANOVILE: "Quadranovile", // 4/9
+	VIGINTILE: "Vigintile", // 1/20
+	SEMISEXTILE: "Semisextile", // 1/12
+	UNDECILE: "Undecile", // 1/11
+	DECILE: "Decile", // 1/10
+	NOVILE: "Novile", // 1/9
+	SEMISQUARE: "Semisquare", // 1/8
+	SEPTILE: "Septile", // 1/7
+	QUINTILE: "Quintile", // 1/5
+	BINOVILE: "Binovile", // 2/9
+	BISEPTILE: "Biseptile", // 2/7
+	TREDECILE: "Tredecile", // 3/10
+	SESQUIQUADRATE: "Sesquiquadrate", // 3/8
+	BIQUINTILE: "Biquintile", // 2/5
+	QUINCUNX: "Quincunx", // 5/12
+	TRISEPTILE: "Triseptile", // 3/7
+	QUADRANOVILE: "Quadranovile", // 4/9
 	
 	// configurations
 	GRAND_TRINE: "Grand Trine", // 3 in trines

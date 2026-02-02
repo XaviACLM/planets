@@ -74,7 +74,7 @@ function App() {
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
+	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
 
 	const rulershipGraph = useMemo<RulershipGraph>(() => {
 		return RulershipGraph.create(zodiacPositions, dignityMode);

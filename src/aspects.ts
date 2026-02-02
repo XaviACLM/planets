@@ -11,22 +11,22 @@ export const aspectKindAngles: Record<AspectKind, number[] | null> = {
 	[AspectKind.SEXTILE] : [1/6],
 	[AspectKind.PARALLEL] : null,
 	[AspectKind.CONTRAPARALLEL] : null,
-    [AspectKind.VIGINTILE] : [1/20],
-    [AspectKind.SEMISEXTILE] : [1/12],
-    [AspectKind.UNDECILE] : [1/11],
-    [AspectKind.DECILE] : [1/10],
-    [AspectKind.NOVILE] : [1/9],
-    [AspectKind.SEMISQUARE] : [1/8],
-    [AspectKind.SEPTILE] : [1/7],
-    [AspectKind.QUINTILE] : [1/5],
-    [AspectKind.BINOVILE] : [2/9],
-    [AspectKind.BISEPTILE] : [2/7],
-    [AspectKind.TREDECILE] : [3/10],
-    [AspectKind.SESQUIQUADRATE] : [3/8],
-    [AspectKind.BIQUINTILE] : [2/5],
-    [AspectKind.QUINCUNX] : [5/12],
-    [AspectKind.TRISEPTILE] : [3/7],
-    [AspectKind.QUADRANOVILE] : [4/9],
+	[AspectKind.VIGINTILE] : [1/20],
+	[AspectKind.SEMISEXTILE] : [1/12],
+	[AspectKind.UNDECILE] : [1/11],
+	[AspectKind.DECILE] : [1/10],
+	[AspectKind.NOVILE] : [1/9],
+	[AspectKind.SEMISQUARE] : [1/8],
+	[AspectKind.SEPTILE] : [1/7],
+	[AspectKind.QUINTILE] : [1/5],
+	[AspectKind.BINOVILE] : [2/9],
+	[AspectKind.BISEPTILE] : [2/7],
+	[AspectKind.TREDECILE] : [3/10],
+	[AspectKind.SESQUIQUADRATE] : [3/8],
+	[AspectKind.BIQUINTILE] : [2/5],
+	[AspectKind.QUINCUNX] : [5/12],
+	[AspectKind.TRISEPTILE] : [3/7],
+	[AspectKind.QUADRANOVILE] : [4/9],
 	[AspectKind.GRAND_TRINE] : [1/3, 2/3],
 	[AspectKind.GRAND_SQUARE] : [1/4, 2/4, 3/4],
 	[AspectKind.GRAND_SEXTILE] : [1/6, 2/6, 3/6, 4/6, 5/6],
@@ -69,22 +69,22 @@ const isRegular: Partial<Record<AspectKind, boolean>> = Object.fromEntries(
 );
 
 export class Aspect {
-    kind: AspectKind;
-    nodes: Node[];
-    basisNodeIdx: number | null;
-    error: number | null;
+	kind: AspectKind;
+	nodes: Node[];
+	basisNodeIdx: number | null;
+	error: number | null;
 
-    constructor(
-        kind: AspectKind,
-        nodes: Node[],
-        basisNodeIdx?: number | null,
-        error?: number | null
-    ) {
-        this.kind = kind;
-        this.nodes = nodes;
-        this.basisNodeIdx = basisNodeIdx ?? null;
-        this.error = error ?? null;
-    }
+	constructor(
+		kind: AspectKind,
+		nodes: Node[],
+		basisNodeIdx?: number | null,
+		error?: number | null
+	) {
+		this.kind = kind;
+		this.nodes = nodes;
+		this.basisNodeIdx = basisNodeIdx ?? null;
+		this.error = error ?? null;
+	}
 }
 
 // nodes are always ordered increasingly by their position 0-2pi
@@ -96,28 +96,28 @@ export class Aspect {
 // for kite, 120, 60, 60, (120)
 
 function ensureCorrectOrderingInAspect(aspect: Aspect, nodePositions: Map<Node, number>): void {
-    if (aspect.basisNodeIdx === null) {
-        aspect.nodes.sort((a, b) => nodePositions.get(a)! - nodePositions.get(b)!);
-    } else {
-        const nodesWithFlags = aspect.nodes.map((node, idx) => ({
-            node,
-            isBasis: idx === aspect.basisNodeIdx
-        }));
-        
-        nodesWithFlags.sort((a, b) => nodePositions.get(a.node)! - nodePositions.get(b.node)!);
-        
-        aspect.nodes = nodesWithFlags.map(item => item.node);
-        aspect.basisNodeIdx = nodesWithFlags.findIndex(item => item.isBasis);
-    }
+	if (aspect.basisNodeIdx === null) {
+		aspect.nodes.sort((a, b) => nodePositions.get(a)! - nodePositions.get(b)!);
+	} else {
+		const nodesWithFlags = aspect.nodes.map((node, idx) => ({
+			node,
+			isBasis: idx === aspect.basisNodeIdx
+		}));
+		
+		nodesWithFlags.sort((a, b) => nodePositions.get(a.node)! - nodePositions.get(b.node)!);
+		
+		aspect.nodes = nodesWithFlags.map(item => item.node);
+		aspect.basisNodeIdx = nodesWithFlags.findIndex(item => item.isBasis);
+	}
 }
 
 function ensureCorrectOrderingInAspectList(
-    aspectList: Aspect[], 
-    nodePositions: Map<Node, number>
+	aspectList: Aspect[], 
+	nodePositions: Map<Node, number>
 ): void {
-    for (const aspect of aspectList) {
-        ensureCorrectOrderingInAspect(aspect, nodePositions);
-    }
+	for (const aspect of aspectList) {
+		ensureCorrectOrderingInAspect(aspect, nodePositions);
+	}
 }
 
 function aspectError(
@@ -320,29 +320,29 @@ function subaspectsOf(
 }
 
 class AspectGroup {
-    private aspects: Map<string, Aspect> = new Map();
-    
-    private static key(aspect: Aspect): string {
+	private aspects: Map<string, Aspect> = new Map();
+	
+	private static key(aspect: Aspect): string {
 		// technically doesn't guarantee equality, but works for any reasonable max error value
-        return `${aspect.kind}:${aspect.nodes.join(',')}`;
-    }
-    
-    insert(aspect: Aspect): void {
-        const key = AspectGroup.key(aspect);
-        const presentAspect = this.aspects.get(key);
-        
-        if (
-            presentAspect === undefined || 
-            presentAspect.error === null || 
-            (presentAspect.error > aspect.error!)
-        ) {
-            this.aspects.set(key, aspect);
-        }
-    }
-    
-    contains(aspect: Aspect): boolean {
-        return this.aspects.has(AspectGroup.key(aspect));
-    }
+		return `${aspect.kind}:${aspect.nodes.join(',')}`;
+	}
+	
+	insert(aspect: Aspect): void {
+		const key = AspectGroup.key(aspect);
+		const presentAspect = this.aspects.get(key);
+		
+		if (
+			presentAspect === undefined || 
+			presentAspect.error === null || 
+			(presentAspect.error > aspect.error!)
+		) {
+			this.aspects.set(key, aspect);
+		}
+	}
+	
+	contains(aspect: Aspect): boolean {
+		return this.aspects.has(AspectGroup.key(aspect));
+	}
 
 	getAllAspects(): Aspect[] {
 		return Array.from(this.aspects.values());
@@ -352,30 +352,30 @@ class AspectGroup {
 
 
 export function findAspects(
-    nodePositions: Map<Node, number>,
+	nodePositions: Map<Node, number>,
 	aspectErrorMode: AspectErrorMode,
 	maxConfigurationError: number,
 	maxMajorBAError: number,
 	maxMinorBAError: number
 ): Map<Aspect, Aspect[]> {
 
-    // should be unnecessary, but let's make sure
-    for (const [node, position] of nodePositions.entries()) {
-        nodePositions.set(node, normalizeAngleRad(position));
-    }
+	// should be unnecessary, but let's make sure
+	for (const [node, position] of nodePositions.entries()) {
+		nodePositions.set(node, normalizeAngleRad(position));
+	}
 
-    // canonical ordering during search
-    const orderedNodes = Array.from(nodePositions.keys()).sort(
-        (a, b) => (nodePositions.get(a)!) - (nodePositions.get(b)!)
-    );
+	// canonical ordering during search
+	const orderedNodes = Array.from(nodePositions.keys()).sort(
+		(a, b) => (nodePositions.get(a)!) - (nodePositions.get(b)!)
+	);
 
-    const aspects = new AspectGroup(); // holds every aspect we find
-    const subaspects = new Map<Aspect, Aspect[]>(); // maps every aspect to its subaspects
-    const excludedAspects = new AspectGroup(); // holds every subaspect of an aspect we've found, to avoid reintroduction
+	const aspects = new AspectGroup(); // holds every aspect we find
+	const subaspects = new Map<Aspect, Aspect[]>(); // maps every aspect to its subaspects
+	const excludedAspects = new AspectGroup(); // holds every subaspect of an aspect we've found, to avoid reintroduction
 	
-    // we start with the grands, in a reverse topological order of inclusion <= descending amt of nodes
-    // populate and use aspects, subaspects, and excluded_aspects during search
-    const aspectConfigs = configurationAspectKinds
+	// we start with the grands, in a reverse topological order of inclusion <= descending amt of nodes
+	// populate and use aspects, subaspects, and excluded_aspects during search
+	const aspectConfigs = configurationAspectKinds
 	.map(kind => ({
 		kind,
 		angles: aspectKindAngles[kind]!,
@@ -383,14 +383,14 @@ export function findAspects(
 	}));
 
 	for (const config of aspectConfigs) {
-        const { kind, angles, requiresBasis } = config;
+		const { kind, angles, requiresBasis } = config;
 		const k = angles.length + 1;
-        const scaledAngles = angles.map(angle => angle * TAU);
-        const numVertices = scaledAngles.length + 1;
+		const scaledAngles = angles.map(angle => angle * TAU);
+		const numVertices = scaledAngles.length + 1;
 
-        for (const basisNode of orderedNodes) {
-            const basisPosition = nodePositions.get(basisNode)!;
-            
+		for (const basisNode of orderedNodes) {
+			const basisPosition = nodePositions.get(basisNode)!;
+			
 			
 			// for pairwise we have to compute error on-the-fly, I think
 			// can't easily pre-filter them, either (well, we can, but it's done differently)
@@ -483,34 +483,34 @@ export function findAspects(
 			// do search
 			search([basisNode], 0, 0)
 
-            // ensure correct ordering
-            ensureCorrectOrderingInAspectList(aspectsOnBasis, nodePositions);
+			// ensure correct ordering
+			ensureCorrectOrderingInAspectList(aspectsOnBasis, nodePositions);
 
-            // update aspects, excluded_aspects, subaspects
-            for (const aspect of aspectsOnBasis) {
-                if (excludedAspects.contains(aspect)) {
-                    continue;
-                }
-                aspects.insert(aspect);
-                const subs = subaspectsOf(aspect, nodePositions);
-                subaspects.set(aspect, subs);
-                for (const subaspect of subs) {
-                    excludedAspects.insert(subaspect);
-                }
-            }
-        }
-    }
-    // then the binary aspects. just do pairwise
-    for (let idx = 0; idx < orderedNodes.length; idx++) {
-        const n1 = orderedNodes[idx];
-        for (let j = idx + 1; j < orderedNodes.length; j++) {
-            const n2 = orderedNodes[j];
-            const p1 = nodePositions.get(n1)!;
-            const p2 = nodePositions.get(n2)!;
-            const d = angleShortDistance(p1, p2);
+			// update aspects, excluded_aspects, subaspects
+			for (const aspect of aspectsOnBasis) {
+				if (excludedAspects.contains(aspect)) {
+					continue;
+				}
+				aspects.insert(aspect);
+				const subs = subaspectsOf(aspect, nodePositions);
+				subaspects.set(aspect, subs);
+				for (const subaspect of subs) {
+					excludedAspects.insert(subaspect);
+				}
+			}
+		}
+	}
+	// then the binary aspects. just do pairwise
+	for (let idx = 0; idx < orderedNodes.length; idx++) {
+		const n1 = orderedNodes[idx];
+		for (let j = idx + 1; j < orderedNodes.length; j++) {
+			const n2 = orderedNodes[j];
+			const p1 = nodePositions.get(n1)!;
+			const p2 = nodePositions.get(n2)!;
+			const d = angleShortDistance(p1, p2);
 
-            // standard binary aspects
-            const binaryAspects = binaryAspectKinds
+			// standard binary aspects
+			const binaryAspects = binaryAspectKinds
 				.filter(kind => aspectKindAngles[kind]?.[0] !== undefined)
 				.map(kind => ({
 					target: aspectKindAngles[kind]![0],
@@ -518,48 +518,48 @@ export function findAspects(
 				}));
 
 
-            for (const { target, kind } of binaryAspects) {
-                const error = Math.abs(d - target * TAU);
+			for (const { target, kind } of binaryAspects) {
+				const error = Math.abs(d - target * TAU);
 				const maxError = majorBinaryAspectsKinds.includes(kind) ? maxMajorBAError : maxMinorBAError;
-                if (error <= maxError) {
-                    const aspect = new Aspect(kind, [n1, n2], null, error);
-                    if (!excludedAspects.contains(aspect)) {
-                        aspects.insert(aspect);
-                    }
-                }
-            }
+				if (error <= maxError) {
+					const aspect = new Aspect(kind, [n1, n2], null, error);
+					if (!excludedAspects.contains(aspect)) {
+						aspects.insert(aspect);
+					}
+				}
+			}
 
 			// re: the sequel's use of maxMajorBAError, note contra/parallels and conjunctions/oppositions are all major binary
-            // paralells / contraparallels: skip if conjunct
+			// paralells / contraparallels: skip if conjunct
 			// note that in degenerate (close to the equinoxes) cases two nodes can be both opposite and parallel. we elect that this is fine
-            if (d <= maxMajorBAError) {
-                continue;
-            }
-            
-            // otherwise do the usual sawtooth approach
-            // Assuming sawtoothSine is defined elsewhere
-            const s1 = sawtoothSine(p1);
-            const s2 = sawtoothSine(p2);
-            
+			if (d <= maxMajorBAError) {
+				continue;
+			}
+			
+			// otherwise do the usual sawtooth approach
+			// Assuming sawtoothSine is defined elsewhere
+			const s1 = sawtoothSine(p1);
+			const s2 = sawtoothSine(p2);
+			
 			// parallel
-            let error = Math.abs(s1 - s2);
-            if (error <= maxMajorBAError) {
-                const aspect = new Aspect(AspectKind.PARALLEL, [n1, n2], null, error);
-                if (!excludedAspects.contains(aspect)) {
-                    aspects.insert(aspect);
-                }
-            }
-            
+			let error = Math.abs(s1 - s2);
+			if (error <= maxMajorBAError) {
+				const aspect = new Aspect(AspectKind.PARALLEL, [n1, n2], null, error);
+				if (!excludedAspects.contains(aspect)) {
+					aspects.insert(aspect);
+				}
+			}
+			
 			// contraparallel, skip if opposite
-            error = Math.abs(s1 + s2);
-            if (error <= maxMajorBAError && Math.abs(d-Math.PI) > maxMajorBAError) {
-                const aspect = new Aspect(AspectKind.CONTRAPARALLEL, [n1, n2], null, error);
-                if (!excludedAspects.contains(aspect)) {
-                    aspects.insert(aspect);
-                }
-            }
-        }
-    }
+			error = Math.abs(s1 + s2);
+			if (error <= maxMajorBAError && Math.abs(d-Math.PI) > maxMajorBAError) {
+				const aspect = new Aspect(AspectKind.CONTRAPARALLEL, [n1, n2], null, error);
+				if (!excludedAspects.contains(aspect)) {
+					aspects.insert(aspect);
+				}
+			}
+		}
+	}
 	
 	// guaranteed everything has had its error computed
 	// remove if error is too large (different kinds of aspects may have different thresholds)
@@ -608,8 +608,8 @@ export function ensureNoDuplicates(
 	subaspectMap: Map<Aspect, Aspect[]>
 ){
 	const excludedAspects = new AspectGroup();
-    const sortedEntries = Array.from(subaspectMap.entries())
-        .sort(([a, _sa], [b, _sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error! - b.error!));
+	const sortedEntries = Array.from(subaspectMap.entries())
+		.sort(([a, _sa], [b, _sb]) => 100*(b.nodes.length - a.nodes.length) + (a.error! - b.error!));
 	subaspectMap.clear();
 	for (const [aspect, subs] of sortedEntries){
 		if  ( excludedAspects.contains(aspect) ){
@@ -632,8 +632,7 @@ function filterAspect(
 ){
 	const aspectSelected = selectedAspectKinds.has(aspect.kind);
 	const nodesSelected = aspect.nodes.every(node => selectedNodes.has(node));
-	const amtPhysical = aspect.nodes.filter(node => nodeTypes[node] == NodeType.BODY ||
-							  (nodeTypes[node] == NodeType.HYPOTHETICAL && hamburgPhysical)).length;
+	const amtPhysical = aspect.nodes.filter(node => nodeTypes[node] == NodeType.BODY || (nodeTypes[node] == NodeType.HYPOTHETICAL && hamburgPhysical)).length;
 	const amtNodes = aspect.nodes.length;
 	const physicalEnough = (aspectPhysicalityFilter == AspectPhysicalityFilter.NO_PHYSICAL) ||
 						   (aspectPhysicalityFilter == AspectPhysicalityFilter.ONE_PHYSICAL && amtPhysical >= 1) ||
@@ -656,25 +655,25 @@ export function filterAspects(
 ): Map<Aspect, Aspect[]>{
 	//deepcopy subaspect map
 	const newMap = new Map<Aspect, Aspect[]>();
-    for (const [aspect, subs] of subaspectMap.entries()) {
-        newMap.set(aspect, [...subs]);
-    }
+	for (const [aspect, subs] of subaspectMap.entries()) {
+		newMap.set(aspect, [...subs]);
+	}
 	
-    // tasks list
-    const entries: [Aspect, Aspect[]][] = Array.from(newMap.entries());
+	// tasks list
+	const entries: [Aspect, Aspect[]][] = Array.from(newMap.entries());
 	
-    let i = 0;
-    while (i < entries.length) {
-        const [aspect, subaspects] = entries[i];
-        i++;
-        // if the aspect survives filtering, keep it
-        if (filterAspect(aspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)) {
-            continue;
-        }
-        // Otherwise remove it from the new map
-        newMap.delete(aspect);
-        // Insert its subaspects and queue them for later cleaning
-        for (const subaspect of subaspects) {
+	let i = 0;
+	while (i < entries.length) {
+		const [aspect, subaspects] = entries[i];
+		i++;
+		// if the aspect survives filtering, keep it
+		if (filterAspect(aspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)) {
+			continue;
+		}
+		// Otherwise remove it from the new map
+		newMap.delete(aspect);
+		// Insert its subaspects and queue them for later cleaning
+		for (const subaspect of subaspects) {
 			
 			const subsubaspects: Aspect[] = [];
 			for ( const s of subaspectsOf(subaspect, nodePositions) ){
@@ -696,51 +695,51 @@ export function filterAspects(
 					}
 				}
 			}
-            
+			
 			newMap.set(subaspect, subsubaspects);
-            entries.push([subaspect, subsubaspects]);
-        }
-    }
-    // only mutate the new map
-    ensureNoDuplicates(newMap);
+			entries.push([subaspect, subsubaspects]);
+		}
+	}
+	// only mutate the new map
+	ensureNoDuplicates(newMap);
 	
-    return newMap;
+	return newMap;
 }
 
 function flattenSubaspects(
-    subaspectMap: Map<Aspect, Aspect[]>
+	subaspectMap: Map<Aspect, Aspect[]>
 ): Map<Aspect, Aspect[]> {
-    const newMap = new Map<Aspect, Aspect[]>();
-    for (const [aspect, subaspects] of subaspectMap) {
-        newMap.set(aspect, []);
-        for (const subaspect of subaspects) {
-            newMap.set(subaspect, []);
-        }
-    }
-    ensureNoDuplicates(newMap);
-    return newMap;
+	const newMap = new Map<Aspect, Aspect[]>();
+	for (const [aspect, subaspects] of subaspectMap) {
+		newMap.set(aspect, []);
+		for (const subaspect of subaspects) {
+			newMap.set(subaspect, []);
+		}
+	}
+	ensureNoDuplicates(newMap);
+	return newMap;
 }
 
 function clearSubaspects(
-    subaspectMap: Map<Aspect, Aspect[]>
+	subaspectMap: Map<Aspect, Aspect[]>
 ): Map<Aspect, Aspect[]> {
-    const newMap = new Map<Aspect, Aspect[]>();
-    for (const [aspect, _] of subaspectMap) {
-        newMap.set(aspect, []);
-    }
-    return newMap;
+	const newMap = new Map<Aspect, Aspect[]>();
+	for (const [aspect, _] of subaspectMap) {
+		newMap.set(aspect, []);
+	}
+	return newMap;
 }
 
 function copySubaspects(
-    subaspectMap: Map<Aspect, Aspect[]>
+	subaspectMap: Map<Aspect, Aspect[]>
 ): Map<Aspect, Aspect[]> {
 	
-    const newMap = new Map<Aspect, Aspect[]>();
-    for (const [aspect, subaspects] of subaspectMap) {
-        newMap.set(aspect, subaspects);
-    }
+	const newMap = new Map<Aspect, Aspect[]>();
+	for (const [aspect, subaspects] of subaspectMap) {
+		newMap.set(aspect, subaspects);
+	}
 	
-    return newMap;
+	return newMap;
 }
 	
 export function formatAspects(
@@ -759,7 +758,7 @@ export function formatAspects(
 }
 
 export function flattenSubaspectsToList(
-    subaspectMap: Map<Aspect, Aspect[]>
+	subaspectMap: Map<Aspect, Aspect[]>
 ): Aspect[] {
 	return Array.from(flattenSubaspects(subaspectMap).keys());
 }

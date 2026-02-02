@@ -9,7 +9,7 @@ export interface vec3 {
 }
 
 export function toAstronomyVector(v: vec3, time: Date = new Date()): Vector {
-    return new Vector(v.x, v.y, v.z, new AstroTime(time));
+	return new Vector(v.x, v.y, v.z, new AstroTime(time));
 }
 
 function normVec(v: vec3): number {

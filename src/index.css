@@ -1,116 +1,116 @@
 @import "tailwindcss";
 
 @theme {
-  /* Theme color utilities: bg-theme-bg, text-theme-text, border-theme-border */
-  --color-theme-text: var(--color-text);
-  --color-theme-bg: var(--color-bg);
-  --color-theme-border: var(--color-border);
-  --color-theme-border-light: var(--color-border-light);
+	/* Theme color utilities: bg-theme-bg, text-theme-text, border-theme-border */
+	--color-theme-text: var(--color-text);
+	--color-theme-bg: var(--color-bg);
+	--color-theme-border: var(--color-border);
+	--color-theme-border-light: var(--color-border-light);
 }
 
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 :root {
-  /* Theme CSS variables - default (dark) theme */
-  --color-text: #ffffff;
-  --color-bg: #000000;
-  --color-border: #6b7280;
-  --color-border-light: #9ca3af;
-  --border-radius: 0px;
-  --icon-filter: invert(1);
+	/* Theme CSS variables - default (dark) theme */
+	--color-text: #ffffff;
+	--color-bg: #000000;
+	--color-border: #6b7280;
+	--color-border-light: #9ca3af;
+	--border-radius: 0px;
+	--icon-filter: invert(1);
 
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
 
-  color: var(--color-text);
-  background-color: var(--color-bg);
+	color: var(--color-text);
+	background-color: var(--color-bg);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 /* Parchment theme */
 :root.theme-parchment {
-  font-family: ui-serif, Georgia, serif;
-  --color-text: #3d2914;
-  --color-bg: #f5e6d3;
-  --color-border: #8b7355;
-  --color-border-light: #a08060;
-  --border-radius: 4px;
-  --icon-filter: invert(0);
+	font-family: ui-serif, Georgia, serif;
+	--color-text: #3d2914;
+	--color-bg: #f5e6d3;
+	--color-border: #8b7355;
+	--color-border-light: #a08060;
+	--border-radius: 4px;
+	--icon-filter: invert(0);
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+	margin: 0;
+	display: flex;
+	place-items: center;
+	min-width: 320px;
+	min-height: 100vh;
 }
 
 /* Focus styling - remove default, add yellow focus-visible ring for buttons */
 *:focus {
-  outline: none;
+	outline: none;
 }
 
 button:focus-visible {
-  outline: 2px solid #ffff00 !important;
-  outline-offset: 2px;
+	outline: 2px solid #ffff00 !important;
+	outline-offset: 2px;
 }
 
 /* Custom utilities */
 .small-caps {
-  font-variant: small-caps;
+	font-variant: small-caps;
 }
 
 /* Theme-aware icon filter (replaces hardcoded 'invert') */
 .icon-filter {
-  filter: var(--icon-filter);
+	filter: var(--icon-filter);
 }
 
 .scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
 .scrollbar-none::-webkit-scrollbar {
-  display: none;
+	display: none;
 }
 
 /* Sidebar slide-in animation */
 @keyframes slideInFromRight {
-  from {
-    opacity: 0.5;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+	from {
+		opacity: 0.5;
+		transform: translateX(50px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
 }
 
 .animate-slide-in-right {
-  animation: slideInFromRight 0.5s ease forwards;
+	animation: slideInFromRight 0.5s ease forwards;
 }
 
 /* Sidebar slide-in animation */
 @keyframes slideInFromLeft {
-  from {
-    opacity: 0.5;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+	from {
+		opacity: 0.5;
+		transform: translateX(-50px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
 }
 
 .animate-slide-in-left {
-  animation: slideInFromLeft 0.5s ease forwards;
+	animation: slideInFromLeft 0.5s ease forwards;
 }
 
 .grid-rows-collapsed {

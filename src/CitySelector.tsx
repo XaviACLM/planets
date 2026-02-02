@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { type CityData, CitySearchEngine } from "./CitySearchEngine.ts"
 
 interface CitySelectorProps {
-  startingQueryText: CityData | null;
-  onSelect: (city: CityData) => void;
+	startingQueryText: CityData | null;
+	onSelect: (city: CityData) => void;
 }
 
 export function CitySelector({ startingQueryText, onSelect }: CitySelectorProps) {
