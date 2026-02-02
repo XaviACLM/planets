@@ -365,38 +365,124 @@ export interface SurfacePosition {
 	longitude: number
 }
 
-// Here and below Ophiuchus gets assigned to Pluto (common suggestion of Schmidt and Berg)
-export const classicalRulerships: Record<Zodiac, Node> = {
-	[Zodiac.ARIES]: Node.MARS,
-	[Zodiac.TAURUS]: Node.VENUS,
-	[Zodiac.GEMINI]: Node.MERCURY,
-	[Zodiac.CANCER]: Node.MOON,
-	[Zodiac.LEO]: Node.SUN,
-	[Zodiac.VIRGO]: Node.MERCURY,
-	[Zodiac.LIBRA]: Node.VENUS,
-	[Zodiac.SCORPIO]: Node.MARS,
-	[Zodiac.OPHIUCHUS]: Node.PLUTO,
-	[Zodiac.SAGITTARIUS]: Node.JUPITER,
-	[Zodiac.CAPRICORN]: Node.SATURN,
-	[Zodiac.AQUARIUS]: Node.SATURN,
-	[Zodiac.PISCES]: Node.JUPITER,
+// Dignity data - single source of truth for domicile, exaltation, detriment, fall
+export type DignityData = {
+	domicile: Zodiac[];
+	exaltation: { sign: Zodiac; degree?: number } | null;
+	detriment: Zodiac[];
+	fall: { sign: Zodiac; degree?: number } | null;
 };
 
-export const modernRulerships: Record<Zodiac, Node> = {
-	[Zodiac.ARIES]: Node.MARS,
-	[Zodiac.TAURUS]: Node.VENUS,
-	[Zodiac.GEMINI]: Node.MERCURY,
-	[Zodiac.CANCER]: Node.MOON,
-	[Zodiac.LEO]: Node.SUN,
-	[Zodiac.VIRGO]: Node.MERCURY,
-	[Zodiac.LIBRA]: Node.VENUS,
-	[Zodiac.SCORPIO]: Node.PLUTO,
-	[Zodiac.OPHIUCHUS]: Node.PLUTO,
-	[Zodiac.SAGITTARIUS]: Node.JUPITER,
-	[Zodiac.CAPRICORN]: Node.SATURN,
-	[Zodiac.AQUARIUS]: Node.URANUS,
-	[Zodiac.PISCES]: Node.NEPTUNE,
+const baseDignityData: Partial<Record<Node, DignityData>> = {
+	[Node.SUN]: {
+		domicile: [Zodiac.LEO],
+		exaltation: { sign: Zodiac.ARIES, degree: 19 },
+		detriment: [Zodiac.AQUARIUS],
+		fall: { sign: Zodiac.LIBRA, degree: 19 },
+	},
+	[Node.MOON]: {
+		domicile: [Zodiac.CANCER],
+		exaltation: { sign: Zodiac.TAURUS, degree: 3 },
+		detriment: [Zodiac.CAPRICORN],
+		fall: { sign: Zodiac.SCORPIO, degree: 3 },
+	},
+	[Node.MERCURY]: {
+		domicile: [Zodiac.GEMINI, Zodiac.VIRGO],
+		exaltation: { sign: Zodiac.VIRGO, degree: 15 },
+		detriment: [Zodiac.SAGITTARIUS, Zodiac.PISCES],
+		fall: { sign: Zodiac.PISCES, degree: 15 },
+	},
+	[Node.VENUS]: {
+		domicile: [Zodiac.TAURUS, Zodiac.LIBRA],
+		exaltation: { sign: Zodiac.PISCES, degree: 27 },
+		detriment: [Zodiac.ARIES, Zodiac.SCORPIO],
+		fall: { sign: Zodiac.VIRGO, degree: 27 },
+	},
 };
+
+export const classicalDignityData: Partial<Record<Node, DignityData>> = {
+	...baseDignityData,
+	[Node.MARS]: {
+		domicile: [Zodiac.ARIES, Zodiac.SCORPIO],
+		exaltation: { sign: Zodiac.CAPRICORN, degree: 28 },
+		detriment: [Zodiac.LIBRA, Zodiac.TAURUS],
+		fall: { sign: Zodiac.CANCER, degree: 28 },
+	},
+	[Node.JUPITER]: {
+		domicile: [Zodiac.SAGITTARIUS, Zodiac.PISCES],
+		exaltation: { sign: Zodiac.CANCER, degree: 15 },
+		detriment: [Zodiac.GEMINI, Zodiac.VIRGO],
+		fall: { sign: Zodiac.CAPRICORN, degree: 15 },
+	},
+	[Node.SATURN]: {
+		domicile: [Zodiac.CAPRICORN, Zodiac.AQUARIUS],
+		exaltation: { sign: Zodiac.LIBRA, degree: 21 },
+		detriment: [Zodiac.CANCER, Zodiac.LEO],
+		fall: { sign: Zodiac.ARIES, degree: 21 },
+	},
+};
+
+export const modernDignityData: Partial<Record<Node, DignityData>> = {
+	...baseDignityData,
+	[Node.MARS]: {
+		domicile: [Zodiac.ARIES],
+		exaltation: { sign: Zodiac.CAPRICORN, degree: 28 },
+		detriment: [Zodiac.LIBRA],
+		fall: { sign: Zodiac.CANCER, degree: 28 },
+	},
+	[Node.JUPITER]: {
+		domicile: [Zodiac.SAGITTARIUS],
+		exaltation: { sign: Zodiac.CANCER, degree: 15 },
+		detriment: [Zodiac.GEMINI],
+		fall: { sign: Zodiac.CAPRICORN, degree: 15 },
+	},
+	[Node.SATURN]: {
+		domicile: [Zodiac.CAPRICORN],
+		exaltation: { sign: Zodiac.LIBRA, degree: 21 },
+		detriment: [Zodiac.CANCER],
+		fall: { sign: Zodiac.ARIES, degree: 21 },
+	},
+	[Node.URANUS]: {
+		domicile: [Zodiac.AQUARIUS],
+		exaltation: { sign: Zodiac.SCORPIO },
+		detriment: [Zodiac.LEO],
+		fall: { sign: Zodiac.TAURUS },
+	},
+	[Node.NEPTUNE]: {
+		domicile: [Zodiac.PISCES],
+		exaltation: { sign: Zodiac.CANCER },
+		detriment: [Zodiac.VIRGO],
+		fall: { sign: Zodiac.CAPRICORN },
+	},
+	[Node.PLUTO]: {
+		domicile: [Zodiac.SCORPIO],
+		exaltation: { sign: Zodiac.LEO },
+		detriment: [Zodiac.TAURUS],
+		fall: { sign: Zodiac.AQUARIUS },
+	},
+};
+
+// Extract Zodiac->Node rulership map from dignity data
+function extractRulerships(dignityData: Partial<Record<Node, DignityData>>): Partial<Record<Zodiac, Node>> {
+	const rulerships: Partial<Record<Zodiac, Node>> = {};
+	for (const [node, data] of Object.entries(dignityData)) {
+		for (const sign of data.domicile) {
+			rulerships[sign] = node as Node;
+		}
+	}
+	return rulerships;
+}
+
+// Ophiuchus gets assigned to Pluto (common suggestion of Schmidt and Berg)
+export const classicalRulerships: Record<Zodiac, Node> = {
+	...extractRulerships(classicalDignityData),
+	[Zodiac.OPHIUCHUS]: Node.PLUTO,
+} as Record<Zodiac, Node>;
+
+export const modernRulerships: Record<Zodiac, Node> = {
+	...extractRulerships(modernDignityData),
+	[Zodiac.OPHIUCHUS]: Node.PLUTO,
+} as Record<Zodiac, Node>;
 
 export const nodeCategories = [
 	{

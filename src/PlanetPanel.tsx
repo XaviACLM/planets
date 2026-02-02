@@ -159,7 +159,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 
 	const isStationary = speedRadPerDay !== null && Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]*stationarySpeedFractionThreshold;
 	const isRetrograde = speedRadPerDay !== null && !isStationary && speedRadPerDay < 0;
-	const speedDegPerDay = speedRadPerDay !== null ? (speedRadPerDay * 180 / Math.PI) : null;
+	const speedDegPerDay = speedRadPerDay !== null && (speedRadPerDay * 180 / Math.PI);
+	const formattedSpeedDegPerDay = speedDegPerDay !== null && formatAngle(Math.abs(speedRadPerDay), Math.abs(speedDegPerDay)<1);
 
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {
@@ -423,7 +424,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					)}
 
 					{/* Speed / Retrograde */}
-					{speedDegPerDay !== null && (
+					{formattedSpeedDegPerDay !== null && (
 						<div>
 							{isStationary ? (
 								renderString("Stationary")
@@ -432,7 +433,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 							) : (
 								renderString("Direct")
 							)}
-							{renderString(` (${Math.abs(speedDegPerDay).toFixed(2)}°/day)`)}
+							{renderString(` (${formattedSpeedDegPerDay}/day)`)}
 						</div>
 					)}
 

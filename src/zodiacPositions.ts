@@ -3,7 +3,7 @@ import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, R
 import { normalizeAngleRad, anglesLieInShortArc } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
-import { AstrologyMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularAstrologyModes, classicalRulerships, modernRulerships } from './astroDefs.ts'
+import { AstrologyMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularAstrologyModes } from './astroDefs.ts'
 import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU } from './astroData.ts'
 import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
 import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
