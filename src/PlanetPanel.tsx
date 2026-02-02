@@ -1,5 +1,5 @@
 import { useState, useMemo, FC } from 'react';
-import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect } from './astroDefs';
+import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect, nodeDependsOnLocation } from './astroDefs';
 import { nodeAverageSpeed } from './astroData';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
@@ -56,6 +56,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const boundsMode = useSettingsStore(s => s.boundsMode);
 	const stationarySpeedFractionThreshold = useSettingsStore(s => s.stationarySpeedPercentageThreshold)/100;
 	
+	const selectedNodes = useSettingsStore(s => s.selectedNodes);
+	
 	const theme = useSettingsStore(s => s.theme);
 	const isDarkTheme = theme === Theme.DARK;
 	
@@ -97,14 +99,24 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	].filter(item => item.node != chartRuler || item.highlight), [hasSurfacePosition, chartRuler]);
 	
 	const selectorButtonsSecondary: Array<SelectorButtonSpecs> = useMemo(() => standardNodes.filter(
-			node => ![Node.SUN, Node.MOON, chartRuler].includes(node)
+			node => selectedNodes.has(node) && ![Node.SUN, Node.MOON, chartRuler].includes(node)
 		).map(node => {
 			return {
 				node: node,
 				highlight: false,
 				disabled: false,
 			}
-		}), [chartRuler]);
+		}), [selectedNodes, chartRuler]);
+	
+	const selectorButtonsTertiary: Array<SelectorButtonSpecs> = useMemo(() => Array.from(selectedNodes).filter(
+			node => !standardNodes.includes(node) && node !== Node.ASCENDANT
+		).map(node => {
+			return {
+				node: node,
+				highlight: false,
+				disabled: !hasSurfacePosition && nodeDependsOnLocation[node],
+			}
+		}), [selectedNodes]);
 
 	// Get sign and position for selected node
 	const nodeSign = zodiacPositions.getSymbolOfNode(selectedNode);
@@ -292,7 +304,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	
 	const selectorButtonList = (buttonSpecs: SelectorButtonSpecs[]) => {
 		return (
-			<div className="mb-2">
+			<div className="mb-0">
 				<div className="flex flex-wrap gap-1.5">
 					{buttonSpecs.map((btn, idx) => (
 						<NodeSelectorButton
@@ -359,8 +371,17 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		<div className="text-theme-text p-4" style={{ width: 330 }}>
 			{/* Planet Selector */}
 			
-			{selectorButtonList(selectorButtonsPrimary)}
-			{selectorButtonList(selectorButtonsSecondary)}
+			<div className="group">
+				{selectorButtonList(selectorButtonsPrimary)}
+				<div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+					<div className="overflow-hidden">
+						<hr className="opacity-20 my-2 mx-4" />
+						{selectorButtonList(selectorButtonsSecondary)}
+						<hr className="opacity-20 my-2 mx-4" />
+						{selectorButtonList(selectorButtonsTertiary)}
+					</div>
+				</div>
+			</div>
 
 			<hr className="opacity-50 my-2" />
 			
