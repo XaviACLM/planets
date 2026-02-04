@@ -1,5 +1,5 @@
 import { useState, useMemo, FC } from 'react';
-import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect, nodeDependsOnLocation } from './astroDefs';
+import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect, nodeDependsOnLocation, irregularAstrologyModes } from './astroDefs';
 import { nodeAverageSpeed } from './astroData';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
@@ -120,15 +120,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 				highlight: false,
 				disabled: !hasSurfacePosition && nodeDependsOnLocation[node],
 			}
-		}), [selectedNodes]);
+		}), [selectedNodes, hasSurfacePosition]);
 
 	// Get sign and position for selected node
 	const nodeSign = zodiacPositions.getSymbolOfNode(selectedNode);
 	const positionInSign = zodiacPositions.getNodePositionWithinSign(selectedNode);
 	const formattedPosition = formatAngle(positionInSign);
 
-	const faceLord = getFaceLord(selectedNode, zodiacPositions, faceMode);
-	const boundLord = getBoundLord(selectedNode, zodiacPositions, boundsMode);
+	const faceLord = irregularAstrologyModes.includes(zodiacPositions.astrologyMode) ? null : getFaceLord(selectedNode, zodiacPositions, faceMode);
+	const boundLord = irregularAstrologyModes.includes(zodiacPositions.astrologyMode) ? null : getBoundLord(selectedNode, zodiacPositions, boundsMode);
 
 	// Get house placement (if location defined)
 	// TODO whether this is defined is a bit more complicated
@@ -145,26 +145,21 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		: null;
 
 	// 2.1 Dignity
-	const dignityState = useMemo(
-		() => getDignityState(selectedNode, zodiacPositions, dignityMode),
-		[selectedNode, zodiacPositions, dignityMode]
-	);
+	const dignityState = getDignityState(selectedNode, zodiacPositions, dignityMode);
 	
 	const triplicityRole = (hasSurfacePosition && standardNodes.includes(selectedNode)) ? getTriplicityRole(selectedNode, zodiacPositions, triplicityMode) : null;
 
 	// 2.2 Speed & Retrograde
-	const speedRadPerDay = useMemo(() => {
+	const { formattedSpeedDegPerDay, isStationary, isRetrograde } = useMemo(() => {
 		if (nodeTypes[selectedNode] === NodeType.POINT) {
-			return null;
-		} else {
-			return getEclipticLongitudeSpeed(selectedNode, date, hamburgSchoolMode);
+			return { formattedSpeedDegPerDay: null, isStationary: null, isRetrograde: null};
 		}
-	}, [selectedNode, date, hamburgSchoolMode]);
-
-	const isStationary = speedRadPerDay !== null && Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]*stationarySpeedFractionThreshold;
-	const isRetrograde = speedRadPerDay !== null && !isStationary && speedRadPerDay < 0;
-	const speedDegPerDay = speedRadPerDay !== null && (speedRadPerDay * 180 / Math.PI);
-	const formattedSpeedDegPerDay = speedDegPerDay !== null && formatAngle(Math.abs(speedRadPerDay), Math.abs(speedDegPerDay)<1);
+		const speedRadPerDay = getEclipticLongitudeSpeed(selectedNode, date, hamburgSchoolMode);
+		const isStationary = Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]*stationarySpeedFractionThreshold;
+		const isRetrograde = !isStationary && speedRadPerDay < 0;
+		const formattedSpeedDegPerDay = formatAngle(Math.abs(speedRadPerDay), Math.abs(speedRadPerDay)<Math.PI/180);
+		return {formattedSpeedDegPerDay, isStationary, isRetrograde};
+	}, [selectedNode, date, hamburgSchoolMode])
 
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {

@@ -18,11 +18,6 @@ export type DignityState = {
 };
 
 export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, dignityMode: DignityMode): DignityState | null {
-	// TODO: investigate if it's possible to give a reasonable result with irregular zodiac systems
-	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
-		throw new Error(`getDignityState is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
-	}
-
 	const dignityData = dignityMode === DignityMode.CLASSICAL ? classicalDignityData : modernDignityData;
 
 	const data = dignityData[node];
@@ -41,7 +36,7 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 	}
 
 	if (data.exaltation && data.exaltation.sign === sign) {
-		if (data.exaltation.degree !== undefined) {
+		if (data.exaltation.degree !== undefined && !irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
 			const offset = degreeInSign - data.exaltation.degree;
 			return { dignity: Dignity.EXALTATION, degreeOffset: offset };
 		}
@@ -53,7 +48,7 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 	}
 
 	if (data.fall && data.fall.sign === sign) {
-		if (data.fall.degree !== undefined) {
+		if (data.fall.degree !== undefined && !irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
 			const offset = degreeInSign - data.fall.degree;
 			return { dignity: Dignity.FALL, degreeOffset: offset };
 		}
@@ -102,16 +97,16 @@ const triplicityDataByMode: Record<TriplicityMode, TriplicityData> = {
 };
 
 export function getTriplicityRole(node: Node, zodiacPositions: ZodiacPositions, triplicityMode: TriplicityMode): TriplicityRole | null {
-	// TODO: investigate if it's possible to give a reasonable result with irregular zodiac systems
-	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
-		throw new Error(`getTriplicityRole is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
-	}
-
 	if (!standardNodes.includes(node)) {
 		throw new Error(`getTriplicityRole is only valid for planets and luminaries, got: ${node}`);
 	}
 
 	const sign = zodiacPositions.getSymbolOfNode(node);
+	
+	if (sign === Zodiac.OPHIUCHUS) {
+		return null;
+	}
+	
 	const elem = zodiacElement[sign];
 	const triplicityData = triplicityDataByMode[triplicityMode];
 	const rulers = triplicityData[elem];
@@ -175,7 +170,6 @@ const faceDataByMode: Record<FaceMode, Partial<FaceData>> = {
 };
 
 export function getFaceLord(node: Node, zodiacPositions: ZodiacPositions, faceMode: FaceMode): Node {
-	// TODO: investigate if it's possible to give a reasonable result with irregular zodiac systems
 	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
 		throw new Error(`getFaceLord is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
 	}
@@ -427,7 +421,6 @@ function getBoundsData(boundsMode: BoundsMode, zodiacPositions: ZodiacPositions)
 }
 
 export function getBoundLord(node: Node, zodiacPositions: ZodiacPositions, boundsMode: BoundsMode): Node {
-	// TODO: investigate if it's possible to give a reasonable result with irregular zodiac systems
 	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
 		throw new Error(`getBoundsLord is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
 	}

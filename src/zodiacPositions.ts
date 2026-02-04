@@ -496,7 +496,7 @@ class ZodiacPositions {
 			return normalizeAngleRad(lon - this.siderealOffset)%(Math.PI/6);
 		} else {
 			const sign = this._getSymbolAtLongitude(lon);
-			return lon - this._zodiacSymbolPositions[sign];
+			return lon - this._zodiacSymbolPositions.get(sign);
 		}
 		
 	} 
