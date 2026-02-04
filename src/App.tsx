@@ -6,7 +6,6 @@ import DominanceChart, { AbridgedDominanceChart } from './DominanceChart'
 import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
-import { MainSettingsMenu, DominanceSettingsMenu, PlanetSettingsMenu, RulershipSettingsMenu, HemisphereSettingsMenu } from './settingsMenus'
 import PlanetPanel from './PlanetPanel.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
@@ -21,12 +20,20 @@ import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
 import {
+	MainSettingsMenu,
+	DominanceSettingsMenu,
+	PlanetSettingsMenu,
+	RulershipSettingsMenu,
+	HemisphereSettingsMenu,
+	NodeSelectorSettingsMenu,
+	AspectSelectorSettingsMenu
+} from './settingsMenus'
+import {
 	PlanetInfoHelp,
 	DominanceChartHelp,
 	OrientationHelp,
 	RulershipGraphHelp,
 	NodeSelectorHelp,
-	AspectSelectorHelp,
 	GeneralSettingsHelp,
 	AspectMenuHelp,
 } from './helpContent'
@@ -210,13 +217,13 @@ function App() {
 				}
 
 			</main>
-
 			<Sidebar side="right" animationKey={menuOpen ? 'settings' : 'main'}>
 				{menuOpen ? (
 					<>
 						<Module
 							title="Node Selector"
 							initialDisplayIndex={0}
+							settingsMenu={NodeSelectorSettingsMenu}
 							helpContent={<NodeSelectorHelp />}
 						>
 							<NodeSelector
@@ -227,7 +234,7 @@ function App() {
 						<Module
 							title="Aspect Selector"
 							initialDisplayIndex={0}
-							helpContent={<AspectSelectorHelp />}
+							settingsMenu={AspectSelectorSettingsMenu}
 						>
 							<AspectKindSelector
 								selectedItems={selectedAspectKinds}
@@ -258,7 +265,6 @@ function App() {
 						<Module
 							title="Element/Mode Balance"
 							initialDisplayIndex={1}
-							settingsMenu={DominanceSettingsMenu}
 							helpContent={<DominanceChartHelp />}
 						>
 							<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
@@ -268,7 +274,6 @@ function App() {
 						&& (
 							<Module
 								title="Orientation"
-								settingsMenu={HemisphereSettingsMenu}
 								helpContent={<OrientationHelp />}
 							>
 								<HemispheresChart

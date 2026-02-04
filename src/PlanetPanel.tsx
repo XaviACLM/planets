@@ -48,7 +48,11 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const houseAngularityMode = useSettingsStore(s => s.houseAngularityMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
 	
+	// locally unused, render dependency
+	// ( = these lines here to force rerender if these values change)
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
 	const triplicityMode = useSettingsStore(s => s.triplicityMode);
@@ -246,7 +250,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		
 		const sunScaling = 10/9; // measured from images to match outer edges
 		const sunD = planetImageWidth*(1/2)*(1/sunScaling - 1);
-		const imageTransform = selectedNode === Node.SUN ? `scale(${sunScaling}, ${sunScaling}) translate(${sunD}, ${sunD})` : "";
+		const saturnScaling = 2.43; // eyeballed
+		const saturnD = planetImageWidth*(1/2)*(1/saturnScaling - 1);
+		const imageTransform = selectedNode === Node.SUN ? (
+				`scale(${sunScaling}, ${sunScaling}) translate(${sunD}, ${sunD})`
+			) : selectedNode === Node.SATURN ? (
+				`scale(${saturnScaling}, ${saturnScaling*1.05}) translate(${saturnD-4}, ${saturnD-4})` //very eyeballed!
+			) : (
+				""
+			);
 		
 		return (
 			<svg width={planetImageWidth+2*padding} height={planetImageWidth+2*padding} overflow={"visible"} className="">
@@ -433,7 +445,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 							) : (
 								renderString("Direct")
 							)}
-							{renderString(` (${formattedSpeedDegPerDay}/day)`)}
+							{renderString(` (${formattedSpeedDegPerDay} / day)`)}
 						</div>
 					)}
 

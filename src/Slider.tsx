@@ -1,3 +1,5 @@
+import { renderString } from './renderPrimitives.tsx'
+
 interface SliderProps<T extends string> {
 	options: T[];
 	value: T;
@@ -15,11 +17,12 @@ const Slider = <T extends string>({
 	return (
 		<div className="w-full py-2">
 			<div className="relative px-2.5">
-				<div className="relative h-0.5 bg-zinc-700">
+				{/*halfway color*/}
+				<div className="relative h-0.5 bg-theme-text/30">
 					{/* Active segment line */}
 					{currentIndex > 0 && (
 						<div
-							className="absolute h-0.5 bg-white left-0 top-0 transition-[width] duration-200"
+							className="absolute h-0.5 bg-theme-text left-0 top-0 transition-[width] duration-200"
 							style={{ width: `${(currentIndex / (notchCount - 1)) * 100}%` }}
 						/>
 					)}
@@ -35,8 +38,8 @@ const Slider = <T extends string>({
 							<div
 								className={`transition-all duration-200 ${
 									value === option
-										? 'w-2.5 h-2.5 bg-white shadow-[0_0_0_2px_black]'
-										: 'w-2 h-2 bg-zinc-600 group-hover:bg-gray-400'
+										? 'w-2.5 h-2.5 bg-theme-text'
+										: 'w-2 h-2 bg-theme-text/30 group-hover:bg-theme-text/60'
 								}`}
 							/>
 						</button>
@@ -49,14 +52,14 @@ const Slider = <T extends string>({
 				{options.map(option => (
 					<div
 						key={option}
-						className={`font-mono text-xs cursor-pointer text-center flex-1 select-none px-0.5 py-1 transition-colors duration-200 ${
+						className={`cursor-pointer text-center flex-1 select-none px-0.5 py-1 transition-colors duration-200 ${
 							value === option
 								? 'text-theme-text font-medium'
-								: 'text-gray-500 hover:text-gray-300'
+								: 'text-theme-text/50 hover:text-theme-text'
 						}`}
 						onClick={() => onChange(option)}
 					>
-						{option}
+						{renderString(option)}
 					</div>
 				))}
 			</div>

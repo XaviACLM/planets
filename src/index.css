@@ -16,8 +16,8 @@
 	/* Theme CSS variables - default (dark) theme */
 	--color-text: #ffffff;
 	--color-bg: #000000;
-	--color-border: #6b7280;
-	--color-border-light: #9ca3af;
+	--color-border: #555;
+	--color-border-light: #aaa;
 	--border-radius: 0px;
 	--icon-filter: invert(1);
 
@@ -39,8 +39,8 @@
 	font-family: ui-serif, Georgia, serif;
 	--color-text: #3d2914;
 	--color-bg: #f5e6d3;
-	--color-border: #8b7355;
-	--color-border-light: #a08060;
+	--color-border: #B9A895;
+	--color-border-light: #7A6853;
 	--border-radius: 4px;
 	--icon-filter: invert(0);
 }

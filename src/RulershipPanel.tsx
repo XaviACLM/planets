@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { RulershipGraph } from './rulershipGraph.ts';
 import { renderTitle, renderFinalDispositors, renderDispositorChain } from './renderPrimitives';
+import { useSettingsStore } from './settingsStore.ts'
 
 type RulershipPanelProps = {
 	rulershipGraph: RulershipGraph;
@@ -9,6 +10,13 @@ type RulershipPanelProps = {
 const RulershipPanel: FC<RulershipPanelProps> = ({
 	rulershipGraph,
 }) => {
+	
+	// locally unused, render dependency
+	// ( = these lines here to force rerender if these values change)
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
+	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	
 	return (
 		<div className="text-theme-text p-4" style={{ width: 330 }}>
 			<div>

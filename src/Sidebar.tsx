@@ -21,8 +21,8 @@ export function Sidebar({ side, children, animationKey }: SidebarProps) {
 				<defs>
 					<pattern
 						id={`dot-pattern-${side}`}
-						width="15"
-						height="15"
+						width="10"
+						height="10"
 						patternUnits="userSpaceOnUse"
 						patternTransform="rotate(45)"
 					>
@@ -37,7 +37,7 @@ export function Sidebar({ side, children, animationKey }: SidebarProps) {
 					x="5%"
 					width="90%"
 					height="100%"
-					opacity={isDarkTheme ? "50%" : "100%"}
+					opacity={isDarkTheme ? "30%" : "75%"}
 					fill={`url(#dot-pattern-${side})`}
 				/>
 			</svg>

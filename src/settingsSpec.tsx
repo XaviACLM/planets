@@ -2,6 +2,7 @@ import { type FC, useId } from 'react';
 import Slider from './Slider';
 import NumericInputField from './NumericInputField';
 import { useSettingsStore } from './settingsStore';
+import { renderString } from './renderPrimitives.tsx'
 
 // Get the state type from the store
 type SettingsState = ReturnType<typeof useSettingsStore.getState>;
@@ -69,7 +70,7 @@ const CheckboxItem: FC<{ stateKey: BooleanSettingKeys; label: string }> = ({ sta
 				onChange={() => setter(!value)}
 				id={id}
 			/>
-			<label htmlFor={id}>{label}</label>
+			<label htmlFor={id}>{renderString(label)}</label>
 		</div>
 	);
 };
@@ -80,11 +81,11 @@ const DropdownItem: FC<{ stateKey: EnumSettingKeys; label: string; options: read
 
 	return (
 		<div className="flex justify-between items-center my-1">
-			<span>{label}</span>
+			<span>{renderString(label)}</span>
 			<select
 				value={value}
 				onChange={(e) => setter(e.target.value)}
-				className="bg-theme-bg text-theme-text border border-theme-text px-1 py-1 outline-none"
+				className="bg-theme-bg text-theme-text border border-theme-text px-1 py-1 text-sm outline-none"
 			>
 				{options.map(option => (
 					<option key={option} value={option}>
@@ -118,12 +119,12 @@ const ToggleButtonsItem: FC<{ stateKey: EnumSettingKeys; label: string; options:
 
 	return (
 		<div className="flex items-center gap-2 justify-between">
-			<span>{label}</span>
+			<span>{renderString(label)}</span>
 			<div className="flex gap-2">
 				{options.map(option => (
 					<button
 						key={option}
-						className={`bg-theme-bg border border-gray-700 text-theme-text px-2 py-0.5 cursor-pointer transition-all hover:border-theme-border ${value === option ? 'border-theme-text' : ''}`}
+						className={`bg-theme-bg text-sm border border-theme-border text-theme-text px-2 py-0.5 cursor-pointer transition-all hover:border-theme-border-light ${value === option ? 'border-theme-text' : ''}`}
 						onClick={() => setter(option)}
 					>
 						{option}
@@ -140,7 +141,7 @@ const NumericItem: FC<{ stateKey: NumberSettingKeys; label: string; min: number;
 
 	return (
 		<div className="flex justify-between items-center">
-			{label}
+			{renderString(label)}
 			<div className="max-w-[50px] mr-5">
 				<NumericInputField
 					min={min}
@@ -174,7 +175,7 @@ export const SettingsRenderer: FC<{ spec: SettingsItem[] }> = ({ spec }) => {
 					case 'separator':
 						return <hr key={index} className="opacity-50 my-2" />;
 					case 'text':
-						return <div key={index}>{item.content}</div>;
+						return <div key={index}>{renderString(item.content)}</div>;
 					case 'title':
 						return <div key={index} className="font-bold text-sm text-gray-400 tracking-wide small-caps mt-2">{item.content}</div>;
 					default:

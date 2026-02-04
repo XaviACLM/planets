@@ -118,11 +118,11 @@ export const MainSettingsMenu: FC = () => {
 
 // Element/Mode Balance (Dominance Chart) settings
 const dominanceSettingsSpec: SettingsItem[] = [
+	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
+	separator(),
 	checkbox('showNodeLabels', 'Show node labels'),
 	checkbox('showElementLabels', 'Show element labels'),
 	checkbox('showModeLabels', 'Show mode labels'),
-	separator(),
-	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
 ];
 
 export const DominanceSettingsMenu: FC = () => {
@@ -145,8 +145,6 @@ const rulershipSettingsSpec: SettingsItem[] = [
 	checkbox('showNodeLabels', 'Show node labels'),
 	checkbox('showSymbolLabels', 'Show zodiac symbol labels'),
 	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
-	separator(),
-	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
 ];
 
 export const RulershipSettingsMenu: FC = () => {
@@ -156,13 +154,6 @@ export const RulershipSettingsMenu: FC = () => {
 // Planet Panel settings
 const planetSettingsSpec: SettingsItem[] = [
 	checkbox('useExtendedDignities', 'Use extended dignities'),
-
-	separator(),
-
-	// Label visibility
-	checkbox('showNodeLabels', 'Show node labels'),
-	checkbox('showSymbolLabels', 'Show zodiac symbol labels'),
-	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
 
 	separator(),
 
@@ -176,8 +167,33 @@ const planetSettingsSpec: SettingsItem[] = [
 
 	// House angularity
 	dropdown('houseAngularityMode', 'House angularity', Object.values(HouseAngularityMode)),
+
+	separator(),
+
+	// Label visibility
+	checkbox('showNodeLabels', 'Show node labels'),
+	checkbox('showSymbolLabels', 'Show zodiac symbol labels'),
+	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
 ];
 
 export const PlanetSettingsMenu: FC = () => {
 	return <SettingsRenderer spec={planetSettingsSpec} />;
+};
+
+// Node selector settings
+const nodeSelectorSettingsSpec: SettingsItem[] = [
+	checkbox('showNodeLabels', 'Show node labels'),
+];
+
+export const NodeSelectorSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={nodeSelectorSettingsSpec} />;
+};
+
+// Aspect selector settings
+const aspectSelectorSettingsSpec: SettingsItem[] = [
+	checkbox('showAspectLabels', 'Show aspect labels'),
+];
+
+export const AspectSelectorSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={aspectSelectorSettingsSpec} />;
 };

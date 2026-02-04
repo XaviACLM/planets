@@ -11,7 +11,7 @@ export const DignityMode = {
 export type DignityMode = typeof DignityMode[keyof typeof DignityMode];
 
 export const HamburgSchoolMode = {
-	WITTE: "Witte/Sieggrün",
+	WITTE: "Witte", //Witte / Sieggrün
 	NEELY: "Neely",
 } as const;
 export type HamburgSchoolMode = typeof HamburgSchoolMode[keyof typeof HamburgSchoolMode];

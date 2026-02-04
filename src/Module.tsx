@@ -90,10 +90,7 @@ const Module: FC<ModuleProps> = ({
 				</span>
 			)}
 
-			{/* Left button group: help and settings (only when not collapsed) */}
-
-
-			{/* Right button group: collapse/expand arrows */}
+			{/* Button groups */}
 			<div
 				className="absolute px-1 flex gap-1 -top-0.5 right-3"
 				style={{ transform: 'translateY(-51%)' }}
@@ -143,7 +140,7 @@ const Module: FC<ModuleProps> = ({
 
 			{/* Settings panel */}
 			{!isCollapsed && settingsOpen && SettingsMenu && (
-				<div className="border-t border-theme-border">
+				<div className="border-t border border-theme-border m-1">
 					<div className="relative">
 						<button
 							className="absolute top-2 right-2 text-theme-text text-xs hover:opacity-70 cursor-pointer"

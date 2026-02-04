@@ -365,9 +365,9 @@ export const SelectorButton = ({
 	title,
 	children,
 }: SelectorButtonProps): ReactNode => {
-	const baseClasses = "bg-transparent border-1 p-1.5 text-theme-text cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
-	const hoverClasses = disabled ? "" : "hover:border-theme-border hover:bg-white/10";
-	const borderClass = selected ? "border-theme-text" : "border-theme-text/30";
+	const baseClasses = "bg-transparent border-1 px-1.5 py-1 text-theme-text cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none";
+	const hoverClasses = disabled ? "" : "hover:border-theme-border-light hover:bg-theme-text/5";
+	const borderClass = selected ? "border-theme-text" : "border-theme-border";
 	const disabledClasses = disabled ? "opacity-40" : "";
 	const highlightedClasses = highlighted ? "border-3 border-double" : "";
 
