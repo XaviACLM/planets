@@ -37,6 +37,7 @@ import {
 	GeneralSettingsHelp,
 	AspectMenuHelp,
 } from './helpContent'
+import AboutThisWebsite from './AboutThisWebsite.tsx'
 
 function App() {
 
@@ -177,7 +178,7 @@ function App() {
 				<Module
 					title="Aspects"
 					initialDisplayIndex={1}
-					invert={true}
+					titlePosition={'right'}
 					helpContent={<AspectMenuHelp />}
 				>
 					<AspectMenu
@@ -223,6 +224,7 @@ function App() {
 						<Module
 							title="Node Selector"
 							initialDisplayIndex={0}
+							titlePosition={'left'}
 							settingsMenu={NodeSelectorSettingsMenu}
 							helpContent={<NodeSelectorHelp />}
 						>
@@ -234,6 +236,7 @@ function App() {
 						<Module
 							title="Aspect Selector"
 							initialDisplayIndex={0}
+							titlePosition={'left'}
 							settingsMenu={AspectSelectorSettingsMenu}
 						>
 							<AspectKindSelector
@@ -243,15 +246,23 @@ function App() {
 						</Module>
 						<Module
 							title="General Settings"
+							titlePosition={'left'}
 							helpContent={<GeneralSettingsHelp />}
 						>
 							<MainSettingsMenu />
+						</Module>
+						<Module
+							title="About This Website"
+							titlePosition={'top'}
+						>
+							<AboutThisWebsite />
 						</Module>
 					</>
 				) : (
 					<>
 						<Module
 							title="Planet Info"
+							titlePosition={'left'}
 							settingsMenu={PlanetSettingsMenu}
 							helpContent={<PlanetInfoHelp />}
 						>
@@ -265,6 +276,7 @@ function App() {
 						<Module
 							title="Element/Mode Balance"
 							initialDisplayIndex={1}
+							titlePosition={'left'}
 							helpContent={<DominanceChartHelp />}
 						>
 							<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
@@ -274,6 +286,7 @@ function App() {
 						&& (
 							<Module
 								title="Orientation"
+								titlePosition={'left'}
 								helpContent={<OrientationHelp />}
 							>
 								<HemispheresChart
@@ -283,6 +296,7 @@ function App() {
 						)}
 						<Module
 							title="Rulership Graph"
+							titlePosition={'left'}
 							settingsMenu={RulershipSettingsMenu}
 							helpContent={<RulershipGraphHelp />}
 						>

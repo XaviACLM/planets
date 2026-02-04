@@ -5,7 +5,7 @@ import InfoModal from './InfoModal';
 type ModuleProps = {
 	title: string;
 	initialDisplayIndex?: number;
-	invert?: boolean;
+	titlePosition?: 'top' | 'left' | 'right';
 	settingsMenu?: FC;
 	helpContent?: ReactNode;
 	children: ReactNode;
@@ -14,7 +14,7 @@ type ModuleProps = {
 const Module: FC<ModuleProps> = ({
 	title,
 	initialDisplayIndex,
-	invert=false,
+	titlePosition='top',
 	settingsMenu: SettingsMenu,
 	helpContent,
 	children,
@@ -66,7 +66,7 @@ const Module: FC<ModuleProps> = ({
 				>
 					{title}
 				</span>
-			) : invert ? (
+			) : titlePosition === 'right' ? (
 				<span
 					className="absolute translate-x-0.5 bg-theme-bg px-1 text-theme-text text-xs small-caps font-bold tracking-wide right-0 top-1 whitespace-nowrap"
 					style={{
@@ -77,7 +77,7 @@ const Module: FC<ModuleProps> = ({
 				>
 					{title}
 				</span>
-			) : (
+			) : titlePosition === 'left' ? (
 				<span
 					className="absolute -translate-x-0.5 bg-theme-bg px-1 text-theme-text text-xs small-caps font-bold tracking-wide left-0 top-1 whitespace-nowrap"
 					style={{
@@ -85,6 +85,12 @@ const Module: FC<ModuleProps> = ({
 						transformOrigin: 'center center',
 						willChange: 'transform',
 					}}
+				>
+					{title}
+				</span>
+			) : ( //top
+				<span
+					className="absolute bg-theme-bg px-2 text-theme-text text-xs small-caps font-bold tracking-wide left-3 -translate-y-1/2"
 				>
 					{title}
 				</span>
