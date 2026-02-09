@@ -320,12 +320,8 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							return null;
 						}
 						
-						let filter: string | undefined;
-						if (z == hoveredZodiac || (highlightedAspect != null && highlightedAspect.nodes.includes(node))) {
-							filter = "url(#shadowAndInverted)";
-						} else {
-							filter = isDarkTheme ? "url(#invert)" : undefined;
-						}
+						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node);
+						const filter = "var(--icon-filter)" + (isHighlighted ? "url(#shadow)" : "");
 						
 						return (
 							<image
@@ -335,7 +331,6 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								y={y-symbolSize/2}
 								width={symbolSize}
 								height={symbolSize}
-								//transform={`rotate(${r}, ${x}, ${y})`}
 								filter={filter}
 								style = {{
 									transition: "transform 0.5s ease",
@@ -494,7 +489,11 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 				{aspects != null &&
 					aspects.map((aspect, i) => {
 						
-						if ( AspectKind.CONJUNCTION == aspect.kind ) {
+						if ( AspectKind.CONJUNCTION == aspect.kind ){
+							return null;
+						}
+						
+						if ( !aspect.nodes.every(node => selectedNodes.has(node)) ){
 							return null;
 						}
 						
@@ -582,6 +581,9 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						<feMerge>
 							<feMergeNode in="glow"/>
 						</feMerge>
+					</filter>
+					<filter id="shadow" x="-200%" y="-200%" width="400%" height="400%">
+						<feDropShadow dx="0" dy="0" stdDeviation="0.4" floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={1}/>
 					</filter>
 					<filter id="shadowAndInverted" x="-200%" y="-200%" width="400%" height="400%">
 						{isDarkTheme && <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>}

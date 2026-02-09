@@ -122,13 +122,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setUseArticleForMainAngles: (v) => set({ useArticleForMainAngles: v }),
 
 	// Display options
-	theme: Theme.DARK,
+	theme: Theme.PARCHMENT,
 	setTheme: (v) => set({ theme: v }),
 	flipText: true,
 	setFlipText: (v) => set({ flipText: v }),
 	rotateSymbols: false,
 	setRotateSymbols: (v) => set({ rotateSymbols: v }),
-	aspectsColorcoded: false,
+	aspectsColorcoded: true,
 	setAspectsColorcoded: (v) => set({ aspectsColorcoded: v }),
 
 	// Aspect error settings

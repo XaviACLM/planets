@@ -254,12 +254,13 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			) : (
 				""
 			);
-		
 		return (
 			<svg width={planetImageWidth+2*padding} height={planetImageWidth+2*padding} overflow={"visible"} className="">
-				<circle cx="50%" cy="50%" r={planetImageWidth/2+padding} fill="url(#outerShadow)" opacity="0.4"/>
+				{(nodeImages[selectedNode] === undefined || standardNodes.includes(selectedNode)) &&
+					<circle cx="50%" cy="50%" r={planetImageWidth/2+padding} fill="url(#outerShadow)" opacity="0.4"/>
+				}
 				<circle cx="50%" cy="50%" r={planetImageWidth*(0.5-0.01)} fill="var(--color-bg)"/>
-				{isStandardNode ? (<>
+				{nodeImages[selectedNode] !== undefined ? (<>
 					<image
 						key={0}
 						x={padding}
@@ -268,14 +269,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						width={planetImageWidth}
 						height={planetImageWidth}
 						opacity={1}
-						filter={isDarkTheme ? "" : "invert(1)"}
+						filter={isDarkTheme ? "" : "invert(1) var(--icon-filter)"}
 						transform={imageTransform}
 					/>
 					<circle cx="50%" cy="50%" r={planetImageWidth/2} fill="url(#innerShadow)" filter="url(#boost-alpha)" opacity="1"/>
 				</>) : (<>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="var(--color-text)" opacity="0.5" fill="none"/>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5" fill="none"/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5"
+						fill={nodeTypes[selectedNode] === NodeType.POINT ? "none" : "var(--color-text)"}/>
 				</>)}
 				<image
 					key={2}
@@ -284,7 +286,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					href={nodeSymbols[selectedNode]}
 					width={largeSymbolWidth}
 					height={largeSymbolWidth}
-					filter={isDarkTheme ? "invert(1) url(#glow)" : "url(#glow)"}
+					filter={"var(--icon-filter) url(#glow)"}
 					transform={`translate(${(planetImageWidth-largeSymbolWidth)/2},${(planetImageWidth-largeSymbolWidth)/2})`}
 				/>
 				<defs>

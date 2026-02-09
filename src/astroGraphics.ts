@@ -130,6 +130,11 @@ import saturnImage from "./assets/planet-images/Saturn.png"
 import sunImage from "./assets/planet-images/Sun.png"
 import uranusImage from "./assets/planet-images/Uranus.png"
 import venusImage from "./assets/planet-images/Venus.png"
+import ceresImage from "./assets/planet-images/Ceres.png"
+import hygieaImage from "./assets/planet-images/Hygiea.png"
+import junoImage from "./assets/planet-images/Juno.png"
+import pallasImage from "./assets/planet-images/Pallas.png"
+import vestaImage from "./assets/planet-images/Vesta.png"
 
 export { earthSymbol, dotSymbol };
 
@@ -283,6 +288,12 @@ export const nodeImages: Record<Node, string> = {
 	[Node.URANUS] : uranusImage,
 	[Node.NEPTUNE] : neptuneImage,
 	[Node.PLUTO] : plutoImage,
+	
+	[Node.CERES] : ceresImage,
+	[Node.HYGIEA] : hygieaImage,
+	[Node.JUNO] : junoImage,
+	[Node.PALLAS] : pallasImage,
+	[Node.VESTA] : vestaImage,
 }
 
 export const aspectSymbols: Record<AspectKind, string> = {
