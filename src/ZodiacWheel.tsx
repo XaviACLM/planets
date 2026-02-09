@@ -51,10 +51,12 @@ function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRad
 	}
 }
 
-function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
+function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedNode, setHighlightedNode }: {
 	zodiacPositions: ZodiacPositions,
 	aspects: Aspect[],
-	highlightedAspect: Aspect | null
+	highlightedAspect: Aspect | null,
+	highlightedNode: Node | null,
+	setHighlightedNode: (node: Node) => void
 }) {
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
@@ -122,6 +124,10 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
 	const [hoveredZodiac, setHoveredZodiac] = useState<Zodiac | null>(null);
+	const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
+
+	// The node to use for visual highlighting - hover takes precedence over highlighted
+	const visuallyHighlightedNode = hoveredNode ?? highlightedNode;
 	
 	return (
 		<div className="bg-theme-bg w-screen h-screen">
@@ -308,7 +314,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 				}
 				
 				{/*Node symbols*/}
-				{adjustedNodeAngles != null && 
+				{adjustedNodeAngles != null &&
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
 						const z = zodiacPositions.getSymbolOfNode(node);
@@ -319,10 +325,10 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 						if ( showNodeLabels && nodesWithRedundantSymbols.includes(node) ) {
 							return null;
 						}
-						
-						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node);
+
+						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node) || visuallyHighlightedNode === node;
 						const filter = "var(--icon-filter)" + (isHighlighted ? "url(#shadow)" : "");
-						
+
 						return (
 							<image
 								key={i}
@@ -335,19 +341,24 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								style = {{
 									transition: "transform 0.5s ease",
 									transform: `rotate(${r}deg)`,
-									transformOrigin: `${x}px ${y}px`
+									transformOrigin: `${x}px ${y}px`,
+									cursor: "pointer"
 								}}
+								onMouseEnter={() => setHoveredNode(node)}
+								onMouseLeave={() => setHoveredNode(null)}
+								onClick={(e) => { e.stopPropagation(); setHighlightedNode(node); }}
 							/>
 						);
 					})
 				}
 				
 				{/*Node original placement indicators*/}
-				{adjustedNodeAngles != null && 
+				{adjustedNodeAngles != null &&
 					nodes.map((node, i) => {
 						const a = nodeAngles.get(node)!;
-						
-						const r1 = aspectRadius + 1.25;
+						const isHighlighted = visuallyHighlightedNode === node;
+
+						const r1 = aspectRadius + (isHighlighted ? 1.75 : 1.25);
 						const r2 = aspectRadius + 0.5;
 						const x1 = 50 + r1 * Math.cos(a);
 						const y1 = 50 - r1 * Math.sin(a);
@@ -364,14 +375,14 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								d={pathData}
 								fill="none"
 								stroke="var(--color-text)"
-								strokeWidth={strokeWidthPrimary}
+								strokeWidth={isHighlighted ? strokeWidthPrimary * 2 : strokeWidthPrimary}
 							/>
 						);
 					})
 				}
 				
 				{/*Node labels*/}
-				{adjustedNodeAngles != null && showNodeLabels && 
+				{adjustedNodeAngles != null && showNodeLabels &&
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
 						const x = 50 + planetRadius * Math.cos(a);
@@ -392,7 +403,10 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
 								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-								style={{fontVariant: "small-caps"}}
+								style={{fontVariant: "small-caps", cursor: "pointer"}}
+								onMouseEnter={() => setHoveredNode(node)}
+								onMouseLeave={() => setHoveredNode(null)}
+								onClick={(e) => { e.stopPropagation(); setHighlightedNode(node); }}
 							>
 								{nodeName}
 							</text>
@@ -487,18 +501,26 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 				
 				{/*Aspects*/}
 				{aspects != null &&
-					aspects.map((aspect, i) => {
-						
+					// Reorder aspects: non-highlighted first, highlighted last (so they render on top)
+					[...aspects].sort((a, b) => {
+						if (visuallyHighlightedNode === null) return 0;
+						const aIncident = a.nodes.includes(visuallyHighlightedNode);
+						const bIncident = b.nodes.includes(visuallyHighlightedNode);
+						if (aIncident && !bIncident) return 1;
+						if (!aIncident && bIncident) return -1;
+						return 0;
+					}).map((aspect, i) => {
+
 						if ( AspectKind.CONJUNCTION == aspect.kind ){
 							return null;
 						}
-						
+
 						if ( !aspect.nodes.every(node => selectedNodes.has(node)) ){
 							return null;
 						}
-						
+
 						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
-						
+
 						const stroke = (() => {
 							const color = aspectKindColors[aspect.kind];
 							if (!aspectsColorcoded || color === undefined){
@@ -507,9 +529,13 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 							const [r,g,b] =  color;
 							return `rgb(${r},${g},${b})`;
 						})();
-						
+
 						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
-						
+
+						// Reduce opacity for aspects not incident on the visually highlighted node
+						const isIncidentOnHighlighted = visuallyHighlightedNode !== null && aspect.nodes.includes(visuallyHighlightedNode);
+						const opacity = visuallyHighlightedNode === null ? 1 : (isIncidentOnHighlighted ? 1 : 0.2);
+
 						return (
 							<path
 								key={i}
@@ -517,6 +543,8 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect}: {
 								fill="none"
 								stroke={stroke}
 								strokeWidth={strokeWidth}
+								opacity={opacity}
+								style={{ transition: 'opacity 0.3s ease' }}
 							/>
 						);
 					})

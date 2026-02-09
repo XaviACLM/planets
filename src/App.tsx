@@ -11,6 +11,7 @@ import ZodiacPositions from './zodiacPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
 import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
+import { Node } from './astroDefs.ts'
 import { toZonedTime, fromZonedTime } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
@@ -82,6 +83,17 @@ function App() {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+
+	// Node focus state
+	const [highlightedNode, setHighlightedNode] = useState<Node | null>(null);
+	const [selectedNode, setSelectedNode] = useState<Node>(Node.SUN);
+
+	// Sync selectedNode when highlightedNode becomes non-null
+	useEffect(() => {
+		if (highlightedNode !== null) {
+			setSelectedNode(highlightedNode);
+		}
+	}, [highlightedNode]);
 
 	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
 
@@ -189,11 +201,14 @@ function App() {
 				</Module>
 			</Sidebar>
 
-			<main className="flex-1 relative flex items-center justify-center overflow-hidden">
+			<main
+				className="flex-1 relative flex items-center justify-center overflow-hidden"
+				onClick={() => setHighlightedNode(null)}
+			>
 				<EsotericModePanel/>
 				<button
 					className="absolute top-4 right-4 text-theme-text bg-theme-bg border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4"
-					onClick={() => setMenuOpen(!menuOpen)}
+					onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
 				>
 					{menuOpen ? '✕' : '☰'}
 				</button>
@@ -201,10 +216,15 @@ function App() {
 					zodiacPositions={zodiacPositions}
 					aspects={flattenedAspects}
 					highlightedAspect={highlightedAspect}
+					highlightedNode={highlightedNode}
+					setHighlightedNode={setHighlightedNode}
 				/>
 
 				{zodiacPositions.houseSystemUndefinedForPosition() &&
-					<div className="absolute bottom-5 right-5 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] max-w-[400px] leading-relaxed">
+					<div
+						className="absolute bottom-5 right-5 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] max-w-[400px] leading-relaxed"
+						onClick={(e) => e.stopPropagation()}
+					>
 						<span>
 							Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
 							<button

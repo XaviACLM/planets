@@ -44,7 +44,10 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 	};
 
 	return (
-		<div className="absolute top-4 left-4 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] flex items-center gap-3">
+		<div
+			className="absolute top-4 left-4 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] flex items-center gap-3"
+			onClick={(e) => e.stopPropagation()}
+		>
 			{panelState === 'initial' ? (
 				<>
 					<button
