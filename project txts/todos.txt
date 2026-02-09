@@ -1,36 +1,46 @@
-// TODO re aspects
+TRIVIAL
+- dits on the outer wheel
+- change the look of the parallel main line, it's too intense
 
-//  clean up the aspects code, someday
-//  getting a bit slow. irritating that things like houses cause aspect recomputation. maybe separate from zodiacPositions, or find another way to set up hooks.
+NOT TOO HARD, NOT TOO EASY
+- Full map of country abbreviation to country name
 
-//  real constellations mode
-//  the other widgets: fixed stars, planet info, rulership cycles, buncha barcharts
-//  put the settings somewhere else, together with the node/aspect selector: toggleable settings column
+REQUIRES THINKING
+- chart looks too empty without house divisors. What else do we put in there??
+- write aspect help menu
+- rewrite planet panel help menu
+- Clean up the look of city/datetime selector a bit. Make it not explode upon text input.
+- the house labels aren't very readable or clear
 
-//  parallels vs antiscia
-//  degree dits on the wheel
-//  that stuff with the preferred names vs shortnames
-//  circles on the zodiac wheel depending on what binary aspects are selected (mind you this doesn't force recomputation bc selectedAspects is mutable)
+ETC
+- it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
+- highlight on label-only nodes
 
-orbital nodes for all the physical objects (...)
-midpoints / other hamburg school business
-dignities: rulership/detriment, exaltation/fall
-rulership cycles
-precession
-fixed stars (conjunctions, maybe oppositions)
-inner/outer planets element/mode
-house business
+DO THIS AT THE END
+- Look through the rest of todos (yesyes I know), in particular search "TODO"
+- go through the code and remove all instances of a function returning null when it should throw
+- go through other files and use renderprimitives where applicable. leads into:
+- larger text mode
 
+ALREADY DONE BUT KEEP IN MIND
+XX [done in the sense that it's already in renderPrimitives.ts. We'll get this automatically when we refactor the rest of the code to use renderPrimitives.ts]- That stuff with the node shortnames vs preferred names
 
-bicharts
-parans
-D9s and stuff
-midpoints
-sects
-dignities / hayz / scores
+EVEN MORE ETC
+- annoying how low-opacity aspects that line up can overlap to look higher-opacity
+- Serifed smallcaps too long: "sagittarius" in the main wheel chart, "contraparallel" in aspects menu
+- Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
+- Think a little bit about "include all nodes in analysis" toggles (particularly for hemispheres and element/mode)
+- fixed stars!!!
+- https://www.astro.com/faq/fq_fh_owstyle_e.htm
+- clear up the "just compute it" vs usememo thing
+- speed for non-physical (non-hamburg) nodes
+- how about we just include every gd asteroid in the kuiper belt
+- conclusion. We have eris, not eros. We could add eros, but it doesn't have a symbol. Not a standard one anyway.
+- clean up the shadow stuff with the planet images
 
+TODOS FROM ELSEWHERE THAT I HAVE NOT BOTHERED ORGANIZING
+- circles on the wheel depending on what binary aspects are selected (obs selectedAspects is mutable => does not force recomputation)
+- dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
 
-
-just realized that POINTWISE_MAX = PAIRWISE_FULL_MAX
-(...what to do with this info)
-obs that that being true depends on how all pairs of nodes within a configuration happen to share an aspect, which is something that just happens to be true
+THE BIGGEST TODO IN THE UNIVERSE
+- make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f
