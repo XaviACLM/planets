@@ -129,6 +129,8 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 	// The node to use for visual highlighting - hover takes precedence over highlighted
 	const visuallyHighlightedNode = hoveredNode ?? highlightedNode;
 	
+	const zodiacLongitudes = Array.from(zodiac.values());
+	
 	return (
 		<div className="bg-theme-bg w-screen h-screen py-0">
 			<svg
@@ -157,7 +159,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				/>
 				
 				{/*Outer zodiac sector separators*/}
-				{Array.from(zodiac.values()).map((lon, index) => {
+				{zodiacLongitudes.map((lon, index) => {
 					const a = lon + offset;
 					return (
 						<line
@@ -170,6 +172,34 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 							strokeWidth={strokeWidthPrimary}
 							
 						/>
+					);
+				})}
+				
+				{/*Outer zodiac degree dits*/}
+				{zodiacLongitudes.map((lon, index) => {
+					const nextLon = zodiacLongitudes[(index+1)%zodiacLongitudes.length];
+					const numDits = Math.floor(normalizeAngleRad(nextLon-lon)*180/Math.PI-0.01);
+					const aBase = lon + offset;
+					return (
+						<g key={index}>
+							{Array.from({length: numDits}, (_,i) => i+1).map(i => {
+								const a = aBase + i*Math.PI/180;
+								const ditHeight = 0.5*(1 + (i%5===0) + (i%10===0));
+								console.log("bals");
+								return (
+									<line
+										key={i}
+										x1={50 + radius * Math.cos(a)}
+										y1={50 - radius * Math.sin(a)}
+										x2={50 + (radius + ditHeight) * Math.cos(a)}
+										y2={50 - (radius + ditHeight) * Math.sin(a)}
+										stroke="var(--color-text)"
+										strokeWidth={strokeWidthSecondary}
+										
+									/>
+								);
+							})}
+						</g>
 					);
 				})}
 				
@@ -358,15 +388,25 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 						const a = nodeAngles.get(node)!;
 						const isHighlighted = visuallyHighlightedNode === node;
 
-						const r1 = aspectRadius + (isHighlighted ? 1.75 : 1.25);
-						const r2 = aspectRadius + 0.5;
-						const x1 = 50 + r1 * Math.cos(a);
-						const y1 = 50 - r1 * Math.sin(a);
-						const x2 = 50 + r2 * Math.cos(a);
-						const y2 = 50 - r2 * Math.sin(a);
+						const r1 = aspectRadius + 0.5;
+						const r2 = aspectRadius + (isHighlighted ? 1.75 : 1.25);
+						const r3 = radius - (isHighlighted ? 1.75 : 1.25);
+						const r4 = radius - 0.5;
+						const c = Math.cos(a);
+						const s = Math.sin(a);
+						const x1 = 50 + r1 * c;
+						const y1 = 50 - r1 * s;
+						const x2 = 50 + r2 * c;
+						const y2 = 50 - r2 * s;
+						const x3 = 50 + r3 * c;
+						const y3 = 50 - r3 * s;
+						const x4 = 50 + r4 * c;
+						const y4 = 50 - r4 * s;
 						const pathData = [
 							`M ${x1} ${y1}`,
 							`L ${x2} ${y2}`,
+							`M ${x3} ${y3}`,
+							`L ${x4} ${y4}`,
 							`Z`
 						].join(" ");
 						return (
