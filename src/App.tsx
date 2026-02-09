@@ -6,6 +6,7 @@ import DominanceChart, { AbridgedDominanceChart } from './DominanceChart'
 import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
+import ChartSummary from './ChartSummary'
 import PlanetPanel from './PlanetPanel.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
@@ -208,6 +209,10 @@ function App() {
 				onClick={() => setHighlightedNode(null)}
 			>
 				<EsotericModePanel/>
+				<ChartSummary
+					zodiacPositions={zodiacPositions}
+					setHighlightedNode={setHighlightedNode}
+				/>
 				<button
 					className="absolute top-4 right-4 text-theme-text bg-theme-bg border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4"
 					onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}

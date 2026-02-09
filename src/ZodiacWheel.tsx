@@ -130,7 +130,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 	const visuallyHighlightedNode = hoveredNode ?? highlightedNode;
 	
 	return (
-		<div className="bg-theme-bg w-screen h-screen">
+		<div className="bg-theme-bg w-screen h-screen py-0">
 			<svg
 				viewBox="0 0 100 100"
 				preserveAspectRatio="xMidYMid meet"

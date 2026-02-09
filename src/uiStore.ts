@@ -6,10 +6,6 @@ interface UIState {
 	// 0 = collapsed, 1+ = show nth child
 	moduleDisplayStates: Record<string, number>;
 	setModuleDisplayState: (id: string, index: number) => void;
-	selectedNodeInPlanetPanel: Node;
-	setSelectedNodeInPlanetPanel: (node: Node) => void;
-	selectedNodeInAspectPanel: Node | null;
-	setSelectedNodeInAspectPanel: (node: Node | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -19,13 +15,5 @@ export const useUIStore = create<UIState>((set) => ({
 			...state.moduleDisplayStates,
 			[id]: index,
 		},
-	})),
-	selectedNodeInPlanetPanel: Node.SUN,
-	setSelectedNodeInPlanetPanel: (node: Node) => set((state) => ({
-		selectedNodeInPlanetPanel: node,
-	})),
-	selectedNodeInAspectPanel: null,
-	setSelectedNodeInAspectPanel: (node: Node | null) => set((state) => ({
-		selectedNodeInAspectPanel: node,
 	})),
 }));
