@@ -1,7 +1,10 @@
-import { type Aspect } from './aspects.ts';
+import { useMemo } from 'react';
+import { type Aspect, filterAspectsByNode } from './aspects.ts';
+import { Node } from './astroDefs.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
+import { renderNode, renderString } from './renderPrimitives.tsx'
 
 function createAspectElement(
 	key: number,
@@ -107,19 +110,43 @@ function createAspectElement(
 	</div>;
 }
 
-function AspectMenu({ aspects, onDelete, onHover }: {
+function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighlight }: {
 	aspects: Map<Aspect,Aspect[]>,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
-	onHover: (aspect: Aspect | null) => void
+	onHover: (aspect: Aspect | null) => void,
+	highlightedNode: Node | null,
+	clearHighlight: () => void
 }) {
 	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
 	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
 	const theme = useSettingsStore(s => s.theme);
 	const fallbackColor: [number, number, number] = theme === Theme.DARK ? [255, 255, 255] : [61, 41, 20];
 
+	// Filter aspects if a node is highlighted
+	const displayedAspects = useMemo(() => {
+		if (highlightedNode === null) {
+			return aspects;
+		}
+		return filterAspectsByNode(aspects, highlightedNode);
+	}, [aspects, highlightedNode]);
+
 	return (
 		<div className="p-2 overflow-y-auto bg-theme-bg text-theme-text scrollbar-none">
-			{aspects != null && Array.from(aspects.entries()).map(([aspect, subaspects], index) => {
+			{/* Header message when filtering */}
+			{highlightedNode !== null && (
+				<div className="px-2 pb-2 text-sm">
+					{renderString("Showing aspects for ")}
+					{renderNode(highlightedNode, { forceText: true, withArticle: true })}
+					{renderString(". ")}
+					<button
+						className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70"
+						onClick={clearHighlight}
+					>
+						{renderString("Show all aspects.")}
+					</button>
+				</div>
+			)}
+			{displayedAspects != null && Array.from(displayedAspects.entries()).map(([aspect, subaspects], index) => {
 				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover, fallbackColor);
 				const subaspectElements = subaspects.map((subaspect, subindex) => {
 					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, aspect, onDelete, onHover, fallbackColor);

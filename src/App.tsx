@@ -197,6 +197,8 @@ function App() {
 						aspects={aspects}
 						onHover={(aspect) => {setHighlightedAspect(aspect)}}
 						onDelete={handleAspectDeletion}
+						highlightedNode={highlightedNode}
+						clearHighlight={() => setHighlightedNode(null)}
 					/>
 				</Module>
 			</Sidebar>
@@ -291,6 +293,15 @@ function App() {
 								rulershipGraph={rulershipGraph}
 								aspects={aspects}
 								date={selectedDate}
+								selectedNode={selectedNode}
+								isHighlighted={highlightedNode !== null}
+								cycleToNode={(node) => {
+									setSelectedNode(node);
+									if (highlightedNode !== null) {
+										setHighlightedNode(node);
+									}
+								}}
+								highlightSelected={() => setHighlightedNode(selectedNode)}
 							/>
 						</Module>
 						<Module

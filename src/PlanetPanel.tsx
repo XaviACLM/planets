@@ -1,4 +1,4 @@
-import { useState, useMemo, FC } from 'react';
+import { useMemo, FC } from 'react';
 import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect, nodeDependsOnLocation, irregularAstrologyModes } from './astroDefs';
 import { nodeAverageSpeed } from './astroData';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
@@ -24,7 +24,6 @@ import {
 } from './renderPrimitives';
 import { nodeImages, nodeSymbols } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
-import { useUIStore } from './uiStore.ts'
 import ZodiacPositions from './zodiacPositions';
 
 // Opinionated thresholds
@@ -35,6 +34,10 @@ type PlanetPanelProps = {
 	rulershipGraph: RulershipGraph;
 	aspects: Map<Aspect, Aspect[]>;
 	date: Date;
+	selectedNode: Node;
+	isHighlighted: boolean;
+	cycleToNode: (node: Node) => void;
+	highlightSelected: () => void;
 };
 
 const PlanetPanel: FC<PlanetPanelProps> = ({
@@ -42,6 +45,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	rulershipGraph,
 	aspects,
 	date,
+	selectedNode,
+	isHighlighted,
+	cycleToNode,
+	highlightSelected,
 }) => {
 	
 	const dignityMode = useSettingsStore(s => s.dignityMode);
@@ -71,56 +78,32 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		[zodiacPositions, dignityMode]
 	);
 
-	const selectedNode = useUIStore(s => s.selectedNodeInPlanetPanel);
-	const setSelectedNode = useUIStore(s => s.setSelectedNodeInPlanetPanel);
-	
 	const isStandardNode = standardNodes.includes(selectedNode);
 
-	type SelectorButtonSpecs = {node: Node | null, highlight: boolean, disabled: boolean}
-	
-	// Quick selector buttons: ASC, Ruler, Sun, Moon
-	const selectorButtonsPrimary: Array<SelectorButtonSpecs> = useMemo(() => [
-		{
-			node: Node.ASCENDANT,
-			highlight: false,
-			disabled: !hasSurfacePosition,
-		},
-		{
-			node: chartRuler,
-			highlight: true,
-			disabled: !chartRuler,
-		},
-		{
-			node: Node.SUN,
-			highlight: false,
-			disabled: false,
-		},
-		{
-			node: Node.MOON,
-			highlight: false,
-			disabled: false,
-		},
-	].filter(item => item.node != chartRuler || item.highlight), [hasSurfacePosition, chartRuler]);
-	
-	const selectorButtonsSecondary: Array<SelectorButtonSpecs> = useMemo(() => standardNodes.filter(
-			node => selectedNodes.has(node) && ![Node.SUN, Node.MOON, chartRuler].includes(node)
-		).map(node => {
-			return {
-				node: node,
-				highlight: false,
-				disabled: false,
-			}
-		}), [selectedNodes, chartRuler]);
-	
-	const selectorButtonsTertiary: Array<SelectorButtonSpecs> = useMemo(() => Array.from(selectedNodes).filter(
-			node => !standardNodes.includes(node) && node !== Node.ASCENDANT
-		).map(node => {
-			return {
-				node: node,
-				highlight: false,
-				disabled: !hasSurfacePosition && nodeDependsOnLocation[node],
-			}
-		}), [selectedNodes, hasSurfacePosition]);
+	// Build ordered list of nodes by longitude for arrow navigation
+	const orderedNodes = useMemo(() => {
+		const nodes = Array.from(selectedNodes).filter(node => {
+			// Exclude nodes that depend on location if no surface position
+			return hasSurfacePosition || !nodeDependsOnLocation[node];
+		});
+		return nodes.sort((a, b) => {
+			const lonA = zodiacPositions.getNodePosition(a);
+			const lonB = zodiacPositions.getNodePosition(b);
+			return lonB - lonA;
+		});
+	}, [selectedNodes, zodiacPositions, hasSurfacePosition]);
+
+	const handlePrevNode = () => {
+		const currentIndex = orderedNodes.indexOf(selectedNode);
+		const prevIndex = (currentIndex - 1 + orderedNodes.length) % orderedNodes.length;
+		cycleToNode(orderedNodes[prevIndex]);
+	};
+
+	const handleNextNode = () => {
+		const currentIndex = orderedNodes.indexOf(selectedNode);
+		const nextIndex = (currentIndex + 1) % orderedNodes.length;
+		cycleToNode(orderedNodes[nextIndex]);
+	};
 
 	// Get sign and position for selected node
 	const nodeSign = zodiacPositions.getSymbolOfNode(selectedNode);
@@ -312,26 +295,6 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		);
 	}
 	
-	const selectorButtonList = (buttonSpecs: SelectorButtonSpecs[]) => {
-		return (
-			<div className="mb-0">
-				<div className="flex flex-wrap gap-1.5">
-					{buttonSpecs.map((btn, idx) => (
-						<NodeSelectorButton
-							key={idx}
-							node={btn.node || "Ruler"}
-							showLabel={showNodeLabels || !btn.node}
-							selected={selectedNode === btn.node}
-							disabled={btn.disabled}
-							highlighted={btn.highlight}
-							onClick={() => setSelectedNode(btn.node!)}
-						/>
-					))}
-				</div>
-			</div>
-		);
-	}
-	
 	const renderRuledNodes = (ruledNodes: Node[], transitivelyRuledNodes: Node[]) => {
 		if (ruledNodes.length === 0){
 			return renderString("Not ruling any planet or luminary.");
@@ -379,18 +342,25 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 
 	return (
 		<div className="text-theme-text p-4" style={{ width: 330 }}>
-			{/* Planet Selector */}
-			
-			<div className="group">
-				{selectorButtonList(selectorButtonsPrimary)}
-				<div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300">
-					<div className="overflow-hidden">
-						<hr className="opacity-20 my-2 mx-4" />
-						{selectorButtonList(selectorButtonsSecondary)}
-						<hr className="opacity-20 my-2 mx-4" />
-						{selectorButtonList(selectorButtonsTertiary)}
-					</div>
+			{/* Planet Header with Navigation */}
+			<div className="flex items-center justify-between mb-2">
+				<button
+					className="bg-transparent border-none text-theme-text cursor-pointer p-1 text-xl hover:opacity-70"
+					onClick={handlePrevNode}
+					title="Previous planet"
+				>
+					◀
+				</button>
+				<div className="text-center">
+					{renderNode(selectedNode, { forceText: true })}
 				</div>
+				<button
+					className="bg-transparent border-none text-theme-text cursor-pointer p-1 text-xl hover:opacity-70"
+					onClick={handleNextNode}
+					title="Next planet"
+				>
+					▶
+				</button>
 			</div>
 
 			<hr className="opacity-50 my-2" />
@@ -491,7 +461,15 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 							{renderNode(node)}
 						</span>
 					))}
-					{renderString(".")}
+					{renderString(". ")}
+					{!isHighlighted && (
+						<button
+							className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70"
+							onClick={highlightSelected}
+						>
+							{renderString("Highlight aspects.")}
+						</button>
+					)}
 				</>
 			) : (
 				renderString("Not in any aspects.")
