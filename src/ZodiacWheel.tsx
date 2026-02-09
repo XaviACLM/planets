@@ -394,19 +394,11 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 						const r4 = radius - 0.5;
 						const c = Math.cos(a);
 						const s = Math.sin(a);
-						const x1 = 50 + r1 * c;
-						const y1 = 50 - r1 * s;
-						const x2 = 50 + r2 * c;
-						const y2 = 50 - r2 * s;
-						const x3 = 50 + r3 * c;
-						const y3 = 50 - r3 * s;
-						const x4 = 50 + r4 * c;
-						const y4 = 50 - r4 * s;
 						const pathData = [
-							`M ${x1} ${y1}`,
-							`L ${x2} ${y2}`,
-							`M ${x3} ${y3}`,
-							`L ${x4} ${y4}`,
+							`M ${50 + r1 * c} ${50 - r1 * s}`,
+							`L ${50 + r2 * c} ${50 - r2 * s}`,
+							`M ${50 + r3 * c} ${50 - r3 * s}`,
+							`L ${50 + r4 * c} ${50 - r4 * s}`,
 							`Z`
 						].join(" ");
 						return (
@@ -531,7 +523,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 							ref={node => {
 								if (node) {
 									requestAnimationFrame(() => {
-										node.style.opacity = "1";
+										node.style.opacity = "0.66";
 									});
 								}
 							}}

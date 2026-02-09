@@ -1,8 +1,8 @@
 TRIVIAL
-- change the look of the parallel main line, it's too intense
+-
 
 NOT TOO HARD, NOT TOO EASY
-- Full map of country abbreviation to country name
+- order files
 
 REQUIRES THINKING
 - chart looks too empty without house divisors. What else do we put in there??
