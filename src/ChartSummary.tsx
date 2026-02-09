@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { Node, Sect } from './astroDefs';
 import { getChartSect, getChartRuler } from './astrologyUtil';
 import { formatAngle } from './util';
@@ -15,10 +15,10 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 	zodiacPositions,
 	setHighlightedNode,
 }) => {
-	
+
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
-	
+
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 	const hasSurfacePosition = zodiacPositions.hasSurfacePosition();
 
@@ -31,19 +31,45 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 		return getChartRuler(zodiacPositions, dignityMode);
 	}, [zodiacPositions, dignityMode]);
 
+	// Refs for measuring node row widths
+	const nodeRefs = useRef<Map<Node, HTMLDivElement | null>>(new Map());
+	const [sortedNodes, setSortedNodes] = useState<Node[]>([Node.SUN, Node.MOON, Node.ASCENDANT]);
+	const [measured, setMeasured] = useState(false);
+
+	// Measure actual widths and sort after render
+	useLayoutEffect(() => {
+		const widths = new Map<Node, number>();
+		const nodes = [Node.SUN, Node.MOON, Node.ASCENDANT];
+
+		for (const node of nodes) {
+			const el = nodeRefs.current.get(node);
+			if (el) {
+				widths.set(node, el.getBoundingClientRect().width);
+			}
+		}
+
+		// Sort by width descending (widest first)
+		const sorted = [...nodes].sort((a, b) => {
+			const widthA = widths.get(a) ?? 0;
+			const widthB = widths.get(b) ?? 0;
+			return widthB - widthA;
+		});
+
+		setSortedNodes(sorted);
+		setMeasured(true);
+	}, [zodiacPositions, showNodeLabels, showSymbolLabels]);
+
 	const renderClickableNode = (node: Node, showPosition: boolean = true, forceText: boolean = false) => {
 		const sign = zodiacPositions.getSymbolOfNode(node);
 		const positionInSign = zodiacPositions.getNodePositionWithinSign(node);
 		const formattedPosition = formatAngle(positionInSign);
-		
-		console.log(forceText);
-		
+
 		return (
 			<span
 				className="cursor-pointer hover:opacity-70 whitespace-nowrap"
 				onClick={(e) => { e.stopPropagation(); setHighlightedNode(node); }}
 			>
-				{renderNode(node, {showLabel: forceText, withArticle: forceText})}
+				{renderNode(node, {showLabel: forceText ? true : undefined, withArticle: forceText})}
 				{showPosition && (
 					<>
 						{renderString(" | ")}
@@ -62,31 +88,27 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 	}
 
 	const isDiurnal = chartSect === Sect.DIURNAL;
-	
-	const nodeReprLength = (node: Node) => {
-		return (
-			(showNodeLabels ? node.length : 0)
-			+ (showSymbolLabels ? zodiacPositions.getSymbolOfNode(node).length : 0)
-		);
-	}
-	const nodes = [Node.SUN, Node.MOON, Node.ASCENDANT].sort((n1, n2) => nodeReprLength(n2)-nodeReprLength(n1));
-	
 
 	return (
-		<div className="absolute top-4 left-4 text-theme-text text-sm z-[100] whitespace-nowrap">
+		<div
+			className="absolute top-4 left-4 text-theme-text text-sm z-[100] whitespace-nowrap"
+			style={{ visibility: measured ? 'visible' : 'hidden' }}
+		>
 			<div>
-			<>
 				{renderString((isDiurnal ? "Diurnal" : "Nocturnal") + " Chart")}
-			</>
-			{chartRuler && (
-				<>
-					{renderString(" · Ruled by ")}
-					{renderClickableNode(chartRuler, false, true)}
-				</>
-			)}
+				{chartRuler && (
+					<>
+						{renderString(" · Ruled by ")}
+						{renderClickableNode(chartRuler, false, true)}
+					</>
+				)}
 			</div>
-			{nodes.map((node, i) => (
-				<div key={i}>
+			{sortedNodes.map((node) => (
+				<div
+					key={node}
+					ref={(el) => nodeRefs.current.set(node, el)}
+					style={{ width: 'fit-content' }}
+				>
 					{renderClickableNode(node)}
 				</div>
 			))}
