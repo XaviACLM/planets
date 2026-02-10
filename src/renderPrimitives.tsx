@@ -131,8 +131,8 @@ export const renderAspectKind = (
 		size = DEFAULT_SYMBOL_SIZE,
 		fontSize = DEFAULT_TEXT_SIZE,
 	} = options;
-	const resolvedShowLabel = showLabel ?? useSettingsStore(s => s.showAspectLabels);
-	const resolvedColorcode = colorcode ?? useSettingsStore(s => s.aspectsColorcoded);
+	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showAspectLabels;
+	const resolvedColorcode = colorcode ?? useSettingsStore.getState().aspectsColorcoded;
 	
 	const aspectColorcoded = resolvedColorcode && (aspectKind in aspectKindColors);
 	const [r,g,b] = aspectColorcoded ? aspectKindColors[aspectKind]! : [-1,-1,-1];

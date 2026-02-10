@@ -4,72 +4,41 @@ import { Node } from './astroDefs.ts';
 import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
-import { renderNode, renderString } from './renderPrimitives.tsx'
+import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
 
 function createAspectElement(
 	key: number,
 	aspect: Aspect,
 	showAspectLabels: boolean,
-	aspectsColorcoded: boolean,
 	parentAspect: Aspect | null,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void,
-	fallbackColor: [number, number, number]
 ){
 	const symbolSize = 20;
-	const fixedWidth = "90px";
+	const fixedWidth = showAspectLabels ? "110px" : "90px";
 	const fixedHeight = "20px";
 	const isSubaspect = parentAspect !== null;
 
-	const [r,g,b] = aspect.kind in aspectKindColors ? aspectKindColors[aspect.kind]! : fallbackColor;
 	return <div
 		key={key}
-		className="flex items-center px-2 cursor-pointer hover:bg-gray-500/20 transition-colors duration-300"
+		className="flex items-center px-2 cursor-pointer hover:bg-theme-text/10 transition-colors duration-300"
 		onMouseEnter={() => {onHover(aspect)}}
 		onMouseLeave={() => {onHover(null)}}
 	>
 		<div
-			className={isSubaspect ? 'pl-2.5' : ''}
+			className={isSubaspect ? 'pl-3' : ''}
 			style={{
 				width: fixedWidth,
 				height: fixedHeight,
 			}}
 		>
-			{ !showAspectLabels && !aspectsColorcoded &&
-				<img
-					className="ml-5 icon-filter"
-					src={aspectSymbols[aspect.kind]}
-					alt={aspect.kind}
-					width={symbolSize}
-					height={symbolSize}
-				/>
-			}
-			{ !showAspectLabels && aspectsColorcoded &&
-				<div
-					className="ml-5"
-					style={{
-						WebkitMaskImage: `url(${aspectSymbols[aspect.kind]})`,
-						maskImage: `url(${aspectSymbols[aspect.kind]})`,
-						WebkitMaskRepeat: "no-repeat",
-						maskRepeat: "no-repeat",
-						WebkitMaskSize: "contain",
-						maskSize: "contain",
-						width: symbolSize,
-						height: symbolSize,
-						backgroundColor: `rgb(${r}, ${g}, ${b})`,
-					}}
-				/>
-			}
-			{ showAspectLabels &&
-				<label
-					className="text-xs whitespace-nowrap font-bold small-caps"
-					style={{color: aspectsColorcoded ? `rgb(${r}, ${g}, ${b})` : "white"}}
-				>
-					{aspect.kind}
-				</label>
-			}
+			<div
+				className={showAspectLabels ? '' : 'ml-5'}
+			>
+				{renderAspectKind(aspect.kind)}
+			</div>
 		</div>
-
+		
 		{/* node icons */}
 		<div className="flex mr-4">
 			{aspect.nodes.map((node, i) => (
@@ -147,9 +116,9 @@ function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighligh
 				</div>
 			)}
 			{displayedAspects != null && Array.from(displayedAspects.entries()).map(([aspect, subaspects], index) => {
-				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, aspectsColorcoded, null, onDelete, onHover, fallbackColor);
+				const aspectElement = createAspectElement(100*index, aspect, showAspectLabels, null, onDelete, onHover);
 				const subaspectElements = subaspects.map((subaspect, subindex) => {
-					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspectsColorcoded, aspect, onDelete, onHover, fallbackColor);
+					return createAspectElement(100*index+subindex+1, subaspect, showAspectLabels, aspect, onDelete, onHover);
 				})
 				return [aspectElement, ...subaspectElements]
 			})}
