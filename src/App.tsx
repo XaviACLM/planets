@@ -28,7 +28,8 @@ import {
 	RulershipSettingsMenu,
 	HemisphereSettingsMenu,
 	NodeSelectorSettingsMenu,
-	AspectSelectorSettingsMenu
+	AspectSelectorSettingsMenu,
+	AspectMenuSettingsMenu
 } from './settingsMenus'
 import {
 	PlanetInfoHelp,
@@ -219,6 +220,7 @@ function App() {
 					title="Aspects"
 					initialDisplayIndex={1}
 					titlePosition={'right'}
+					settingsMenu={AspectMenuSettingsMenu}
 					helpContent={<AspectMenuHelp />}
 				>
 					<AspectMenu

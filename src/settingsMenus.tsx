@@ -192,8 +192,37 @@ export const NodeSelectorSettingsMenu: FC = () => {
 // Aspect selector settings
 const aspectSelectorSettingsSpec: SettingsItem[] = [
 	checkbox('showAspectLabels', 'Show aspect labels'),
+	checkbox('aspectsColorcoded', 'Colorcode aspects'),
 ];
 
 export const AspectSelectorSettingsMenu: FC = () => {
 	return <SettingsRenderer spec={aspectSelectorSettingsSpec} />;
+};
+
+// Aspect menu settings
+const aspectMenuSettingsSpec: SettingsItem[] = [
+
+	// Aspect error settings
+	dropdown('aspectErrorMode', 'Configuration error', Object.values(AspectErrorMode)),
+	text('Maximum error per aspect type:'),
+	numeric('maxConfigurationErrorDegrees', '- Configurations:', 0, 20, 'º'),
+	numeric('maxMajorBAErrorDegrees', '- Major binary aspects:', 0, 20, 'º'),
+	numeric('maxMinorBAErrorDegrees', '- Minor binary aspects:', 0, 20, 'º'),
+
+	separator(),
+
+	// Aspect filtering
+	text('Required # of physical nodes per aspect:'),
+	slider('aspectPhysicalityFilter', '', Object.values(AspectPhysicalityFilter)),
+	checkbox('hamburgPhysical', 'Hamburg objects considered physical'),
+	dropdown('aspectMenuMode', 'Display aspects', Object.values(AspectMenuMode)),
+
+	separator(),
+	
+	checkbox('showAspectLabels', 'Show aspect labels'),
+	checkbox('aspectsColorcoded', 'Colorcode aspects'),
+];
+
+export const AspectMenuSettingsMenu: FC = () => {
+	return <SettingsRenderer spec={aspectMenuSettingsSpec} />;
 };

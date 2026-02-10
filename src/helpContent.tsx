@@ -19,7 +19,7 @@ export const PlanetInfoHelp: FC = () => (
 			This panel displays detailed information for a single selected node.
 		</P>
 		<P>
-			<b>Node Selection.</b> The top row provides quick access to the Ascendant, luminaries, and chart ruler. Additional planets and selected points are available via expandable lists.
+			<b>Node Selection.</b> Nodes may be selected by clicking on them in the main chart. One can also cycle nodes (ordered by ecliptic longitude) with the two arrow buttons on top of this panel.
 		</P>
 		<P>
 			<b>Node Data.</b> Displays sign, degree, house placement, angularity, dignity, motion, sect status, closeness to main angles, and aspects where applicable. Some fields appear only when relevant to the selected node.
@@ -138,7 +138,19 @@ export const GeneralSettingsHelp: FC = () => (
 export const AspectMenuHelp: FC = () => (
 	<>
 		<P>
-			This planet shows aspects. There's a lot of stuff going on here, but I'm not writing this before we decide on that filter-by-node thing.
+			This panel displays a list of all the aspects in the chart, or those incident on a selected node.
+		</P>
+		<P>
+			<b>Node Selection.</b> Nodes may be selected by clicking on them in the main chart - this will cause this panel to show only aspects incident on the selected node. Nodes may be unselected by clicking anywhere on the main chart area, or on the "Show all aspects" button that will appear on top of this panel.
+		</P>
+		<P>
+			<b>Aspect Data.</b> For each aspect, this panel shows the aspect kind, the nodes involved, and the orb.
+		</P>
+		<P>
+			<b>Hierarchy.</b> By default, aspects that are "included" in another aspect (e.g. a trine in a grand trine) are shown indented below said aspect. This may be changed in the settings.
+		</P>
+		<P>
+			<b>Interactability.</b> Hovering over any aspect will highlight this aspect in the main chart. In particular hovering over a parallel/contraparallel will also show the line connecting the two equinoxes, analogous to the celestial equator. Aspects may be discarded by clicking on the "X" button, though these may come back if the aspects need to be recomputed (e.g., node selection changes).
 		</P>
 	</>
 );
