@@ -520,7 +520,7 @@ class ZodiacPositions {
 	
 	public getNodePosition(node: Node): number{
 		const a = this._nodePositions.get(node);
-		if (!a) {throw new Error("getNodePosition called for absent node");}
+		if (a === undefined) {throw new Error("getNodePosition called for absent node:", node);}
 		return a;
 	}
 	

@@ -1,28 +1,21 @@
-import { type FC } from 'react';
+import { type FC, type ComponentType } from 'react';
 import { Node, nodeCategories } from './astroDefs';
 import { AspectKind, aspectKindCategories } from './aspectDefs';
-import { nodeSymbols, nodeShortName, aspectSymbols, aspectKindShortName } from './astroGraphics';
-import { useSettingsStore } from './settingsStore';
+import { NodeSelectorButton, AspectKindSelectorButton, renderTitle } from './renderPrimitives';
+import { useSettingsStore } from './settingsStore.ts'
 
 interface SelectorProps<T extends string | number> {
 	selectedItems: Set<T>;
 	setSelectedItems: (items: Set<T>) => void;
-	showLabels: boolean;
-	categories: Array<{
-		name: string;
-		items: T[];
-	}>;
-	symbols: Record<T, string>;  // For icons
-	labels: Partial<Record<T, String>>;   // For text labels
+	categories: Array<{ name: string; items: T[] }>;
+	ButtonComponent: ComponentType<{ item: T; selected: boolean; onClick: () => void }>;
 }
 
 const Selector = <T extends string | number>({
 	selectedItems,
 	setSelectedItems,
-	showLabels,
 	categories,
-	symbols,
-	labels
+	ButtonComponent,
 }: SelectorProps<T>) => {
 	const handleToggle = (item: T) => {
 		const newSelected = new Set(selectedItems);
@@ -38,28 +31,16 @@ const Selector = <T extends string | number>({
 		<div className="p-4 text-theme-text">
 			{categories.map(category => (
 				<div key={category.name} className="mb-2.5">
-					<label className="text-sm font-bold text-gray-400 tracking-wide small-caps">{category.name}</label>
+					{renderTitle(category.name)}
 					<div className="flex flex-wrap gap-1.5">
-						{category.items.map(item => {
-							const isSelected = selectedItems.has(item);
-							const symbol = symbols[item];
-							return (
-								<button
-									key={item}
-									className={`bg-transparent border p-1.5 text-theme-text cursor-pointer transition-all duration-200 flex items-center justify-center small-caps focus:outline-none hover:border-theme-border hover:bg-white/10 ${
-										isSelected ? 'border-theme-text' : 'border-gray-800'
-									}`}
-									onClick={() => handleToggle(item)}
-									title={String(item)}
-								>
-									{showLabels ? (
-										<span className="text-xs font-medium whitespace-nowrap">{labels[item] || String(item)}</span>
-									) : (
-										symbol && <img src={symbol} alt={String(item)} className="w-5 h-5 object-contain icon-filter" />
-									)}
-								</button>
-							);
-						})}
+						{category.items.map(item => (
+							<ButtonComponent
+								key={item}
+								selected={selectedItems.has(item)}
+								onClick={() => handleToggle(item)}
+								item={item}
+							/>
+						))}
 					</div>
 				</div>
 			))}
@@ -69,28 +50,21 @@ const Selector = <T extends string | number>({
 
 
 
-export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'symbols' | 'labels' | 'showLabels'>> = (props) => {
-	const showLabels = useSettingsStore(s => s.showNodeLabels);
-	return (
-		<Selector
-			{...props}
-			showLabels={showLabels}
-			categories={nodeCategories}
-			symbols={nodeSymbols}
-			labels={nodeShortName}
-		/>
-	);
+export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'ButtonComponent'>> = (props) => {
+	const _showLabels = useSettingsStore(s => s.showNodeLabels);
+	return (<Selector
+		{...props}
+		categories={nodeCategories}
+		ButtonComponent={NodeSelectorButton}
+	/>);
 };
 
-export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'symbols' | 'labels' | 'showLabels'>> = (props) => {
-	const showLabels = useSettingsStore(s => s.showAspectLabels);
-	return (
-		<Selector
-			{...props}
-			showLabels={showLabels}
-			categories={aspectKindCategories}
-			symbols={aspectSymbols}
-			labels={aspectKindShortName}
-		/>
-	);
+export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'ButtonComponent'>> = (props) => {
+	const _showLabels = useSettingsStore(s => s.showAspectLabels);
+	const _aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	return (<Selector
+		{...props}
+		categories={aspectKindCategories}
+		ButtonComponent={AspectKindSelectorButton}
+	/>);
 };

@@ -1,7 +1,17 @@
 import { ReactNode } from 'react';
 import { Node, Zodiac, Mode, Element, mainAngles } from './astroDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
-import { zodiacSymbols, nodeSymbols, nodePreferredName, elementSymbols, modeSymbols, nodesWithRedundantSymbols, nodesAdmittingArticle } from './astroGraphics';
+import {
+	zodiacSymbols,
+	nodeSymbols,
+	nodePreferredName,
+	elementSymbols,
+	modeSymbols,
+	nodesWithRedundantSymbols,
+	nodesAdmittingArticle,
+	aspectKindColors,
+	aspectSymbols
+} from './astroGraphics';
 import { useSettingsStore } from './settingsStore';
 
 // Default sizes - can be overridden via optional params
@@ -99,6 +109,65 @@ export const renderNode = (
 			height={size}
 			className="icon-filter align-middle inline"
 		/>
+	);
+};
+
+interface RenderAspectKindOptions {
+	showLabel?: boolean;
+	withArticle?: boolean; //"a conjunction / an opposition"
+	colorcode?: boolean;
+	size?: number;
+	fontSize?: number;
+}
+
+export const renderAspectKind = (
+	aspectKind: AspectKind,
+	options: RenderAspectKindOptions = {}
+): ReactNode => {
+	const {
+		showLabel,
+		withArticle = false,
+		colorcode,
+		size = DEFAULT_SYMBOL_SIZE,
+		fontSize = DEFAULT_TEXT_SIZE,
+	} = options;
+	const resolvedShowLabel = showLabel ?? useSettingsStore(s => s.showAspectLabels);
+	const resolvedColorcode = colorcode ?? useSettingsStore(s => s.aspectsColorcoded);
+	
+	const aspectColorcoded = resolvedColorcode && (aspectKind in aspectKindColors);
+	const [r,g,b] = aspectColorcoded ? aspectKindColors[aspectKind]! : [-1,-1,-1];
+	
+	return resolvedShowLabel ? (
+		<label
+			className="text-xs whitespace-nowrap font-bold small-caps"
+			style={{color: aspectColorcoded ? `rgb(${r}, ${g}, ${b})` : "var(--color-text)"}}
+		>
+			{aspectKind}
+		</label>
+	) : (
+		aspectColorcoded ? (
+			<div
+				style={{
+					WebkitMaskImage: `url(${aspectSymbols[aspectKind]})`,
+					maskImage: `url(${aspectSymbols[aspectKind]})`,
+					WebkitMaskRepeat: "no-repeat",
+					maskRepeat: "no-repeat",
+					WebkitMaskSize: "contain",
+					maskSize: "contain",
+					width: size,
+					height: size,
+					backgroundColor: `rgb(${r}, ${g}, ${b})`,
+				}}
+			/>
+		) : (
+			<img
+				className="icon-filter"
+				src={aspectSymbols[aspectKind]}
+				alt={aspectKind}
+				width={size}
+				height={size}
+			/>
+		)
 	);
 };
 	
@@ -382,21 +451,20 @@ export const SelectorButton = ({
 	);
 };
 
-// Convenience wrapper for rendering a selector button with a node icon/label
 export const NodeSelectorButton = ({
-	node,
-	showLabel,
+	item,
 	selected,
 	disabled = false,
 	highlighted = false,
 	onClick,
+	options = {},
 }: {
-	node: Node;
-	showLabel: boolean;
+	item: Node;
 	selected: boolean;
 	disabled?: boolean;
 	highlighted?: boolean;
 	onClick: () => void;
+	options?: RenderNodeOptions;
 }): ReactNode => {
 	return (
 		<SelectorButton
@@ -404,20 +472,40 @@ export const NodeSelectorButton = ({
 			disabled={disabled}
 			highlighted={highlighted}
 			onClick={onClick}
-			title={node}
+			title={item}
 		>
 			<span className={`flex flex-col items-center ${disabled ? "cursor-not-allowed" : ""}`}>
-				{showLabel ? (
-					<span className="text-xs font-medium whitespace-nowrap">
-						{nodePreferredName[node] || node}
-					</span>
-				) : (
-					<img
-						src={nodeSymbols[node]}
-						alt={node}
-						className="w-5 h-5 object-contain icon-filter"
-					/>
-				)}
+				{renderNode(item, options)}
+			</span>
+		</SelectorButton>
+	);
+};
+
+export const AspectKindSelectorButton = ({
+	item,
+	selected,
+	disabled = false,
+	highlighted = false,
+	onClick,
+	options = {},
+}: {
+	item: AspectKind;
+	selected: boolean;
+	disabled?: boolean;
+	highlighted?: boolean;
+	onClick: () => void;
+	options?: RenderAspectKindOptions;
+}): ReactNode => {
+	return (
+		<SelectorButton
+			selected={selected}
+			disabled={disabled}
+			highlighted={highlighted}
+			onClick={onClick}
+			title={item}
+		>
+			<span className={`flex flex-col items-center ${disabled ? "cursor-not-allowed" : ""}`}>
+				{renderAspectKind(item, options)}
 			</span>
 		</SelectorButton>
 	);
