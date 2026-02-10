@@ -3,6 +3,7 @@ import { Node, Zodiac, Element, Mode, standardNodes } from './astroDefs';
 import { nodeSymbols } from './astroGraphics.ts';
 import ZodiacPositions from './zodiacPositions.ts'
 import { useSettingsStore } from './settingsStore.ts'
+import { renderString } from './renderPrimitives.tsx'
 
 type HemispheresChartProps = {
 	zodiacPositions: ZodiacPositions,
@@ -41,7 +42,7 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number) {
 		if (verticalStrength === 0) { // null - null case
 			return "No east/west or above/below horizon emphasis.";
 		} else {
-			return capitalize(`${verticalModifier}emphasis ${horizontalOrientation === 1 ? 'east' : 'west'} & ${verticalOrientation === 1 ? 'above' : 'below'} the horizon.`);
+			return capitalize(`${verticalModifier}emphasis ${horizontalOrientation === 1 ? 'west' : 'east'} & ${verticalOrientation === 1 ? 'above' : 'below'} the horizon.`);
 		}
 	} else {
 		const verticalString = verticalStrength === 0 ? (
@@ -61,9 +62,9 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number) {
 			'No east/west emphasis'
 		) : (
 			verticalStringLongish ? (
-				`${horizontalModifierAdj}${horizontalOrientation === 1? 'eastern' : 'western'}`
+				`${horizontalModifierAdj}${horizontalOrientation === 1? 'western' : 'eastern'}`
 			) : (
-				`${horizontalModifier}${horizontalOrientation === 1? 'eastern' : 'western'} emphasis`
+				`${horizontalModifier}${horizontalOrientation === 1? 'western' : 'eastern'} emphasis`
 			)
 		);
 		if (verticalStrength>horizontalStrength) { // vertical goes first
@@ -92,14 +93,6 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		fontVariant: "small-caps",
 		fontWeight: "bold",
 	} as const;
-
-	const renderString = (str: string): ReactNode => {
-		return (
-			<span style={{ fontSize: textSize }}>
-				{str}
-			</span>
-		);
-	};
 	
 	const renderNodeGroupSVG = (nodes: Node): ReactNode => {
 		if (showNodeLabels) {
@@ -237,10 +230,10 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					{"Horizon"}
 				</text>
 				<text x="0%" y={height/2-textSize*0.3} textAnchor="start" {...svgTextProps}>
-					{"West"}
+					{"East"}
 				</text>
 				<text x="100%" y={height/2-textSize*0.3} textAnchor="end" {...svgTextProps}>
-					{"East"}
+					{"West"}
 				</text>
 				<g transform={`translate(${0.25*width},${0.25*height})`}>
 					{renderNodeGroupSVG(nodesAboveWest)}

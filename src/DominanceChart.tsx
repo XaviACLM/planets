@@ -1,10 +1,9 @@
 import { useMemo, FC, ReactNode } from 'react';
 import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
 import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
-import { renderNode } from './renderPrimitives.tsx'
 import ZodiacPositions from './zodiacPositions.ts'
 import { useSettingsStore } from './settingsStore.ts'
-
+import { renderString, renderSmallcapsString, renderTitle, renderElement, renderMode, renderNode } from './renderPrimitives.tsx'
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
@@ -20,44 +19,6 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 	const textSize = 12;
 	const textSizeTitle = 14;
 	const strokeWidth = 1;
-
-	const renderSmallcapsString = (str: string): ReactNode => {
-		return (
-			<span className="small-caps font-bold" style={{ fontSize: textSize }}>
-				{str}
-			</span>
-		);
-	};
-
-	const renderString = (str: string): ReactNode => {
-		return (
-			<span style={{ fontSize: textSize }}>
-				{str}
-			</span>
-		);
-	};
-
-	const renderTitle = (str: string): ReactNode => {
-		return (
-			<span className="small-caps font-bold tracking-wide" style={{ fontSize: textSizeTitle }}>
-				{str}
-			</span>
-		);
-	};
-
-	const renderElement = (elem: Element): ReactNode => {
-		return showElementLabels ? (
-			renderSmallcapsString(elem)
-		) : (
-			<img
-				src={elementSymbols[elem]}
-				alt={elem}
-				width={symbolSize}
-				height={symbolSize}
-				className="icon-filter inline"
-			/>
-		);
-	};
 
 	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
 		return showElementLabels ? (
@@ -75,21 +36,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				href={elementSymbols[elem]}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"icon-filter(1)"}}
-			/>
-		);
-	};
-
-	const renderMode = (mode: Mode): ReactNode => {
-		return showModeLabels ? (
-			renderSmallcapsString(mode)
-		) : (
-			<img
-				src={modeSymbols[mode]}
-				alt={mode}
-				width={symbolSize}
-				height={symbolSize}
-				className="icon-filter inline"
+				style={{filter:"var(--icon-filter)"}}
 			/>
 		);
 	};
@@ -110,7 +57,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				href={modeSymbols[mode]}
 				width={symbolSize}
 				height={symbolSize}
-				style={{filter:"icon-filter(1)"}}
+				style={{filter:"var(--icon-filter)"}}
 			/>
 		);
 	};

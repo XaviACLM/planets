@@ -134,7 +134,7 @@ function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighligh
 		<div className="p-2 overflow-y-auto bg-theme-bg text-theme-text scrollbar-none">
 			{/* Header message when filtering */}
 			{highlightedNode !== null && (
-				<div className="px-2 pb-2 text-sm">
+				<div className="pb-1 text-sm">
 					{renderString("Showing aspects for ")}
 					{renderNode(highlightedNode, { forceText: true, withArticle: true })}
 					{renderString(". ")}
@@ -153,6 +153,8 @@ function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighligh
 				})
 				return [aspectElement, ...subaspectElements]
 			})}
+			{displayedAspects.size === 0 && ( renderString("No aspects.", {fontStyle: "italic"})
+			)}
 		</div>
 	);
 }

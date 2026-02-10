@@ -7,10 +7,8 @@ NOT TOO HARD, NOT TOO EASY
 REQUIRES THINKING
 - write aspect help menu
 - rewrite planet panel help menu
-- Clean up the look of city/datetime selector a bit. Make it not explode upon text input.
 
 ETC
-- aspect menu handles it somehow if no aspects
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
 - something is actually weird with the aspect system :( square contains 3 t-squares, fourth t-square is outside for some reason, w orb 1.48 whereas other t-squares and general square has error 1.92. Yeah something doesn't work as intended here :(
 
@@ -24,6 +22,7 @@ ALREADY DONE BUT KEEP IN MIND
 XX [done in the sense that it's already in renderPrimitives.ts. We'll get this automatically when we refactor the rest of the code to use renderPrimitives.ts]- That stuff with the node shortnames vs preferred names
 
 EVEN MORE ETC
+- grey scrollbar for the info modal is ugly
 - annoying how low-opacity aspects that line up can overlap to look higher-opacity
 - Serifed smallcaps too long: "sagittarius" in the main wheel chart, "contraparallel" in aspects menu
 - Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?

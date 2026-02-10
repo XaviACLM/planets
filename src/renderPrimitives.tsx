@@ -33,9 +33,9 @@ export const renderString = (
 	str: string,
 	options: TextRenderOptions = {}
 ): ReactNode => {
-	const { fontSize = DEFAULT_TEXT_SIZE } = options;
+	const { fontSize = DEFAULT_TEXT_SIZE, fontStyle = "normal" } = options;
 	return (
-		<span style={{ fontSize }}>
+		<span style={{ fontSize, fontStyle }}>
 			{str}
 		</span>
 	);
