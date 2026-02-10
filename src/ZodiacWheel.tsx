@@ -4,7 +4,7 @@ import ZodiacPositions from './zodiacPositions.ts'
 import { type Aspect } from './aspects.ts'
 import { Node, Zodiac, standardZodiac } from './astroDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
-import { spreadIcons, normalizeAngleDeg, normalizeAngleRad } from './util.ts'
+import { spreadIcons, normalizeAngleDeg, normalizeAngleRad, interpolateShorterAngle, angleShortDistance } from './util.ts'
 import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
@@ -185,7 +185,6 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 							{Array.from({length: numDits}, (_,i) => i+1).map(i => {
 								const a = aBase + i*Math.PI/180;
 								const ditHeight = 0.5*(1 + (i%5===0) + (i%10===0));
-								console.log("bals");
 								return (
 									<line
 										key={i}
@@ -210,10 +209,10 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 					return (
 						<line
 							key={index}
-							x1={50 + (radius - 3) * Math.cos(a)}
-							y1={50 - (radius - 3) * Math.sin(a)}
-							x2={50 + (aspectRadius + 3) * Math.cos(a)}
-							y2={50 - (aspectRadius + 3) * Math.sin(a)}
+							x1={50 + (radius - 2) * Math.cos(a)}
+							y1={50 - (radius - 2) * Math.sin(a)}
+							x2={50 + (aspectRadius + 2) * Math.cos(a)}
+							y2={50 - (aspectRadius + 2) * Math.sin(a)}
 							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
 							
@@ -222,8 +221,6 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				})}
 				
 				{/*Sign separators if no houses*/}
-				{/*Hidden for now. Might be confusing, not really important to have*/}
-				{/*
 				{!zodiacPositions.houseCuspsAreDefined()
 				&& Array.from(zodiac.values()).map((lon, index) => {
 					const a = lon + offset;
@@ -240,7 +237,6 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 						/>
 					);
 				})}
-				*/}
 				
 				{/*House presweep line*/}
 				{housePresweep
@@ -250,37 +246,40 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 					return (
 						<line
 							key={index}
-							x1={50 + (aspectRadius + 3) * Math.cos(a)}
-							y1={50 - (aspectRadius + 3) * Math.sin(a)}
-							x2={50 + (radius - 3) * Math.cos(a)}
-							y2={50 - (radius - 3) * Math.sin(a)}
+							x1={50 + (aspectRadius + 1) * Math.cos(a)}
+							y1={50 - (aspectRadius + 1) * Math.sin(a)}
+							x2={50 + (radius - 1) * Math.cos(a)}
+							y2={50 - (radius - 1) * Math.sin(a)}
 							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
 							strokeDasharray="0.2,0.5"
 						/>
 					);
 				})}
-				
+								
 				{/*House cusp labels*/}
 				{zodiacPositions.houseCuspsAreDefined()
 				&& houseCuspAngles.map((lon, index) => {
-					const a = lon + offset;
+					const nextLon = houseCuspAngles[(index+1)%houseCuspAngles.length];
+					const size = Math.min(5, 30*angleShortDistance(nextLon, lon));
+					const a = interpolateShorterAngle(0.5, lon, nextLon) + offset - 5*Math.PI/180*housePresweep;
 					const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 					const flip = (r>90 && r<270) && flipText;
-					const adj = flip ? 0.01 : -0.01; //perfect alignment w/ house separators
-					const x = 50 + (radius-1) * Math.cos(a+adj);
-					const y = 50 - (radius-1) * Math.sin(a+adj);
+					const adj = 0.005*(flip ? -size: size);
+					const rad = (radius + aspectRadius)/2
+					const x = 50 + rad * Math.cos(a+adj);
+					const y = 50 - rad * Math.sin(a+adj);
 					const cuspName = "H"+String(index+1)
+					console.log(cuspName, index, lon, nextLon, a);
 					return (
 						<text fill="var(--color-text)"
 							key={index}
 							x={x}
 							y={y+0.6}
-							fontSize="1"
-							fontWeight="bold"
-							textAnchor={flip ? "end" : "start"}
+							fontSize={size}
+							textAnchor={"middle"}
+							opacity={0.15}
 							transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
-							style={{fontVariant: "small-caps"}}
 						>
 							{cuspName}
 						</text>
@@ -426,6 +425,11 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 						if ( nodesWithRedundantSymbols.includes(node) ) {
 							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
 						}
+						
+						const z = zodiacPositions.getSymbolOfNode(node);
+						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node) || visuallyHighlightedNode === node;
+						const filter = isHighlighted && nodesWithRedundantSymbols.includes(node) ? "url(#shadow)" : "";
+						
 						return (
 							<text fill="var(--color-text)"
 								key={i}
@@ -436,6 +440,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 								textAnchor={flip ? "end" : "start"}
 								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
 								style={{fontVariant: "small-caps", cursor: "pointer"}}
+								filter={filter}
 								onMouseEnter={() => setHoveredNode(node)}
 								onMouseLeave={() => setHoveredNode(null)}
 								onClick={(e) => { e.stopPropagation(); setHighlightedNode(node); }}

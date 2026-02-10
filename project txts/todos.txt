@@ -5,15 +5,14 @@ NOT TOO HARD, NOT TOO EASY
 - order files
 
 REQUIRES THINKING
-- chart looks too empty without house divisors. What else do we put in there??
 - write aspect help menu
 - rewrite planet panel help menu
 - Clean up the look of city/datetime selector a bit. Make it not explode upon text input.
-- the house labels aren't very readable or clear
 
 ETC
+- aspect menu handles it somehow if no aspects
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
-- highlight on label-only nodes
+- something is actually weird with the aspect system :( square contains 3 t-squares, fourth t-square is outside for some reason, w orb 1.48 whereas other t-squares and general square has error 1.92. Yeah something doesn't work as intended here :(
 
 DO THIS AT THE END
 - search "TODO"
@@ -36,6 +35,7 @@ EVEN MORE ETC
 - how about we just include every gd asteroid in the kuiper belt
 - conclusion. We have eris, not eros. We could add eros, but it doesn't have a symbol. Not a standard one anyway.
 - clean up the shadow stuff with the planet images
+- at extreme latitudes on some house systems houses may be less than 5 degrees which would make presweep look really weird. would behave normally but house cusps technically outside houses. A warning like the one we already have, I guess suggesting turning off presweep or going to whole signs or whatever.
 
 TODOS FROM ELSEWHERE THAT I HAVE NOT BOTHERED ORGANIZING
 - circles on the wheel depending on what binary aspects are selected (obs selectedAspects is mutable => does not force recomputation)
