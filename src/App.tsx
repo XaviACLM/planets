@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
@@ -13,7 +13,7 @@ import { RulershipGraph } from './rulershipGraph.ts'
 import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { Node } from './astroDefs.ts'
-import { toZonedTime, fromZonedTime } from './util.ts'
+import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
 import { HouseSystem } from './houses.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
 import { type CityData } from './CitySearchEngine'
@@ -166,6 +166,17 @@ function App() {
 		return selectedCity.timezone;
 	}, [selectedCity]);
 
+	// Debounced date input - local state updates immediately, actual state updates after delay
+	const [dateInputValue, setDateInputValue] = useState<string>(
+		toISOLocal(toZonedTime(selectedDate, currentTimezone)).slice(0, 16)
+	);
+	const dateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	// Sync local input state when selectedDate or timezone changes externally
+	useEffect(() => {
+		setDateInputValue(toISOLocal(toZonedTime(selectedDate, currentTimezone)).slice(0, 16));
+	}, [selectedDate, currentTimezone]);
+
 	function handleAspectDeletion(aspect: Aspect, parentAspect: Aspect | null){
 		setAspects(deleteAspectFromMap(aspects, aspect, parentAspect));
 	}
@@ -183,9 +194,25 @@ function App() {
 					<input
 						aria-label="Date and time"
 						type="datetime-local"
-						className="text-black text-sm icon-filter small-caps"
-						value={toZonedTime(selectedDate, currentTimezone).toISOString().slice(0, 16)}
-						onChange={(e) => setSelectedDate(fromZonedTime(new Date(e.target.value), currentTimezone))}
+						className="text-sm"
+						value={dateInputValue}
+						onChange={(e) => {
+							const newValue = e.target.value;
+							setDateInputValue(newValue);
+
+							// Clear any pending debounce
+							if (dateDebounceRef.current) {
+								clearTimeout(dateDebounceRef.current);
+							}
+
+							// Update actual state after 300ms of no typing
+							dateDebounceRef.current = setTimeout(() => {
+								const parsed = new Date(newValue);
+								if (!isNaN(parsed.getTime())) {
+									setSelectedDate(fromZonedTime(parsed, currentTimezone));
+								}
+							}, 300);
+						}}
 					/>
 				</div>
 				<Module

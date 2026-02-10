@@ -8,13 +8,31 @@ export const TAU = 2*Math.PI;
 
 export function toZonedTime(date: Date, tz: string) {
 	const d = dayjs(date).tz(tz);
-	const offsetMs = (d.utcOffset()+0) * 60 * 1000;
+	const offsetMs = d.utcOffset() * 60 * 1000;
 	return new Date(date.getTime() + offsetMs);
 }
 export function fromZonedTime(date: Date, tz: string) {
 	const d = dayjs(date).tz(tz);
-	const offsetMs = (d.utcOffset() - 60) * 60 * 1000;
+	const offsetMs = d.utcOffset() * 60 * 1000;
 	return new Date(date.getTime() - offsetMs);
+}
+
+// no comments
+export function toISOLocal(d) {
+	var z  = n =>  ('0' + n).slice(-2);
+	var zz = n => ('00' + n).slice(-3);
+	var off = d.getTimezoneOffset();
+	var sign = off > 0? '-' : '+';
+	off = Math.abs(off);
+
+	return d.getFullYear() + '-'
+		+ z(d.getMonth()+1) + '-' +
+		z(d.getDate()) + 'T' +
+		z(d.getHours()) + ':'  + 
+		z(d.getMinutes()) + ':' +
+		z(d.getSeconds()) + '.' +
+		zz(d.getMilliseconds()) +
+		sign + z(off/60|0) + ':' + z(off%60); 
 }
 
 export function spreadIcons(

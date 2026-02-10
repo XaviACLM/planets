@@ -270,7 +270,6 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 					const x = 50 + rad * Math.cos(a+adj);
 					const y = 50 - rad * Math.sin(a+adj);
 					const cuspName = "H"+String(index+1)
-					console.log(cuspName, index, lon, nextLon, a);
 					return (
 						<text fill="var(--color-text)"
 							key={index}
