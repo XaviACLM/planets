@@ -320,8 +320,9 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 					Array.from(zodiac.entries()).map(([symbol, _], i, array) => {
 						const lon = array[(i+1)%array.length][1];
 						const a = lon - 0.01 + offset;
-						const x = 50 + sectorRadius * Math.cos(a);
-						const y = 50 - sectorRadius * Math.sin(a);
+						const rad = sectorRadius + 1.5*(symbol===Zodiac.SAGITTARIUS);
+						const x = 50 + rad * Math.cos(a);
+						const y = 50 - rad * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 						const flip = (r>90 && r<270) && flipText;
 						return (

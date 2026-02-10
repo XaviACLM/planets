@@ -1,11 +1,12 @@
 TRIVIAL
--
+- grey scrollbar for the info modal is ugly
 
 NOT TOO HARD, NOT TOO EASY
 - order files
+- at extreme latitudes on some house systems houses may be less than 5 degrees which would make presweep look really weird. would behave normally but house cusps technically outside houses. A warning like the one we already have, I guess suggesting turning off presweep or going to whole signs or whatever.
 
 REQUIRES THINKING
--
+- clean up the shadow stuff with the planet images
 
 ETC
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
@@ -19,24 +20,21 @@ ALREADY DONE BUT KEEP IN MIND
 -
 
 EVEN MORE ETC
-- grey scrollbar for the info modal is ugly
 - annoying how low-opacity aspects that line up can overlap to look higher-opacity
-- Serifed smallcaps too long: "sagittarius" in the main wheel chart, "contraparallel" in aspects menu
-- Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
 - Think a little bit about "include all nodes in analysis" toggles (particularly for hemispheres and element/mode)
 - fixed stars!!!
 - https://www.astro.com/faq/fq_fh_owstyle_e.htm
-- clear up the "just compute it" vs usememo thing
 - speed for non-physical (non-hamburg) nodes
-- how about we just include every gd asteroid in the kuiper belt
-- conclusion. We have eris, not eros. We could add eros, but it doesn't have a symbol. Not a standard one anyway.
-- clean up the shadow stuff with the planet images
-- at extreme latitudes on some house systems houses may be less than 5 degrees which would make presweep look really weird. would behave normally but house cusps technically outside houses. A warning like the one we already have, I guess suggesting turning off presweep or going to whole signs or whatever.
+
+I DONT FEEL LIKE IT
 - larger text mode
+- clear up the "just compute it" vs usememo thing
+- how about we just include every gd asteroid in the kuiper belt (We have eris, not eros. We could add eros, but it doesn't have a symbol. Not a standard one anyway.)
 
 TODOS FROM ELSEWHERE THAT I HAVE NOT BOTHERED ORGANIZING
 - circles on the wheel depending on what binary aspects are selected (obs selectedAspects is mutable => does not force recomputation)
 - dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
 
 THE BIGGEST TODO IN THE UNIVERSE
+- Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
 - make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f

@@ -86,10 +86,9 @@ function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighligh
 	highlightedNode: Node | null,
 	clearHighlight: () => void
 }) {
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
 	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
-	const theme = useSettingsStore(s => s.theme);
-	const fallbackColor: [number, number, number] = theme === Theme.DARK ? [255, 255, 255] : [61, 41, 20];
 
 	// Filter aspects if a node is highlighted
 	const displayedAspects = useMemo(() => {
