@@ -91,6 +91,11 @@ const mainSettingsSpec: SettingsItem[] = [
 	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
 
 	separator(),
+	
+	checkbox('useFixedStars', 'Use fixed star conjunctions'),
+	numeric('fixedStarMaximumDistance', 'Maximum fixed star conjunction error:', 0, 20, 'º'),
+
+	separator(),
 
 	// Dignities
 	dropdown('dignityMode', 'Dignities', Object.values(DignityMode)),
@@ -171,6 +176,11 @@ const planetSettingsSpec: SettingsItem[] = [
 	dropdown('triplicityMode', 'Triplicity', Object.values(TriplicityMode)),
 	dropdown('boundsMode', 'Bounds', Object.values(BoundsMode)),
 	dropdown('faceMode', 'Faces', Object.values(FaceMode)),
+
+	separator(),
+	
+	checkbox('useFixedStars', 'Use fixed star conjunctions'),
+	numeric('fixedStarMaximumDistance', 'Maximum fixed star conjunction error:', 0, 20, 'º'),
 
 	separator(),
 

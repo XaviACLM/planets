@@ -1,5 +1,6 @@
 import { StateVector, Vector, Body, GeoVector, Ecliptic, GeoMoonState, HelioState, AstroTime, Rotation_ECL_EQJ, Rotation_EQJ_ECT, RotateState, RotateVector } from 'astronomy-engine';
 
+import { normalizeAngleRad } from './util.ts'
 import { Node } from './astroDefs.ts';
 import { HamburgSchoolMode } from './settingsDefs.ts';
 import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams, smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts';
@@ -61,7 +62,7 @@ export function bodyToGeocentricLongitude(body: Body, date: Date) {
 	// accepts EQJ2000 vector w date and turns into ECT (ecliptic of date)
 	const etc = Ecliptic(eqj);
 		
-	return etc.elon/180*Math.PI;
+	return normalizeAngleRad(etc.elon/180*Math.PI);
 }
 
 // our nodes -> astronomy engine bodies
@@ -132,9 +133,8 @@ function geocentricEQJToECT(state: StateVector, date: Date): SimpleState {
 
 // Extract ecliptic longitude (radians) from position
 export function eclipticLongitudeFromPosition(pos: { x: number; y: number }): number {
-	let lon = Math.atan2(pos.y, pos.x);
-	if (lon < 0) lon += 2 * Math.PI;
-	return lon;
+	const lon = Math.atan2(pos.y, pos.x);
+	return normalizeAngleRad(lon);
 }
 
 // Extract ecliptic longitude speed (radians/day) from state
@@ -142,4 +142,15 @@ export function eclipticLongitudeFromPosition(pos: { x: number; y: number }): nu
 function eclipticLongitudeSpeedFromState(state: SimpleState): number {
 	const { x, y, vx, vy } = state;
 	return (x * vy - y * vx) / (x * x + y * y);
+}
+
+// takes and returns radians
+// goes J2000 -> date
+export function addPrecession(date: Date, longitude: number): number {
+	const radPerSecondPrecession = 4.426734852389845e-10 * Math.PI/180;
+	const j2000InMillis = Date.UTC(2000, 0, 1, 12, 0, 0);
+	
+	//getTime will count leap seconds, but the difference is negligible
+	const delta = (date.getTime() - j2000InMillis) / 1000;
+	return normalizeAngleRad(longitude + radPerSecondPrecession * delta);
 }

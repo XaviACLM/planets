@@ -4,7 +4,7 @@ import { nodeAverageSpeed } from './astroData';
 import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
-import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect } from './astrologyUtil';
+import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect, getFixedStarsWithinLongitude } from './astrologyUtil';
 import { getEclipticLongitudeSpeed } from './astronomyUtil';
 import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
@@ -57,9 +57,13 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	
 	// locally unused, render dependency
 	// ( = these lines here to force rerender if these values change)
+	// ( this is an extremely normal react pattern, but I'll keep it here until I stop feeling uneasy about not mentioning it anywhere)
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
 	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	
+	const useFixedStars = useSettingsStore(s => s.useFixedStars);
+	const fixedStarMaximumDistance = useSettingsStore(s => s.fixedStarMaximumDistance);
 	
 	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
 	const triplicityMode = useSettingsStore(s => s.triplicityMode);
@@ -144,6 +148,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		return {formattedSpeedDegPerDay, isStationary, isRetrograde};
 	}, [selectedNode, date, hamburgSchoolMode])
 
+	const nearbyFixedStars = useMemo(() => {
+		return getFixedStarsWithinLongitude(selectedNode, zodiacPositions, fixedStarMaximumDistance*Math.PI/180);
+	}, [selectedNode, fixedStarMaximumDistance, zodiacPositions])
+
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {
 		if (!hasSurfacePosition) return null;
@@ -219,6 +227,22 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 				{renderString(`).`)}
 			</div>
 		);
+	};
+	
+	const renderFixedStarSummaryString = (nearbyFixedStars: Map<string, number>) => {
+		const lastIdx = nearbyFixedStars.size-1;
+		return (<span className="block pl-3 -indent-3 text-wrap">
+			{renderString(lastIdx === 0 ? "Fixed star conjunction: " : "Fixed star conjunctions: ")}
+			{Array.from(nearbyFixedStars.entries()).map(([starName, orb], index) => {
+				return (<>
+					<span key={index} className="text-nowrap pl-1">
+						{renderSmallcapsString(starName)}
+						{renderString(` (Δ${formatAngle(orb)})`)}
+					</span>
+					{renderString(index === lastIdx ? "." : ", ")}
+				</>);
+			})}
+		</span>);
 	};
 	
 	const nodeGraphicSVG = () => {
@@ -473,6 +497,12 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 				</>
 			) : (
 				renderString("Not in any aspects.")
+			)}
+			
+			{useFixedStars && nearbyFixedStars.size > 0 && (
+				<div>
+					{renderFixedStarSummaryString(nearbyFixedStars)}
+				</div>
 			)}
 
 			{/* Rulership Chain */}

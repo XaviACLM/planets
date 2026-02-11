@@ -4,10 +4,10 @@ import { normalizeAngleRad, anglesLieInShortArc } from './util.ts'
 import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
 import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
 import { AstrologyMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularAstrologyModes } from './astroDefs.ts'
-import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU } from './astroData.ts'
+import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU, fixedStars } from './astroData.ts'
 import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
 import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
-import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude } from './astronomyUtil.ts'
+import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude, addPrecession } from './astronomyUtil.ts'
 
 function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
 	const jd = (date.getTime() / 86400000) + 2440587.5;
@@ -246,17 +246,6 @@ function computeAllNodePositions(
 	return nodePositions;
 }
 
-// takes and returns radians
-// goes J2000 -> date
-function addPrecession(date: Date, longitude: number): number {
-	const radPerSecondPrecession = 4.426734852389845e-10 * Math.PI/180;
-	const j2000InMillis = Date.UTC(2000, 0, 1, 12, 0, 0);
-	
-	//getTime will count leap seconds, but the difference is negligible
-	const delta = (date.getTime() - j2000InMillis) / 1000;
-	return longitude + radPerSecondPrecession * delta;
-}
-
 function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
 	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
 	
@@ -292,6 +281,14 @@ function computeZodiacSymbolPositionsForIrregularMode(date: Date, astrologyMode:
 	);
 }
 
+function computeFixedStarPositions(date: Date): Map<string, number> {
+	const positions = new Map<string, number>();
+	for (const [starName, j2000longitude] of Object.entries(fixedStars)){
+		positions.set(starName, addPrecession(date, j2000longitude));
+	}
+	return positions;
+}
+
 interface ZodiacPositionsConstructorArgs {
 	date: Date;
 	surfacePosition: SurfacePosition | null;
@@ -304,12 +301,14 @@ interface ZodiacPositionsConstructorArgs {
 	houseCuspPositions?: number[] | null;
 	siderealOffset?: number | null;
 	zodiacSymbolPositions?: Map<Zodiac, number>;
+	fixedStarPositions?: Map<string, number>;
 }
 
 class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
 	private readonly _houseCuspPositions: number[] | null;
 	private readonly _zodiacSymbolPositions: Map<Zodiac, number>;
+	private readonly _fixedStarPositions: Map<string, number>;
 	
 	public readonly date: Date;
 	public readonly surfacePosition: SurfacePosition | null;
@@ -328,6 +327,12 @@ class ZodiacPositions {
 		this.astrologyMode = config.astrologyMode;
 		this.hamburgSchoolMode = config.hamburgSchoolMode;
 		this.housePresweep = config.housePresweep;
+		
+		if (config.fixedStarPositions === undefined ){
+			this._fixedStarPositions = computeFixedStarPositions(this.date);
+		} else {
+			this._fixedStarPositions = config.fixedStarPositions;
+		}
 		
 		// best be explicit ab whether siderealOffset is undefined/null
 		if (config.siderealOffset === undefined) {
@@ -394,6 +399,7 @@ class ZodiacPositions {
 			houseCuspPositions: this._houseCuspPositions,
 			siderealOffset: this.siderealOffset,
 			zodiacSymbolPositions: this._zodiacSymbolPositions,
+			fixedStarPositions: this._fixedStarPositions,
 			...updates
 		});
 	}
@@ -591,6 +597,10 @@ class ZodiacPositions {
 			}
 		}
 		return houseLimits.length;
+	}
+	
+	public getFixedStarPositions(): Map<string, number> {
+		return this._fixedStarPositions;
 	}
 }
 

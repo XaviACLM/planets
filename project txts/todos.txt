@@ -8,7 +8,6 @@ REQUIRES THINKING
 -
 
 ETC
-- Think a little bit about "include all nodes in analysis" toggles (particularly for hemispheres and element/mode)
 - fixed stars!!!
 - speed for non-physical (non-hamburg) nodes
 - arabic parts

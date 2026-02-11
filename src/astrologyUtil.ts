@@ -125,3 +125,11 @@ export function getHouseAngularities(zodiacPositions: ZodiacPositions, houseAngu
 		}
 	})
 }
+
+export function getFixedStarsWithinLongitude(node: Node, zodiacPositions: ZodiacPositions, maximumDistance: number): Map<string, number> {
+	const lon = zodiacPositions.getNodePosition(node);
+	return new Map(Array.from( zodiacPositions.getFixedStarPositions() )
+		.map(([starName, longitude]) => [ starName, angleShortDistance(lon, longitude)])
+		.filter(([starName, distance]) => distance < maximumDistance)
+	);
+}

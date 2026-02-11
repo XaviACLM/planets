@@ -87,6 +87,7 @@ interface SettingsState {
 	setDignityMode: (v: DignityMode) => void;
 	houseAngularityMode: HouseAngularityMode;
 	setHouseAngularityMode: (v: HouseAngularityMode) => void;
+	
 	useExtendedDignities: boolean;
 	setUseExtendedDignities: (v: boolean) => void;
 	triplicityMode: TriplicityMode;
@@ -95,6 +96,11 @@ interface SettingsState {
 	setBoundsMode: (v: BoundsMode) => void;
 	faceMode: FaceMode;
 	setFaceMode: (v: FaceMode) => void;
+	
+	useFixedStars: boolean;
+	setUseFixedStars: (v: boolean) => void;
+	fixedStarMaximumDistance: number;
+	setFixedStarMaximumDistance: (v: number) => void;
 
 	// Selections
 	selectedNodes: Set<Node>;
@@ -174,6 +180,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setDignityMode: (v) => set({ dignityMode: v }),
 	houseAngularityMode: HouseAngularityMode.TRADITIONAL,
 	setHouseAngularityMode: (v) => set({ houseAngularityMode: v }),
+	
 	useExtendedDignities: false,
 	setUseExtendedDignities: (v) => set({ useExtendedDignities: v }),
 	triplicityMode: TriplicityMode.PTOLEMAIC_LILLY,
@@ -182,6 +189,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setBoundsMode: (v) => set({ boundsMode: v }),
 	faceMode: FaceMode.MODERN,
 	setFaceMode: (v) => set({ faceMode: v }),
+	
+	useFixedStars: false,
+	setUseFixedStars: (v) => set({ useFixedStars: v}),
+	fixedStarMaximumDistance: 3,
+	setFixedStarMaximumDistance: (v) => set({ fixedStarMaximumDistance: v}),
 
 	// Selections
 	selectedNodes: new Set(initiallySelectedNodes),

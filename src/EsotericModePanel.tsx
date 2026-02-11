@@ -12,6 +12,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 	const setShowModeLabels = useSettingsStore(s => s.setShowModeLabels);
 	const setShowSignsInDispositorChains = useSettingsStore(s => s.setShowSignsInDispositorChains);
 	const setUseExtendedDignities = useSettingsStore(s => s.setUseExtendedDignities);
+	const setUseFixedStars = useSettingsStore(s => s.setUseFixedStars);
 	
 	const [panelState, setPanelState] = useState<'initial' | 'esoteric' | 'hidden'>('initial');
 
@@ -26,6 +27,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowModeLabels(false);
 		setShowSignsInDispositorChains(true);
 		setUseExtendedDignities(true);
+		setUseFixedStars(true);
 		setPanelState('esoteric');
 	};
 
@@ -36,6 +38,7 @@ const EsotericModePanel: FC<EsotericModePanelProps> = ({
 		setShowModeLabels(true);
 		setShowSignsInDispositorChains(false);
 		setUseExtendedDignities(false);
+		setUseFixedStars(false);
 		setPanelState('hidden');
 	};
 
