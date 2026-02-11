@@ -1,67 +1,16 @@
-import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
-
 import { normalizeAngleRad, anglesLieInShortArc } from './util.ts'
-import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
-import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
+import { computeHouseCuspPositions, HouseSystem, ayanamsaDependantHouseSystems } from './houses.ts'
+import { smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts'
 import { AstrologyMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularAstrologyModes } from './astroDefs.ts'
 import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU, fixedStars } from './astroData.ts'
-import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
-import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
-import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude, addPrecession } from './astronomyUtil.ts'
-
-function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
-	const jd = (date.getTime() / 86400000) + 2440587.5;
-	const t = (jd - 2451545.0) / 36525.0;
-	
-	// again Meeus Ch. 47
-	const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
-	const perigee = (omega % 360) * Math.PI / 180;
-	
-	return new Map<Node, number>([
-		[Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
-		[Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
-	]);
-}
-
-function computeLunarApogeePerigeeExact(date: Date): Map<Node, number> {
-	const s = GeoMoonState(date);
-	
-	const GM = 8.887692587023177e-10;  // earth's gravitational parameter in AU^3 / day^2
-	const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
-	
-	// angular momentum
-	const h = {
-		x: s.y * s.vz - s.z * s.vy,
-		y: s.z * s.vx - s.x * s.vz,
-		z: s.x * s.vy - s.y * s.vx
-	};
-	
-	// eccentricity vector points toward perigee
-	const rVec = {x: s.x, y: s.y, z: s.z};
-	const vVec = {x: s.vx, y: s.vy, z: s.vz};
-	
-	// e = (v x h)/GM - r/mod(r)
-	const vxh = {
-		x: vVec.y * h.z - vVec.z * h.y,
-		y: vVec.z * h.x - vVec.x * h.z,
-		z: vVec.x * h.y - vVec.y * h.x
-	};
-	const e = {
-		x: vxh.x/GM - rVec.x/r,
-		y: vxh.y/GM - rVec.y/r,
-		z: vxh.z/GM - rVec.z/r,
-		t: MakeTime(date)
-	};
-	
-	
-	const eEcl = Ecliptic(new Vector(e.x, e.y, e.z, e.t)).vec;
-	const omega = Math.atan2(eEcl.y, eEcl.x);
-	
-	return new Map<Node, number>([
-		[Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
-		[Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
-	]);
-}
+import { LunarNodeMode, HamburgSchoolMode } from './settingsDefs.ts'
+import { computeAllSignificantPoints } from './geometry.ts'
+import {
+	orbitalParamsToGeocentricLongitude, nodeToBody, bodyToGeocentricLongitude, addPrecession,
+	getTodayEclipticLongitudeFromEQJ,
+	computeLunarApogeePerigeeMeeus, computeLunarApogeePerigeeExact,
+	computeLunarNodesMeeus, computeLunarNodesExact
+} from './astronomyUtil.ts'
 
 function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
@@ -71,55 +20,12 @@ function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Ma
 	}
 }
 
-function computeLunarNodesMeeus(date: Date): Map<Node, number> {
-	const jd = (date.getTime() / 86400000) + 2440587.5; // Unix ms -> JD
-	const t = (jd - 2451545.0) / 36525.0;
-
-	// Meeus Ch. 47: mean longitude of ascending node of lunar orbit
-	const omega = 125.04452 - 1934.136261 * t + 0.0020708 * t*t + (t*t*t)/450000; // small correction
-
-	const ascending = (omega)/360*2*Math.PI;
-	
-	return new Map <Node, number>([
-		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
-		[Node.LUNAR_DESCENDING, normalizeAngleRad(ascending + Math.PI)]
-	]);
-}
-
-function computeLunarNodesExact(date: Date): Map<Node, number>{
-	
-	const s = GeoMoonState(date);
-	
-	const r = { x: s.x, y: s.y, z: s.z };
-	const v = { x: s.vx, y: s.vy, z: s.vz };
-	const h = {
-		x: r.y * v.z - r.z * v.y,
-		y: r.z * v.x - r.x * v.z,
-		z: r.x * v.y - r.y * v.x,
-		t: new AstroTime(date)
-	};
-	
-	const hEcl = Ecliptic(new Vector(h.x, h.y, h.z, h.t)).vec; // { x, y, z } in ecliptic frame
-	const omega = Math.atan2(hEcl.x, -hEcl.y);
-	return new Map <Node, number>([
-		[Node.LUNAR_ASCENDING, normalizeAngleRad(omega)],
-		[Node.LUNAR_DESCENDING, normalizeAngleRad(omega + Math.PI)]
-	]);
-	
-}
-
 function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
 		return computeLunarNodesMeeus(date);
 	} else {
 		return computeLunarNodesExact(date);
 	}
-}
-
-function getTodayEclipticLongitudeFromEQJ(date: Date, v: vec3): number {
-	const astroTime = new AstroTime(date);
-	const vECT = RotateVector(Rotation_EQJ_ECT(astroTime), toAstronomyVector(v));
-	return Math.atan2(vECT.y, vECT.x);
 }
 
 function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
@@ -443,7 +349,7 @@ class ZodiacPositions {
 			newZodiacSymbolPositions = computeZodiacSymbolPositionsFromSiderealOffset(newSiderealOffset);
 		}
 		
-		if (AyanamsaDependantHouseSystems.includes(this.houseSystem) && this.surfacePosition !== null) {
+		if (ayanamsaDependantHouseSystems.includes(this.houseSystem) && this.surfacePosition !== null) {
 			const newHouseCuspPositions = computeHouseCuspPositions(
 				this.date,
 				this.surfacePosition,

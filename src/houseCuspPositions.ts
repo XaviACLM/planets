@@ -5,8 +5,10 @@
 
 import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle, anglesLieInShortArc } from './util.ts'
 
-import { Node, type SurfacePosition } from './astroDefs.ts'
+import { Node, type SurfacePosition, type Zodiac } from './astroDefs.ts'
 import { type vec3, toAstronomyVector, normalize, cross, computeAllSignificantPoints } from './geometry.ts'
+import { getTodayEclipticLongitudeFromEQJ } from './astronomyUtil.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
 
 import { Vector, SiderealTime, RotateVector, Rotation_EQJ_ECL, AstroTime, Ecliptic } from "astronomy-engine";
 
@@ -23,14 +25,14 @@ export const HouseSystem = {
 	PORPHYRY: "Porphyry",
 	EQUAL_HOUSES_VEHLOW: "Equal Houses - Vehlow",
 	WHOLE_SIGN_ARIES: "Whole Sign - Aries",
-	
+
 	KRUSINSKY: "Krusinsky",
 	REGIOMONTANUS: "Regiomontanus",
 	MERIDIAN: "Meridian",
 	MORINUS: "Morinus",
 	CAMPANUS: "Campanus",
 	ZENITH_HORIZONTAL: "Zenith / Horizontal",
-	
+
 	PLACIDUS: "Placidus",
 	KOCH: "Koch / Birthplace",
 } as const;
@@ -41,22 +43,37 @@ export const ayanamsaDependantHouseSystems: HouseSystem[] = [
 	HouseSystem.WHOLE_SIGN_ARIES,
 ];
 
+function computeAxisAnglesFromSurface(date: Date, surfacePosition: SurfacePosition): AxisAngles {
+	const { asc, mc } = computeAllSignificantPoints(date, surfacePosition);
+	const ascLon = getTodayEclipticLongitudeFromEQJ(date, asc);
+	const mcLon = getTodayEclipticLongitudeFromEQJ(date, mc);
+	return {
+		asc: normalizeAngleRad(ascLon),
+		dsc: normalizeAngleRad(ascLon + Math.PI),
+		mc: normalizeAngleRad(mcLon),
+		ic: normalizeAngleRad(mcLon + Math.PI)
+	};
+}
+
 function computeWholeSignCuspPositions(
-	angles: AxisAngles,
-	zodiacSymbolPositions: Map<Zodiac, number>
-) {	
-	const longitudes = Array.from(zodiacSymbolPositions.values());
+	date: Date,
+	surfacePosition: SurfacePosition,
+	signPositions: Map<Zodiac, number>
+) {
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
+	const longitudes = Array.from(signPositions.values());
 	let index = longitudes.findIndex((lon) => lon > angles.asc);
 	if (index === -1 || index === 0) {
 		index = longitudes.length - 1;
 	} else {
 		index = index - 1;
 	}
-	
+
 	return Array.from({length: longitudes.length}).map((_,i) => longitudes[(index+i)%longitudes.length]);
 }
 
-function computeEqualHousesCuspPositions(angles: AxisAngles){
+function computeEqualHousesCuspPositions(date: Date, surfacePosition: SurfacePosition){
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	return [
 		angles.asc,
 		angles.asc + Math.PI/6,
@@ -73,7 +90,8 @@ function computeEqualHousesCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computePorphyryCuspPositions(angles: AxisAngles){
+function computePorphyryCuspPositions(date: Date, surfacePosition: SurfacePosition){
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	return [
 		angles.asc,
 		interpolateAngles(1/3, angles.asc, angles.ic),
@@ -90,7 +108,8 @@ function computePorphyryCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
+function computeEqualHousesVehlowCuspPositions(date: Date, surfacePosition: SurfacePosition){
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	return [
 		angles.asc + (-1)*Math.PI/12,
 		angles.asc + 1*Math.PI/12,
@@ -107,8 +126,8 @@ function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computeWholeSignAriesCuspPositions(zodiacSymbolPositions: Map<Zodiac, number>){
-	return Array.from(zodiacSymbolPositions.values());
+function computeWholeSignAriesCuspPositions(signPositions: Map<Zodiac, number>){
+	return Array.from(signPositions.values());
 }
 
 
@@ -179,13 +198,13 @@ function computeKrusinskyCuspPositions(date: Date, surfacePosition: SurfacePosit
 
 function computeRegiomontanusCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {N, meridian, equator} = computeAllSignificantPoints(date, surfacePosition);
-	const intersection = normalize(cross(meridian, equator)); 
+	const intersection = normalize(cross(meridian, equator));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, N);
 }
 
 function computeMeridianCuspPositions(date: Date, surfacePosition: SurfacePosition){
 	const {eqN, meridian, equator} = computeAllSignificantPoints(date, surfacePosition);
-	const intersection = normalize(cross(meridian, equator)); 
+	const intersection = normalize(cross(meridian, equator));
 	return computeSpaceBasedSystemCuspPositions(date, surfacePosition, equator, intersection, eqN);
 }
 
@@ -218,7 +237,7 @@ function eclipticLongitudeToRAAndDeclination(longitude: number, axialTilt: numbe
 
 // returns radians as a unit of time (2pi = 24hr)
 function timeToHorizon(pointRA: number, pointDeclination: number, RAMC: number, observerLatitude: number): number | null{
-	
+
 	const cosAD = -Math.tan(observerLatitude * Math.PI / 180)*Math.tan(pointDeclination);
 	if ( Math.abs(cosAD) > 1 ) {
 		return null;
@@ -236,7 +255,7 @@ function timeToHorizon(pointRA: number, pointDeclination: number, RAMC: number, 
 
 // returns radians as a unit of time (2pi = 24hr)
 function timeSinceHorizon(pointRA: number, pointDeclination: number, RAMC: number, observerLatitude: number): number | null{
-	
+
 	const cosAD = -Math.tan(observerLatitude * Math.PI / 180)*Math.tan(pointDeclination);
 	if ( Math.abs(cosAD) > 1 ) {
 		return null;
@@ -266,7 +285,7 @@ export const MainAxisArc = {
 } as const;
 export type MainAxisArc = typeof MainAxisArc[keyof typeof MainAxisArc];
 
-function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number, angles: AxisAngles, mode: MainAxisArc, c: number): number | null { 
+function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number, angles: AxisAngles, mode: MainAxisArc, c: number): number | null {
 	const { asc, mc, dsc, ic } = angles;
 	const { RA: RAMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
 	const start = ([MainAxisArc.ASC_TO_IC, MainAxisArc.ASC_TO_MC] as MainAxisArc[]).includes(mode) ? asc : dsc;
@@ -277,7 +296,7 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 		const { RA, declination } = eclipticLongitudeToRAAndDeclination(eclLon, axialTilt);
 		var tsh, tth, ttm, tsm;
 		switch (mode){
-			case MainAxisArc.ASC_TO_MC:	
+			case MainAxisArc.ASC_TO_MC:
 				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
 				if ( tsh === null ) { return null; }
 				ttm = timeToMeridian(RA, RAMC);
@@ -287,12 +306,12 @@ function placidusCuspSearch(obsLatitude: number, axialTilt: number, eps: number,
 				if ( tth === null ) { return null; }
 				tsm = Math.PI-timeToMeridian(RA, RAMC);
 				return (1-c)*tth - c*tsm;
-			case MainAxisArc.ASC_TO_IC:	
+			case MainAxisArc.ASC_TO_IC:
 				tth = timeToHorizon(RA, declination, RAMC, obsLatitude);
 				if ( tth === null ) { return null; }
 				tsm = Math.PI-timeToMeridian(RA, RAMC);
 				return (1-c)*tth - c*tsm;
-			case MainAxisArc.DSC_TO_IC:	
+			case MainAxisArc.DSC_TO_IC:
 				tsh = timeSinceHorizon(RA, declination, RAMC, obsLatitude);
 				if ( tsh === null ) { return null; }
 				ttm = timeToMeridian(RA, RAMC);
@@ -332,13 +351,14 @@ function computeAxialTilt(date: Date): number {
 	return obliquity;
 }
 
-function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles): number[] | null {
+function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePosition): number[] | null {
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	// 12th cusp is the point along the ecliptic which is 1/3rd of the way, time-wise, from the ascendant to the mc
-	
+
 	// note: some people claim asc is midpoint, timewise, btw asc-dsc. This would simplify calculations but it is false
 	const axialTilt = computeAxialTilt(date);
 	const eps = 0.01;
-	
+
 	const houseCusps = [
 		angles.asc,
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_IC, 1/3),
@@ -353,7 +373,7 @@ function computePlacidusCuspPositions(date: Date, surfacePosition: SurfacePositi
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 2/3),
 		placidusCuspSearch(surfacePosition.latitude, axialTilt, eps, angles, MainAxisArc.ASC_TO_MC, 1/3)
 	];
-	
+
 	const containsNull = houseCusps.some(cusp => cusp === null);
 	return containsNull ? null : houseCusps as number[];
 }
@@ -365,28 +385,29 @@ function computeAscendantAndDescendant(date: Date, surfacePos: SurfacePosition):
 	const lstHours = gstHours + longitudeDeg / 15.0;
 	const lstHoursNorm = ((lstHours % 24) + 24) % 24;
 	const theta = lstHoursNorm * Math.PI / 12
-	
+
 	const epsRad = computeAxialTilt(date);
-		
+
 	const phi = latitudeDeg * Math.PI/180;
-	
+
 	const x = Math.cos(theta);
 	const y = - (Math.sin(theta) * Math.cos(epsRad) + Math.tan(phi) * Math.sin(epsRad));
 	const lambda = Math.atan2(x,y);
-	
+
 	return new Map<Node, number>([
 		[Node.ASCENDANT, normalizeAngleRad(lambda)],
 		[Node.DESCENDANT, normalizeAngleRad(lambda + Math.PI)]
 	]);
 }
 
-function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, angles: AxisAngles){
+function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition){
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	//consider the time it took the current mc to arrive there from the horizon. 12th house is the 1/3rd point (time-wise)
-	
+
 	// setup
-	const axialTilt = computeAxialTilt(date);	
+	const axialTilt = computeAxialTilt(date);
 	const { asc, mc, dsc, ic } = angles;
-	
+
 	// how long did the current mc take to arrive from the horizon?
 	const { RA: RAMC, declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
 	const tshRadMC = timeSinceHorizon(RAMC, declinationMC, RAMC, surfacePosition.latitude);
@@ -397,7 +418,7 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	const tshRadIC = timeSinceHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
 	// how long will the current ic take to get to the horizon again?
 	const tthRadIC = timeToHorizon(RAIC, declinationIC, RAMC, surfacePosition.latitude);
-	
+
 	if (
 		tshRadMC === null ||
 		tthRadMC === null ||
@@ -406,39 +427,39 @@ function computeKochCuspPositions(date: Date, surfacePosition: SurfacePosition, 
 	){
 		return null;
 	}
-	
+
 	// first quadrant
 	const tshHoursMC = tshRadMC * 12 / Math.PI;
-	
+
 	const date11th = new Date(date.getTime() - tshHoursMC*(2/3)*3600*1000)
 	const date12th = new Date(date.getTime() - tshHoursMC*(1/3)*3600*1000)
 	const cusp11 = computeAscendantAndDescendant(date11th, surfacePosition).get(Node.ASCENDANT)!;
 	const cusp12 = computeAscendantAndDescendant(date12th, surfacePosition).get(Node.ASCENDANT)!;
-	
+
 	// second quadrant
 	const tthHoursMC = tthRadMC* 12 / Math.PI;
-	
+
 	const date8th = new Date(date.getTime() + tthHoursMC*(1/3)*3600*1000)
 	const date9th = new Date(date.getTime() + tthHoursMC*(2/3)*3600*1000)
 	const cusp8 = computeAscendantAndDescendant(date8th, surfacePosition).get(Node.DESCENDANT)!;
 	const cusp9 = computeAscendantAndDescendant(date9th, surfacePosition).get(Node.DESCENDANT)!;
-	
+
 	// third quadrant
 	const tshHoursIC = tshRadIC* 12 / Math.PI;
-	
+
 	const date5th = new Date(date.getTime() - tshHoursIC*(2/3)*3600*1000)
 	const date6th = new Date(date.getTime() - tshHoursIC*(1/3)*3600*1000)
 	const cusp5 = computeAscendantAndDescendant(date5th, surfacePosition).get(Node.DESCENDANT)!;
 	const cusp6 = computeAscendantAndDescendant(date6th, surfacePosition).get(Node.DESCENDANT)!;
-	
+
 	// fourth quadrant
 	const tthHoursIC = tthRadIC * 12 / Math.PI;
-	
+
 	const date2nd = new Date(date.getTime() + tthHoursIC*(1/3)*3600*1000)
 	const date3rd = new Date(date.getTime() + tthHoursIC*(2/3)*3600*1000)
 	const cusp2 = computeAscendantAndDescendant(date2nd, surfacePosition).get(Node.ASCENDANT)!;
 	const cusp3 = computeAscendantAndDescendant(date3rd, surfacePosition).get(Node.ASCENDANT)!;
-				
+
 	return [asc, cusp2, cusp3, ic, cusp5, cusp6, dsc, cusp8, cusp9, mc, cusp11, cusp12];
 }
 
@@ -457,23 +478,24 @@ function computePolichPageCusp(c: number, p1: number, p2: number, tp1: number, t
 // ugh... another serious release blocker
 // tried three other ways, none worked. see scripts/discarded.ts
 // we'll just remove this from the options for now.
-function computeTopocentricCuspPositions(date: Date, angles: AxisAngles){
+function computeTopocentricCuspPositions(date: Date, surfacePosition: SurfacePosition){
+	const angles = computeAxisAnglesFromSurface(date, surfacePosition);
 	// polich - page. Consider the "polar elevation" of the asc-mc, i.e. its geographic latitude
 	// consider tangents, trisect interval, invert over the ecliptic.
-	
-	const axialTilt = computeAxialTilt(date);	
+
+	const axialTilt = computeAxialTilt(date);
 	const { asc, mc, dsc, ic } = angles;
-	
+
 	const { declination: declinationMC } = eclipticLongitudeToRAAndDeclination(mc, axialTilt);
 	const { declination: declinationASC } = eclipticLongitudeToRAAndDeclination(asc, axialTilt);
 	const { declination: declinationIC } = eclipticLongitudeToRAAndDeclination(ic, axialTilt);
 	const { declination: declinationDSC } = eclipticLongitudeToRAAndDeclination(dsc, axialTilt);
-	
+
 	const tAsc = Math.tan(declinationASC);
 	const tMc = Math.tan(declinationMC);
 	const tDsc = Math.tan(declinationDSC);
 	const tIc = Math.tan(declinationIC);
-	
+
 	return [
 		asc,
 		computePolichPageCusp(2/3, asc, ic, tAsc, tIc, axialTilt),
@@ -491,30 +513,23 @@ function computeTopocentricCuspPositions(date: Date, angles: AxisAngles){
 }
 void computeTopocentricCuspPositions;
 
-export function computeHouseCuspPositions(
+function computeHouseCuspPositions(
 	date: Date,
 	surfacePosition: SurfacePosition,
 	houseSystem: HouseSystem,
-	knownNodes: Map<Node, number>,
-	zodiacSymbolPositions: Map<Zodiac, number>
+	signPositions: Map<Zodiac, number>
 ): number[] | null {
-	const angles = {
-		asc: knownNodes.get(Node.ASCENDANT)!,
-		dsc: knownNodes.get(Node.DESCENDANT)!,
-		mc: knownNodes.get(Node.MIDHEAVEN)!,
-		ic: knownNodes.get(Node.IMUM_COELI)!
-	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
-			return computeWholeSignCuspPositions(angles, zodiacSymbolPositions);
+			return computeWholeSignCuspPositions(date, surfacePosition, signPositions);
 		case HouseSystem.EQUAL_HOUSES:
-			return computeEqualHousesCuspPositions(angles);
+			return computeEqualHousesCuspPositions(date, surfacePosition);
 		case HouseSystem.PORPHYRY:
-			return computePorphyryCuspPositions(angles);
+			return computePorphyryCuspPositions(date, surfacePosition);
 		case HouseSystem.EQUAL_HOUSES_VEHLOW:
-			return computeEqualHousesVehlowCuspPositions(angles);
+			return computeEqualHousesVehlowCuspPositions(date, surfacePosition);
 		case HouseSystem.WHOLE_SIGN_ARIES:
-			return computeWholeSignAriesCuspPositions(zodiacSymbolPositions);
+			return computeWholeSignAriesCuspPositions(signPositions);
 		case HouseSystem.KRUSINSKY:
 			return computeKrusinskyCuspPositions(date, surfacePosition);
 		case HouseSystem.REGIOMONTANUS:
@@ -528,10 +543,141 @@ export function computeHouseCuspPositions(
 		case HouseSystem.ZENITH_HORIZONTAL:
 			return computeZenithHorizontalCuspPositions(date, surfacePosition);
 		case HouseSystem.PLACIDUS:
-			return computePlacidusCuspPositions(date, surfacePosition, angles);
+			return computePlacidusCuspPositions(date, surfacePosition);
 		case HouseSystem.KOCH:
-			return computeKochCuspPositions(date, surfacePosition, angles);
+			return computeKochCuspPositions(date, surfacePosition);
 		default:
 			throw new Error("something wrong with house computation dispatch:", houseSystem);
 	}
 }
+
+
+// ============================================================================
+// HouseCuspPositions class
+// ============================================================================
+
+interface HouseCuspPositionsConstructorArgs {
+	date: Date;
+	surfacePosition: SurfacePosition;
+	houseSystem: HouseSystem;
+	housePresweep: boolean;
+	zodiacSignPositions: ZodiacSignPositions;
+	cuspPositions?: number[] | null;
+}
+
+class HouseCuspPositions {
+	private readonly _date: Date;
+	private readonly _surfacePosition: SurfacePosition;
+	private readonly _houseSystem: HouseSystem;
+	private readonly _housePresweep: boolean;
+	private readonly _zodiacSignPositions: ZodiacSignPositions;
+	private readonly _cuspPositions: number[] | null;
+
+	constructor(config: HouseCuspPositionsConstructorArgs) {
+		this._date = config.date;
+		this._surfacePosition = config.surfacePosition;
+		this._houseSystem = config.houseSystem;
+		this._housePresweep = config.housePresweep;
+		this._zodiacSignPositions = config.zodiacSignPositions;
+
+		if (config.cuspPositions !== undefined) {
+			this._cuspPositions = config.cuspPositions;
+		} else {
+			this._cuspPositions = computeHouseCuspPositions(
+				this._date, this._surfacePosition, this._houseSystem,
+				this._zodiacSignPositions.getSignPositions()
+			);
+		}
+	}
+
+	static create(
+		date: Date,
+		surfacePosition: SurfacePosition,
+		houseSystem: HouseSystem,
+		zodiacSignPositions: ZodiacSignPositions,
+		housePresweep: boolean
+	): HouseCuspPositions | null {
+		const instance = new HouseCuspPositions({
+			date, surfacePosition, houseSystem, housePresweep, zodiacSignPositions
+		});
+		if (instance._cuspPositions === null) { return null; }
+		return instance;
+	}
+
+	private copyWith(updates: Partial<HouseCuspPositionsConstructorArgs>): HouseCuspPositions {
+		return new HouseCuspPositions({
+			date: this._date,
+			surfacePosition: this._surfacePosition,
+			houseSystem: this._houseSystem,
+			housePresweep: this._housePresweep,
+			zodiacSignPositions: this._zodiacSignPositions,
+			cuspPositions: this._cuspPositions,
+			...updates
+		});
+	}
+
+	public changeHousePresweep(newHousePresweep: boolean): HouseCuspPositions {
+		return this.copyWith({ housePresweep: newHousePresweep });
+	}
+
+	public changeZodiacSignPositions(newZSP: ZodiacSignPositions): HouseCuspPositions {
+		if (!ayanamsaDependantHouseSystems.includes(this._houseSystem)) {
+			return this;
+		}
+		// Recompute cusps with new sign positions.
+		// Ayanamsa-dependant systems (whole sign) never return null, so non-null assertion is safe.
+		const newCusps = computeHouseCuspPositions(
+			this._date, this._surfacePosition, this._houseSystem, newZSP.getSignPositions()
+		)!;
+		return this.copyWith({ zodiacSignPositions: newZSP, cuspPositions: newCusps });
+	}
+
+	public getCuspPositions(): number[] | null {
+		return this._cuspPositions;
+	}
+
+	public getCuspPosition(i: number): number | null {
+		return this._cuspPositions?.[i] ?? null;
+	}
+
+	public getHouseAtLongitude(lon: number): number {
+		if (this._cuspPositions === null) {
+			throw new Error("getHouseAtLongitude called but house cusps are undefined");
+		}
+		const houseLimits = this._cuspPositions.map(cusp => {
+			if (this._housePresweep) {
+				const limit = cusp - 5*Math.PI/180;
+				return limit > 0 ? limit : limit + 2*Math.PI;
+			} else {
+				return cusp;
+			}
+		});
+		for (let i = 0; i < houseLimits.length-1; i++){
+			const houseStart = houseLimits[i];
+			const houseEnd = houseLimits[i+1];
+			if ( anglesLieInShortArc(houseStart, lon, houseEnd) ) {
+				return i+1;
+			}
+		}
+		return houseLimits.length;
+	}
+
+	public areHouseCuspsWithinHouse(): boolean {
+		if (!this._housePresweep || this._cuspPositions === null) {
+			return true;
+		}
+		const cusps = this._cuspPositions;
+		for (let i = 0; i < cusps.length; i++) {
+			const next = cusps[(i + 1) % cusps.length];
+			const current = cusps[i];
+			let width = next - current;
+			if (width < 0) { width += 2 * Math.PI; }
+			if (width < 5 * Math.PI / 180) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+export default HouseCuspPositions;

@@ -159,7 +159,7 @@ function App() {
 	useEffect(() => {
 		setZodiacPositions(zodiacPositions.changeHousePresweep(housePresweep));
 	}, [housePresweep])
-
+	
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
 			return Intl.DateTimeFormat().resolvedOptions().timeZone;
