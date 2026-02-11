@@ -103,7 +103,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	
-	const nodesUnderConsideration = useMemo(() => {
+	const nodesInConsideration = useMemo(() => {
 		if (whichNodes === NodesToConsider.STANDARD) {
 			return standardNodes;
 		} else if (whichNodes === NodesToConsider.ALL) {
@@ -116,15 +116,13 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		}
 	}, [whichNodes, selectedNodes, hamburgPhysical])
 	
-	console.log(whichNodes, nodesUnderConsideration);
-	
 	const {nodesAboveEast, nodesAboveWest, nodesBelowEast, nodesBelowWest, verticalDiff, horizontalDiff} = useMemo(() => {
 		const nodesAboveEast: Node[] = [];
 		const nodesAboveWest: Node[] = [];
 		const nodesBelowEast: Node[] = [];
 		const nodesBelowWest: Node[] = [];
 	
-		for (const node of nodesUnderConsideration){
+		for (const node of nodesInConsideration){
 			if (zodiacPositions.isNodeAboveHorizon(node)) {
 				if (zodiacPositions.isNodeEastern(node)) {
 					nodesAboveEast.push(node);
@@ -144,7 +142,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		const horizontalDiff: number = (nodesAboveEast.length + nodesBelowEast.length) - (nodesAboveWest.length + nodesBelowWest.length);
 
 		return {nodesAboveEast, nodesAboveWest, nodesBelowEast, nodesBelowWest, verticalDiff, horizontalDiff};
-	}, [zodiacPositions, nodesUnderConsideration]);
+	}, [zodiacPositions, nodesInConsideration]);
 	
 	const symbolSize = 20;
 	const nodeSpacing = 27;
@@ -353,7 +351,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	return (
 		<div className="text-theme-text p-4 pt-3" style={{ width: 330 }}>
 		
-			{renderString(createEmphasisString(verticalDiff, horizontalDiff, nodesUnderConsideration.length))}
+			{renderString(createEmphasisString(verticalDiff, horizontalDiff, nodesInConsideration.length))}
 			
 			<hr className="opacity-50 my-2"/>
 			

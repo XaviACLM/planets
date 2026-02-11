@@ -1,8 +1,23 @@
 import { useMemo, FC, ReactNode } from 'react';
-import { Node, Zodiac, Element, Mode, personalPlanets, socialPlanets, transpersonalPlanets, zodiacElement, zodiacMode, nodeDependsOnLocation } from './astroDefs';
+import {
+	Node,
+	Zodiac,
+	Element,
+	Mode,
+	personalPlanets,
+	socialPlanets,
+	transpersonalPlanets,
+	zodiacElement,
+	zodiacMode,
+	nodeDependsOnLocation,
+	standardNodes,
+	nodeTypes,
+	NodeType
+} from './astroDefs';
 import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
 import ZodiacPositions from './zodiacPositions.ts'
 import { useSettingsStore } from './settingsStore.ts'
+import { NodesToConsider } from './settingsDefs.ts'
 import { renderString, renderSmallcapsString, renderTitle, renderElement, renderMode, renderNode } from './renderPrimitives.tsx'
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
@@ -19,48 +34,21 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 	const textSize = 12;
 	const textSizeTitle = 14;
 	const strokeWidth = 1;
-
-	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
-		return showElementLabels ? (
-			<text
-				fill="var(--color-text)"
-				fontSize={textSize}
-				textAnchor={leftJustify ? "start" : "end"}
-				fontVariant="small-caps"
-				fontWeight="bold"
-			>
-				{elem}
-			</text>
-		) : (
-			<image
-				href={elementSymbols[elem]}
-				width={symbolSize}
-				height={symbolSize}
-				style={{filter:"var(--icon-filter)"}}
-			/>
-		);
-	};
-
-	const renderModeSVG = (mode: Mode, leftJustify: boolean): ReactNode => {
-		return showModeLabels ? (
-			<text
-				fill="var(--color-text)"
-				fontSize={textSize}
-				textAnchor={leftJustify ? "start" : "end"}
-				fontVariant="small-caps"
-				fontWeight="bold"
-			>
-				{mode}
-			</text>
-		) : (
-			<image
-				href={modeSymbols[mode]}
-				width={symbolSize}
-				height={symbolSize}
-				style={{filter:"var(--icon-filter)"}}
-			/>
-		);
-	};
+	
+	const whichNodes = useSettingsStore(s => s.nodesInDominanceChart);
+	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
+	const selectedNodes = useSettingsStore(s => s.selectedNodes);
+	
+	const nodesInConsideration = useMemo(() => {
+		if (whichNodes === NodesToConsider.STANDARD) {
+			return standardNodes;
+		} else if (whichNodes === NodesToConsider.ALL) {
+			return Array.from(selectedNodes);
+		} else {
+			return Array.from(selectedNodes)
+				.filter(node => nodeTypes[node] === NodeType.BODY || (hamburgPhysical && nodeTypes[node] === NodeType.HYPOTHETICAL));
+		}
+	}, [whichNodes, selectedNodes, hamburgPhysical])
 
 	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes} = useMemo(() => {
 		const nodeElements: Map<Node, Element> = new Map();
@@ -73,7 +61,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		const allPlanets: Node[] = [];
 		const discardedNodes: Node[] = [];
 
-		const nodesInConsideration: Node[] = [
+		const nodesInConsiderationz: Node[] = [
 			...personalPlanets,
 			...socialPlanets,
 			...transpersonalPlanets,
@@ -122,7 +110,49 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		}
 
 		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes};
-	},[zodiacPositions]);
+	}, [zodiacPositions, nodesInConsideration]);
+
+	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
+		return showElementLabels ? (
+			<text
+				fill="var(--color-text)"
+				fontSize={textSize}
+				textAnchor={leftJustify ? "start" : "end"}
+				fontVariant="small-caps"
+				fontWeight="bold"
+			>
+				{elem}
+			</text>
+		) : (
+			<image
+				href={elementSymbols[elem]}
+				width={symbolSize}
+				height={symbolSize}
+				style={{filter:"var(--icon-filter)"}}
+			/>
+		);
+	};
+
+	const renderModeSVG = (mode: Mode, leftJustify: boolean): ReactNode => {
+		return showModeLabels ? (
+			<text
+				fill="var(--color-text)"
+				fontSize={textSize}
+				textAnchor={leftJustify ? "start" : "end"}
+				fontVariant="small-caps"
+				fontWeight="bold"
+			>
+				{mode}
+			</text>
+		) : (
+			<image
+				href={modeSymbols[mode]}
+				width={symbolSize}
+				height={symbolSize}
+				style={{filter:"var(--icon-filter)"}}
+			/>
+		);
+	};
 
 	const createCounter = <T extends string>(
 		enumObj: { readonly [key: string]: T },
