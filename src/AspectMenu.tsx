@@ -5,6 +5,7 @@ import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astro
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
 import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
+import { formatAngle } from './util';
 
 function createAspectElement(
 	key: number,
@@ -66,8 +67,7 @@ function createAspectElement(
 		{/* error, quantile */}
 		<div className="grow text-right text-[0.7em] mr-4">
 			{ /*{aspect.error.toFixed(2)}Δ - {aspect.percentile.toFixed(2)}%*/}
-			// TODO use the angle repr funs
-			Δ{(aspect.error!*180/Math.PI).toFixed(2)}º
+			Δ{formatAngle(aspect.error!)}
 		</div>
 
 		{/* delete button */}

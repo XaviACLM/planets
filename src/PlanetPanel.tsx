@@ -234,13 +234,13 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		return (<span className="block pl-3 -indent-3 text-wrap">
 			{renderString(lastIdx === 0 ? "Fixed star conjunction: " : "Fixed star conjunctions: ")}
 			{Array.from(nearbyFixedStars.entries()).map(([starName, orb], index) => {
-				return (<>
-					<span key={index} className="text-nowrap pl-1">
+				return (<span key={index}>
+					<span className="text-nowrap pl-1">
 						{renderSmallcapsString(starName)}
 						{renderString(` (Δ${formatAngle(orb)})`)}
 					</span>
 					{renderString(index === lastIdx ? "." : ", ")}
-				</>);
+				</span>);
 			})}
 		</span>);
 	};

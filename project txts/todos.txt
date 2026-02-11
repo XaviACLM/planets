@@ -8,7 +8,6 @@ REQUIRES THINKING
 -
 
 ETC
-- fixed stars!!!
 - speed for non-physical (non-hamburg) nodes
 - arabic parts
 
@@ -29,6 +28,7 @@ I'LL GET TO IT
 - at extreme latitudes on some house systems houses may be less than 5 degrees which would make presweep look really weird. would behave normally but house cusps technically outside houses. A warning like the one we already have, I guess suggesting turning off presweep or going to whole signs or whatever.
 - annoying how low-opacity aspects that line up can overlap to look higher-opacity
 - segregate zodiacPositions
+- fixed stars but more seriously (different star groups, parans, helical rising/setting, etc. Also touches upon "inverse astrology", which will be in the roadmap)
 
 I DONT FEEL LIKE IT
 - https://www.astro.com/faq/fq_fh_owstyle_e.htm
