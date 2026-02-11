@@ -13,6 +13,7 @@ import {
 	FaceMode,
 	BoundsMode,
 	Theme,
+	NodesToConsider,
 } from './settingsDefs.ts';
 import {
 	SettingsRenderer,
@@ -71,7 +72,6 @@ const mainSettingsSpec: SettingsItem[] = [
 	// Aspect filtering
 	text('Required # of physical nodes per aspect:'),
 	slider('aspectPhysicalityFilter', '', Object.values(AspectPhysicalityFilter)),
-	checkbox('hamburgPhysical', 'Hamburg objects considered physical'),
 	dropdown('aspectMenuMode', 'Display aspects', Object.values(AspectMenuMode)),
 
 	separator(),
@@ -83,6 +83,7 @@ const mainSettingsSpec: SettingsItem[] = [
 
 	// Hamburg school
 	toggleButtons('hamburgSchoolMode', 'Hamburg school params:', Object.values(HamburgSchoolMode)),
+	checkbox('hamburgPhysical', 'Hamburg objects considered physical'),
 
 	separator(),
 
@@ -97,6 +98,11 @@ const mainSettingsSpec: SettingsItem[] = [
 	dropdown('triplicityMode', 'Triplicity', Object.values(TriplicityMode)),
 	dropdown('boundsMode', 'Bounds', Object.values(BoundsMode)),
 	dropdown('faceMode', 'Faces', Object.values(FaceMode)),
+
+	separator(),
+	
+	dropdown('nodesInDominanceChart', 'Nodes in Element/Mode Analysis', Object.values(NodesToConsider)),
+	dropdown('nodesInHemispheresChart', 'Nodes in Orientation Analysis', Object.values(NodesToConsider)),
 
 	separator(),
 	
@@ -118,6 +124,7 @@ export const MainSettingsMenu: FC = () => {
 
 // Element/Mode Balance (Dominance Chart) settings
 const dominanceSettingsSpec: SettingsItem[] = [
+	dropdown('nodesInDominanceChart', 'Nodes in Element/Mode Analysis', Object.values(NodesToConsider)),
 	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
 	separator(),
 	checkbox('showNodeLabels', 'Show node labels'),
@@ -131,6 +138,8 @@ export const DominanceSettingsMenu: FC = () => {
 
 // Orientation (Hemispheres) settings
 const hemisphereSettingsSpec: SettingsItem[] = [
+	dropdown('nodesInHemispheresChart', 'Nodes in Orientation Analysis', Object.values(NodesToConsider)),
+	separator(),
 	checkbox('showNodeLabels', 'Show node labels'),
 ];
 
@@ -214,7 +223,6 @@ const aspectMenuSettingsSpec: SettingsItem[] = [
 	// Aspect filtering
 	text('Required # of physical nodes per aspect:'),
 	slider('aspectPhysicalityFilter', '', Object.values(AspectPhysicalityFilter)),
-	checkbox('hamburgPhysical', 'Hamburg objects considered physical'),
 	dropdown('aspectMenuMode', 'Display aspects', Object.values(AspectMenuMode)),
 
 	separator(),

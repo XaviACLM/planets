@@ -14,6 +14,7 @@ import {
 	BoundsMode,
 	FaceMode,
 	Theme,
+	NodesToConsider,
 } from './settingsDefs.ts';
 
 interface SettingsState {
@@ -69,6 +70,11 @@ interface SettingsState {
 	
 	stationarySpeedPercentageThreshold: number;
 	setStationarySpeedPercentageThreshold: (v: number) => void;
+	
+	nodesInDominanceChart: NodesToConsider;
+	setNodesInDominanceChart: (v: NodesToConsider) => void;
+	nodesInHemispheresChart: NodesToConsider;
+	setNodesInHemispheresChart: (v: NodesToConsider) => void;
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode;
@@ -151,6 +157,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	
 	stationarySpeedPercentageThreshold: 30,
 	setStationarySpeedPercentageThreshold: (v) => set({ stationarySpeedPercentageThreshold: v }),
+	
+	nodesInDominanceChart: NodesToConsider.STANDARD,
+	setNodesInDominanceChart: (v) => set({ nodesInDominanceChart: v }),
+	nodesInHemispheresChart: NodesToConsider.STANDARD,
+	setNodesInHemispheresChart: (v) => set({ nodesInHemispheresChart: v }),
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode.MEAN,

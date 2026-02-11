@@ -72,3 +72,10 @@ export const Theme = {
 	PARCHMENT: "Parchment",
 } as const;
 export type Theme = typeof Theme[keyof typeof Theme];
+
+export const NodesToConsider = {
+	STANDARD: "Standard (P&L)",
+	PHYSICAL: "Physical",
+	ALL : "All nodes",
+} as const;
+export type NodesToConsider = typeof NodesToConsider[keyof typeof NodesToConsider];

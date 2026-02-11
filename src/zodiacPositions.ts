@@ -565,9 +565,9 @@ class ZodiacPositions {
 		const mc = this.getNodePosition(Node.MIDHEAVEN);
 		const ic = this.getNodePosition(Node.IMUM_COELI);
 		if (mc<ic){
-			return !((mc < lon)&&(lon < ic));
+			return ((mc < lon)&&(lon < ic));
 		} else {
-			return ((ic < lon)&&(lon < mc));
+			return !((ic < lon)&&(lon < mc));
 		}
 	}
 	

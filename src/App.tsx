@@ -342,6 +342,7 @@ function App() {
 							title="Element/Mode Balance"
 							initialDisplayIndex={1}
 							titlePosition={'left'}
+							settingsMenu={DominanceSettingsMenu}
 							helpContent={<DominanceChartHelp />}
 						>
 							<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
@@ -352,6 +353,7 @@ function App() {
 							<Module
 								title="Orientation"
 								titlePosition={'left'}
+								settingsMenu={HemisphereSettingsMenu}
 								helpContent={<OrientationHelp />}
 							>
 								<HemispheresChart
