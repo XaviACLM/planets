@@ -5,7 +5,6 @@ import { Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
 import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect, getFixedStarsWithinLongitude, getSignOfNode, getNodePositionWithinSign, getHouseOfNode, type AngleProximityInfo } from './chartAnalysis';
-import { getEclipticLongitudeSpeed } from './astronomyUtil';
 import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
 import {
