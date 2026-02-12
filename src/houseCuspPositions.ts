@@ -502,6 +502,8 @@ function computeHouseCuspPositions(
 	signPositions: Map<Zodiac, number>
 ): number[] | null {
 	switch (houseSystem) {
+		case HouseSystem.NO_HOUSES:
+			return null;
 		case HouseSystem.WHOLE_SIGN:
 			return computeWholeSignCuspPositions(date, surfacePosition, signPositions);
 		case HouseSystem.EQUAL_HOUSES:

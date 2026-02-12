@@ -81,6 +81,8 @@ export const NodesToConsider = {
 export type NodesToConsider = typeof NodesToConsider[keyof typeof NodesToConsider];
 
 export const HouseSystem = {
+	NO_HOUSES: "No Houses",
+	
 	WHOLE_SIGN: "Whole Sign",
 	EQUAL_HOUSES: "Equal Houses",
 	PORPHYRY: "Porphyry",

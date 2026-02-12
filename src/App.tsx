@@ -159,7 +159,7 @@ function App() {
 			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, newZSP, housePresweep)
 			: null;
 		setHouseCuspPositions(newHCP);
-		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null && houseSystem !== HouseSystem.NO_HOUSES);
 	}, [selectedCity, selectedDate])
 
 	// Partial recompute effects
@@ -176,7 +176,7 @@ function App() {
 		setZodiacSignPositions(newZSP);
 		const newHCP = houseCuspPositions?.changeZodiacSignPositions(newZSP) ?? null;
 		setHouseCuspPositions(newHCP);
-		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null && houseSystem !== HouseSystem.NO_HOUSES);
 	}, [zodiacMode])
 
 	useEffect(() => {
@@ -184,13 +184,13 @@ function App() {
 			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, zodiacSignPositions, housePresweep)
 			: null;
 		setHouseCuspPositions(newHCP);
-		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null && houseSystem !== HouseSystem.NO_HOUSES);
 	}, [houseSystem])
 
 	useEffect(() => {
 		const newHCP = houseCuspPositions?.changeHousePresweep(housePresweep) ?? null;
 		setHouseCuspPositions(newHCP);
-		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null && houseSystem !== HouseSystem.NO_HOUSES);
 	}, [housePresweep])
 	
 	const currentTimezone = useMemo(() => {

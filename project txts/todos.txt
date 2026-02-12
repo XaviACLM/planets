@@ -1,3 +1,10 @@
+FROM THE REFACTOR
+- NodeVelocities (derived from NodePositions after refactor is done)
+- UI tooltip for areHouseCuspsWithinHouse
+
+
+
+
 TRIVIAL
 -
 
@@ -8,8 +15,8 @@ REQUIRES THINKING
 -
 
 ETC
-- speed for non-physical (non-hamburg) nodes
-- arabic parts
+- speed for non-physical (non-hamburg) nodes (this is the bit from above)
+- arabic parts (for now, just pick a source)
 
 OH NO 
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
@@ -22,12 +29,10 @@ ALREADY DONE BUT KEEP IN MIND
 -
 
 I'LL GET TO IT
-- go through the code and remove all instances of a function returning null when it should throw
+- Variable presweep amounts (different from exactly 5 degrees)
 - dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
 - order files
-- at extreme latitudes on some house systems houses may be less than 5 degrees which would make presweep look really weird. would behave normally but house cusps technically outside houses. A warning like the one we already have, I guess suggesting turning off presweep or going to whole signs or whatever.
 - annoying how low-opacity aspects that line up can overlap to look higher-opacity
-- segregate zodiacPositions
 - fixed stars but more seriously (different star groups, parans, helical rising/setting, etc. Also touches upon "inverse astrology", which will be in the roadmap)
 
 I DONT FEEL LIKE IT
