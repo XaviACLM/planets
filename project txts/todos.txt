@@ -1,15 +1,57 @@
+some more arabic lots
+
+Fortune: asc + moon - sun
+Spirit: asc + sun - moon
+Eros: asc + spirit - fortune
+Necessity: asc + fortune - mercury
+Courage: asc + fortune - mars
+Victory: asc + jupiter - spirit
+Nemesis: asc + fortune - saturn
+Marriage - men: asc + venus - saturn
+Marriage - women: asc + saturn - venus
+Children: asc + saturn - jupiter
+Wealth: asc + 2nd - ruler 2nd.
+Death: saturn + 8th - moon
+Father: asc + saturn - sun
+Mother: asc + moon - venus
+
+To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
+
+DS, PA = Dorotheus of Sidon, Paulus of Alexandria
+
+Formulas are straightforward, except that the signs on the last two terms flip on nocturnal charts. Easy enough.
+
+That 2nd / 8th / etc stuff: refers to house cusps, obvi ruler 2nd being the ruler of the 2nd cusp. A bit annoying, definitely, but we'll manage - nodePositions now depends on houseCuspPositions (no circular dependencies, so all is good). We'll want a method NodePositions.changeHouseCuspPositions. It's probably fine to NOT keep an internal NodePositions._houseCuspPositions - the semantic dependence really isn't very strong, once NodePositions knows where the lots are then we're all good.
+
+It does introduce a problem though which is that we can't cleanly define Lots as a triplet of Nodes, since house cusps aren't nodes, much less house cusp rulers. We could have a relatively complicated data model to work with this but... eh. We can just stick it all in a big function for now. Proper data model may become relevant later if we offer full arabic lot support. Oh yeah and remember they have self-dependencies, e.g. many depend on fortune or spirit
+
+okay, but what do we do now with the arabic lots? We don't have icons for them, man. We can't really get away with an ASC-type approach. ~maybe~ they can stay in text within the wheel w very short names, but what about the aspect menu? What's gonna happen there?
+
+anyway also todo commit this and update the info modal for the node selector.
+
+yeah, we need to rethink the look of the aspectMenu. It's not really... it's obtuse on purpose. It should be parseable.
+binary aspects are not much trouble, they probably fit side-by-side even with long names
+question is what we do about configurations, particularly grand sextiles, particularly when nodes-without-icons are involved, particularly when their names are long
+...like honestly, I'm not sure there _is_ a good solution?
+you know: configurations are already allowed to take up a ton of space via subaspects. Maybe we can make the configurations bigger in exchange for making the subaspects smaller.
+like. Grand sextile (vertical list or nodes, or just generally some nice little layout)
+and below. Subaspects: and a bunch of hoverable subaspectkind icons that highlight the corresponding subaspect in the main chart. Also tells you the orb somehow
+as for the "nice little layout". Possibly just a tiny version of the aspect itself with the nodes annotated. Like the grand sextile is a little grand sextile, drawn in the usual
+way, and on each side on each of the three nodes we write down who's who. Not even that bad of an idea: it would be definitely _not impossible_ to do this with a bunch of ad hoc svgs.
+yeah. I'm not 100% sold but it _is_ a way out. We'll think about it more, see if we come up with something better, or just stick to that.
+
 TRIVIAL
 -
 
 NOT TOO HARD, NOT TOO EASY
 - PlanetTable
+- fill in the nodeAverageSpeed (or whatever it's called) record
 
 REQUIRES THINKING
--
+- maybe HCP should actually provide some information about presweep? Currently externally it just tells people where the houses are. ZodiacWheel actually infers where the cusps are from config values, which is slightly weird. Actually that's not quite true is it? readily tells you where cusps are, doesn't expose where limits are, but does tell you what house a longitude is in wrt limits - which is all we need, actually. Mb that's fine? Actually what we said about ZodiacWheel is still true, just reversed, so idk idk.
 
 ETC
-- speed for non-physical (non-hamburg) nodes (this is the bit from above)
-- arabic parts (for now, just pick a source)
+-
 
 OH NO 
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.

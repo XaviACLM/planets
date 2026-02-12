@@ -125,7 +125,19 @@ export const Node = {
 	
 	// arabic parts
 	PART_OF_FORTUNE: "Part of Fortune",
-	// there's about 400 more. Will need to figure sth out - see below
+	PART_OF_SPIRIT: "Part of Spirit",
+	PART_OF_EROS: "Part of Eros",
+	PART_OF_NECESSITY: "Part of Necessity",
+	PART_OF_COURAGE: "Part of Courage",
+	PART_OF_VICTORY: "Part of Victory",
+	PART_OF_NEMESIS: "Part of Nemesis",
+	PART_OF_MARRIAGE_MEN: "Part of Marriage (Men)",
+	PART_OF_MARRIAGE_WOMEN: "Part of Marriage (Women)",
+	PART_OF_CHILDREN: "Part of Children",
+	PART_OF_WEALTH: "Part of Wealth",
+	PART_OF_DEATH: "Part of Death",
+	PART_OF_FATHER: "Part of the Father",
+	PART_OF_MOTHER: "Part of the Mother",
 	
 	//lunar
 	LUNAR_ASCENDING: "Lunar Ascending",
@@ -484,11 +496,33 @@ export const modernRulerships: Record<Zodiac, Node> = {
 	[Zodiac.OPHIUCHUS]: Node.PLUTO,
 } as Record<Zodiac, Node>;
 
+export const arabicParts: Node[] = [
+	Node.PART_OF_FORTUNE,
+	Node.PART_OF_SPIRIT,
+	Node.PART_OF_EROS,
+	Node.PART_OF_NECESSITY,
+	Node.PART_OF_COURAGE,
+	Node.PART_OF_VICTORY,
+	Node.PART_OF_NEMESIS,
+	Node.PART_OF_MARRIAGE_MEN,
+	Node.PART_OF_MARRIAGE_WOMEN,
+	Node.PART_OF_CHILDREN,
+	Node.PART_OF_WEALTH,
+	Node.PART_OF_DEATH,
+	Node.PART_OF_FATHER,
+	Node.PART_OF_MOTHER,
+];
+
+export const highDependencyArabicParts: Node = [
+	Node.PART_OF_WEALTH,
+	Node.PART_OF_DEATH,
+];
+
 export const lunarNodes: Node[] = [
 	Node.LUNAR_ASCENDING,
 	Node.LUNAR_DESCENDING, 
 	Node.LUNAR_APOGEE,
-	Node.LUNAR_PERIGEE
+	Node.LUNAR_PERIGEE,
 ];
 
 export const hamburgNodes: Node[] = [
@@ -519,9 +553,7 @@ export const nodeCategories = [
 	},
 	{
 		name: 'Arabic Parts',
-		items: [
-			Node.PART_OF_FORTUNE
-		]
+		items: arabicParts
 	},
 	{
 		name: 'Lunar Nodes',

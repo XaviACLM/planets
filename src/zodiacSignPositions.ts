@@ -41,41 +41,33 @@ function computeSignPositionsForIrregularMode(date: Date, zodiacMode: ZodiacMode
 interface ZodiacSignPositionsConstructorArgs {
 	date: Date;
 	zodiacMode: ZodiacMode;
-	siderealOffset?: number | null;
-	signPositions?: Map<Zodiac, number>;
+	siderealOffset: number | null;
+	signPositions: Map<Zodiac, number>;
 }
 
 class ZodiacSignPositions {
+	// dependencies
 	private readonly _date: Date;
 	private readonly _zodiacMode: ZodiacMode;
-	private readonly _signPositions: Map<Zodiac, number>;
+	
+	// logical state
 	public readonly siderealOffset: number | null;
+	private readonly _signPositions: Map<Zodiac, number>;
 
 	constructor(config: ZodiacSignPositionsConstructorArgs) {
 		this._date = config.date;
 		this._zodiacMode = config.zodiacMode;
-
-		if (config.siderealOffset === undefined) {
-			if (irregularZodiacModes.includes(this._zodiacMode)) {
-				this.siderealOffset = null;
-			} else {
-				this.siderealOffset = computeSiderealOffset(this._date, this._zodiacMode);
-			}
-		} else {
-			this.siderealOffset = config.siderealOffset;
-		}
-
-		if (config.signPositions !== undefined) {
-			this._signPositions = config.signPositions;
-		} else if (this.siderealOffset === null) {
-			this._signPositions = computeSignPositionsForIrregularMode(this._date, this._zodiacMode);
-		} else {
-			this._signPositions = computeSignPositionsFromSiderealOffset(this.siderealOffset);
-		}
+		this.siderealOffset = config.siderealOffset;
+		this._signPositions = config.signPositions;
 	}
 
 	static create(date: Date, zodiacMode: ZodiacMode): ZodiacSignPositions {
-		return new ZodiacSignPositions({ date, zodiacMode });
+		const isIrregular = irregularZodiacModes.includes(zodiacMode);
+		const siderealOffset = isIrregular ? null : computeSiderealOffset(date, zodiacMode);
+		const signPositions = isIrregular
+			? computeSignPositionsForIrregularMode(date, zodiacMode)
+			: computeSignPositionsFromSiderealOffset(siderealOffset);
+		return new ZodiacSignPositions({ date, zodiacMode, siderealOffset, signPositions });
 	}
 
 	public getSignPositions(): Map<Zodiac, number> {

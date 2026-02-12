@@ -1,5 +1,5 @@
 import { normalizeAngleRad } from './util.ts'
-import { Node, lunarNodes, hamburgNodes } from './astroDefs.ts'
+import { Node, lunarNodes, hamburgNodes, highDependencyArabicParts } from './astroDefs.ts'
 import { LunarNodeMode, HamburgSchoolMode } from './settingsDefs.ts'
 import NodePositions from './nodePositions.ts'
 
@@ -11,8 +11,11 @@ function signedAngleDifference(from: number, to: number): number {
 	return d > Math.PI ? d - 2 * Math.PI : d;
 }
 
-function computeVelocity(base: NodePositions, progressed: NodePositions, node: Node, timeDeltaMs: number): number {
-	return signedAngleDifference(base.get(node), progressed.get(node)) / (timeDeltaMs / MS_PER_DAY);
+function computeVelocity(base: NodePositions, progressed: NodePositions, node: Node, timeDeltaMs: number): number | null {
+	if (!(base.has(node) && progressed.has(node))){
+		return null; // meaning "remove this value"
+	}
+	return signedAngleDifference(lon1, lon2) / (timeDeltaMs / MS_PER_DAY);
 }
 
 function recomputeVelocitiesForNodes(
@@ -24,7 +27,12 @@ function recomputeVelocitiesForNodes(
 ): Map<Node, number> {
 	const newVelocities = new Map(existingVelocities);
 	for (const node of nodes) {
-		newVelocities.set(node, computeVelocity(base, progressed, node, timeDeltaMs));
+		const newVelocity = computeVelocity(base, progressed, node, timeDeltaMs);
+		if (newVelocity === null) {
+			newVelocities.delete(node);
+		} else {
+			newVelocities.set(node, newVelocity);
+		}
 	}
 	return newVelocities;
 }
@@ -43,42 +51,49 @@ function computeAllVelocities(base: NodePositions, progressed: NodePositions, ti
 
 interface NodeVelocitiesConstructorArgs {
 	basePositions: NodePositions;
-	progressedPositions: NodePositions;
 	timeDeltaMs: number;
-	velocities?: Map<Node, number>;
+	progressedPositions: NodePositions;
+	velocities: Map<Node, number>;
 }
 
 class NodeVelocities {
+	// dependencies
 	private readonly _basePositions: NodePositions;
-	private readonly _progressedPositions: NodePositions;
 	private readonly _timeDeltaMs: number;
+	
+	// logical state
+	private readonly _progressedPositions: NodePositions;
 	private readonly _velocities: Map<Node, number>;
 
 	constructor(config: NodeVelocitiesConstructorArgs) {
 		this._basePositions = config.basePositions;
-		this._progressedPositions = config.progressedPositions;
 		this._timeDeltaMs = config.timeDeltaMs;
-		this._velocities = config.velocities ?? computeAllVelocities(
-			this._basePositions, this._progressedPositions, this._timeDeltaMs
-		);
+		this._progressedPositions = config.progressedPositions;
+		this._velocities = config.velocities;
 	}
 
 	static create(basePositions: NodePositions, timeDeltaMs: number = DEFAULT_TIME_DELTA_MS): NodeVelocities {
-		const { date, surfacePosition, lunarNodeMode, hamburgSchoolMode } = basePositions.getParams();
+		const { date, surfacePosition, lunarNodeMode, hamburgSchoolMode, houseCuspPositions, zodiacSignPositions, dignityMode } = basePositions.getParams();
 		const progressedPositions = NodePositions.create(
 			new Date(date.getTime() + timeDeltaMs),
 			surfacePosition,
 			lunarNodeMode,
-			hamburgSchoolMode
+			hamburgSchoolMode,
+			houseCuspPositions,
+			zodiacSignPositions,
+			dignityMode
 		);
-		return new NodeVelocities({ basePositions, progressedPositions, timeDeltaMs });
+		const velocities = computeAllVelocities(
+			basePositions, progressedPositions, timeDeltaMs
+		);
+		return new NodeVelocities({ basePositions, timeDeltaMs, progressedPositions, velocities });
 	}
 
 	private copyWith(updates: Partial<NodeVelocitiesConstructorArgs>): NodeVelocities {
 		return new NodeVelocities({
 			basePositions: this._basePositions,
-			progressedPositions: this._progressedPositions,
 			timeDeltaMs: this._timeDeltaMs,
+			progressedPositions: this._progressedPositions,
 			velocities: this._velocities,
 			...updates
 		});
@@ -91,6 +106,7 @@ class NodeVelocities {
 		newProgressedPositions: NodePositions,
 		changedNodes: Node[],
 	): NodeVelocities {
+		// TODO will this error out if hdArabicParts passed but hcp null => no arabic part pos?
 		const newVelocities = recomputeVelocitiesForNodes(
 			newBasePositions, newProgressedPositions, this._timeDeltaMs,
 			this._velocities, changedNodes
@@ -102,16 +118,35 @@ class NodeVelocities {
 		});
 	}
 
-	public changeLunarNodeMode(newMode: LunarNodeMode, updatedBasePositions: NodePositions): NodeVelocities {
+	public changeBasePositionsWithLunarNodeMode(updatedBasePositions: NodePositions, newMode: LunarNodeMode): NodeVelocities {
 		const newProgressedPositions = this._progressedPositions.changeLunarNodeMode(newMode);
 		return this._updatePositions(updatedBasePositions, newProgressedPositions, lunarNodes);
 	}
 
-	public changeHamburgSchoolMode(newMode: HamburgSchoolMode, updatedBasePositions: NodePositions): NodeVelocities {
+	public changeBasePositionsWithHamburgSchoolMode(updatedBasePositions: NodePositions, newMode: HamburgSchoolMode): NodeVelocities {
 		const newProgressedPositions = this._progressedPositions.changeHamburgSchoolMode(newMode);
 		return this._updatePositions(updatedBasePositions, newProgressedPositions, hamburgNodes);
 	}
 
+	public changeBasePositionsWithHouseCuspPositions(updatedBasePositions: NodePositions, houseCuspPositions: HouseCuspPositions | null): NodeVelocities {
+		const newProgressedPositions = this._progressedPositions.changeHouseCuspPositions(houseCuspPositions);
+		return this._updatePositions(updatedBasePositions, newProgressedPositions, highDependencyArabicParts);
+	}
+
+	public changeBasePositionsWithZodiacSignPositionsAndHouseCuspPositions(
+		updatedBasePositions: NodePositions,
+		zodiacSignPositions: ZodiacSignPosition,
+		houseCuspPositions: HouseCuspPositions | null,
+	): NodeVelocities {
+		const newProgressedPositions = this._progressedPositions.changeZodiacSignPositionsAndHouseCuspPositions(zodiacSignPositions, houseCuspPositions);
+		return this._updatePositions(updatedBasePositions, newProgressedPositions, highDependencyArabicParts);
+	}
+
+	public changeBasePositionsWithDignityMode(updatedBasePositions: NodePositions, dignityMode: DignityMode): NodeVelocities {
+		const newProgressedPositions = this._progressedPositions.changeDignityMode(dignityMode);
+		return this._updatePositions(updatedBasePositions, newProgressedPositions, highDependencyArabicParts);
+	}
+	
 	// Returns velocity in rad/day
 	public get(node: Node): number {
 		const v = this._velocities.get(node);

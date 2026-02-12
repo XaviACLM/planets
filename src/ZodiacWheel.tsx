@@ -121,6 +121,7 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 		nodes.forEach((node, index) => {
 			adjustedMap.set(node, adjustedPositions[index]);
 		});
+		
 		return adjustedMap;
 	}, [nodeAngles]);
 

@@ -1,5 +1,5 @@
 import { normalizeAngleRad } from './util.ts'
-import { Node, type SurfacePosition } from './astroDefs.ts'
+import { classicalRulerships, modernRulerships, Node, type SurfacePosition } from './astroDefs.ts'
 import { LunarNodeMode, HamburgSchoolMode } from './settingsDefs.ts'
 import { computeAllSignificantPoints } from './geometry.ts'
 import { smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts'
@@ -9,10 +9,28 @@ import {
 	computeLunarApogeePerigeeMeeus, computeLunarApogeePerigeeExact,
 	computeLunarNodesMeeus, computeLunarNodesExact
 } from './astronomyUtil.ts'
+import HouseCuspPositions from './houseCuspPositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import { DignityMode } from './settingsDefs.ts'
+
+
+// nulls indicate we no longer have a position => should delete from map
+type PositionsUpdate = Map<Node, number | null>
+
+// the deleting is handled by:
+function resolvePositionsUpdate(positionsUpdate: PositionsUpdate) {
+	const result = new Map<Node, number>();
+	for (const [node, value] of positionsUpdate){
+		if (value !== null) {
+			result.set(node, value);
+		}
+	}
+	return result;
+}
 
 // LunarNodeMode dispatchers
 
-function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): PositionsUpdate{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
 		return computeLunarApogeePerigeeMeeus(date);
 	} else {
@@ -20,7 +38,7 @@ function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Ma
 	}
 }
 
-function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
+function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): PositionsUpdate{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
 		return computeLunarNodesMeeus(date);
 	} else {
@@ -30,7 +48,7 @@ function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, 
 
 // Position computation functions
 
-function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
+function computeAxisAngles(date: Date, surfacePos: SurfacePosition): PositionsUpdate {
 	const { asc, mc, vx } = computeAllSignificantPoints(date, surfacePos);
 
 	const ascLon = getTodayEclipticLongitudeFromEQJ(date, asc);
@@ -47,14 +65,14 @@ function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, n
 	]);
 }
 
-function computeEquinoxes(): Map<Node, number> {
+function computeEquinoxes(): PositionsUpdate {
 	return new Map<Node, number>([
 		[Node.VERNAL_EQUINOX, 0],
 		[Node.AUTUMNAL_EQUINOX, Math.PI]
 	]);
 }
 
-function computePhysicalNodePositions(date: Date): Map<Node, number> {
+function computePhysicalNodePositions(date: Date): PositionsUpdate {
 	const nodeAngles = new Map<Node, number>();
 	for ( const [node, body] of Object.entries(nodeToBody)) {
 		const lon = bodyToGeocentricLongitude(body, date);
@@ -63,7 +81,7 @@ function computePhysicalNodePositions(date: Date): Map<Node, number> {
 	return nodeAngles;
 }
 
-function computeSmallObjectPositions(date: Date): Map<Node, number> {
+function computeSmallObjectPositions(date: Date): PositionsUpdate {
 	const nodeAngles = new Map<Node, number>();
 
 	for (const [node, params] of Object.entries(smallBodyParams)) {
@@ -74,7 +92,7 @@ function computeSmallObjectPositions(date: Date): Map<Node, number> {
 	return nodeAngles;
 }
 
-function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: HamburgSchoolMode): Map<Node, number> {
+function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: HamburgSchoolMode): PositionsUpdate {
 	const nodeAngles = new Map<Node, number>();
 
 	const hamburgSchoolParams = hamburgSchoolMode == HamburgSchoolMode.NEELY ? hamburgSchoolParamsNeely : hamburgSchoolParamsWitte;
@@ -86,38 +104,70 @@ function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: Hamb
 	return nodeAngles;
 }
 
-function computeArabicPartPositions(nodePositions: Map<Node, number>): Map<Node, number> {
+function computeHighDependencyArabicPartPositions(
+	nodePositions: Map<Node, number>,
+	houseCuspPositions: HouseCuspPositions | null,
+	zodiacSignPositions: ZodiacSignPositions,
+	dignityMode: DignityMode,
+): PositionUpdate {
+
+	if (houseCuspPositions === null){
+		return new Map <Node, number>([
+			[Node.PART_OF_WEALTH, null],
+			[Node.PART_OF_DEATH, null],
+		]);
+	}
 	const asc = nodePositions.get(Node.ASCENDANT)!;
 	const sun = nodePositions.get(Node.SUN)!;
 	const d = normalizeAngleRad(sun-asc);
 	const dayBirth = d > Math.PI;
 	const f = dayBirth ? 1 : -1;
-	//source: https://horoscopes.astro-seek.com/astrology-arabic-lots-list
-	// there's a bajillion of these. I see two ideas:
-	// - just the part of fortune. that's basic.
-	// - all of them, with some complicated filters to include them by source/category/etc.
-	// I don't think there's a midpoint between the two.
-	// let's just leave the PoF for now and look into the other stuff later down the line.
-
-	// oh, and this will depend on house cusps eventually, so we'll need to move things around a bit.
-	// this will probably go in its own file, anyway.
+	
+	const hc2 = houseCuspPositions.getCuspPosition(2);
+	const hc8 = houseCuspPositions.getCuspPosition(8);
+	const hc2sign = zodiacSignPositions.getSignAtLongitude(hc2);
+	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
+	const hc2ruler = nodePositions.get(rulerships[hc2sign])!;
+	
 	return new Map <Node, number>([
-		[Node.PART_OF_FORTUNE, asc + f*(nodePositions.get(Node.MOON)! - nodePositions.get(Node.SUN)!)],
-		//[Node.PART_OF_SPIRIT, asc + f*(nodePositions.get(Node.SUN) - nodePositions.get(Node.MOON))],
-		//[Node.PART_OF_LOVE, asc + f*(nodePositions.get(Node.VENUS) - nodePositions.get(Node.SUN))],
-		//[Node.PART_OF_MARRIAGE, asc + f*(nodePositions.get(Node.DESCENDANT) - nodePositions.get(Node.VENUS))],
-		//[Node.PART_OF_NECESSITY, asc + f*(nodePositions.get(Node.SATURN) - nodePositions.get(Node.MOON))],
+		[Node.PART_OF_WEALTH, asc + f*(hc2 - hc2ruler)],
+		[Node.PART_OF_DEATH, nodePositions.get(Node.SATURN)! + f*(hc8 - nodePositions.get(Node.MOON)!)],
+	]);
+}
+	
 
-		//Dubious. Source notes same formula for parts of: commerce, communication, slaves 4b, vitality
-		//[Node.PART_OF_CAREER, asc + f*(nodePositions.get(Node.MERCURY) - nodePositions.get(Node.SUN))],
-
-		// first source said courage = mars - sun. not in main source, equals:
-		// commerce (jacobson), conquest, deceit, destruction(jones), dignity B, enemies (olympiodorus B), fire, lost animal, passion, sowing, travel (firmicus), wheat
-		// okay.
-		// [Node.PART_OF_COURAGE, asc + f*(nodePositions.get(Node.MARS) - nodePositions.get(Node.SUN))],
-
-		//[Node.PART_OF_LONGEVITY, asc + f*(nodePositions.get(Node.MOON) - nodePositions.get(Node.JUPITER))],
-		//[Node.PART_OF_DEATH, asc + f*(houseCusps[7] - nodePositions.get(Node.MOON))], //8th cusp
+function computeArabicPartPositions(
+	nodePositions: Map<Node, number>,
+	houseCuspPositions: HouseCuspPositions | null,
+	zodiacSignPositions: ZodiacSignPositions,
+	dignityMode: DignityMode,
+): PositionsUpdate {
+	const asc = nodePositions.get(Node.ASCENDANT)!;
+	const sun = nodePositions.get(Node.SUN)!;
+	const d = normalizeAngleRad(sun-asc);
+	const dayBirth = d > Math.PI;
+	const f = dayBirth ? 1 : -1;
+	
+	const fortune = asc + f*(nodePositions.get(Node.MOON)! - nodePositions.get(Node.SUN)!);
+	const spirit = asc + f*(nodePositions.get(Node.SUN)! - nodePositions.get(Node.MOON)!);
+	
+	return new Map <Node, number>([
+		[Node.PART_OF_FORTUNE, fortune],
+		[Node.PART_OF_SPIRIT, spirit],
+		
+		[Node.PART_OF_EROS, asc + f*(spirit - fortune)], //Dorotheus of Sidon formula used (as opposed to Paulus of Alexandria)
+		[Node.PART_OF_NECESSITY, asc + f*(fortune - nodePositions.get(Node.MERCURY)!)],
+		[Node.PART_OF_COURAGE, asc + f*(fortune - nodePositions.get(Node.MARS)!)],
+		[Node.PART_OF_VICTORY, asc + f*(nodePositions.get(Node.JUPITER)! - spirit)],
+		[Node.PART_OF_NEMESIS, asc + f*(fortune - nodePositions.get(Node.SATURN)!)],
+		
+		[Node.PART_OF_MARRIAGE_MEN, asc + f*(nodePositions.get(Node.VENUS)! - nodePositions.get(Node.SATURN)!)],
+		[Node.PART_OF_MARRIAGE_WOMEN, asc + f*(nodePositions.get(Node.SATURN)! - nodePositions.get(Node.VENUS)!)],
+		[Node.PART_OF_CHILDREN, asc + f*(nodePositions.get(Node.SATURN)! - nodePositions.get(Node.JUPITER)!)],
+		...computeHighDependencyArabicPartPositions(nodePositions, houseCuspPositions, zodiacSignPositions, dignityMode),
+		
+		[Node.PART_OF_FATHER, asc + f*(nodePositions.get(Node.SATURN)! - nodePositions.get(Node.SUN)!)],
+		[Node.PART_OF_MOTHER, asc + f*(nodePositions.get(Node.MOON)! - nodePositions.get(Node.VENUS)!)],
 	]);
 }
 
@@ -125,7 +175,7 @@ function computeAllNodePositionsWithoutSurfacePosition(
 	date: Date,
 	lunarNodeMode: LunarNodeMode,
 	hamburgSchoolMode: HamburgSchoolMode
-): Map<Node, number>{
+): PositionsUpdate{
 	return new Map<Node, number>([
 		...computePhysicalNodePositions(date),
 		...computeSmallObjectPositions(date),
@@ -140,15 +190,18 @@ function computeAllNodePositions(
 	date: Date,
 	surfacePosition: SurfacePosition,
 	lunarNodeMode: LunarNodeMode,
-	hamburgSchoolMode: HamburgSchoolMode
-): Map<Node, number>{
+	hamburgSchoolMode: HamburgSchoolMode,
+	houseCuspPositions: HouseCuspPositions | null,
+	zodiacSignPositions: ZodiacSignPositions,
+	dignityMode: DignityMode,
+): PositionsUpdate{
 	let positions = new Map<Node, number>([
 		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode, hamburgSchoolMode),
 		...computeAxisAngles(date, surfacePosition),
 	]);
 	positions = new Map<Node, number>([
 		...positions,
-		...computeArabicPartPositions(positions),
+		...computeArabicPartPositions(positions, houseCuspPositions, zodiacSignPositions, dignityMode),
 	]);
 	return positions;
 }
@@ -163,14 +216,24 @@ interface NodePositionsConstructorArgs {
 	surfacePosition: SurfacePosition | null;
 	lunarNodeMode: LunarNodeMode;
 	hamburgSchoolMode: HamburgSchoolMode;
-	positions?: Map<Node, number>;
+	houseCuspPositions: HouseCuspPositions | null;
+	zodiacSignPositions: ZodiacSignPositions;
+	dignityMode: DignityMode;
+	positions: Map<Node, number>;
 }
 
 class NodePositions {
+	// dependencies
 	private readonly _date: Date;
 	private readonly _surfacePosition: SurfacePosition | null;
 	private readonly _lunarNodeMode: LunarNodeMode;
 	private readonly _hamburgSchoolMode: HamburgSchoolMode;
+	// these just for the part of wealth & friend
+	private readonly _houseCuspPositions: HouseCuspPositions | null;
+	private readonly _zodiacSignPositions: ZodiacSignPositions;
+	private readonly _dignityMode: DignityMode;
+	
+	// actual state
 	private readonly _positions: Map<Node, number>;
 
 	constructor(config: NodePositionsConstructorArgs) {
@@ -178,35 +241,44 @@ class NodePositions {
 		this._surfacePosition = config.surfacePosition;
 		this._lunarNodeMode = config.lunarNodeMode;
 		this._hamburgSchoolMode = config.hamburgSchoolMode;
-
-		if (config.positions !== undefined) {
-			this._positions = config.positions;
-		} else if (this._surfacePosition !== null) {
-			this._positions = computeAllNodePositions(
-				this._date, this._surfacePosition, this._lunarNodeMode, this._hamburgSchoolMode
-			);
-		} else {
-			this._positions = computeAllNodePositionsWithoutSurfacePosition(
-				this._date, this._lunarNodeMode, this._hamburgSchoolMode
-			);
-		}
+		this._houseCuspPositions = config.houseCuspPositions;
+		this._zodiacSignPositions = config.zodiacSignPositions;
+		this._dignityMode = config.dignityMode;
+		this._positions = config.positions;
 	}
 
 	static create(
 		date: Date,
 		surfacePosition: SurfacePosition | null,
 		lunarNodeMode: LunarNodeMode,
-		hamburgSchoolMode: HamburgSchoolMode
+		hamburgSchoolMode: HamburgSchoolMode,
+		houseCuspPositions: HouseCuspPositions | null,
+		zodiacSignPositions: ZodiacSignPositions,
+		dignityMode: DignityMode,
 	): NodePositions {
-		return new NodePositions({ date, surfacePosition, lunarNodeMode, hamburgSchoolMode });
+		
+		const positions = resolvePositionsUpdate(
+			surfacePosition === null ? (
+				computeAllNodePositionsWithoutSurfacePosition(
+					date, lunarNodeMode, hamburgSchoolMode
+				)
+			) : (
+				computeAllNodePositions(
+					date, surfacePosition, lunarNodeMode, hamburgSchoolMode,
+					houseCuspPositions, zodiacSignPositions, dignityMode
+				)
+			)
+		);
+			
+		return new NodePositions({
+			date, surfacePosition, lunarNodeMode, hamburgSchoolMode,
+			houseCuspPositions, zodiacSignPositions, dignityMode, positions
+		});
 	}
 
 	private copyWith(updates: Partial<NodePositionsConstructorArgs>): NodePositions {
 		return new NodePositions({
-			date: this._date,
-			surfacePosition: this._surfacePosition,
-			lunarNodeMode: this._lunarNodeMode,
-			hamburgSchoolMode: this._hamburgSchoolMode,
+			...this.getParams(),
 			positions: this._positions,
 			...updates
 		});
@@ -219,7 +291,7 @@ class NodePositions {
 		const newLunarNodePositions = computeLunarNodes(this._date, newMode);
 		const newLilithSelenePositions = computeLunarApogeePerigee(this._date, newMode);
 		const newPositions = new Map<Node, number>([...this._positions, ...newLunarNodePositions, ...newLilithSelenePositions]);
-		return this.copyWith({ lunarNodeMode: newMode, positions: newPositions });
+		return this.copyWith({ lunarNodeMode: newMode, positions: resolvePositionsUpdate(newPositions) });
 	}
 
 	public changeHamburgSchoolMode(newMode: HamburgSchoolMode): NodePositions {
@@ -228,7 +300,34 @@ class NodePositions {
 		}
 		const newHamburgSchoolObjectPositions = computeHamburgSchoolObjectPositions(this._date, newMode);
 		const newPositions = new Map<Node, number>([...this._positions, ...newHamburgSchoolObjectPositions]);
-		return this.copyWith({ hamburgSchoolMode: newMode, positions: newPositions });
+		return this.copyWith({ hamburgSchoolMode: newMode, positions: resolvePositionsUpdate(newPositions) });
+	}
+
+	public changeHouseCuspPositions(houseCuspPositions: HouseCuspPositions | null): NodePositions {
+		const newPositions = new Map<Node, number>([
+			...this._positions,
+			...computeHighDependencyArabicPartPositions(this._nodePositions, houseCuspPositions, this._zodiacSignPositions, this._dignityMode),
+		]);
+		return this.copyWith({ houseCuspPositions, positions: resolvePositionsUpdate(newPositions) });
+	}
+
+	public changeZodiacSignPositionsAndHouseCuspPositions(
+		zodiacSignPositions: ZodiacSignPositions,
+		houseCuspPositions: HouseCuspPositions | null
+	): NodePositions {
+		const newPositions = new Map<Node, number>([
+			...this._positions,
+			...computeHighDependencyArabicPartPositions(this._nodePositions, houseCuspPositions, zodiacSignPositions, this._dignityMode),
+		]);
+		return this.copyWith({ zodiacSignPositions, houseCuspPositions, positions: resolvePositionsUpdate(newPositions) });
+	}
+
+	public changeDignityMode(dignityMode: DignityMode): NodePositions {
+		const newPositions = new Map<Node, number>([
+			...this._positions,
+			...computeHighDependencyArabicPartPositions(this._nodePositions, this._houseCuspPositions, this._zodiacSignPositions, dignityMode),
+		]);
+		return this.copyWith({ dignityMode, positions: resolvePositionsUpdate(newPositions) });
 	}
 
 	public getPositions(): Map<Node, number> {
@@ -241,12 +340,24 @@ class NodePositions {
 		return a;
 	}
 
+	public has(node: Node): boolean {
+		return node in this._positions;
+	}
+
 	public hasSurfacePosition(): boolean {
 		return this._surfacePosition !== null;
 	}
 
 	public getParams(): { date: Date, surfacePosition: SurfacePosition | null, lunarNodeMode: LunarNodeMode, hamburgSchoolMode: HamburgSchoolMode } {
-		return { date: this._date, surfacePosition: this._surfacePosition, lunarNodeMode: this._lunarNodeMode, hamburgSchoolMode: this._hamburgSchoolMode };
+		return {
+			date: this._date,
+			surfacePosition: this._surfacePosition,
+			lunarNodeMode: this._lunarNodeMode,
+			hamburgSchoolMode: this._hamburgSchoolMode,
+			houseCuspPositions: this._houseCuspPositions,
+			zodiacSignPositions: this._zodiacSignPositions,
+			dignityMode: this._dignityMode,
+		};
 	}
 }
 

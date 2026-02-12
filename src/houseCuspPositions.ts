@@ -544,34 +544,29 @@ interface HouseCuspPositionsConstructorArgs {
 	date: Date;
 	surfacePosition: SurfacePosition;
 	houseSystem: HouseSystem;
-	housePresweep: boolean;
 	zodiacSignPositions: ZodiacSignPositions;
-	cuspPositions?: number[] | null;
+	housePresweep: boolean;
+	cuspPositions: number[] | null;
 }
 
 class HouseCuspPositions {
+	// dependencies
 	private readonly _date: Date;
 	private readonly _surfacePosition: SurfacePosition;
 	private readonly _houseSystem: HouseSystem;
-	private readonly _housePresweep: boolean;
 	private readonly _zodiacSignPositions: ZodiacSignPositions;
+	
+	// logical state
+	private readonly _housePresweep: boolean; // both state and dependency!
 	private readonly _cuspPositions: number[] | null;
 
 	constructor(config: HouseCuspPositionsConstructorArgs) {
 		this._date = config.date;
 		this._surfacePosition = config.surfacePosition;
 		this._houseSystem = config.houseSystem;
-		this._housePresweep = config.housePresweep;
 		this._zodiacSignPositions = config.zodiacSignPositions;
-
-		if (config.cuspPositions !== undefined) {
-			this._cuspPositions = config.cuspPositions;
-		} else {
-			this._cuspPositions = computeHouseCuspPositions(
-				this._date, this._surfacePosition, this._houseSystem,
-				this._zodiacSignPositions.getSignPositions()
-			);
-		}
+		this._housePresweep = config.housePresweep;
+		this._cuspPositions = config.cuspPositions;
 	}
 
 	static create(
@@ -581,10 +576,14 @@ class HouseCuspPositions {
 		zodiacSignPositions: ZodiacSignPositions,
 		housePresweep: boolean
 	): HouseCuspPositions | null {
+		const cuspPositions = computeHouseCuspPositions(
+			date, surfacePosition, houseSystem,
+			zodiacSignPositions.getSignPositions()
+		);
+		if (cuspPositions === null) { return null; }
 		const instance = new HouseCuspPositions({
-			date, surfacePosition, houseSystem, housePresweep, zodiacSignPositions
+			date, surfacePosition, houseSystem, zodiacSignPositions, housePresweep, cuspPositions
 		});
-		if (instance._cuspPositions === null) { return null; }
 		return instance;
 	}
 
@@ -593,8 +592,8 @@ class HouseCuspPositions {
 			date: this._date,
 			surfacePosition: this._surfacePosition,
 			houseSystem: this._houseSystem,
-			housePresweep: this._housePresweep,
 			zodiacSignPositions: this._zodiacSignPositions,
+			housePresweep: this._housePresweep,
 			cuspPositions: this._cuspPositions,
 			...updates
 		});

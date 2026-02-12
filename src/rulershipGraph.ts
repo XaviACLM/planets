@@ -4,10 +4,6 @@ import NodePositions from './nodePositions.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
 import { getSignOfNode } from './chartAnalysis.ts'
 
-// this approach (to get copyWith) is actually unnecessary since changing either main arg results in full recomputation
-// but might be useful to keep it like this for later
-// and it wouldn't be impossible to avoid recomputation, actually, at the very least ruledBy is very redundant. but...
-
 function constructRulershipGraphInternals(nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, dignityMode: DignityMode) {
 
 	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
@@ -85,21 +81,22 @@ interface RulershipGraphConstructorArgs {
 	nodePositions: NodePositions,
 	zodiacSignPositions: ZodiacSignPositions,
 	dignityMode: DignityMode,
-	// internal
-	_rulerships?: Record<Zodiac, Node>;
-	_sign?: Map<Node, Zodiac>;
-	_ruledBy?: Map<Node, Node>;
-	_rules?: Map<Node, Node[]>;
-	_leafNodes?: Node[];
-	_finalDispositors?: FinalDispositors[];
-	_isFinalDispositor?: Map<Node, boolean>;
+	rulerships: Record<Zodiac, Node>;
+	sign: Map<Node, Zodiac>;
+	ruledBy: Map<Node, Node>;
+	rules: Map<Node, Node[]>;
+	leafNodes: Node[];
+	finalDispositors: FinalDispositors[];
+	isFinalDispositor: Map<Node, boolean>;
 }
 
 export class RulershipGraph {
-	public readonly nodePositions: NodePositions;
-	public readonly zodiacSignPositions: ZodiacSignPositions;
-	public readonly dignityMode: DignityMode;
-
+	// dependencies
+	public readonly _nodePositions: NodePositions;
+	public readonly _zodiacSignPositions: ZodiacSignPositions;
+	public readonly _dignityMode: DignityMode;
+	
+	// logical state
 	private readonly _rulerships: Record<Zodiac, Node>;
 	private readonly _sign: Map<Node, Zodiac>;
 	private readonly _ruledBy: Map<Node, Node>;
@@ -109,30 +106,16 @@ export class RulershipGraph {
 	private readonly _isFinalDispositor: Map<Node, boolean>;
 	
 	constructor( config: RulershipGraphConstructorArgs ){
-		this.nodePositions = config.nodePositions;
-		this.zodiacSignPositions = config.zodiacSignPositions;
-		this.dignityMode = config.dignityMode;
-
-		if (config._ruledBy) {
-			// everything is defined, then
-			this._rulerships = config._rulerships!;
-			this._sign = config._sign!;
-			this._ruledBy = config._ruledBy!;
-			this._rules = config._rules!;
-			this._leafNodes = config._leafNodes!;
-			this._finalDispositors = config._finalDispositors!;
-			this._isFinalDispositor = config._isFinalDispositor!;
-			return;
-		} else {
-			const { rulerships, sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor } = constructRulershipGraphInternals(this.nodePositions, this.zodiacSignPositions, this.dignityMode);
-			this._rulerships = rulerships;
-			this._sign = sign;
-			this._ruledBy = ruledBy;
-			this._rules = rules;
-			this._leafNodes = leafNodes;
-			this._finalDispositors = finalDispositors;
-			this._isFinalDispositor = isFinalDispositor;	
-		}
+		this._nodePositions = config.nodePositions;
+		this._zodiacSignPositions = config.zodiacSignPositions;
+		this._dignityMode = config.dignityMode;
+		this._rulerships = config.rulerships;
+		this._sign = config.sign;
+		this._ruledBy = config.ruledBy;
+		this._rules = config.rules;
+		this._leafNodes = config.leafNodes;
+		this._finalDispositors = config.finalDispositors;
+		this._isFinalDispositor = config.isFinalDispositor;
 	}
 	
 	static create(
@@ -141,31 +124,12 @@ export class RulershipGraph {
 		dignityMode: DignityMode,
 	): RulershipGraph {
 		return new RulershipGraph({
-			nodePositions: nodePositions,
-			zodiacSignPositions: zodiacSignPositions,
-			dignityMode: dignityMode,
+			nodePositions,
+			zodiacSignPositions,
+			dignityMode,
+			...constructRulershipGraphInternals(nodePositions, zodiacSignPositions, dignityMode),
 		});
 	}
-	
-	/*
-	unused
-	private copyWith( updates: Partial<RulershipGraphConstructorArgs> ): RulershipGraph {
-		return new RulershipGraph({
-			nodePositions: this.nodePositions,
-			zodiacSignPositions: this.zodiacSignPositions,
-			dignityMode: this.dignityMode,
-			//internal
-			_rulerships: this._rulerships,
-			_sign: this._sign,
-			_ruledBy: this._ruledBy,
-			_rules: this._rules,
-			_leafNodes: this._leafNodes,
-			_finalDispositors: this._finalDispositors,
-			_isFinalDispositor: this._isFinalDispositor,
-			...updates
-		});
-	}
-	*/
 	
 	public getDispositorChain(node: Node): DispositorChain{
 		const chain: Node[] = [];
@@ -239,4 +203,7 @@ export class RulershipGraph {
 	public isFinalDispositor(node: Node): boolean{
 		return this._isFinalDispositor.get(node)!;
 	}
+	
+	// considered a getRulerAtLongitude function, but seems like the graph should only do discrete stuff
+	// it doesn't know where nodes or signs _are_. Those references are just bookkeeping.
 }

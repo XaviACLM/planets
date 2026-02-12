@@ -11,20 +11,24 @@ function computeFixedStarPositions(date: Date): Map<string, number> {
 
 interface FixedStarPositionsConstructorArgs {
 	date: Date;
-	positions?: Map<string, number>;
+	positions: Map<string, number>;
 }
 
 class FixedStarPositions {
+	// dependencies
 	private readonly _date: Date;
+	
+	//logical state
 	private readonly _positions: Map<string, number>;
 
 	constructor(config: FixedStarPositionsConstructorArgs) {
 		this._date = config.date;
-		this._positions = config.positions ?? computeFixedStarPositions(this._date);
+		this._positions = config.positions;
 	}
 
 	static create(date: Date): FixedStarPositions {
-		return new FixedStarPositions({ date });
+		const positions = computeFixedStarPositions(date);
+		return new FixedStarPositions({ date, positions });
 	}
 
 	public getPositions(): Map<string, number> {
