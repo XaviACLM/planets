@@ -244,6 +244,10 @@ class NodePositions {
 	public hasSurfacePosition(): boolean {
 		return this._surfacePosition !== null;
 	}
+
+	public getParams(): { date: Date, surfacePosition: SurfacePosition | null, lunarNodeMode: LunarNodeMode, hamburgSchoolMode: HamburgSchoolMode } {
+		return { date: this._date, surfacePosition: this._surfacePosition, lunarNodeMode: this._lunarNodeMode, hamburgSchoolMode: this._hamburgSchoolMode };
+	}
 }
 
 export default NodePositions;

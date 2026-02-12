@@ -484,6 +484,24 @@ export const modernRulerships: Record<Zodiac, Node> = {
 	[Zodiac.OPHIUCHUS]: Node.PLUTO,
 } as Record<Zodiac, Node>;
 
+export const lunarNodes: Node[] = [
+	Node.LUNAR_ASCENDING,
+	Node.LUNAR_DESCENDING, 
+	Node.LUNAR_APOGEE,
+	Node.LUNAR_PERIGEE
+];
+
+export const hamburgNodes: Node[] = [
+	Node.CUPIDO,
+	Node.HADES,
+	Node.ZEUS,
+	Node.KRONOS,
+	Node.APOLLON,
+	Node.ADMETOS,
+	Node.VULCANUS,
+	Node.POSEIDON,
+];
+
 export const nodeCategories = [
 	{
 		name: 'Major Bodies',
@@ -507,12 +525,7 @@ export const nodeCategories = [
 	},
 	{
 		name: 'Lunar Nodes',
-		items: [
-			Node.LUNAR_ASCENDING,
-			Node.LUNAR_DESCENDING, 
-			Node.LUNAR_APOGEE,
-			Node.LUNAR_PERIGEE
-		]
+		items: lunarNodes
 	},
 	{
 		name: 'Major Asteroids & Dwarfs',
@@ -530,16 +543,7 @@ export const nodeCategories = [
 	},
 	{
 		name: 'Hamburg School Objects',
-		items: [
-			Node.CUPIDO,
-			Node.HADES,
-			Node.ZEUS,
-			Node.KRONOS,
-			Node.APOLLON,
-			Node.ADMETOS,
-			Node.VULCANUS,
-			Node.POSEIDON,
-		]
+		items: hamburgNodes
 	},
 	{
 		name: 'Minor Bodies',

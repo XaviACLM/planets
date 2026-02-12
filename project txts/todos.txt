@@ -1,6 +1,5 @@
 FROM THE REFACTOR
 - NodeVelocities (derived from NodePositions after refactor is done)
-- UI tooltip for areHouseCuspsWithinHouse
 
 
 
@@ -9,7 +8,7 @@ TRIVIAL
 -
 
 NOT TOO HARD, NOT TOO EASY
--
+- PlanetTable
 
 REQUIRES THINKING
 -

@@ -10,6 +10,7 @@ import ChartSummary from './ChartSummary'
 import PlanetPanel from './PlanetPanel.tsx'
 import InfoPopup from './InfoPopup.tsx'
 import NodePositions from './nodePositions.ts'
+import NodeVelocities from './nodeVelocities.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
 import FixedStarPositions from './fixedStarPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
@@ -86,7 +87,7 @@ function App() {
 
 	// Local state (not settings)
 	const [selectedCity, setSelectedCity] = useState<CityData|null>(null);
-	const [selectedDate, setSelectedDate] = useState(new Date());
+	const [selectedDate, setSelectedDate] = useState(() => new Date());
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
@@ -101,9 +102,10 @@ function App() {
 		}
 	}, [highlightedNode]);
 
-	const [nodePositions, setNodePositions] = useState(() => NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode));
-	const [zodiacSignPositions, setZodiacSignPositions] = useState(() => ZodiacSignPositions.create(selectedDate, zodiacMode));
-	const [fixedStarPositions, setFixedStarPositions] = useState(() => FixedStarPositions.create(selectedDate));
+	const [nodePositions, setNodePositions] = useState<NodePositions>(() => NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode));
+	const [nodeVelocities, setNodeVelocities] = useState<NodeVelocities>(() => NodeVelocities.create(nodePositions));
+	const [zodiacSignPositions, setZodiacSignPositions] = useState<ZodiacSignPositions>(() => ZodiacSignPositions.create(selectedDate, zodiacMode));
+	const [fixedStarPositions, setFixedStarPositions] = useState<FixedStarPositions>(() => FixedStarPositions.create(selectedDate));
 	const [houseCuspPositions, setHouseCuspPositions] = useState<HouseCuspPositions | null>(() =>
 		selectedCity !== null
 			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, ZodiacSignPositions.create(selectedDate, zodiacMode), housePresweep)
@@ -139,7 +141,7 @@ function App() {
 	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
 
 	// aspects, filtered, in the format imposed by the aspect menu mode
-	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(formatAspects(filteredAspects, aspectMenuMode));
+	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(() => formatAspects(filteredAspects, aspectMenuMode));
 	useEffect(() => {
 		setAspects(formatAspects(filteredAspects, aspectMenuMode));
 	}, [filteredAspects, aspectMenuMode])
@@ -203,7 +205,7 @@ function App() {
 	}, [selectedCity]);
 
 	// Debounced date input - local state updates immediately, actual state updates after delay
-	const [dateInputValue, setDateInputValue] = useState<string>(
+	const [dateInputValue, setDateInputValue] = useState<string>(() =>
 		toISOLocal(toZonedTime(selectedDate, currentTimezone)).slice(0, 16)
 	);
 	const dateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
