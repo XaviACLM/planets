@@ -15,16 +15,6 @@ function computeVelocity(base: NodePositions, progressed: NodePositions, node: N
 	return signedAngleDifference(base.get(node), progressed.get(node)) / (timeDeltaMs / MS_PER_DAY);
 }
 
-function findChangedNodes(oldPositions: NodePositions, newPositions: NodePositions): Node[] {
-	const changed: Node[] = [];
-	for (const [node, pos] of newPositions.getPositions()) {
-		if (oldPositions.getPositions().get(node) !== pos) {
-			changed.push(node);
-		}
-	}
-	return changed;
-}
-
 function recomputeVelocitiesForNodes(
 	base: NodePositions,
 	progressed: NodePositions,
@@ -101,7 +91,6 @@ class NodeVelocities {
 		newProgressedPositions: NodePositions,
 		changedNodes: Node[],
 	): NodeVelocities {
-		const changedNodes = findChangedNodes(this._progressedPositions, newProgressedPositions);
 		const newVelocities = recomputeVelocitiesForNodes(
 			newBasePositions, newProgressedPositions, this._timeDeltaMs,
 			this._velocities, changedNodes

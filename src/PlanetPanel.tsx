@@ -20,6 +20,7 @@ import {
 import { nodeImages, nodeSymbols } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import NodePositions from './nodePositions';
+import NodeVelocities from './nodeVelocities';
 import ZodiacSignPositions from './zodiacSignPositions';
 import FixedStarPositions from './fixedStarPositions';
 import HouseCuspPositions from './houseCuspPositions';
@@ -29,6 +30,7 @@ const ANGLE_PROXIMITY_THRESHOLD_DEG = 10; // degrees - show "near angle" info wi
 					
 type PlanetPanelProps = {
 	nodePositions: NodePositions;
+	nodeVelocities: NodeVelocities;
 	zodiacSignPositions: ZodiacSignPositions;
 	fixedStarPositions: FixedStarPositions;
 	houseCuspPositions: HouseCuspPositions | null;
@@ -43,6 +45,7 @@ type PlanetPanelProps = {
 
 const PlanetPanel: FC<PlanetPanelProps> = ({
 	nodePositions,
+	nodeVelocities,
 	zodiacSignPositions,
 	fixedStarPositions,
 	houseCuspPositions,
@@ -140,15 +143,32 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const triplicityRole = (hasSurfacePosition && standardNodes.includes(selectedNode)) ? getTriplicityRole(selectedNode, nodePositions, zodiacSignPositions, triplicityMode) : null;
 
 	// 2.2 Speed & Retrograde
-	const { formattedSpeedDegPerDay, isStationary, isRetrograde } = useMemo(() => {
-		if (nodeTypes[selectedNode] === NodeType.POINT) {
-			return { formattedSpeedDegPerDay: null, isStationary: null, isRetrograde: null};
-		}
-		const speedRadPerDay = getEclipticLongitudeSpeed(selectedNode, date, hamburgSchoolMode);
+	const { formattedSpeedDegPerTimeUnit, isStationary, isRetrograde, timeUnit } = useMemo(() => {
+		// TODO the average speebs
+		// TODO the formatting
+		const speedRadPerDay = nodeVelocities.get(selectedNode);
 		const isStationary = Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]!*stationarySpeedFractionThreshold;
 		const isRetrograde = !isStationary && speedRadPerDay < 0;
-		const formattedSpeedDegPerDay = formatAngle(Math.abs(speedRadPerDay), Math.abs(speedRadPerDay)<Math.PI/180);
-		return {formattedSpeedDegPerDay, isStationary, isRetrograde};
+		
+		if (speedRadPerDay > Math.PI) { // no particular reason for this threshold. Only main angles are gonna hit it anyway
+			const speedRadPerHr = speedRadPerDay/24;
+			const formattedSpeedDegPerTimeUnit = formatAngle(Math.abs(speedRadPerHr));
+			return {
+				formattedSpeedDegPerTimeUnit,
+				isStationary,
+				isRetrograde,
+				timeUnit: "hr",
+			};
+		} else {
+			const formattedSpeedDegPerTimeUnit = formatAngle(Math.abs(speedRadPerDay), Math.abs(speedRadPerDay)<Math.PI/180, true);
+			return {
+				formattedSpeedDegPerTimeUnit,
+				isStationary,
+				isRetrograde,
+				timeUnit: "day",
+			};
+		}
+		return {formattedSpeedDegPerTimeUnit, isStationary, isRetrograde};
 	}, [selectedNode, date, hamburgSchoolMode])
 
 	const nearbyFixedStars = useMemo(() => {
@@ -432,7 +452,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					)}
 
 					{/* Speed / Retrograde */}
-					{formattedSpeedDegPerDay !== null && (
+					{formattedSpeedDegPerTimeUnit !== null && (
 						<div>
 							{isStationary ? (
 								renderString("Stationary")
@@ -441,7 +461,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 							) : (
 								renderString("Direct")
 							)}
-							{renderString(` (${formattedSpeedDegPerDay} / day)`)}
+							{renderString(` (${formattedSpeedDegPerTimeUnit} / ${timeUnit})`)}
 						</div>
 					)}
 

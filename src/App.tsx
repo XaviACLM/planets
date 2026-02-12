@@ -154,9 +154,10 @@ function App() {
 
 	// Full recompute on date/city change
 	useEffect(() => {
-		const newNodePositions = NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode);
+		const newNP = NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode);
 		const newZSP = ZodiacSignPositions.create(selectedDate, zodiacMode);
-		setNodePositions(newNodePositions);
+		setNodePositions(newNP);
+		setNodeVelocities(NodeVelocities.create(newNP));
 		setZodiacSignPositions(newZSP);
 		setFixedStarPositions(FixedStarPositions.create(selectedDate));
 		const newHCP = selectedCity !== null
@@ -168,11 +169,15 @@ function App() {
 
 	// Partial recompute effects
 	useEffect(() => {
-		setNodePositions(prev => prev.changeLunarNodeMode(lunarNodeMode));
+		const newNP = nodePositions.changeLunarNodeMode(lunarNodeMode);
+		setNodePositions(newNP);
+		setNodeVelocities(nodeVelocities.changeLunarNodeMode(lunarNodeMode, newNP));
 	}, [lunarNodeMode])
 
 	useEffect(() => {
-		setNodePositions(prev => prev.changeHamburgSchoolMode(hamburgSchoolMode));
+		const newNP = nodePositions.changeHamburgSchoolMode(hamburgSchoolMode);
+		setNodePositions(newNP);
+		setNodeVelocities(nodeVelocities.changeHamburgSchoolMode(hamburgSchoolMode, newNP));
 	}, [hamburgSchoolMode])
 
 	useEffect(() => {
@@ -381,6 +386,7 @@ function App() {
 						>
 							<PlanetPanel
 								nodePositions={nodePositions}
+								nodeVelocities={nodeVelocities}
 								zodiacSignPositions={zodiacSignPositions}
 								fixedStarPositions={fixedStarPositions}
 								houseCuspPositions={houseCuspPositions}

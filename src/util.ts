@@ -148,7 +148,8 @@ export function sawtoothSine(x: number): number{
 // If includeSeconds is true, includes seconds: "15°23'45""
 export function formatAngle(
 	radians: number,
-	includeSeconds: boolean = false
+	includeSeconds: boolean = false,
+	elideDegreesIfZero: boolean = false,
 ): string {
 	const totalDegrees = (radians * 180) / Math.PI;
 	const degrees = Math.floor(totalDegrees);
@@ -156,9 +157,16 @@ export function formatAngle(
 	const minutes = Math.floor(remainingMinutes);
 
 	if (!includeSeconds) {
-		return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'`;
+		if (elideDegreesIfZero && degrees === 0) {
+			return `${minutes.toString().padStart(2, '0')}'`;
+		} else {
+			return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'`;
+		}
 	}
-
 	const seconds = Math.round((remainingMinutes - minutes) * 60);
-	return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"`;
+	if (elideDegreesIfZero && degrees === 0) {
+		return `${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"`;
+	} else {
+		return `${degrees}\u00B0${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"`;
+	}
 }

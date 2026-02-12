@@ -1,9 +1,3 @@
-FROM THE REFACTOR
-- NodeVelocities (derived from NodePositions after refactor is done)
-
-
-
-
 TRIVIAL
 -
 
