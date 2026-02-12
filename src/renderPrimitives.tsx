@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { Node, Zodiac, Mode, Element, mainAngles } from './astroDefs';
+import { AspectKind } from './aspectDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
 import {
 	zodiacSymbols,
@@ -21,6 +22,7 @@ const DEFAULT_SYMBOL_SIZE = 20;
 
 interface TextRenderOptions {
 	fontSize?: number;
+	fontStyle?: string;
 }
 
 interface SymbolRenderOptions {
@@ -131,6 +133,11 @@ export const renderAspectKind = (
 		size = DEFAULT_SYMBOL_SIZE,
 		fontSize = DEFAULT_TEXT_SIZE,
 	} = options;
+	
+	if (withArticle) {
+		throw new Error("Articles in renderAspectKind are not yet implemented");
+	}
+	
 	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showAspectLabels;
 	const resolvedColorcode = colorcode ?? useSettingsStore.getState().aspectsColorcoded;
 	
@@ -140,7 +147,7 @@ export const renderAspectKind = (
 	return resolvedShowLabel ? (
 		<label
 			className="text-xs whitespace-nowrap font-bold small-caps"
-			style={{color: aspectColorcoded ? `rgb(${r}, ${g}, ${b})` : "var(--color-text)"}}
+			style={{fontSize, color: aspectColorcoded ? `rgb(${r}, ${g}, ${b})` : "var(--color-text)"}}
 		>
 			{aspectKind}
 		</label>
@@ -265,12 +272,12 @@ export const renderMutualArrow = (options: TextRenderOptions = {}): ReactNode =>
 
 export const renderHookedArrow = (options: TextRenderOptions = {}): ReactNode => {
 	const { fontSize = DEFAULT_TEXT_SIZE } = options;
-	return <span className="mx-1" style={{ fontSize }}>{" \u21A9 "}</span>;s
+	return <span className="mx-1" style={{ fontSize }}>{" \u21A9 "}</span>;
 };
 
 export const renderDoubleArrow = (options: TextRenderOptions = {}): ReactNode => {
 	const { fontSize = DEFAULT_TEXT_SIZE } = options;
-	return <span className="mx-1" style={{ fontSize }}>{" ⇒ "}</span>;s
+	return <span className="mx-1" style={{ fontSize }}>{" ⇒ "}</span>;
 };
 
 // Renders a node with its sign in brackets, e.g. "Sun [Leo]"
@@ -421,6 +428,7 @@ export const renderDispositorChain = (
 interface SelectorButtonProps {
 	selected: boolean;
 	disabled?: boolean;
+	highlighted?: boolean;
 	onClick: () => void;
 	title?: string;
 	children: ReactNode;

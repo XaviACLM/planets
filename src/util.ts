@@ -18,9 +18,9 @@ export function fromZonedTime(date: Date, tz: string) {
 }
 
 // no comments
-export function toISOLocal(d) {
-	var z  = n =>  ('0' + n).slice(-2);
-	var zz = n => ('00' + n).slice(-3);
+export function toISOLocal(d: Date) {
+	var z  = (n: number) =>  ('0' + n).slice(-2);
+	var zz = (n: number) => ('00' + n).slice(-3);
 	var off = d.getTimezoneOffset();
 	var sign = off > 0? '-' : '+';
 	off = Math.abs(off);

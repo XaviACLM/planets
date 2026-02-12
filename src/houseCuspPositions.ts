@@ -6,6 +6,7 @@
 import { normalizeAngleRad, interpolateAngles, interpolateShorterAngle, anglesLieInShortArc } from './util.ts'
 
 import { Node, type SurfacePosition, type Zodiac } from './astroDefs.ts'
+import { HouseSystem } from './settingsDefs.ts'
 import { type vec3, toAstronomyVector, normalize, cross, computeAllSignificantPoints } from './geometry.ts'
 import { getTodayEclipticLongitudeFromEQJ } from './astronomyUtil.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
@@ -18,25 +19,6 @@ interface AxisAngles {
 	mc: number;
 	ic: number
 }
-
-export const HouseSystem = {
-	WHOLE_SIGN: "Whole Sign",
-	EQUAL_HOUSES: "Equal Houses",
-	PORPHYRY: "Porphyry",
-	EQUAL_HOUSES_VEHLOW: "Equal Houses - Vehlow",
-	WHOLE_SIGN_ARIES: "Whole Sign - Aries",
-
-	KRUSINSKY: "Krusinsky",
-	REGIOMONTANUS: "Regiomontanus",
-	MERIDIAN: "Meridian",
-	MORINUS: "Morinus",
-	CAMPANUS: "Campanus",
-	ZENITH_HORIZONTAL: "Zenith / Horizontal",
-
-	PLACIDUS: "Placidus",
-	KOCH: "Koch / Birthplace",
-} as const;
-export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];
 
 export const ayanamsaDependantHouseSystems: HouseSystem[] = [
 	HouseSystem.WHOLE_SIGN,
@@ -632,12 +614,15 @@ class HouseCuspPositions {
 		return this.copyWith({ zodiacSignPositions: newZSP, cuspPositions: newCusps });
 	}
 
-	public getCuspPositions(): number[] | null {
-		return this._cuspPositions;
+	public getCuspPositions(): number[] {
+		return this._cuspPositions!;
 	}
 
-	public getCuspPosition(i: number): number | null {
-		return this._cuspPositions?.[i] ?? null;
+	public getCuspPosition(i: number): number {
+		if (i >= this._cuspPositions!.length || i < 0) {
+			throw new Error("getCuspPosition called for invalid index");
+		}
+		return this._cuspPositions![i];
 	}
 
 	public getHouseAtLongitude(lon: number): number {

@@ -1,13 +1,14 @@
-import { useMemo, FC, ReactNode } from 'react';
-import { Node, Zodiac, Element, Mode, standardNodes, NodeType, nodeTypes, mainAngles } from './astroDefs';
+import { useMemo, type FC, type ReactNode } from 'react';
+import { Node, standardNodes, NodeType, nodeTypes, mainAngles } from './astroDefs';
 import { nodeSymbols, nodeShortName, nodePreferredName } from './astroGraphics.ts';
-import ZodiacPositions from './zodiacPositions.ts'
+import NodePositions from './nodePositions.ts'
+import { isNodeAboveHorizon, isNodeEastern } from './chartAnalysis.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { NodesToConsider } from './settingsDefs.ts'
 import { renderString } from './renderPrimitives.tsx'
 
 type HemispheresChartProps = {
-	zodiacPositions: ZodiacPositions,
+	nodePositions: NodePositions,
 }
 
 function capitalize(sentence: string): string {
@@ -26,7 +27,6 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number, nNod
 	// starts at nth. slight from 0.2. normal from 0.4. strong from 0.6
 	
 	// considering we're working with 10 standard planets. nth if equal, slight if 2 (4 vs 6), av if 4 (3 vs 7), strong if 6/8/10 (0,1,2 vs 8,9,10)
-	const strengthsPerDiff: (number|null)[] = [0, null, 1, null, 2, null, 3, null, 3, null, 3];
 	const strengthsPerRelDiff = (diffRel: number) => {
 		if (diffRel >= 0.6) { return 3; }
 		else if (diffRel >= 0.4) { return 2; }
@@ -90,13 +90,13 @@ function generateNodesPerRow(nNodes: number): number[]{
 		return [[], [1], [2], [3], [2, 2], [3, 2], [3, 3], [2, 3, 2], [3, 2, 3], [3, 3, 3], [3, 4, 3], [4, 3, 4], [4, 4, 4]][nNodes];
 	}
 	const numRows = Math.floor(nNodes/4)
-	const nodesPerRow = Array.from({length: numRows}, (_, i) => 4);
+	const nodesPerRow = Array.from({length: numRows}, () => 4);
 	nodesPerRow.push(nNodes - 4*numRows);
 	return nodesPerRow;
 }
 
 const HemispheresChart: FC<HemispheresChartProps> = ({
-	zodiacPositions,
+	nodePositions,
 }) => {
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const whichNodes = useSettingsStore(s => s.nodesInHemispheresChart);
@@ -123,14 +123,14 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		const nodesBelowWest: Node[] = [];
 	
 		for (const node of nodesInConsideration){
-			if (zodiacPositions.isNodeAboveHorizon(node)) {
-				if (zodiacPositions.isNodeEastern(node)) {
+			if (isNodeAboveHorizon(node, nodePositions)) {
+				if (isNodeEastern(node, nodePositions)) {
 					nodesAboveEast.push(node);
 				} else {
 					nodesAboveWest.push(node);
 				}
 			} else {
-				if (zodiacPositions.isNodeEastern(node)) {
+				if (isNodeEastern(node, nodePositions)) {
 					nodesBelowEast.push(node);
 				} else {
 					nodesBelowWest.push(node);
@@ -142,7 +142,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		const horizontalDiff: number = (nodesAboveEast.length + nodesBelowEast.length) - (nodesAboveWest.length + nodesBelowWest.length);
 
 		return {nodesAboveEast, nodesAboveWest, nodesBelowEast, nodesBelowWest, verticalDiff, horizontalDiff};
-	}, [zodiacPositions, nodesInConsideration]);
+	}, [nodePositions, nodesInConsideration]);
 	
 	const symbolSize = 20;
 	const nodeSpacing = 27;
@@ -157,7 +157,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		fontWeight: "bold",
 	} as const;
 	
-	const renderNodeGroupSVG = (nodes: Node): ReactNode => {
+	const renderNodeGroupSVG = (nodes: Node[]): ReactNode => {
 		if (showNodeLabels) {
 			const nNodes = nodes.length;
 			if (nNodes <= 5) {
@@ -221,7 +221,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 			const nodesPerRow: number[] = generateNodesPerRow(nodes.length);
 			const nRows = nodesPerRow.length;
 			const rowPerIdx = nodesPerRow.flatMap((count, index) => Array(count).fill(index));
-			const colPerIdx = nodesPerRow.flatMap((count, index) => Array.from(Array(count).keys()));
+			const colPerIdx = nodesPerRow.flatMap((count, _) => Array.from(Array(count).keys()));
 			return nodes.map((node, i) => {
 				const rowOffset = rowPerIdx[i] - (nRows-1)/2;
 				const colOffset = colPerIdx[i] - (nodesPerRow[rowPerIdx[i]]-1)/2;

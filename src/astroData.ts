@@ -1,22 +1,22 @@
-import { AstrologyMode, Zodiac, Node } from './astroDefs.ts'
+import { ZodiacMode, Zodiac, Node } from './astroDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
 // those missing from the code in scripts, pulling swissephemeris data
-export const ayanamsas: Partial<Record<AstrologyMode, number>> = {
+export const ayanamsas: Partial<Record<ZodiacMode, number>> = {
 	// in J2000 ecliptic longitude
-	[AstrologyMode.SIDEREAL_LAHIRI] : 23.8531,
-	[AstrologyMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
-	[AstrologyMode.SIDEREAL_RAMAN] : 22.4069, 
-	[AstrologyMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
-	[AstrologyMode.SIDEREAL_YUKTESHWAR] : 22.4778,
-	[AstrologyMode.SIDEREAL_DE_LUCE] : 27.8056,
-	[AstrologyMode.SIDEREAL_HIPPARCHOS] : 20.2461,
-	[AstrologyMode.SIDEREAL_BABYLONIAN] : 24.7867,
-	[AstrologyMode.SIDEREAL_HUBER] : 24.7336,
-	[AstrologyMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
-	[AstrologyMode.SIDEREAL_TRUE_CITRA] : 23.8400,
-	[AstrologyMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
+	[ZodiacMode.SIDEREAL_LAHIRI] : 23.8531,
+	[ZodiacMode.SIDEREAL_FAGAN_BRADLEY] : 24.7367,
+	[ZodiacMode.SIDEREAL_RAMAN] : 22.4069, 
+	[ZodiacMode.SIDEREAL_KRISHNAMURTI] : 23.7619,
+	[ZodiacMode.SIDEREAL_YUKTESHWAR] : 22.4778,
+	[ZodiacMode.SIDEREAL_DE_LUCE] : 27.8056,
+	[ZodiacMode.SIDEREAL_HIPPARCHOS] : 20.2461,
+	[ZodiacMode.SIDEREAL_BABYLONIAN] : 24.7867,
+	[ZodiacMode.SIDEREAL_HUBER] : 24.7336,
+	[ZodiacMode.SIDEREAL_SURYASIDDHANTA] : 20.8950,
+	[ZodiacMode.SIDEREAL_TRUE_CITRA] : 23.8400,
+	[ZodiacMode.SIDEREAL_TRUE_REVANTI] : 20.0451,
 }
 
 export const zodiacLongitudeClosest: Record<Zodiac, number> = {

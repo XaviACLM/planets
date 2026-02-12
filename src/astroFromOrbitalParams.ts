@@ -1,7 +1,7 @@
 import { Node } from './astroDefs.ts'
 
 // types for orbital elements
-interface OrbitParams {
+export interface OrbitParams {
 	a: number;	   // semi-major axis, AU
 	e: number;	   // eccentricity
 	i: number;	   // inclination, degrees

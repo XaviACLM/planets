@@ -119,7 +119,7 @@ import tSquareSymbol from "./assets/aspect-symbols/T-Square.png"
 
 import dotSymbol from "./assets/general-symbols/Dot.png"
 
-import earthImage from "./assets/planet-images/Earth.png" //unused
+//import earthImage from "./assets/planet-images/Earth.png" //unused
 import jupiterImage from "./assets/planet-images/Jupiter.png"
 import marsImage from "./assets/planet-images/Mars.png"
 import mercuryImage from "./assets/planet-images/Mercury.png"
@@ -276,13 +276,13 @@ export const nodeSymbols: Record<Node, string> = {
 	[Node.GKUNHOMDIMA] : gkunhomdimaSymbol,
 }
 
-export const nodeImages: Record<Node, string> = {
+export const nodeImages: Partial<Record<Node, string>> = {
 	[Node.SUN] : sunImage,
 	[Node.MOON] : moonImage,
 	[Node.MERCURY] : mercuryImage,
 	[Node.VENUS] : venusImage,
 	[Node.MARS] : marsImage,
-	[Node.EARTH] : earthImage,
+	//[Node.EARTH] : earthImage,
 	[Node.JUPITER] : jupiterImage,
 	[Node.SATURN] : saturnImage,
 	[Node.URANUS] : uranusImage,

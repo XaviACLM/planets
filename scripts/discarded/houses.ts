@@ -43,9 +43,9 @@ export const ayanamsaDependantHouseSystems: HouseSystem[] = [
 
 function computeWholeSignCuspPositions(
 	angles: AxisAngles,
-	zodiacSymbolPositions: Map<Zodiac, number>
+	signPositions: Map<Zodiac, number>
 ) {	
-	const longitudes = Array.from(zodiacSymbolPositions.values());
+	const longitudes = Array.from(signPositions.values());
 	let index = longitudes.findIndex((lon) => lon > angles.asc);
 	if (index === -1 || index === 0) {
 		index = longitudes.length - 1;
@@ -107,8 +107,8 @@ function computeEqualHousesVehlowCuspPositions(angles: AxisAngles){
 	];
 }
 
-function computeWholeSignAriesCuspPositions(zodiacSymbolPositions: Map<Zodiac, number>){
-	return Array.from(zodiacSymbolPositions.values());
+function computeWholeSignAriesCuspPositions(signPositions: Map<Zodiac, number>){
+	return Array.from(signPositions.values());
 }
 
 
@@ -496,7 +496,7 @@ export function computeHouseCuspPositions(
 	surfacePosition: SurfacePosition,
 	houseSystem: HouseSystem,
 	knownNodes: Map<Node, number>,
-	zodiacSymbolPositions: Map<Zodiac, number>
+	signPositions: Map<Zodiac, number>
 ): number[] | null {
 	const angles = {
 		asc: knownNodes.get(Node.ASCENDANT)!,
@@ -506,7 +506,7 @@ export function computeHouseCuspPositions(
 	}
 	switch (houseSystem) {
 		case HouseSystem.WHOLE_SIGN:
-			return computeWholeSignCuspPositions(angles, zodiacSymbolPositions);
+			return computeWholeSignCuspPositions(angles, signPositions);
 		case HouseSystem.EQUAL_HOUSES:
 			return computeEqualHousesCuspPositions(angles);
 		case HouseSystem.PORPHYRY:
@@ -514,7 +514,7 @@ export function computeHouseCuspPositions(
 		case HouseSystem.EQUAL_HOUSES_VEHLOW:
 			return computeEqualHousesVehlowCuspPositions(angles);
 		case HouseSystem.WHOLE_SIGN_ARIES:
-			return computeWholeSignAriesCuspPositions(zodiacSymbolPositions);
+			return computeWholeSignAriesCuspPositions(signPositions);
 		case HouseSystem.KRUSINSKY:
 			return computeKrusinskyCuspPositions(date, surfacePosition);
 		case HouseSystem.REGIOMONTANUS:

@@ -140,7 +140,7 @@ whether to call this function at all.)
 
 PHASE 4: DELETE ZodiacPositions, RENAME astrologyUtil.ts
 ---------------------------------------------------------
-- Delete zodiacPositions.ts
+- Delete zodiacPositions.ts (actually - don't do this yet, we'll do it at the end when we've verified that everything else works)
 - Rename astrologyUtil.ts -> chartAnalysis.ts
 - Update all imports
 
@@ -260,12 +260,16 @@ with the specific objects it needs:
     - rulershipGraph depends on nodePositions + zodiacSignPositions + dignityMode
 
 
+FIXING STUFF UP
+do a npm build later to catch type errors
+
 PHASE 8: CLEANUP
 -----------------
 - Verify no remaining references to ZodiacPositions
 - Verify all "zodiacSymbol" -> "zodiacSign" renames are complete
 - Verify all "astrologyMode" -> "zodiacMode" renames are complete
 - Run the app, test basic flows
+- Delete zodiacPositions.ts
 
 
 NOT IN SCOPE (future work noted by owner)

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { HouseSystem } from './houses.ts';
-import { Node, initiallySelectedNodes, AstrologyMode } from './astroDefs.ts';
+import { Node, initiallySelectedNodes, ZodiacMode } from './astroDefs.ts';
 import { AspectKind, defaultAspectKinds } from './aspectDefs.ts';
 import {
 	LunarNodeMode,
@@ -15,6 +14,7 @@ import {
 	FaceMode,
 	Theme,
 	NodesToConsider,
+	HouseSystem,
 } from './settingsDefs.ts';
 
 interface SettingsState {
@@ -81,8 +81,8 @@ interface SettingsState {
 	setLunarNodeMode: (v: LunarNodeMode) => void;
 	hamburgSchoolMode: HamburgSchoolMode;
 	setHamburgSchoolMode: (v: HamburgSchoolMode) => void;
-	astrologyMode: AstrologyMode;
-	setAstrologyMode: (v: AstrologyMode) => void;
+	zodiacMode: ZodiacMode;
+	setZodiacMode: (v: ZodiacMode) => void;
 	dignityMode: DignityMode;
 	setDignityMode: (v: DignityMode) => void;
 	houseAngularityMode: HouseAngularityMode;
@@ -174,8 +174,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setLunarNodeMode: (v) => set({ lunarNodeMode: v }),
 	hamburgSchoolMode: HamburgSchoolMode.NEELY,
 	setHamburgSchoolMode: (v) => set({ hamburgSchoolMode: v }),
-	astrologyMode: AstrologyMode.TROPICAL,
-	setAstrologyMode: (v) => set({ astrologyMode: v }),
+	zodiacMode: ZodiacMode.TROPICAL,
+	setZodiacMode: (v) => set({ zodiacMode: v }),
 	dignityMode: DignityMode.MODERN,
 	setDignityMode: (v) => set({ dignityMode: v }),
 	houseAngularityMode: HouseAngularityMode.TRADITIONAL,

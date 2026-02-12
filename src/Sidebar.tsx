@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { useSettingsStore } from './settingsStore.ts';
 import { Theme } from './settingsDefs.ts'
 

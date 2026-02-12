@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { type Aspect, filterAspectsByNode } from './aspects.ts';
 import { Node } from './astroDefs.ts';
-import { nodeSymbols, aspectSymbols, dotSymbol, aspectKindColors } from './astroGraphics.ts'
+import { nodeSymbols, dotSymbol } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
-import { Theme } from './settingsDefs.ts'
 import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
 import { formatAngle } from './util';
 
@@ -87,9 +86,9 @@ function AspectMenu({ aspects, onDelete, onHover, highlightedNode, clearHighligh
 	highlightedNode: Node | null,
 	clearHighlight: () => void
 }) {
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	useSettingsStore(s => s.showNodeLabels);
 	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
-	const aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	useSettingsStore(s => s.aspectsColorcoded);
 
 	// Filter aspects if a node is highlighted
 	const displayedAspects = useMemo(() => {

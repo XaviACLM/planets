@@ -51,7 +51,7 @@ const Selector = <T extends string | number>({
 
 
 export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'ButtonComponent'>> = (props) => {
-	const _showLabels = useSettingsStore(s => s.showNodeLabels);
+	useSettingsStore(s => s.showNodeLabels);
 	return (<Selector
 		{...props}
 		categories={nodeCategories}
@@ -60,8 +60,8 @@ export const NodeSelector: FC<Omit<SelectorProps<Node>, 'categories' | 'ButtonCo
 };
 
 export const AspectKindSelector: FC<Omit<SelectorProps<AspectKind>, 'categories' | 'ButtonComponent'>> = (props) => {
-	const _showLabels = useSettingsStore(s => s.showAspectLabels);
-	const _aspectsColorcoded = useSettingsStore(s => s.aspectsColorcoded);
+	useSettingsStore(s => s.showAspectLabels);
+	useSettingsStore(s => s.aspectsColorcoded);
 	return (<Selector
 		{...props}
 		categories={aspectKindCategories}

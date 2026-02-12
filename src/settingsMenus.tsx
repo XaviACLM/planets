@@ -1,6 +1,5 @@
 import { type FC } from 'react';
-import { HouseSystem } from './houses.ts';
-import { AstrologyMode } from './astroDefs.ts';
+import { ZodiacMode } from './astroDefs.ts';
 import {
 	LunarNodeMode,
 	HamburgSchoolMode,
@@ -14,6 +13,7 @@ import {
 	BoundsMode,
 	Theme,
 	NodesToConsider,
+	HouseSystem,
 } from './settingsDefs.ts';
 import {
 	SettingsRenderer,
@@ -88,7 +88,7 @@ const mainSettingsSpec: SettingsItem[] = [
 	separator(),
 
 	// Astrology mode
-	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
+	dropdown('zodiacMode', 'Zodiac Mode', Object.values(ZodiacMode)),
 
 	separator(),
 	
@@ -130,7 +130,7 @@ export const MainSettingsMenu: FC = () => {
 // Element/Mode Balance (Dominance Chart) settings
 const dominanceSettingsSpec: SettingsItem[] = [
 	dropdown('nodesInDominanceChart', 'Nodes in Element/Mode Analysis', Object.values(NodesToConsider)),
-	dropdown('astrologyMode', 'Mode', Object.values(AstrologyMode)),
+	dropdown('zodiacMode', 'Zodiac Mode', Object.values(ZodiacMode)),
 	separator(),
 	checkbox('showNodeLabels', 'Show node labels'),
 	checkbox('showElementLabels', 'Show element labels'),

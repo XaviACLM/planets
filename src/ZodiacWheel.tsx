@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react'
 
-import ZodiacPositions from './zodiacPositions.ts'
+import NodePositions from './nodePositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import HouseCuspPositions from './houseCuspPositions.ts'
+import { getSignOfNode } from './chartAnalysis.ts'
 import { type Aspect } from './aspects.ts'
-import { Node, Zodiac, standardZodiac } from './astroDefs.ts'
+import { Node, Zodiac } from './astroDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad, interpolateShorterAngle, angleShortDistance } from './util.ts'
 import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
@@ -51,8 +54,10 @@ function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRad
 	}
 }
 
-function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedNode, setHighlightedNode }: {
-	zodiacPositions: ZodiacPositions,
+function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, aspects, highlightedAspect, highlightedNode, setHighlightedNode }: {
+	nodePositions: NodePositions,
+	zodiacSignPositions: ZodiacSignPositions,
+	houseCuspPositions: HouseCuspPositions | null,
 	aspects: Aspect[],
 	highlightedAspect: Aspect | null,
 	highlightedNode: Node | null,
@@ -82,27 +87,26 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 	const strokeWidthTertiary = 0.05;
 	const blurBaseWidth = 2;
 	
-	const { offset, nodeAngles, houseCuspAngles, siderealOffset } = useMemo(() => {
-		
-		const offset = zodiacPositions.hasSurfacePosition() ?
-			Math.PI - zodiacPositions.getNodePosition(Node.ASCENDANT)
+	const { offset, nodeAngles, houseCuspAngles } = useMemo(() => {
+
+		const offset = nodePositions.hasSurfacePosition() ?
+			Math.PI - nodePositions.get(Node.ASCENDANT)
 			: -Math.PI/12;
-		
+
 		// this is vestigial, but it will be useful in the future to implement anglo style
 		const nodeAngles = new Map<Node, number>();
-		zodiacPositions.getNodePositions().forEach((position, node) => {
+		nodePositions.getPositions().forEach((position, node) => {
 			if (selectedNodes.has(node)) {
 				nodeAngles.set(node, position + offset);
 			}
 		})
-		
+
 		return {
 			offset: offset,
 			nodeAngles: nodeAngles,
-			houseCuspAngles: zodiacPositions.getHouseCuspPositions(),
-			siderealOffset: zodiacPositions.siderealOffset,
+			houseCuspAngles: houseCuspPositions?.getCuspPositions() ?? null,
 		}
-	}, [zodiacPositions, selectedNodes]);
+	}, [nodePositions, zodiacSignPositions, houseCuspPositions, selectedNodes]);
 	
 	const adjustedNodeAngles = useMemo(() => {
 		if ( nodeAngles === null ) return null;
@@ -120,7 +124,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 		return adjustedMap;
 	}, [nodeAngles]);
 
-	const zodiac: Map<Zodiac, number> = zodiacPositions.getZodiacSymbolPositions();
+	const zodiac: Map<Zodiac, number> = zodiacSignPositions.getSignPositions();
 	const nodes: Node[] = Array.from(nodeAngles.keys());
 	
 	const [hoveredZodiac, setHoveredZodiac] = useState<Zodiac | null>(null);
@@ -184,7 +188,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 						<g key={index}>
 							{Array.from({length: numDits}, (_,i) => i+1).map(i => {
 								const a = aBase + i*Math.PI/180;
-								const ditHeight = 0.5*(1 + (i%5===0) + (i%10===0));
+								const ditHeight = 0.5*(1 + Number(i%5===0) + Number(i%10===0));
 								return (
 									<line
 										key={i}
@@ -203,7 +207,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				})}
 				
 				{/*House separators*/}
-				{zodiacPositions.houseCuspsAreDefined()
+				{houseCuspAngles !== null
 				&& houseCuspAngles.map((lon, index) => {
 					const a = lon + offset + ( housePresweep ? -Math.PI/36 : 0 ); //5º presweep
 					return (
@@ -221,7 +225,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				})}
 				
 				{/*Sign separators if no houses*/}
-				{!zodiacPositions.houseCuspsAreDefined()
+				{houseCuspAngles === null
 				&& Array.from(zodiac.values()).map((lon, index) => {
 					const a = lon + offset;
 					return (
@@ -240,7 +244,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				
 				{/*House presweep line*/}
 				{housePresweep
-				&& zodiacPositions.houseCuspsAreDefined()
+				&& houseCuspAngles !== null
 				&& houseCuspAngles.map((lon, index) => {
 					const a = lon + offset;
 					return (
@@ -258,11 +262,11 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				})}
 								
 				{/*House cusp labels*/}
-				{zodiacPositions.houseCuspsAreDefined()
+				{houseCuspAngles !== null
 				&& houseCuspAngles.map((lon, index) => {
 					const nextLon = houseCuspAngles[(index+1)%houseCuspAngles.length];
 					const size = Math.min(5, 30*angleShortDistance(nextLon, lon));
-					const a = interpolateShorterAngle(0.5, lon, nextLon) + offset - 5*Math.PI/180*housePresweep;
+					const a = interpolateShorterAngle(0.5, lon, nextLon) + offset - 5*Math.PI/180*Number(housePresweep);
 					const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
 					const flip = (r>90 && r<270) && flipText;
 					const adj = 0.005*(flip ? -size: size);
@@ -320,7 +324,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 					Array.from(zodiac.entries()).map(([symbol, _], i, array) => {
 						const lon = array[(i+1)%array.length][1];
 						const a = lon - 0.01 + offset;
-						const rad = sectorRadius + 1.5*(symbol===Zodiac.SAGITTARIUS);
+						const rad = sectorRadius + 1.5*Number(symbol===Zodiac.SAGITTARIUS);
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
@@ -346,7 +350,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 				{adjustedNodeAngles != null &&
 					nodes.map((node, i) => {
 						const a = adjustedNodeAngles.get(node)!;
-						const z = zodiacPositions.getSymbolOfNode(node);
+						const z = getSignOfNode(node, nodePositions, zodiacSignPositions);
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
@@ -426,7 +430,7 @@ function ZodiacWheel({ zodiacPositions, aspects, highlightedAspect, highlightedN
 							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
 						}
 						
-						const z = zodiacPositions.getSymbolOfNode(node);
+						const z = getSignOfNode(node, nodePositions, zodiacSignPositions);
 						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node) || visuallyHighlightedNode === node;
 						const filter = isHighlighted && nodesWithRedundantSymbols.includes(node) ? "url(#shadow)" : "";
 						

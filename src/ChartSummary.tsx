@@ -1,18 +1,21 @@
-import { FC, useMemo, useRef, useState, useLayoutEffect } from 'react';
+import { type FC, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { Node, Sect } from './astroDefs';
-import { getChartSect, getChartRuler } from './astrologyUtil';
+import { getChartSect, getChartRuler, getSignOfNode, getNodePositionWithinSign } from './chartAnalysis';
 import { formatAngle } from './util';
 import { renderString, renderNode, renderSign } from './renderPrimitives';
 import { useSettingsStore } from './settingsStore';
-import ZodiacPositions from './zodiacPositions';
+import NodePositions from './nodePositions';
+import ZodiacSignPositions from './zodiacSignPositions';
 
 type ChartSummaryProps = {
-	zodiacPositions: ZodiacPositions;
+	nodePositions: NodePositions;
+	zodiacSignPositions: ZodiacSignPositions;
 	setHighlightedNode: (node: Node) => void;
 };
 
 const ChartSummary: FC<ChartSummaryProps> = ({
-	zodiacPositions,
+	nodePositions,
+	zodiacSignPositions,
 	setHighlightedNode,
 }) => {
 
@@ -20,16 +23,14 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
 
 	const dignityMode = useSettingsStore(s => s.dignityMode);
-	const hasSurfacePosition = zodiacPositions.hasSurfacePosition();
 
 	const chartSect = useMemo(() => {
-		if (!hasSurfacePosition) return null;
-		return getChartSect(zodiacPositions);
-	}, [zodiacPositions, hasSurfacePosition]);
+		return getChartSect(nodePositions);
+	}, [nodePositions]);
 
 	const chartRuler = useMemo(() => {
-		return getChartRuler(zodiacPositions, dignityMode);
-	}, [zodiacPositions, dignityMode]);
+		return getChartRuler(nodePositions, zodiacSignPositions, dignityMode);
+	}, [nodePositions, zodiacSignPositions, dignityMode]);
 
 	// Refs for measuring node row widths
 	const nodeRefs = useRef<Map<Node, HTMLDivElement | null>>(new Map());
@@ -57,11 +58,11 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 
 		setSortedNodes(sorted);
 		setMeasured(true);
-	}, [zodiacPositions, showNodeLabels, showSymbolLabels]);
+	}, [nodePositions, zodiacSignPositions, showNodeLabels, showSymbolLabels]);
 
 	const renderClickableNode = (node: Node, showPosition: boolean = true, forceText: boolean = false) => {
-		const sign = zodiacPositions.getSymbolOfNode(node);
-		const positionInSign = zodiacPositions.getNodePositionWithinSign(node);
+		const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
+		const positionInSign = getNodePositionWithinSign(node, nodePositions, zodiacSignPositions);
 		const formattedPosition = formatAngle(positionInSign);
 
 		return (
@@ -82,11 +83,6 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 		);
 	};
 
-	// If no surface position, we can't show much
-	if (!hasSurfacePosition) {
-		return null;
-	}
-
 	const isDiurnal = chartSect === Sect.DIURNAL;
 
 	return (
@@ -106,7 +102,7 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 			{sortedNodes.map((node) => (
 				<div
 					key={node}
-					ref={(el) => nodeRefs.current.set(node, el)}
+					ref={(el) => { nodeRefs.current.set(node, el); }}
 					style={{ width: 'fit-content' }}
 				>
 					{renderClickableNode(node)}

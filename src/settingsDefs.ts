@@ -79,3 +79,22 @@ export const NodesToConsider = {
 	ALL : "All nodes",
 } as const;
 export type NodesToConsider = typeof NodesToConsider[keyof typeof NodesToConsider];
+
+export const HouseSystem = {
+	WHOLE_SIGN: "Whole Sign",
+	EQUAL_HOUSES: "Equal Houses",
+	PORPHYRY: "Porphyry",
+	EQUAL_HOUSES_VEHLOW: "Equal Houses - Vehlow",
+	WHOLE_SIGN_ARIES: "Whole Sign - Aries",
+
+	KRUSINSKY: "Krusinsky",
+	REGIOMONTANUS: "Regiomontanus",
+	MERIDIAN: "Meridian",
+	MORINUS: "Morinus",
+	CAMPANUS: "Campanus",
+	ZENITH_HORIZONTAL: "Zenith / Horizontal",
+
+	PLACIDUS: "Placidus",
+	KOCH: "Koch / Birthplace",
+} as const;
+export type HouseSystem = typeof HouseSystem[keyof typeof HouseSystem];

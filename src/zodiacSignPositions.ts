@@ -1,14 +1,14 @@
 import { normalizeAngleRad } from './util.ts'
-import { AstrologyMode, Zodiac, standardZodiac, irregularAstrologyModes } from './astroDefs.ts'
+import { ZodiacMode, Zodiac, standardZodiac, irregularZodiacModes } from './astroDefs.ts'
 import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU } from './astroData.ts'
 import { addPrecession } from './astronomyUtil.ts'
 
-function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
-	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
+function computeSiderealOffset(date: Date, zodiacMode: ZodiacMode): number {
+	if (zodiacMode === ZodiacMode.TROPICAL) { return 0; }
 
-	const ayanamsaJ2000 = ayanamsas[astrologyMode];
+	const ayanamsaJ2000 = ayanamsas[zodiacMode];
 	if (ayanamsaJ2000 === undefined) {
-		throw new Error("Irregular astrology mode passed to computeSiderealOffset");
+		throw new Error("Irregular zodiac mode passed to computeSiderealOffset");
 	}
 
 	return addPrecession(date, ayanamsaJ2000*Math.PI/180);
@@ -20,34 +20,34 @@ function computeSignPositionsFromSiderealOffset(siderealOffset: number): Map<Zod
 	));
 }
 
-function computeSignPositionsForIrregularMode(date: Date, astrologyMode: AstrologyMode): Map<Zodiac, number> {
+function computeSignPositionsForIrregularMode(date: Date, zodiacMode: ZodiacMode): Map<Zodiac, number> {
 	let zodiacLongitudes = null;
 
-	if (astrologyMode === AstrologyMode.CONSTELLATIONS_CLOSEST) {
+	if (zodiacMode === ZodiacMode.CONSTELLATIONS_CLOSEST) {
 		zodiacLongitudes = zodiacLongitudeClosest;
-	} else if (astrologyMode === AstrologyMode.CONSTELLATIONS_IAU) {
+	} else if (zodiacMode === ZodiacMode.CONSTELLATIONS_IAU) {
 		zodiacLongitudes = zodiacLongitudeIAU;
 	} else {
-		throw new Error("Regular astrology mode passed to computeSignPositionsForIrregularMode");
+		throw new Error("Regular zodiac mode passed to computeSignPositionsForIrregularMode");
 	}
 
 	return new Map(
 		Object.entries(zodiacLongitudes).map(([zodiac, lon]) =>
-			[zodiac, addPrecession(date, lon)]
+			[zodiac as Zodiac, addPrecession(date, lon)]
 		)
 	);
 }
 
 interface ZodiacSignPositionsConstructorArgs {
 	date: Date;
-	zodiacMode: AstrologyMode;
+	zodiacMode: ZodiacMode;
 	siderealOffset?: number | null;
 	signPositions?: Map<Zodiac, number>;
 }
 
 class ZodiacSignPositions {
 	private readonly _date: Date;
-	private readonly _zodiacMode: AstrologyMode;
+	private readonly _zodiacMode: ZodiacMode;
 	private readonly _signPositions: Map<Zodiac, number>;
 	public readonly siderealOffset: number | null;
 
@@ -56,7 +56,7 @@ class ZodiacSignPositions {
 		this._zodiacMode = config.zodiacMode;
 
 		if (config.siderealOffset === undefined) {
-			if (irregularAstrologyModes.includes(this._zodiacMode)) {
+			if (irregularZodiacModes.includes(this._zodiacMode)) {
 				this.siderealOffset = null;
 			} else {
 				this.siderealOffset = computeSiderealOffset(this._date, this._zodiacMode);
@@ -74,7 +74,7 @@ class ZodiacSignPositions {
 		}
 	}
 
-	static create(date: Date, zodiacMode: AstrologyMode): ZodiacSignPositions {
+	static create(date: Date, zodiacMode: ZodiacMode): ZodiacSignPositions {
 		return new ZodiacSignPositions({ date, zodiacMode });
 	}
 
@@ -88,7 +88,7 @@ class ZodiacSignPositions {
 
 	public getSignAtLongitude(lon: number): Zodiac {
 		if (this.isRegular()) {
-			return standardZodiac[Math.floor((((lon-this.siderealOffset)*6/Math.PI)%12+12)%12)];
+			return standardZodiac[Math.floor((((lon-this.siderealOffset!)*6/Math.PI)%12+12)%12)];
 		} else {
 			const entries = Array.from(this._signPositions.entries());
 			const index = entries.findIndex(([_, zlon]) => zlon > lon);
@@ -102,10 +102,10 @@ class ZodiacSignPositions {
 
 	public getPositionWithinSign(lon: number): number {
 		if (this.isRegular()) {
-			return normalizeAngleRad(lon - this.siderealOffset)%(Math.PI/6);
+			return normalizeAngleRad(lon - this.siderealOffset!)%(Math.PI/6);
 		} else {
 			const sign = this.getSignAtLongitude(lon);
-			return lon - this._signPositions.get(sign);
+			return lon - this._signPositions.get(sign)!;
 		}
 	}
 }

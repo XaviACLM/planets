@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { type FC } from 'react';
 import { RulershipGraph } from './rulershipGraph.ts';
 import { renderTitle, renderFinalDispositors, renderDispositorChain } from './renderPrimitives';
 import { useSettingsStore } from './settingsStore.ts'
@@ -13,9 +13,9 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 	
 	// locally unused, render dependency
 	// ( = these lines here to force rerender if these values change)
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
-	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
-	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	useSettingsStore(s => s.showNodeLabels);
+	useSettingsStore(s => s.showSymbolLabels);
+	useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	return (
 		<div className="text-theme-text p-4" style={{ width: 330 }}>

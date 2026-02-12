@@ -1,7 +1,8 @@
-import { Node, Zodiac, Element, zodiacElement, standardNodes, irregularAstrologyModes, Sect, standardZodiac, classicalDignityData, modernDignityData, type DignityData } from './astroDefs.ts';
+import { Node, Zodiac, Element, zodiacElement, standardNodes, Sect, standardZodiac, classicalDignityData, modernDignityData } from './astroDefs.ts';
 import { DignityMode, TriplicityMode, FaceMode, BoundsMode } from './settingsDefs.ts';
-import { getChartSect } from './astrologyUtil.ts';
-import ZodiacPositions from './zodiacPositions.ts';
+import { getChartSect, getSignOfNode, getNodePositionWithinSign } from './chartAnalysis.ts';
+import NodePositions from './nodePositions.ts';
+import ZodiacSignPositions from './zodiacSignPositions.ts';
 
 export const Dignity = {
 	DOMICILE: "Domicile",
@@ -17,7 +18,7 @@ export type DignityState = {
 	degreeOffset?: number;
 };
 
-export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, dignityMode: DignityMode): DignityState | null {
+export function getDignityState(node: Node, nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, dignityMode: DignityMode): DignityState | null {
 	const dignityData = dignityMode === DignityMode.CLASSICAL ? classicalDignityData : modernDignityData;
 
 	const data = dignityData[node];
@@ -25,9 +26,9 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 		return null;
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node);
-	const position = zodiacPositions.getNodePosition(node);
-	const signStartPositions = zodiacPositions.getZodiacSymbolPositions();
+	const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
+	const position = nodePositions.get(node);
+	const signStartPositions = zodiacSignPositions.getSignPositions();
 	const signStart = signStartPositions.get(sign)!;
 	const degreeInSign = ((position - signStart) * 180 / Math.PI + 360) % 360;
 
@@ -36,7 +37,7 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 	}
 
 	if (data.exaltation && data.exaltation.sign === sign) {
-		if (data.exaltation.degree !== undefined && !irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
+		if (data.exaltation.degree !== undefined && zodiacSignPositions.isRegular()) {
 			const offset = degreeInSign - data.exaltation.degree;
 			return { dignity: Dignity.EXALTATION, degreeOffset: offset };
 		}
@@ -48,7 +49,7 @@ export function getDignityState(node: Node, zodiacPositions: ZodiacPositions, di
 	}
 
 	if (data.fall && data.fall.sign === sign) {
-		if (data.fall.degree !== undefined && !irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
+		if (data.fall.degree !== undefined && zodiacSignPositions.isRegular()) {
 			const offset = degreeInSign - data.fall.degree;
 			return { dignity: Dignity.FALL, degreeOffset: offset };
 		}
@@ -96,22 +97,22 @@ const triplicityDataByMode: Record<TriplicityMode, TriplicityData> = {
 	[TriplicityMode.PTOLEMAIC_LILLY]: ptolemaicLillyTriplicityData,
 };
 
-export function getTriplicityRole(node: Node, zodiacPositions: ZodiacPositions, triplicityMode: TriplicityMode): TriplicityRole | null {
+export function getTriplicityRole(node: Node, nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, triplicityMode: TriplicityMode): TriplicityRole | null {
 	if (!standardNodes.includes(node)) {
 		throw new Error(`getTriplicityRole is only valid for planets and luminaries, got: ${node}`);
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node);
-	
+	const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
+
 	if (sign === Zodiac.OPHIUCHUS) {
 		return null;
 	}
-	
-	const elem = zodiacElement[sign];
+
+	const elem = zodiacElement[sign]!;
 	const triplicityData = triplicityDataByMode[triplicityMode];
 	const rulers = triplicityData[elem];
 
-	if (getChartSect(zodiacPositions) === Sect.DIURNAL) {
+	if (getChartSect(nodePositions) === Sect.DIURNAL) {
 		if (rulers.diurnal === node) {
 			return TriplicityRole.DIURNAL;
 		}
@@ -169,18 +170,18 @@ const faceDataByMode: Record<FaceMode, Partial<FaceData>> = {
 	[FaceMode.MODERN]: modernFaceData,
 };
 
-export function getFaceLord(node: Node, zodiacPositions: ZodiacPositions, faceMode: FaceMode): Node {
-	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
-		throw new Error(`getFaceLord is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
+export function getFaceLord(node: Node, nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, faceMode: FaceMode): Node {
+	if (!zodiacSignPositions.isRegular()) {
+		throw new Error(`getFaceLord is not supported for irregular zodiac modes`);
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node);
-	const positionInSign = zodiacPositions.getNodePositionWithinSign(node);
+	const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
+	const positionInSign = getNodePositionWithinSign(node, nodePositions, zodiacSignPositions);
 
 	const faceData = faceDataByMode[faceMode];
 	const faceLords = faceData[sign];
 	const faceIndex = Math.floor(positionInSign / (Math.PI/18));
-	return faceLords[faceIndex];
+	return faceLords![faceIndex];
 }
 
 // ============================================================================
@@ -188,10 +189,11 @@ export function getFaceLord(node: Node, zodiacPositions: ZodiacPositions, faceMo
 // ============================================================================
 
 type BoundEntry = { upToDegree: number; lord: Node };
-type BoundsData = Record<Zodiac, BoundEntry[]>;
+// partial bc always missing ophiuchus
+type BoundsData = Partial<Record<Zodiac, BoundEntry[]>>;
 
 // https://astrolibrary.org/library/tetrabiblos/tetrabiblos-22/
-const egyptianBoundsData: Partial<BoundsData> = {
+const egyptianBoundsData: BoundsData = {
 	// Each array lists bounds in order, with cumulative degree endpoints
 	[Zodiac.ARIES]: [
 		{ upToDegree: 6, lord: Node.JUPITER },
@@ -280,7 +282,7 @@ const egyptianBoundsData: Partial<BoundsData> = {
 };
 
 // https://astrolibrary.org/library/tetrabiblos/tetrabiblos-23/
-const ptolemaicBoundsData: Partial<BoundsData> = {
+const ptolemaicBoundsData: BoundsData = {
 	[Zodiac.ARIES]: [
 		{ upToDegree: 6, lord: Node.JUPITER },
 		{ upToDegree: 14, lord: Node.VENUS },
@@ -368,7 +370,7 @@ const ptolemaicBoundsData: Partial<BoundsData> = {
 };
 
 // https://astrolibrary.org/library/tetrabiblos/tetrabiblos-23/
-function generateChaldeanBoundsData(sect: Sect): BoundsData{
+function generateChaldeanBoundsData(sect: Sect): BoundsData {
 	if (sect === Sect.VARIABLE) {
 		throw new Error(`generateChaldeanBoundsData does not support variable sect (not a valid chart sect)`);
 	}
@@ -405,13 +407,13 @@ function generateChaldeanBoundsData(sect: Sect): BoundsData{
 const diurnalChaldeanBoundsData = generateChaldeanBoundsData(Sect.DIURNAL);
 const nocturnalChaldeanBoundsData = generateChaldeanBoundsData(Sect.NOCTURNAL);
 
-function getBoundsData(boundsMode: BoundsMode, zodiacPositions: ZodiacPositions): BoundsData{
+function getBoundsData(boundsMode: BoundsMode, nodePositions: NodePositions): BoundsData{
 	if (boundsMode === BoundsMode.EGYPTIAN){
 		return egyptianBoundsData;
 	} else if (boundsMode === BoundsMode.PTOLEMAIC){
 		return ptolemaicBoundsData;
 	} else { //chaldean
-		const sect = getChartSect(zodiacPositions); // will error if no surface pos
+		const sect = getChartSect(nodePositions); // will error if no surface pos
 		if (sect === Sect.DIURNAL) {
 			return diurnalChaldeanBoundsData;
 		} else {
@@ -420,20 +422,22 @@ function getBoundsData(boundsMode: BoundsMode, zodiacPositions: ZodiacPositions)
 	}
 }
 
-export function getBoundLord(node: Node, zodiacPositions: ZodiacPositions, boundsMode: BoundsMode): Node {
-	if (irregularAstrologyModes.includes(zodiacPositions.astrologyMode)) {
-		throw new Error(`getBoundsLord is not supported for irregular astrology mode: ${zodiacPositions.astrologyMode}`);
+export function getBoundLord(node: Node, nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, boundsMode: BoundsMode): Node {
+	if (!zodiacSignPositions.isRegular()) {
+		throw new Error(`getBoundsLord is not supported for irregular zodiac modes`);
 	}
 
-	const sign = zodiacPositions.getSymbolOfNode(node);
-	const positionInSign = zodiacPositions.getNodePositionWithinSign(node);
+	const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
+	const positionInSign = getNodePositionWithinSign(node, nodePositions, zodiacSignPositions);
 	const degreeInSign = positionInSign * 180 / Math.PI;
 
-	const boundsData = getBoundsData(boundsMode, zodiacPositions)
-	const bounds = boundsData[sign];
+	const boundsData = getBoundsData(boundsMode, nodePositions)
+	const bounds = boundsData[sign]!;
 	for (const bound of bounds) {
 		if (degreeInSign <= bound.upToDegree) {
 			return bound.lord;
 		}
 	}
+	
+	throw new Error("Error in getBoundLord - bound data incomplete");
 }

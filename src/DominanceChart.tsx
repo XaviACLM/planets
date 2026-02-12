@@ -1,4 +1,4 @@
-import { useMemo, FC, ReactNode } from 'react';
+import { useMemo, type FC, type ReactNode } from 'react';
 import {
 	Node,
 	Zodiac,
@@ -14,25 +14,27 @@ import {
 	nodeTypes,
 	NodeType
 } from './astroDefs';
-import { nodeSymbols, elementSymbols, modeSymbols } from './astroGraphics.ts';
-import ZodiacPositions from './zodiacPositions.ts'
+import { elementSymbols, modeSymbols } from './astroGraphics.ts';
+import NodePositions from './nodePositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import { getSignOfNode } from './chartAnalysis.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { NodesToConsider } from './settingsDefs.ts'
 import { renderString, renderSmallcapsString, renderTitle, renderElement, renderMode, renderNode } from './renderPrimitives.tsx'
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
-	zodiacPositions: ZodiacPositions,
+	nodePositions: NodePositions,
+	zodiacSignPositions: ZodiacSignPositions,
 }
 
 // Custom hook containing all shared logic for dominance charts
-const useDominanceData = (zodiacPositions: ZodiacPositions) => {
+const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions) => {
 	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const showElementLabels = useSettingsStore(s => s.showElementLabels);
 	const showModeLabels = useSettingsStore(s => s.showModeLabels);
 	const symbolSize = 20;
 	const textSize = 12;
-	const textSizeTitle = 14;
 	const strokeWidth = 1;
 	
 	const whichNodes = useSettingsStore(s => s.nodesInDominanceChart);
@@ -50,24 +52,18 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		}
 	}, [whichNodes, selectedNodes, hamburgPhysical])
 
-	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes} = useMemo(() => {
+	const {nodeElements, nodeModes, nodesByElement, nodesByMode, validPersonalPlanets, validSocialPlanets, validTranspersonalPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes} = useMemo(() => {
 		const nodeElements: Map<Node, Element> = new Map();
 		const nodeModes: Map<Node, Mode> = new Map();
 		const nodesByElement: Map<Element, Node[]> = new Map();
 		const nodesByMode: Map<Mode, Node[]> = new Map();
+		const validPersonalPlanets: Node[] = [];
 		const validSocialPlanets: Node[] = [];
+		const validTranspersonalPlanets: Node[] = [];
 		const validMainAngles: Node[] = [];
 		const validLuminaries: Node[] = [];
 		const allPlanets: Node[] = [];
 		const discardedNodes: Node[] = [];
-
-		const nodesInConsiderationz: Node[] = [
-			...personalPlanets,
-			...socialPlanets,
-			...transpersonalPlanets,
-			Node.ASCENDANT,
-			Node.MIDHEAVEN,
-		];
 
 		for (const elem of Object.values(Element)){
 			nodesByElement.set(elem, []);
@@ -77,18 +73,24 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		}
 
 		for (const node of nodesInConsideration){
-			if (nodeDependsOnLocation[node] && !zodiacPositions.hasSurfacePosition()){
+			if (nodeDependsOnLocation[node] && !nodePositions.hasSurfacePosition()){
 				continue;
 			}
 
-			const z = zodiacPositions.getSymbolOfNode(node);
+			const z = getSignOfNode(node, nodePositions, zodiacSignPositions);
 			if (z == Zodiac.OPHIUCHUS){
 				discardedNodes.push(node);
 				continue;
 			}
 
+			if (personalPlanets.includes(node)){
+				validPersonalPlanets.push(node);
+			}
 			if (socialPlanets.includes(node)){
 				validSocialPlanets.push(node);
+			}
+			if (transpersonalPlanets.includes(node)){
+				validTranspersonalPlanets.push(node);
 			}
 			if (nodeDependsOnLocation[node]){
 				validMainAngles.push(node);
@@ -100,17 +102,18 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 				allPlanets.push(node);
 			}
 
-			const elem = zodiacElement[z];
-			const mode = zodiacMode[z];
+			const elem = zodiacElement[z]!;
+			const mode = zodiacMode[z]!;
 
 			nodeElements.set(node, elem);
 			nodeModes.set(node, mode);
-			nodesByElement.get(elem).push(node);
-			nodesByMode.get(mode).push(node);
+			nodesByElement.get(elem)!.push(node);
+			nodesByMode.get(mode)!.push(node);
 		}
 
-		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validSocialPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes};
-	}, [zodiacPositions, nodesInConsideration]);
+
+		return {nodeElements, nodeModes, nodesByElement, nodesByMode, validPersonalPlanets, validSocialPlanets, validTranspersonalPlanets, validMainAngles, validLuminaries, allPlanets, discardedNodes};
+	}, [nodePositions, zodiacSignPositions, nodesInConsideration]);
 
 	const renderElementSVG = (elem: Element, leftJustify: boolean): ReactNode => {
 		return showElementLabels ? (
@@ -161,11 +164,11 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		return (nodes: Node[]): Map<T, number> => {
 			const counts: Map<T, number> = new Map();
 			for (const value of Object.values(enumObj)){
-				counts.set(value, 0);
+				counts.set(value as T, 0);
 			}
 			for (const node of nodes){
-				const value = nodeMap.get(node);
-				counts.set(value, counts.get(value) + 1);
+				const value = nodeMap.get(node)!;
+				counts.set(value as T, counts.get(value)! + 1);
 			}
 			return counts;
 		};
@@ -184,7 +187,7 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 			if (maxCount !== 1){
 				return null;
 			}
-			return Array.from(counts.entries()).find(([_,count]) => count == maxVal)[0];
+			return Array.from(counts.entries()).find(([_,count]) => count == maxVal)![0];
 		};
 	};
 
@@ -330,9 +333,9 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 						<div key={node} className="mx-2 flex items-center gap-1">
 							{renderNode(node, { forceText: true })}
 							{" | "}
-							{renderElement(nodeElements.get(node))}
+							{renderElement(nodeElements.get(node)!)}
 							{" · "}
-							{renderMode(nodeModes.get(node))}
+							{renderMode(nodeModes.get(node)!)}
 						</div>
 					);
 				})}
@@ -362,7 +365,9 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		nodeModes,
 		nodesByElement,
 		nodesByMode,
+		validPersonalPlanets,
 		validSocialPlanets,
+		validTranspersonalPlanets,
 		validMainAngles,
 		validLuminaries,
 		allPlanets,
@@ -375,12 +380,12 @@ const useDominanceData = (zodiacPositions: ZodiacPositions) => {
 		renderTitle,
 		renderElement,
 		renderMode,
-		zodiacPositions,
+		nodePositions,
 	};
 };
 
 // Abbreviated view component
-export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
+export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ nodePositions, zodiacSignPositions }) => {
 	const {
 		validLuminaries,
 		validMainAngles,
@@ -389,8 +394,8 @@ export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPosition
 		modeBarChart,
 		dominanceString,
 		smallNodeDisplay,
-		zodiacPositions: zp,
-	} = useDominanceData(zodiacPositions);
+		nodePositions: np,
+	} = useDominanceData(nodePositions, zodiacSignPositions);
 
 	return (
 		<div className="text-theme-text p-4 pt-2 pb-2" style={{ width: 330 }}>
@@ -412,7 +417,7 @@ export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPosition
 				{smallNodeDisplay(validLuminaries)}
 			</div>}
 
-			{ zp.hasSurfacePosition()
+			{ np.hasSurfacePosition()
 			&& validMainAngles.length != 0
 			&& <div>
 				<hr className="opacity-50 my-2"/>
@@ -423,12 +428,14 @@ export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ zodiacPosition
 };
 
 // Full view component
-const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
+export const DominanceChart: FC<DominanceChartProps> = ({ nodePositions, zodiacSignPositions }) => {
 	const {
 		textSize,
 		nodesByElement,
 		nodesByMode,
+		validPersonalPlanets,
 		validSocialPlanets,
+		validTranspersonalPlanets,
 		validMainAngles,
 		validLuminaries,
 		discardedNodes,
@@ -440,18 +447,18 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 		renderTitle,
 		renderElement,
 		renderMode,
-		zodiacPositions: zp,
-	} = useDominanceData(zodiacPositions);
+		nodePositions: np,
+	} = useDominanceData(nodePositions, zodiacSignPositions);
 
 	return (
 		<div className="text-theme-text p-4 pt-3 pb-0" style={{ width: 330 }}>
 
 			<div>
 				{renderTitle("Personal Planets")}
-				{dominanceString(personalPlanets)}
+				{dominanceString(validPersonalPlanets)}
 				<div className="flex justify-center">
-					{elementBarChart(personalPlanets, false)}
-					{modeBarChart(personalPlanets, true)}
+					{elementBarChart(validPersonalPlanets, false)}
+					{modeBarChart(validPersonalPlanets, true)}
 				</div>
 			</div>
 
@@ -476,14 +483,14 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 
 			<div>
 				{renderTitle("Transpersonal Planets")}
-				{dominanceString(transpersonalPlanets)}
+				{dominanceString(validTranspersonalPlanets)}
 				<div className="flex justify-center">
-					{elementBarChart(transpersonalPlanets, false)}
-					{modeBarChart(transpersonalPlanets, true)}
+					{elementBarChart(validTranspersonalPlanets, false)}
+					{modeBarChart(validTranspersonalPlanets, true)}
 				</div>
 			</div>
 
-			{ zp.hasSurfacePosition()
+			{ np.hasSurfacePosition()
 			&& validMainAngles.length != 0
 			&& <div>
 				<hr className="opacity-50 my-2"/>
@@ -536,8 +543,8 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 			</div>
 
 			{ (discardedNodes.length != 0) &&
-				<div>
-					<hr className="opacity-50"/>
+				<div className="pb-2">
+					<hr className="opacity-50 pb-2"/>
 					{"※"}
 					{listNodes(discardedNodes, true)}
 					<span style={{fontSize: textSize}}> in Ophiuchus: discarded from analysis.</span>
@@ -546,5 +553,3 @@ const DominanceChart: FC<DominanceChartProps> = ({ zodiacPositions }) => {
 		</div>
 	);
 }
-
-export default DominanceChart;

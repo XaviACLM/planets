@@ -2,25 +2,27 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
-import DominanceChart, { AbridgedDominanceChart } from './DominanceChart'
+import { DominanceChart, AbridgedDominanceChart } from './DominanceChart'
 import HemispheresChart from './HemispheresChart'
 import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import ChartSummary from './ChartSummary'
 import PlanetPanel from './PlanetPanel.tsx'
-import ZodiacPositions from './zodiacPositions.ts'
+import NodePositions from './nodePositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import FixedStarPositions from './fixedStarPositions.ts'
 import { RulershipGraph } from './rulershipGraph.ts'
 import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { Node } from './astroDefs.ts'
 import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
-import { HouseSystem } from './houses.ts'
+import HouseCuspPositions from './houseCuspPositions.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
 import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
-import { Theme } from './settingsDefs.ts'
+import { Theme, HouseSystem } from './settingsDefs.ts'
 import {
 	MainSettingsMenu,
 	DominanceSettingsMenu,
@@ -62,7 +64,7 @@ function App() {
 
 	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
-	const astrologyMode = useSettingsStore(s => s.astrologyMode);
+	const zodiacMode = useSettingsStore(s => s.zodiacMode);
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
@@ -97,22 +99,30 @@ function App() {
 		}
 	}, [highlightedNode]);
 
-	const [zodiacPositions, setZodiacPositions] = useState(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
+	const [nodePositions, setNodePositions] = useState(() => NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode));
+	const [zodiacSignPositions, setZodiacSignPositions] = useState(() => ZodiacSignPositions.create(selectedDate, zodiacMode));
+	const [fixedStarPositions, setFixedStarPositions] = useState(() => FixedStarPositions.create(selectedDate));
+	const [houseCuspPositions, setHouseCuspPositions] = useState<HouseCuspPositions | null>(() =>
+		selectedCity !== null
+			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, ZodiacSignPositions.create(selectedDate, zodiacMode), housePresweep)
+			: null
+	);
+	const [houseSystemComputationFailed, setHouseSystemComputationFailed] = useState<boolean>(selectedCity !== null && houseCuspPositions === null);
 
 	const rulershipGraph = useMemo<RulershipGraph>(() => {
-		return RulershipGraph.create(zodiacPositions, dignityMode);
-	}, [zodiacPositions, dignityMode])
+		return RulershipGraph.create(nodePositions, zodiacSignPositions, dignityMode);
+	}, [nodePositions, zodiacSignPositions, dignityMode])
 
 	// all aspects of all kinds from all nodes
 	const fullAspects = useMemo(() => {
-		return findAspects(zodiacPositions.getNodePositions(), aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
-	}, [zodiacPositions, aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
+		return findAspects(nodePositions.getPositions(), aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
+	}, [nodePositions, aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
 
 	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
 	const filteredAspects = useMemo(() => {
 		return filterAspects(
 			fullAspects,
-			zodiacPositions.getNodePositions(),
+			nodePositions.getPositions(),
 			selectedNodes,
 			selectedAspectKinds,
 			aspectPhysicalityFilter,
@@ -138,26 +148,49 @@ function App() {
 		return flattenSubaspectsToList(aspects)
 	}, [aspects])
 
-	// recompute zodiac whenever date or time changes
+	// Full recompute on date/city change
 	useEffect(() => {
-		setZodiacPositions(ZodiacPositions.create(selectedDate, selectedCity, lunarNodeMode, houseSystem, astrologyMode, hamburgSchoolMode, housePresweep));
+		const newNodePositions = NodePositions.create(selectedDate, selectedCity, lunarNodeMode, hamburgSchoolMode);
+		const newZSP = ZodiacSignPositions.create(selectedDate, zodiacMode);
+		setNodePositions(newNodePositions);
+		setZodiacSignPositions(newZSP);
+		setFixedStarPositions(FixedStarPositions.create(selectedDate));
+		const newHCP = selectedCity !== null
+			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, newZSP, housePresweep)
+			: null;
+		setHouseCuspPositions(newHCP);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
 	}, [selectedCity, selectedDate])
 
-	// handlers for changing config details in the zodiac positions that only require partial recomputation
+	// Partial recompute effects
 	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeHouseSystem(houseSystem));
-	}, [houseSystem])
-	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeLunarNodeMode(lunarNodeMode));
+		setNodePositions(prev => prev.changeLunarNodeMode(lunarNodeMode));
 	}, [lunarNodeMode])
+
 	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeAstrologyMode(astrologyMode));
-	}, [astrologyMode])
-	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeHamburgSchoolMode(hamburgSchoolMode));
+		setNodePositions(prev => prev.changeHamburgSchoolMode(hamburgSchoolMode));
 	}, [hamburgSchoolMode])
+
 	useEffect(() => {
-		setZodiacPositions(zodiacPositions.changeHousePresweep(housePresweep));
+		const newZSP = ZodiacSignPositions.create(selectedDate, zodiacMode);
+		setZodiacSignPositions(newZSP);
+		const newHCP = houseCuspPositions?.changeZodiacSignPositions(newZSP) ?? null;
+		setHouseCuspPositions(newHCP);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+	}, [zodiacMode])
+
+	useEffect(() => {
+		const newHCP = selectedCity !== null
+			? HouseCuspPositions.create(selectedDate, selectedCity, houseSystem, zodiacSignPositions, housePresweep)
+			: null;
+		setHouseCuspPositions(newHCP);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
+	}, [houseSystem])
+
+	useEffect(() => {
+		const newHCP = houseCuspPositions?.changeHousePresweep(housePresweep) ?? null;
+		setHouseCuspPositions(newHCP);
+		setHouseSystemComputationFailed(selectedCity !== null && newHCP === null);
 	}, [housePresweep])
 	
 	const currentTimezone = useMemo(() => {
@@ -238,10 +271,13 @@ function App() {
 				onClick={() => setHighlightedNode(null)}
 			>
 				<EsotericModePanel/>
-				<ChartSummary
-					zodiacPositions={zodiacPositions}
-					setHighlightedNode={setHighlightedNode}
-				/>
+				{nodePositions.hasSurfacePosition() && (
+					<ChartSummary
+						nodePositions={nodePositions}
+						zodiacSignPositions={zodiacSignPositions}
+						setHighlightedNode={setHighlightedNode}
+					/>
+				)}
 				<button
 					className="absolute top-4 right-4 text-theme-text bg-theme-bg border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4"
 					onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
@@ -249,14 +285,16 @@ function App() {
 					{menuOpen ? '✕' : '☰'}
 				</button>
 				<ZodiacWheel
-					zodiacPositions={zodiacPositions}
+					nodePositions={nodePositions}
+					zodiacSignPositions={zodiacSignPositions}
+					houseCuspPositions={houseCuspPositions}
 					aspects={flattenedAspects}
 					highlightedAspect={highlightedAspect}
 					highlightedNode={highlightedNode}
 					setHighlightedNode={setHighlightedNode}
 				/>
 
-				{zodiacPositions.houseSystemUndefinedForPosition() &&
+				{houseSystemComputationFailed &&
 					<div
 						className="absolute bottom-5 right-5 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] max-w-[400px] leading-relaxed"
 						onClick={(e) => e.stopPropagation()}
@@ -323,7 +361,10 @@ function App() {
 							helpContent={<PlanetInfoHelp />}
 						>
 							<PlanetPanel
-								zodiacPositions={zodiacPositions}
+								nodePositions={nodePositions}
+								zodiacSignPositions={zodiacSignPositions}
+								fixedStarPositions={fixedStarPositions}
+								houseCuspPositions={houseCuspPositions}
 								rulershipGraph={rulershipGraph}
 								aspects={aspects}
 								date={selectedDate}
@@ -345,10 +386,10 @@ function App() {
 							settingsMenu={DominanceSettingsMenu}
 							helpContent={<DominanceChartHelp />}
 						>
-							<AbridgedDominanceChart zodiacPositions={zodiacPositions} />
-							<DominanceChart zodiacPositions={zodiacPositions} />
+							<AbridgedDominanceChart nodePositions={nodePositions} zodiacSignPositions={zodiacSignPositions} />
+							<DominanceChart nodePositions={nodePositions} zodiacSignPositions={zodiacSignPositions} />
 						</Module>
-						{ zodiacPositions.hasSurfacePosition()
+						{ nodePositions.hasSurfacePosition()
 						&& (
 							<Module
 								title="Orientation"
@@ -357,7 +398,7 @@ function App() {
 								helpContent={<OrientationHelp />}
 							>
 								<HemispheresChart
-									zodiacPositions={zodiacPositions}
+									nodePositions={nodePositions}
 								/>
 							</Module>
 						)}

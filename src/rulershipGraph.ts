@@ -1,27 +1,29 @@
 import { Node, Zodiac, standardNodes, classicalRulerships, modernRulerships } from './astroDefs';
 import { DignityMode } from './settingsDefs.ts'
-import ZodiacPositions from './zodiacPositions.ts'
+import NodePositions from './nodePositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import { getSignOfNode } from './chartAnalysis.ts'
 
 // this approach (to get copyWith) is actually unnecessary since changing either main arg results in full recomputation
 // but might be useful to keep it like this for later
 // and it wouldn't be impossible to avoid recomputation, actually, at the very least ruledBy is very redundant. but...
 
-function constructRulershipGraphInternals(zodiacPositions: ZodiacPositions, dignityMode: DignityMode) {
-		
+function constructRulershipGraphInternals(nodePositions: NodePositions, zodiacSignPositions: ZodiacSignPositions, dignityMode: DignityMode) {
+
 	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
-	
+
 	const rules: Map<Node, Node[]> = new Map(standardNodes.map(node => [node, []]));
 	const ruledBy = new Map<Node, Node>();
 	const sign = new Map<Node, Zodiac>();
 	for ( const node of standardNodes ){
-		const symbol = zodiacPositions.getSymbolOfNode(node);
+		const symbol = getSignOfNode(node, nodePositions, zodiacSignPositions);
 		const ruler = rulerships[symbol]
 		ruledBy.set(node, ruler);
-		rules.get(ruler).push(node);
+		rules.get(ruler)!.push(node);
 		sign.set(node, symbol);
 	}
 	
-	const leafNodes: Node[] = standardNodes.filter(node => rules.get(node).length == 0);
+	const leafNodes: Node[] = standardNodes.filter(node => rules.get(node)!.length == 0);
 	
 	const isFinalDispositor: Map<Node, boolean> = new Map(standardNodes.map(node => [node, false]));
 	const finalDispositors: Node[][] = [];
@@ -45,14 +47,14 @@ function constructRulershipGraphInternals(zodiacPositions: ZodiacPositions, dign
 			}
 			visited.set(currentNode, true);
 			chain.push(currentNode);
-			currentNode = ruledBy.get(currentNode);
+			currentNode = ruledBy.get(currentNode)!;
 		}
 	}
 	
 	const signedFinalDispositors = finalDispositors.map(nodes => {
 		return {
 			nodes: nodes,
-			signs: nodes.map(node => sign.get(node)),
+			signs: nodes.map(node => sign.get(node)!),
 		}
 	})
 	
@@ -80,10 +82,11 @@ export function getFinalDispositorsOfChain(dispositorChain: DispositorChain): Fi
 }
 
 interface RulershipGraphConstructorArgs {
-	zodiacPositions: ZodiacPositions,
+	nodePositions: NodePositions,
+	zodiacSignPositions: ZodiacSignPositions,
 	dignityMode: DignityMode,
 	// internal
-	_rulerships?: Map<Zodiac, Node>;
+	_rulerships?: Record<Zodiac, Node>;
 	_sign?: Map<Node, Zodiac>;
 	_ruledBy?: Map<Node, Node>;
 	_rules?: Map<Node, Node[]>;
@@ -93,32 +96,35 @@ interface RulershipGraphConstructorArgs {
 }
 
 export class RulershipGraph {
-	public readonly zodiacPositions: ZodiacPositions;
+	public readonly nodePositions: NodePositions;
+	public readonly zodiacSignPositions: ZodiacSignPositions;
 	public readonly dignityMode: DignityMode;
-	
-	private readonly _rulerships: Map<Zodiac, Node>;
+
+	private readonly _rulerships: Record<Zodiac, Node>;
 	private readonly _sign: Map<Node, Zodiac>;
 	private readonly _ruledBy: Map<Node, Node>;
 	private readonly _rules: Map<Node, Node[]>;
 	private readonly _leafNodes: Node[];
-	private readonly _finalDispositors: Node[][];
+	private readonly _finalDispositors: FinalDispositors[];
 	private readonly _isFinalDispositor: Map<Node, boolean>;
 	
-	constructor( config: ZodiacPositionsConstructorArgs ){
-		this.zodiacPositions = config.zodiacPositions;
+	constructor( config: RulershipGraphConstructorArgs ){
+		this.nodePositions = config.nodePositions;
+		this.zodiacSignPositions = config.zodiacSignPositions;
 		this.dignityMode = config.dignityMode;
-		
+
 		if (config._ruledBy) {
-			this._rulerships = config._rulerships;
-			this._sign = config._sign;
-			this._ruledBy = config._ruledBy;
-			this._rules = config._rules;
-			this._leafNodes = config._leafNodes;
-			this._finalDispositors = config._finalDispositors;
-			this._isFinalDispositor = config._isFinalDispositor;
+			// everything is defined, then
+			this._rulerships = config._rulerships!;
+			this._sign = config._sign!;
+			this._ruledBy = config._ruledBy!;
+			this._rules = config._rules!;
+			this._leafNodes = config._leafNodes!;
+			this._finalDispositors = config._finalDispositors!;
+			this._isFinalDispositor = config._isFinalDispositor!;
 			return;
 		} else {
-			const { rulerships, sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor } = constructRulershipGraphInternals(this.zodiacPositions, this.dignityMode);
+			const { rulerships, sign, ruledBy, rules, leafNodes, finalDispositors, isFinalDispositor } = constructRulershipGraphInternals(this.nodePositions, this.zodiacSignPositions, this.dignityMode);
 			this._rulerships = rulerships;
 			this._sign = sign;
 			this._ruledBy = ruledBy;
@@ -130,18 +136,23 @@ export class RulershipGraph {
 	}
 	
 	static create(
-		zodiacPositions: ZodiacPositions,
+		nodePositions: NodePositions,
+		zodiacSignPositions: ZodiacSignPositions,
 		dignityMode: DignityMode,
 	): RulershipGraph {
 		return new RulershipGraph({
-			zodiacPositions: zodiacPositions,
+			nodePositions: nodePositions,
+			zodiacSignPositions: zodiacSignPositions,
 			dignityMode: dignityMode,
 		});
 	}
 	
+	/*
+	unused
 	private copyWith( updates: Partial<RulershipGraphConstructorArgs> ): RulershipGraph {
 		return new RulershipGraph({
-			zodiacPositions: this.zodiacPositions,
+			nodePositions: this.nodePositions,
+			zodiacSignPositions: this.zodiacSignPositions,
 			dignityMode: this.dignityMode,
 			//internal
 			_rulerships: this._rulerships,
@@ -154,9 +165,10 @@ export class RulershipGraph {
 			...updates
 		});
 	}
+	*/
 	
 	public getDispositorChain(node: Node): DispositorChain{
-		const chain = [];
+		const chain: Node[] = [];
 		var firstFinalDispositor: Node | null = null;
 		var firstFinalDispositorIdx: number | null = null;
 		var currentNode = node;
@@ -172,16 +184,16 @@ export class RulershipGraph {
 			}
 			idx++;
 			chain.push(currentNode);
-			currentNode = this._ruledBy.get(currentNode);
+			currentNode = this._ruledBy.get(currentNode)!;
 		}
 		return {
 			nodes: chain,
-			signs: chain.map(node => this._sign.get(node)),
-			cycleStartIndex: firstFinalDispositorIdx,
+			signs: chain.map(node => this._sign.get(node)!),
+			cycleStartIndex: firstFinalDispositorIdx!,
 		}
 	}
 	
-	public getDispositorChainForNonstandardNode(node: node, sign: Zodiac): DispositorChain {
+	public getDispositorChainForNonstandardNode(node: Node, sign: Zodiac): DispositorChain {
 		const chain = this.getDispositorChain(this._rulerships[sign]);
 		return {
 			nodes: [node, ...chain.nodes],
@@ -192,14 +204,14 @@ export class RulershipGraph {
 	
 	public getRuledNodes(node: Node, transitive: boolean): Node[]{
 		if (!transitive){
-			return this._rules.get(node).filter(n => n !== node);
+			return this._rules.get(node)!.filter(n => n !== node);
 		}
 		// otherwise, some tree search
 		const transitivelyRuledNodes: Node[] = [];
-		const nodesToExpand: Node[] = [...this._rules.get(node)];
+		const nodesToExpand: Node[] = [...this._rules.get(node)!];
 		const visited = [node];
 		while (nodesToExpand.length > 0) {
-			const currentNode = nodesToExpand.pop();
+			const currentNode = nodesToExpand.pop()!;
 			if (this._isFinalDispositor.get(currentNode)){
 				if (visited.includes(currentNode)){
 					continue;
@@ -209,7 +221,7 @@ export class RulershipGraph {
 			}
 			transitivelyRuledNodes.push(currentNode);
 			// no satisfying way to do this in js
-			for (const otherNode of this._rules.get(currentNode)){
+			for (const otherNode of this._rules.get(currentNode)!){
 				nodesToExpand.push(otherNode);
 			}
 		}
@@ -220,11 +232,11 @@ export class RulershipGraph {
 		return this._leafNodes;
 	}
 	
-	public getFinalDispositors(): Node[][]{
+	public getFinalDispositors(): FinalDispositors[]{
 		return this._finalDispositors;
 	}
 	
 	public isFinalDispositor(node: Node): boolean{
-		return this._isFinalDispositor.get(node);
+		return this._isFinalDispositor.get(node)!;
 	}
 }

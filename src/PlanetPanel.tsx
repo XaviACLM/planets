@@ -1,36 +1,37 @@
-import { useMemo, FC } from 'react';
-import { Node, mainAngles, NodeType, nodeTypes, zodiacElement, zodiacMode, standardNodes, Sect, nodeDependsOnLocation, irregularAstrologyModes } from './astroDefs';
+import { useMemo, type FC } from 'react';
+import { Node, mainAngles, NodeType, nodeTypes, standardNodes, Sect, nodeDependsOnLocation } from './astroDefs';
 import { nodeAverageSpeed } from './astroData';
-import { DignityMode, HouseAngularityMode, HamburgSchoolMode, Theme } from './settingsDefs';
+import { Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
-import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect, getFixedStarsWithinLongitude } from './astrologyUtil';
+import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect, getFixedStarsWithinLongitude, getSignOfNode, getNodePositionWithinSign, getHouseOfNode, type AngleProximityInfo } from './chartAnalysis';
 import { getEclipticLongitudeSpeed } from './astronomyUtil';
 import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
 import {
-	renderTitle,
 	renderString,
 	renderSmallcapsString,
 	renderSign,
 	renderNode,
-	renderElement,
-	renderMode,
-	renderArrow,
-	NodeSelectorButton,
 	renderDispositorChain,
 	renderFinalDispositors,
 	renderCommaSeparatedNodeList
 } from './renderPrimitives';
 import { nodeImages, nodeSymbols } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
-import ZodiacPositions from './zodiacPositions';
+import NodePositions from './nodePositions';
+import ZodiacSignPositions from './zodiacSignPositions';
+import FixedStarPositions from './fixedStarPositions';
+import HouseCuspPositions from './houseCuspPositions';
 
 // Opinionated thresholds
 const ANGLE_PROXIMITY_THRESHOLD_DEG = 10; // degrees - show "near angle" info within this distance
 					
 type PlanetPanelProps = {
-	zodiacPositions: ZodiacPositions;
+	nodePositions: NodePositions;
+	zodiacSignPositions: ZodiacSignPositions;
+	fixedStarPositions: FixedStarPositions;
+	houseCuspPositions: HouseCuspPositions | null;
 	rulershipGraph: RulershipGraph;
 	aspects: Map<Aspect, Aspect[]>;
 	date: Date;
@@ -41,7 +42,10 @@ type PlanetPanelProps = {
 };
 
 const PlanetPanel: FC<PlanetPanelProps> = ({
-	zodiacPositions,
+	nodePositions,
+	zodiacSignPositions,
+	fixedStarPositions,
+	houseCuspPositions,
 	rulershipGraph,
 	aspects,
 	date,
@@ -58,9 +62,9 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	// locally unused, render dependency
 	// ( = these lines here to force rerender if these values change)
 	// ( this is an extremely normal react pattern, but I'll keep it here until I stop feeling uneasy about not mentioning it anywhere)
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
-	const showSymbolLabels = useSettingsStore(s => s.showSymbolLabels);
-	const showSignsInDispositorChains = useSettingsStore(s => s.showSignsInDispositorChains);
+	useSettingsStore(s => s.showNodeLabels);
+	useSettingsStore(s => s.showSymbolLabels);
+	useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	const useFixedStars = useSettingsStore(s => s.useFixedStars);
 	const fixedStarMaximumDistance = useSettingsStore(s => s.fixedStarMaximumDistance);
@@ -76,10 +80,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const theme = useSettingsStore(s => s.theme);
 	const isDarkTheme = theme === Theme.DARK;
 	
-	const hasSurfacePosition = zodiacPositions.hasSurfacePosition();
+	const hasSurfacePosition = nodePositions.hasSurfacePosition();
 	const chartRuler = useMemo(
-		() => getChartRuler(zodiacPositions, dignityMode),
-		[zodiacPositions, dignityMode]
+		() => hasSurfacePosition ? getChartRuler(nodePositions, zodiacSignPositions, dignityMode) : null,
+		[nodePositions, zodiacSignPositions, dignityMode]
 	);
 
 	const isStandardNode = standardNodes.includes(selectedNode);
@@ -91,11 +95,11 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			return hasSurfacePosition || !nodeDependsOnLocation[node];
 		});
 		return nodes.sort((a, b) => {
-			const lonA = zodiacPositions.getNodePosition(a);
-			const lonB = zodiacPositions.getNodePosition(b);
+			const lonA = nodePositions.get(a);
+			const lonB = nodePositions.get(b);
 			return lonB - lonA;
 		});
-	}, [selectedNodes, zodiacPositions, hasSurfacePosition]);
+	}, [selectedNodes, nodePositions, hasSurfacePosition]);
 
 	const handlePrevNode = () => {
 		const currentIndex = orderedNodes.indexOf(selectedNode);
@@ -110,31 +114,30 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	};
 
 	// Get sign and position for selected node
-	const nodeSign = zodiacPositions.getSymbolOfNode(selectedNode);
-	const positionInSign = zodiacPositions.getNodePositionWithinSign(selectedNode);
+	const nodeSign = getSignOfNode(selectedNode, nodePositions, zodiacSignPositions);
+	const positionInSign = getNodePositionWithinSign(selectedNode, nodePositions, zodiacSignPositions);
 	const formattedPosition = formatAngle(positionInSign);
 
-	const faceLord = irregularAstrologyModes.includes(zodiacPositions.astrologyMode) ? null : getFaceLord(selectedNode, zodiacPositions, faceMode);
-	const boundLord = irregularAstrologyModes.includes(zodiacPositions.astrologyMode) ? null : getBoundLord(selectedNode, zodiacPositions, boundsMode);
+	const faceLord = zodiacSignPositions.isRegular() ? getFaceLord(selectedNode, nodePositions, zodiacSignPositions, faceMode) : null;
+	const boundLord = zodiacSignPositions.isRegular() ? getBoundLord(selectedNode, nodePositions, zodiacSignPositions, boundsMode) : null;
 
 	// Get house placement (if location defined)
-	// TODO whether this is defined is a bit more complicated
-	const houseNumber = hasSurfacePosition
-		? zodiacPositions.getHouseOfNode(selectedNode)
+	const houseNumber = houseCuspPositions !== null
+		? getHouseOfNode(selectedNode, nodePositions, houseCuspPositions)
 		: null;
 
 	// Get house angularity
-	const houseAngularities = hasSurfacePosition
-		? getHouseAngularities(zodiacPositions, houseAngularityMode)
+	const houseAngularities = houseCuspPositions !== null
+		? getHouseAngularities(nodePositions, houseCuspPositions, houseAngularityMode)
 		: null;
 	const angularity = houseNumber && houseAngularities
 		? houseAngularities[houseNumber - 1]
 		: null;
 
 	// 2.1 Dignity
-	const dignityState = getDignityState(selectedNode, zodiacPositions, dignityMode);
-	
-	const triplicityRole = (hasSurfacePosition && standardNodes.includes(selectedNode)) ? getTriplicityRole(selectedNode, zodiacPositions, triplicityMode) : null;
+	const dignityState = getDignityState(selectedNode, nodePositions, zodiacSignPositions, dignityMode);
+
+	const triplicityRole = (hasSurfacePosition && standardNodes.includes(selectedNode)) ? getTriplicityRole(selectedNode, nodePositions, zodiacSignPositions, triplicityMode) : null;
 
 	// 2.2 Speed & Retrograde
 	const { formattedSpeedDegPerDay, isStationary, isRetrograde } = useMemo(() => {
@@ -142,38 +145,40 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			return { formattedSpeedDegPerDay: null, isStationary: null, isRetrograde: null};
 		}
 		const speedRadPerDay = getEclipticLongitudeSpeed(selectedNode, date, hamburgSchoolMode);
-		const isStationary = Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]*stationarySpeedFractionThreshold;
+		const isStationary = Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]!*stationarySpeedFractionThreshold;
 		const isRetrograde = !isStationary && speedRadPerDay < 0;
 		const formattedSpeedDegPerDay = formatAngle(Math.abs(speedRadPerDay), Math.abs(speedRadPerDay)<Math.PI/180);
 		return {formattedSpeedDegPerDay, isStationary, isRetrograde};
 	}, [selectedNode, date, hamburgSchoolMode])
 
 	const nearbyFixedStars = useMemo(() => {
-		return getFixedStarsWithinLongitude(selectedNode, zodiacPositions, fixedStarMaximumDistance*Math.PI/180);
-	}, [selectedNode, fixedStarMaximumDistance, zodiacPositions])
+		return getFixedStarsWithinLongitude(selectedNode, nodePositions, fixedStarPositions, fixedStarMaximumDistance*Math.PI/180);
+	}, [selectedNode, fixedStarMaximumDistance, nodePositions, fixedStarPositions])
 
 	// 2.3 Angle proximity
 	const angleProximity = useMemo(() => {
 		if (!hasSurfacePosition) return null;
-		return getAngleProximity(selectedNode, zodiacPositions);
-	}, [selectedNode, zodiacPositions, hasSurfacePosition]);
+		return getAngleProximity(selectedNode, nodePositions);
+	}, [selectedNode, nodePositions, hasSurfacePosition]);
 
 	const angleProximityDeg = angleProximity ? (angleProximity.distance * 180 / Math.PI) : null;
 	const showAngleProximity = angleProximityDeg !== null && angleProximityDeg <= ANGLE_PROXIMITY_THRESHOLD_DEG && !mainAngles.includes(selectedNode);
 
 	// 2.4 Rulership chain
-	const { isFinalDispositor, dispositorChain } = useMemo(() => {
+	const { isFinalDispositor, dispositorChain, finalDispositors } = useMemo(() => {
 		if (isStandardNode) {
 			const isFinalDispositor = rulershipGraph.isFinalDispositor(selectedNode);
 			const chain = rulershipGraph.getDispositorChain(selectedNode);
 			return {
 				isFinalDispositor,
-				dispositorChain: isFinalDispositor ? getFinalDispositorsOfChain(chain) : chain,
+				dispositorChain: isFinalDispositor ? null : chain,
+				finalDispositors: isFinalDispositor ? getFinalDispositorsOfChain(chain) : null,
 			};
 		} else {
 			return {
 				isFinalDispositor: false,
-				dispositorChain: rulershipGraph.getDispositorChainForNonstandardNode(selectedNode, nodeSign)
+				dispositorChain: rulershipGraph.getDispositorChainForNonstandardNode(selectedNode, nodeSign),
+				finalDispositors: null,
 			};
 		}
 	}, [selectedNode, rulershipGraph]);
@@ -199,10 +204,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const { chartIsDiurnal, inSect } = useMemo(() => {
 		if (!hasSurfacePosition) {return { chartIsDiurnal: null, inSect: null }};
 		return {
-			chartIsDiurnal: getChartSect(zodiacPositions) === Sect.DIURNAL,
-			inSect: isInSect(selectedNode, zodiacPositions)
+			chartIsDiurnal: getChartSect(nodePositions) === Sect.DIURNAL,
+			inSect: isInSect(selectedNode, nodePositions)
 		};
-	}, [selectedNode, zodiacPositions]);
+	}, [selectedNode, nodePositions]);
 
 	const formatOrdinal = (n: number): string => {
 		const suffixes = ["th", "st", "nd", "rd"];
@@ -211,19 +216,19 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	};
 	
 	const formatAngleProximity = (angleProximityInfo: AngleProximityInfo) => {
-		const preposition = angleProximity.passed ? "past" : "before";
+		const preposition = angleProximityInfo.passed ? "past" : "before";
 		const verbs: Partial<Record<Node, string[]>> = {
 			[Node.ASCENDANT] : ["Rising", "Risen"],
 			[Node.IMUM_COELI] : ["Anti-culminating", "Anti-culminated"],
 			[Node.DESCENDANT] : ["Setting", "Set"],
 			[Node.MIDHEAVEN] : ["Culminating", "Culminated"],
 		}
-		const verb = verbs[angleProximityInfo.closestAngle][angleProximityInfo.passed ? 1 : 0];
+		const verb = verbs[angleProximityInfo.closestAngle]![angleProximityInfo.passed ? 1 : 0];
 		return (
 			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
-				{renderNode(angleProximity.closestAngle, { forceText: true })}
+				{renderNode(angleProximityInfo.closestAngle, { forceText: true })}
 				{renderString(`).`)}
 			</div>
 		);
@@ -452,18 +457,18 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			</div>
 					
 			{/* Extended dignities (face and bound, not triplicity)*/}
-			{useExtendedDignities && ( faceLord === boundLord ? (
+			{useExtendedDignities && zodiacSignPositions.isRegular() && ( faceLord === boundLord ? (
 				<div className="text-wrap">
 					{renderString("In the face & bound of ")}
-					{renderNode(faceLord, { withArticle: true })}
+					{renderNode(faceLord!, { withArticle: true })}
 					{renderString(".")}
 				</div>
 			) : (
 				<div>
 					{renderString("In the face of ")}
-					{renderNode(faceLord, { withArticle: true })}
+					{renderNode(faceLord!, { withArticle: true })}
 					{renderString(" & the bound of ")}
-					{renderNode(boundLord, { withArticle: true })}
+					{renderNode(boundLord!, { withArticle: true })}
 					{renderString(".")}
 				</div>
 			))}
@@ -506,7 +511,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			)}
 
 			{/* Rulership Chain */}
-			{dispositorChain && (
+			{(dispositorChain || finalDispositors) && (
 				<>
 					<hr className="opacity-50 mt-4" />
 					<span className="absolute -translate-y-4 translate-x-2 bg-theme-bg px-1">
@@ -515,12 +520,12 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					<div>
 						<div className="mt-2">
 							{isFinalDispositor ? (
-								renderFinalDispositors(dispositorChain, true)
+								renderFinalDispositors(finalDispositors!, true)
 							) : (
-								renderDispositorChain(dispositorChain, true)
+								renderDispositorChain(dispositorChain!, true)
 							)}
 						</div>
-						{isStandardNode && renderRuledNodes(ruledNodes, transitivelyRuledNodes)}
+						{isStandardNode && renderRuledNodes(ruledNodes!, transitivelyRuledNodes!)}
 					</div>
 				</>
 			)}

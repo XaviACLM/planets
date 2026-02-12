@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { Node } from './astroDefs.ts'
 
 interface UIState {
 	// Module collapse states: key is module title, value is display index

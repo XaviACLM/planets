@@ -34,7 +34,7 @@ export function getEclipticLongitudeSpeed(node: Node, date: Date, hamburgSchoolM
 	}
 
 	// For standard planets, use HelioState (already in EQJ)
-	const body = nodeToBody[node];
+	const body = nodeToBody[node]!;
 
 	const planetState = HelioState(body, date);
 	const stateEQJ: SimpleState = {

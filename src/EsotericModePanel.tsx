@@ -1,4 +1,4 @@
-import { useState, FC } from 'react';
+import { useState, type FC } from 'react';
 import { useSettingsStore } from './settingsStore.ts'
 	
 type EsotericModePanelProps = {

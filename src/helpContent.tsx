@@ -1,10 +1,5 @@
 import { type FC } from 'react';
 
-// Shared styling for help content
-const H2: FC<{ children: React.ReactNode }> = ({ children }) => (
-	<h2 className="text-base font-bold small-caps tracking-wide mb-2 mt-4 first:mt-0">{children}</h2>
-);
-
 const P: FC<{ children: React.ReactNode }> = ({ children }) => (
 	<p className="mb-2">{children}</p>
 );

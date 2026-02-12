@@ -15,7 +15,7 @@ export const Zodiac = {
 } as const;
 export type Zodiac = typeof Zodiac[keyof typeof Zodiac];
 
-export const standardZodiac: [Zodiac] =[
+export const standardZodiac: Zodiac[] =[
 	Zodiac.ARIES,
 	Zodiac.TAURUS,
 	Zodiac.GEMINI,
@@ -30,7 +30,7 @@ export const standardZodiac: [Zodiac] =[
 	Zodiac.PISCES,
 ];
 
-export const AstrologyMode = {
+export const ZodiacMode = {
 	TROPICAL: "Tropical",
 	SIDEREAL_LAHIRI: "Sidereal - Lahiri",
 	SIDEREAL_FAGAN_BRADLEY: "Sidereal - Fagan / Bradley",
@@ -47,11 +47,11 @@ export const AstrologyMode = {
 	CONSTELLATIONS_CLOSEST: "Constellations - Closest",
 	CONSTELLATIONS_IAU: "Constellations - IAU / Berg",
 } as const;
-export type AstrologyMode = typeof AstrologyMode[keyof typeof AstrologyMode];
+export type ZodiacMode = typeof ZodiacMode[keyof typeof ZodiacMode];
 
-export const irregularAstrologyModes: AstrologyMode[] = [
-	AstrologyMode.CONSTELLATIONS_CLOSEST, 
-	AstrologyMode.CONSTELLATIONS_IAU
+export const irregularZodiacModes: ZodiacMode[] = [
+	ZodiacMode.CONSTELLATIONS_CLOSEST, 
+	ZodiacMode.CONSTELLATIONS_IAU
 ];
 
 export const Element = {
@@ -202,7 +202,7 @@ export const standardNodes: Node[] = [
 	...transpersonalPlanets,
 ]
 
-export const mainAngles = [
+export const mainAngles: Node[] = [
 	Node.ASCENDANT,
 	Node.IMUM_COELI,
 	Node.DESCENDANT,
@@ -573,7 +573,7 @@ export const HouseAngularity = {
 } as const;
 export type HouseAngularity = typeof HouseAngularity[keyof typeof HouseAngularity];
 
-export const traditionalHouseAngularities: HouseAngularity[] = [
+export const traditionalHouseAngularities: (HouseAngularity | null)[] = [
 	HouseAngularity.ANGULAR,
 	HouseAngularity.SUCCEDENT,
 	HouseAngularity.CADENT,
