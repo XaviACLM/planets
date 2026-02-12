@@ -8,6 +8,7 @@ import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import ChartSummary from './ChartSummary'
 import PlanetPanel from './PlanetPanel.tsx'
+import InfoPopup from './InfoPopup.tsx'
 import NodePositions from './nodePositions.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
 import FixedStarPositions from './fixedStarPositions.ts'
@@ -50,6 +51,7 @@ function App() {
 	const houseSystem = useSettingsStore(s => s.houseSystem);
 	const setHouseSystem = useSettingsStore(s => s.setHouseSystem);
 	const housePresweep = useSettingsStore(s => s.housePresweep);
+	const setHousePresweep = useSettingsStore(s => s.setHousePresweep);
 	const aspectErrorMode = useSettingsStore(s => s.aspectErrorMode);
 	const maxConfigurationErrorDegrees = useSettingsStore(s => s.maxConfigurationErrorDegrees);
 	const maxMajorBAErrorDegrees = useSettingsStore(s => s.maxMajorBAErrorDegrees);
@@ -294,22 +296,37 @@ function App() {
 					setHighlightedNode={setHighlightedNode}
 				/>
 
-				{houseSystemComputationFailed &&
-					<div
-						className="absolute bottom-5 right-5 bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border z-[1000] max-w-[400px] leading-relaxed"
-						onClick={(e) => e.stopPropagation()}
-					>
-						<span>
+				<div className="absolute bottom-5 right-5 z-[1000] flex flex-col gap-2 items-end">
+					{/* Note that these stay closed forever once X is pressed, even if some condition would force them to reappear */}
+					{/* This is expected */}
+					{houseCuspPositions !== null && !houseCuspPositions.areHouseCuspsWithinHouse() &&
+						<InfoPopup>
+							Selected house system ({houseSystem}) has narrow ({"<5º"}) houses for the selected time and location.{" "}
+							Since presweep is activated, this results in some house cusps being outside of their house.{" "}
+							Consider switching house system or {" "}
+							<button
+								onClick={() => setHousePresweep(false)}
+								className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
+							>
+								turning off presweep
+							</button>
+							.
+						</InfoPopup>
+					}
+					{houseSystemComputationFailed &&
+						<InfoPopup>
 							Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
+							Consider switching to another house system, e.g.{" "}
 							<button
 								onClick={() => setHouseSystem(HouseSystem.PORPHYRY)}
 								className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
 							>
-								Switch to Porphyry
+								switch to Porphyry
 							</button>
-						</span>
-					</div>
-				}
+							.
+						</InfoPopup>
+					}
+				</div>
 
 			</main>
 			<Sidebar side="right" animationKey={menuOpen ? 'settings' : 'main'}>
