@@ -8,6 +8,7 @@ import RulershipPanel from './RulershipPanel'
 import EsotericModePanel from './EsotericModePanel'
 import ChartSummary from './ChartSummary'
 import PlanetPanel from './PlanetPanel.tsx'
+import PlanetTable from './PlanetTable.tsx'
 import InfoPopup from './InfoPopup.tsx'
 import NodePositions from './nodePositions.ts'
 import NodeVelocities from './nodeVelocities.ts'
@@ -20,7 +21,6 @@ import { Node } from './astroDefs.ts'
 import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
 import HouseCuspPositions from './houseCuspPositions.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
-import { type CityData } from './CitySearchEngine'
 import { CitySelector } from './CitySelector'
 import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
@@ -377,6 +377,7 @@ function App() {
 				>
 					{menuOpen ? '✕' : '☰'}
 				</button>
+				
 				<ZodiacWheel
 					nodePositions={nodePositions}
 					zodiacSignPositions={zodiacSignPositions}
@@ -384,6 +385,15 @@ function App() {
 					aspects={flattenedAspects}
 					highlightedAspect={highlightedAspect}
 					highlightedNode={highlightedNode}
+					setHighlightedNode={setHighlightedNode}
+				/>
+				<PlanetTable
+					nodePositions={nodePositions}
+					nodeVelocities={nodeVelocities}
+					zodiacSignPositions={zodiacSignPositions}
+					fixedStarPositions={fixedStarPositions}
+					houseCuspPositions={houseCuspPositions}
+					aspects={aspects}
 					setHighlightedNode={setHighlightedNode}
 				/>
 

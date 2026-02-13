@@ -75,6 +75,8 @@ interface SettingsState {
 	setNodesInDominanceChart: (v: NodesToConsider) => void;
 	nodesInHemispheresChart: NodesToConsider;
 	setNodesInHemispheresChart: (v: NodesToConsider) => void;
+	nodesInPlanetTable: NodesToConsider;
+	setNodesInPlanetTable: (v: NodesToConsider) => void;
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode;
@@ -168,6 +170,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setNodesInDominanceChart: (v) => set({ nodesInDominanceChart: v }),
 	nodesInHemispheresChart: NodesToConsider.STANDARD,
 	setNodesInHemispheresChart: (v) => set({ nodesInHemispheresChart: v }),
+	nodesInPlanetTable: NodesToConsider.STANDARD,
+	setNodesInPlanetTable: (v) => set({ nodesInPlanetTable: v }),
 
 	// Astrology modes
 	lunarNodeMode: LunarNodeMode.MEAN,

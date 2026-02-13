@@ -186,6 +186,22 @@ export const nodesAdmittingArticle: Node[] = [
 	Node.PART_OF_FORTUNE,
 ];
 	
+export const zodiacShortNames: Record<Zodiac, string> = {
+	[Zodiac.ARIES]: "Ari",
+	[Zodiac.TAURUS]: "Tau",
+	[Zodiac.GEMINI]: "Gem",
+	[Zodiac.CANCER]: "Can",
+	[Zodiac.LEO]: "Leo",
+	[Zodiac.VIRGO]: "Vir",
+	[Zodiac.LIBRA]: "Lib",
+	[Zodiac.SCORPIO]: "Sco",
+	[Zodiac.OPHIUCHUS]: "Oph",
+	[Zodiac.SAGITTARIUS]: "Sag",
+	[Zodiac.CAPRICORN]: "Cap",
+	[Zodiac.AQUARIUS]: "Aqu",
+	[Zodiac.PISCES]: "Pis",
+};
+
 export const zodiacSymbols: Record<Zodiac, string> = {
 	[Zodiac.ARIES] : ariesSymbol,
 	[Zodiac.TAURUS] : taurusSymbol,

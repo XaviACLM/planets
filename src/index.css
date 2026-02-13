@@ -6,6 +6,7 @@
 	--color-theme-bg: var(--color-bg);
 	--color-theme-border: var(--color-border);
 	--color-theme-border-light: var(--color-border-light);
+	--color-theme-emphasis: var(--color-emphasis);
 }
 
 * {
@@ -18,6 +19,7 @@
 	--color-bg: #000000;
 	--color-border: #555;
 	--color-border-light: #aaa;
+	--color-emphasis: #c47040;
 	--border-radius: 0px;
 	--icon-filter: invert(1);
 
@@ -41,6 +43,7 @@
 	--color-bg: #f5e6d3;
 	--color-border: #B9A895;
 	--color-border-light: #7A6853;
+	--color-emphasis: #8b4513;
 	--border-radius: 4px;
 	/* from https://codepen.io/sosuke/pen/Pjoqqp, to match color-text */
 	--icon-filter: invert(12%) sepia(60%) saturate(629%) hue-rotate(350deg) brightness(91%) contrast(88%);

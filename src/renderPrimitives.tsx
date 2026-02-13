@@ -4,8 +4,10 @@ import { AspectKind } from './aspectDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
 import {
 	zodiacSymbols,
+	zodiacShortNames,
 	nodeSymbols,
 	nodePreferredName,
+	nodeShortName,
 	elementSymbols,
 	modeSymbols,
 	nodesWithRedundantSymbols,
@@ -69,6 +71,7 @@ interface RenderNodeOptions {
 	showLabel?: boolean;
 	withArticle?: boolean;
 	forceText?: boolean; // force text for special nodes like Asc, etc.
+	abbreviated?: boolean;
 	size?: number;
 	fontSize?: number;
 }
@@ -92,12 +95,15 @@ export const renderNode = (
 		showLabel,
 		withArticle = false,
 		forceText = false,
+		abbreviated = false,
 		size = DEFAULT_SYMBOL_SIZE,
 		fontSize = DEFAULT_TEXT_SIZE
 	} = options;
 	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showNodeLabels;
 	if (resolvedShowLabel || (forceText && nodesWithRedundantSymbols.includes(node))) {
-		const label = nodePreferredName[node] || node;
+		const label = abbreviated
+			? (nodeShortName[node] || node)
+			: (nodePreferredName[node] || node);
 		if (shouldUseArticle(node, withArticle)) {
 			return <>{renderString("the ", { fontSize })}{renderSmallcapsString(String(label), { fontSize })}</>;
 		}
@@ -200,12 +206,13 @@ export const renderCommaSeparatedNodeList = (
 export const renderSign = (
 	sign: Zodiac,
 	showLabel?: boolean,
-	options: SymbolRenderOptions & TextRenderOptions = {}
+	options: SymbolRenderOptions & TextRenderOptions & { abbreviated?: boolean } = {}
 ): ReactNode => {
 	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showSymbolLabels;
-	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE } = options;
+	const { size = DEFAULT_SYMBOL_SIZE, fontSize = DEFAULT_TEXT_SIZE, abbreviated = false } = options;
 	if (resolvedShowLabel) {
-		return renderSmallcapsString(sign, { fontSize });
+		const label = abbreviated ? zodiacShortNames[sign] : sign;
+		return renderSmallcapsString(label, { fontSize });
 	}
 	return (
 		<img

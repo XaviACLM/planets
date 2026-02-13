@@ -106,6 +106,7 @@ const mainSettingsSpec: SettingsItem[] = [
 
 	separator(),
 	
+	dropdown('nodesInPlanetTable', 'Nodes in Planet Table', Object.values(NodesToConsider)),
 	dropdown('nodesInDominanceChart', 'Nodes in Element/Mode Analysis', Object.values(NodesToConsider)),
 	dropdown('nodesInHemispheresChart', 'Nodes in Orientation Analysis', Object.values(NodesToConsider)),
 
