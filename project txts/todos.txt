@@ -41,14 +41,13 @@ way, and on each side on each of the three nodes we write down who's who. Not ev
 yeah. I'm not 100% sold but it _is_ a way out. We'll think about it more, see if we come up with something better, or just stick to that.
 
 
-- make orientation chart text ever so slightly smaller
 
 MINILIST
 - revamp aspect menu
 - fenagle things so that the app can handle the arabic parts while looking fine
-- make planetTable clickable?
+- make planet table clickable, maybe
 - fit planetTable into the layout
-- you forgot about making the gd status sync hook, retard
+- make orientation chart text ever so slightly smaller
 
 - fuck it, try to make it work on the phone a bit
 - some sort of sharing functionality. try to make the links short + make it forwards-compatible

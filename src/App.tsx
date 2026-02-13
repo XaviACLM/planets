@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 
-import { useEventChartPositions } from './astroHooks.ts'
+import { useEventChartPositions, useAspects } from './astroHooks.ts'
 import ZodiacWheel from './ZodiacWheel'
 import AspectMenu from './AspectMenu'
 import { DominanceChart, AbridgedDominanceChart } from './DominanceChart'
@@ -122,40 +122,19 @@ function App() {
 		return RulershipGraph.create(nodePositions, zodiacSignPositions, dignityMode);
 	}, [nodePositions, zodiacSignPositions, dignityMode])
 
-	// all aspects of all kinds from all nodes
-	const fullAspects = useMemo(() => {
-		return findAspects(nodePositions.getPositions(), aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError);
-	}, [nodePositions, aspectErrorMode, maxConfigurationError, maxMajorBAError, maxMinorBAError]);
-
-	// aspects restricted to only selected kinds/nodes w/ sufficient physical nodes
-	const filteredAspects = useMemo(() => {
-		return filterAspects(
-			fullAspects,
-			nodePositions.getPositions(),
-			selectedNodes,
-			selectedAspectKinds,
-			aspectPhysicalityFilter,
-			hamburgPhysical,
-			aspectErrorMode,
-			maxConfigurationError,
-			maxMajorBAError,
-			maxMinorBAError
-		);
-		// note that errors or error mode are not in dependencies list
-		// any change fullAspects recomputation which will force filteredAspects recomputation anyway
-	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
-
-	// aspects, filtered, in the format imposed by the aspect menu mode
-	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(() => formatAspects(filteredAspects, aspectMenuMode));
-	useEffect(() => {
-		setAspects(formatAspects(filteredAspects, aspectMenuMode));
-	}, [filteredAspects, aspectMenuMode])
-
-	// aspects, flattened down to a single list for processing in UI components
-	// (this might be possible to do w/ enforced redundancy but unnecessary and much too complicated, even considering the above)
-	const flattenedAspects = useMemo(() => {
-		return flattenSubaspectsToList(aspects)
-	}, [aspects])
+	// filtered / formatted / flattened aspect objects synced to the chart
+	const { aspects, flattenedAspects } = useAspects(
+		nodePositions,
+		selectedNodes,
+		selectedAspectKinds,
+		aspectPhysicalityFilter,
+		hamburgPhysical,
+		aspectMenuMode,
+		aspectErrorMode,
+		maxConfigurationError,
+		maxMajorBAError,
+		maxMinorBAError,
+	);
 	
 	const currentTimezone = useMemo(() => {
 		if (selectedCity === null) {
