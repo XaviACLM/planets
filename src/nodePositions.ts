@@ -306,7 +306,7 @@ class NodePositions {
 	public changeHouseCuspPositions(houseCuspPositions: HouseCuspPositions | null): NodePositions {
 		const newPositions = new Map<Node, number>([
 			...this._positions,
-			...computeHighDependencyArabicPartPositions(this._nodePositions, houseCuspPositions, this._zodiacSignPositions, this._dignityMode),
+			...computeHighDependencyArabicPartPositions(this._positions, houseCuspPositions, this._zodiacSignPositions, this._dignityMode),
 		]);
 		return this.copyWith({ houseCuspPositions, positions: resolvePositionsUpdate(newPositions) });
 	}
@@ -317,7 +317,7 @@ class NodePositions {
 	): NodePositions {
 		const newPositions = new Map<Node, number>([
 			...this._positions,
-			...computeHighDependencyArabicPartPositions(this._nodePositions, houseCuspPositions, zodiacSignPositions, this._dignityMode),
+			...computeHighDependencyArabicPartPositions(this._positions, houseCuspPositions, zodiacSignPositions, this._dignityMode),
 		]);
 		return this.copyWith({ zodiacSignPositions, houseCuspPositions, positions: resolvePositionsUpdate(newPositions) });
 	}
@@ -325,7 +325,7 @@ class NodePositions {
 	public changeDignityMode(dignityMode: DignityMode): NodePositions {
 		const newPositions = new Map<Node, number>([
 			...this._positions,
-			...computeHighDependencyArabicPartPositions(this._nodePositions, this._houseCuspPositions, this._zodiacSignPositions, dignityMode),
+			...computeHighDependencyArabicPartPositions(this._positions, this._houseCuspPositions, this._zodiacSignPositions, dignityMode),
 		]);
 		return this.copyWith({ dignityMode, positions: resolvePositionsUpdate(newPositions) });
 	}

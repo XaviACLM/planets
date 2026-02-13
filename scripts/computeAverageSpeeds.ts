@@ -43,7 +43,7 @@ for (let t = startDate.getTime(); t < endDate.getTime(); t += intervalMs) {
 	const zodiacMode = ZodiacMode.TROPICAL;
 	const houseSystem = HouseSystem.PLACIDUS;
 	const housePresweep = false;
-	const lunarNodeMode = LunarNodeMode.TRUE; // TODO ugh, speed is prob different for true v mean
+	const lunarNodeMode = LunarNodeMode.MEAN; // TODO ugh, speed is prob different for true v mean
 	const hamburgSchoolMode = HamburgSchoolMode.WITTE;
 	const dignityMode = DignityMode.MODERN;
 	

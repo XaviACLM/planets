@@ -30,30 +30,6 @@ export const standardZodiac: Zodiac[] =[
 	Zodiac.PISCES,
 ];
 
-export const ZodiacMode = {
-	TROPICAL: "Tropical",
-	SIDEREAL_LAHIRI: "Sidereal - Lahiri",
-	SIDEREAL_FAGAN_BRADLEY: "Sidereal - Fagan / Bradley",
-	SIDEREAL_RAMAN: "Sidereal - Raman",
-	SIDEREAL_KRISHNAMURTI: "Sidereal - Krishnamurti",
-	SIDEREAL_YUKTESHWAR: "Sidereal - Yukteshwar",
-	SIDEREAL_DE_LUCE: "Sidereal - De Luce",
-	SIDEREAL_HIPPARCHOS: "Sidereal - Hipparchos",
-	SIDEREAL_BABYLONIAN: "Sidereal - Babylonian",
-	SIDEREAL_HUBER: "Sidereal - Huber",
-	SIDEREAL_SURYASIDDHANTA: "Sidereal - Suryasiddhanta",
-	SIDEREAL_TRUE_CITRA: "Sidereal - True Citra",
-	SIDEREAL_TRUE_REVANTI: "Sidereal - True Revanti",
-	CONSTELLATIONS_CLOSEST: "Constellations - Closest",
-	CONSTELLATIONS_IAU: "Constellations - IAU / Berg",
-} as const;
-export type ZodiacMode = typeof ZodiacMode[keyof typeof ZodiacMode];
-
-export const irregularZodiacModes: ZodiacMode[] = [
-	ZodiacMode.CONSTELLATIONS_CLOSEST, 
-	ZodiacMode.CONSTELLATIONS_IAU
-];
-
 export const Element = {
   AIR: 'Air',
   FIRE: 'Fire',

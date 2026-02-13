@@ -1,5 +1,6 @@
 import { normalizeAngleRad } from './util.ts'
-import { ZodiacMode, Zodiac, standardZodiac, irregularZodiacModes } from './astroDefs.ts'
+import { Zodiac, standardZodiac } from './astroDefs.ts'
+import { ZodiacMode, irregularZodiacModes } from './settingsDefs.ts'
 import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU } from './astroData.ts'
 import { addPrecession } from './astronomyUtil.ts'
 
@@ -97,7 +98,7 @@ class ZodiacSignPositions {
 			return normalizeAngleRad(lon - this.siderealOffset!)%(Math.PI/6);
 		} else {
 			const sign = this.getSignAtLongitude(lon);
-			return lon - this._signPositions.get(sign)!;
+			return normalizeAngleRad(lon - this._signPositions.get(sign)!);
 		}
 	}
 }

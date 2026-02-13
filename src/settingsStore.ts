@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Node, initiallySelectedNodes, ZodiacMode } from './astroDefs.ts';
+import { Node, initiallySelectedNodes } from './astroDefs.ts';
 import { AspectKind, defaultAspectKinds } from './aspectDefs.ts';
 import {
 	LunarNodeMode,
@@ -15,6 +15,7 @@ import {
 	Theme,
 	NodesToConsider,
 	HouseSystem,
+	ZodiacMode,
 } from './settingsDefs.ts';
 
 interface SettingsState {

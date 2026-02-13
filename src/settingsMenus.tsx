@@ -1,5 +1,4 @@
 import { type FC } from 'react';
-import { ZodiacMode } from './astroDefs.ts';
 import {
 	LunarNodeMode,
 	HamburgSchoolMode,
@@ -14,6 +13,7 @@ import {
 	Theme,
 	NodesToConsider,
 	HouseSystem,
+	ZodiacMode,
 } from './settingsDefs.ts';
 import {
 	SettingsRenderer,

@@ -6,6 +6,17 @@ import { useSettingsStore } from './settingsStore.ts'
 import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
 import { formatAngle } from './util';
 
+function createConfigurationElement(
+	key: number,
+	aspect: Aspect,
+	showAspectLabels: boolean,
+	onDelete: (aspect: Aspect) => void, //TODO types
+	onHover: (aspect: Aspect) => void,
+	children: ReactNode,
+) {
+	return;
+}
+
 function createAspectElement(
 	key: number,
 	aspect: Aspect,

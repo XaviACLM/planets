@@ -1,6 +1,6 @@
 import { useMemo, type FC } from 'react';
 import { Node, mainAngles, NodeType, nodeTypes, standardNodes, Sect, nodeDependsOnLocation } from './astroDefs';
-import { nodeAverageSpeed } from './astroData';
+import { getNodeAverageSpeed } from './astroData';
 import { Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
@@ -75,6 +75,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const triplicityMode = useSettingsStore(s => s.triplicityMode);
 	const faceMode = useSettingsStore(s => s.faceMode);
 	const boundsMode = useSettingsStore(s => s.boundsMode);
+	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
 	const stationarySpeedFractionThreshold = useSettingsStore(s => s.stationarySpeedPercentageThreshold)/100;
 	
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
@@ -143,10 +144,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 
 	// 2.2 Speed & Retrograde
 	const { formattedSpeedDegPerTimeUnit, isStationary, isRetrograde, timeUnit } = useMemo(() => {
-		// TODO the average speebs
-		// TODO the formatting
 		const speedRadPerDay = nodeVelocities.get(selectedNode);
-		const isStationary = Math.abs(speedRadPerDay) < nodeAverageSpeed[selectedNode]!*stationarySpeedFractionThreshold;
+		const isStationary = Math.abs(speedRadPerDay) < getNodeAverageSpeed(selectedNode, lunarNodeMode)!*stationarySpeedFractionThreshold;
 		const isRetrograde = !isStationary && speedRadPerDay < 0;
 		
 		if (speedRadPerDay > Math.PI) { // no particular reason for this threshold. Only main angles are gonna hit it anyway
@@ -168,7 +167,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			};
 		}
 		return {formattedSpeedDegPerTimeUnit, isStationary, isRetrograde};
-	}, [selectedNode, date, hamburgSchoolMode])
+	}, [selectedNode, date, hamburgSchoolMode, lunarNodeMode])
 
 	const nearbyFixedStars = useMemo(() => {
 		return getFixedStarsWithinLongitude(selectedNode, nodePositions, fixedStarPositions, fixedStarMaximumDistance*Math.PI/180);
@@ -256,7 +255,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const renderFixedStarSummaryString = (nearbyFixedStars: Map<string, number>) => {
 		const lastIdx = nearbyFixedStars.size-1;
 		return (<span className="block pl-3 -indent-3 text-wrap">
+			{/*
 			{renderString(lastIdx === 0 ? "Fixed star conjunction: " : "Fixed star conjunctions: ")}
+			*/}
+			{renderString("Conjunct")}
 			{Array.from(nearbyFixedStars.entries()).map(([starName, orb], index) => {
 				return (<span key={index}>
 					<span className="text-nowrap pl-1">

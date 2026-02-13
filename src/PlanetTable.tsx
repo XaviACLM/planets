@@ -104,11 +104,12 @@ function computeRowData(
 
 	// Extended dignities
 	const isRegular = zodiacSignPositions.isRegular();
+	const isStandard = standardNodes.includes(node);
 	const faceLord = (useExtendedDignities && isRegular)
 		? getFaceLord(node, nodePositions, zodiacSignPositions, faceMode as any) : null;
 	const boundLord = (useExtendedDignities && isRegular)
 		? getBoundLord(node, nodePositions, zodiacSignPositions, boundsMode as any) : null;
-	const triplicityRole = (useExtendedDignities && isRegular)
+	const triplicityRole = (useExtendedDignities && isRegular && isStandard)
 		? getTriplicityRole(node, nodePositions, zodiacSignPositions, triplicityMode as any) : null;
 
 	// Fixed stars
@@ -338,7 +339,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 
 	// ── Determine visible columns ──
 
-	const showHouse = hasSurfacePosition;
+	const showHouse = houseCuspPositions !== null && hasSurfacePosition;
 	const showFace = false && useExtendedDignities && zodiacSignPositions.isRegular();
 	const showBound = false && useExtendedDignities && zodiacSignPositions.isRegular();
 	const showTriplicity = false && useExtendedDignities && zodiacSignPositions.isRegular();

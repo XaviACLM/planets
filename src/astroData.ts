@@ -1,4 +1,5 @@
-import { ZodiacMode, Zodiac, Node } from './astroDefs.ts'
+import { Zodiac, Node, lunarNodes } from './astroDefs.ts'
+import { LunarNodeMode, ZodiacMode } from './settingsDefs.ts'
 
 // https://storage.yandexcloud.net/j108/library/tzubx8h2/Buz_Overbeck_-_Ayanamsa_-_A_Statistical_Study.pdf
 // https://iphemeris.com/blog/document/ayanamsa
@@ -71,7 +72,7 @@ export const fixedStars: Record<string, number> = {
 	["Fomalhaut"] : 333.856, //not behenian, but royal
 }
 
-const averageSpeeds: Record<Node, number> = {
+const nodeAverageSpeed: Partial<Record<Node, number>> = {
 	[Node.SUN]: 0.017202803653535204,
 	[Node.MOON]: 0.22997078831069478,
 	[Node.MERCURY]: 0.021245850490587425,
@@ -106,11 +107,6 @@ const averageSpeeds: Record<Node, number> = {
 	[Node.PART_OF_DEATH]: 2.4891066625147436,
 	[Node.PART_OF_FATHER]: 9.566037920526139,
 	[Node.PART_OF_MOTHER]: 9.384083608317844,
-	
-	[Node.LUNAR_ASCENDING]: 0.001043570973420969,
-	[Node.LUNAR_DESCENDING]: 0.0010435709734202688,
-	[Node.LUNAR_APOGEE]: 0.041742508614994435,
-	[Node.LUNAR_PERIGEE]: 0.04174250861499068,
 	
 	[Node.CERES]: 0.004779354285906425,
 	[Node.PALLAS]: 0.005126038194944519,
@@ -150,3 +146,29 @@ const averageSpeeds: Record<Node, number> = {
 	[Node.RADAMANTHUS]: 0.0002818033762905684,
 	[Node.GKUNHOMDIMA]: 0.00018757668376559233,
 };
+
+const nodeAverageSpeedLunarTrue: Partial<Record<Node, number>> = {
+	[Node.LUNAR_ASCENDING]: 0.001043570973420969,
+	[Node.LUNAR_DESCENDING]: 0.0010435709734202688,
+	[Node.LUNAR_APOGEE]: 0.041742508614994435,
+	[Node.LUNAR_PERIGEE]: 0.04174250861499068,
+};
+	
+const nodeAverageSpeedLunarMean: Partial<Record<Node, number>> = {
+	[Node.LUNAR_ASCENDING]: 0.0009242184792568911,
+	[Node.LUNAR_DESCENDING]: 0.0009242184792501214,
+	[Node.LUNAR_APOGEE]: 0.0019443630970820975,
+	[Node.LUNAR_PERIGEE]: 0.0019443630970692588,
+};
+
+export function getNodeAverageSpeed(node: Node, lunarNodeMode: LunarNodeMode): number {
+	if (lunarNodes.includes(node)){
+		if (lunarNodeMode === LunarNodeMode.TRUE){
+			return nodeAverageSpeedLunarTrue[node];
+		} else {
+			return nodeAverageSpeedLunarMean[node];
+		}
+	} else {
+		return nodeAverageSpeed[node]!;
+	}	
+}
