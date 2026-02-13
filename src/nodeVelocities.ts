@@ -1,7 +1,9 @@
 import { normalizeAngleRad } from './util.ts'
 import { Node, lunarNodes, hamburgNodes, highDependencyArabicParts } from './astroDefs.ts'
-import { LunarNodeMode, HamburgSchoolMode } from './settingsDefs.ts'
+import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
 import NodePositions from './nodePositions.ts'
+import ZodiacSignPositions from './zodiacSignPositions.ts'
+import HouseCuspPositions from './houseCuspPositions.ts'
 
 const DEFAULT_TIME_DELTA_MS = 60 * 1000; // 1 minute
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -40,7 +42,10 @@ function recomputeVelocitiesForNodes(
 function computeAllVelocities(base: NodePositions, progressed: NodePositions, timeDeltaMs: number): Map<Node, number> {
 	const velocities = new Map<Node, number>();
 	for (const [node] of base.getPositions()) {
-		velocities.set(node, computeVelocity(base, progressed, node, timeDeltaMs));
+		const velocity = computeVelocity(base, progressed, node, timeDeltaMs);
+		if (velocity !== null){
+			velocities.set(node, velocity);
+		}
 	}
 	return velocities;
 }
@@ -135,7 +140,7 @@ class NodeVelocities {
 
 	public changeBasePositionsWithZodiacSignPositionsAndHouseCuspPositions(
 		updatedBasePositions: NodePositions,
-		zodiacSignPositions: ZodiacSignPosition,
+		zodiacSignPositions: ZodiacSignPositions,
 		houseCuspPositions: HouseCuspPositions | null,
 	): NodeVelocities {
 		const newProgressedPositions = this._progressedPositions.changeZodiacSignPositionsAndHouseCuspPositions(zodiacSignPositions, houseCuspPositions);

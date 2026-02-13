@@ -6,16 +6,13 @@ import {
 	DignityMode, AspectPhysicalityFilter, AspectMenuMode, AspectErrorMode 
 } from './settingsDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
-import { useSettingsStore } from './settingsStore.ts'
 import { Node } from './astroDefs.ts'
 import NodePositions from './nodePositions.ts'
 import NodeVelocities from './nodeVelocities.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
 import FixedStarPositions from './fixedStarPositions.ts'
 import HouseCuspPositions from './houseCuspPositions.ts'
-import { RulershipGraph } from './rulershipGraph.ts'
-
-import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
+import { type CityData } from './CitySearchEngine.ts'
 import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList } from './aspects.ts'
 
 export function useAspects(
@@ -65,11 +62,11 @@ export function useAspects(
 		return flattenSubaspectsToList(aspects)
 	}, [aspects])
 	
-	return { aspects, flattenedAspects };
+	return { aspects, setAspects, flattenedAspects };
 }
 
 export function useEventChartPositions(
-	selectedCity: CityData,
+	selectedCity: CityData | null,
 	selectedDate: Date,
 	zodiacMode: ZodiacMode,
 	houseSystem: HouseSystem,

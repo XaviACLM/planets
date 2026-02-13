@@ -166,7 +166,6 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 				timeUnit: "day",
 			};
 		}
-		return {formattedSpeedDegPerTimeUnit, isStationary, isRetrograde};
 	}, [selectedNode, date, hamburgSchoolMode, lunarNodeMode])
 
 	const nearbyFixedStars = useMemo(() => {

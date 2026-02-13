@@ -48,7 +48,9 @@ interface ZodiacSignPositionsConstructorArgs {
 
 class ZodiacSignPositions {
 	// dependencies
+	// @ts-expect-error
 	private readonly _date: Date;
+	// @ts-expect-error
 	private readonly _zodiacMode: ZodiacMode;
 	
 	// logical state
@@ -67,7 +69,7 @@ class ZodiacSignPositions {
 		const siderealOffset = isIrregular ? null : computeSiderealOffset(date, zodiacMode);
 		const signPositions = isIrregular
 			? computeSignPositionsForIrregularMode(date, zodiacMode)
-			: computeSignPositionsFromSiderealOffset(siderealOffset);
+			: computeSignPositionsFromSiderealOffset(siderealOffset!);
 		return new ZodiacSignPositions({ date, zodiacMode, siderealOffset, signPositions });
 	}
 

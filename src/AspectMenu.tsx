@@ -6,6 +6,7 @@ import { useSettingsStore } from './settingsStore.ts'
 import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
 import { formatAngle } from './util';
 
+/*
 function createConfigurationElement(
 	key: number,
 	aspect: Aspect,
@@ -16,6 +17,7 @@ function createConfigurationElement(
 ) {
 	return;
 }
+*/
 
 function createAspectElement(
 	key: number,

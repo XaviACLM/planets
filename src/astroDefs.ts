@@ -236,6 +236,19 @@ export const nodeTypes: Record<Node, NodeType> = {
 	[Node.AUTUMNAL_EQUINOX] : NodeType.POINT,
 	
 	[Node.PART_OF_FORTUNE] : NodeType.POINT,
+	[Node.PART_OF_SPIRIT] : NodeType.POINT,
+	[Node.PART_OF_EROS] : NodeType.POINT,
+	[Node.PART_OF_NECESSITY] : NodeType.POINT,
+	[Node.PART_OF_COURAGE] : NodeType.POINT,
+	[Node.PART_OF_VICTORY] : NodeType.POINT,
+	[Node.PART_OF_NEMESIS] : NodeType.POINT,
+	[Node.PART_OF_MARRIAGE_MEN] : NodeType.POINT,
+	[Node.PART_OF_MARRIAGE_WOMEN] : NodeType.POINT,
+	[Node.PART_OF_CHILDREN] : NodeType.POINT,
+	[Node.PART_OF_WEALTH] : NodeType.POINT,
+	[Node.PART_OF_DEATH] : NodeType.POINT,
+	[Node.PART_OF_FATHER] : NodeType.POINT,
+	[Node.PART_OF_MOTHER] : NodeType.POINT,
 	
 	[Node.LUNAR_ASCENDING] : NodeType.POINT,
 	[Node.LUNAR_DESCENDING] : NodeType.POINT,
@@ -303,6 +316,19 @@ export const nodeDependsOnLocation: Record<Node, boolean> = {
 	[Node.AUTUMNAL_EQUINOX] : false,
 	
 	[Node.PART_OF_FORTUNE] : true,
+	[Node.PART_OF_SPIRIT] : true,
+	[Node.PART_OF_EROS] : true,
+	[Node.PART_OF_NECESSITY] : true,
+	[Node.PART_OF_COURAGE] : true,
+	[Node.PART_OF_VICTORY] : true,
+	[Node.PART_OF_NEMESIS] : true,
+	[Node.PART_OF_MARRIAGE_MEN] : true,
+	[Node.PART_OF_MARRIAGE_WOMEN] : true,
+	[Node.PART_OF_CHILDREN] : true,
+	[Node.PART_OF_WEALTH] : true,
+	[Node.PART_OF_DEATH] : true,
+	[Node.PART_OF_FATHER] : true,
+	[Node.PART_OF_MOTHER] : true,
 	
 	[Node.LUNAR_ASCENDING] : false,
 	[Node.LUNAR_DESCENDING] : false,
@@ -489,7 +515,7 @@ export const arabicParts: Node[] = [
 	Node.PART_OF_MOTHER,
 ];
 
-export const highDependencyArabicParts: Node = [
+export const highDependencyArabicParts: Node[] = [
 	Node.PART_OF_WEALTH,
 	Node.PART_OF_DEATH,
 ];

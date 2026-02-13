@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source not "../project txts";
 
 @theme {
 	/* Theme color utilities: bg-theme-bg, text-theme-text, border-theme-border */
@@ -6,7 +7,6 @@
 	--color-theme-bg: var(--color-bg);
 	--color-theme-border: var(--color-border);
 	--color-theme-border-light: var(--color-border-light);
-	--color-theme-emphasis: var(--color-emphasis);
 }
 
 * {

@@ -137,7 +137,7 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 	const zodiacLongitudes = Array.from(zodiac.values());
 	
 	return (
-		<div className="bg-theme-bg w-screen h-screen py-0">
+		<div className="bg-theme-bg w-full h-full py-0">
 			<svg
 				viewBox="0 0 100 100"
 				preserveAspectRatio="xMidYMid meet"

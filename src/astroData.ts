@@ -164,9 +164,9 @@ const nodeAverageSpeedLunarMean: Partial<Record<Node, number>> = {
 export function getNodeAverageSpeed(node: Node, lunarNodeMode: LunarNodeMode): number {
 	if (lunarNodes.includes(node)){
 		if (lunarNodeMode === LunarNodeMode.TRUE){
-			return nodeAverageSpeedLunarTrue[node];
+			return nodeAverageSpeedLunarTrue[node]!;
 		} else {
-			return nodeAverageSpeedLunarMean[node];
+			return nodeAverageSpeedLunarMean[node]!;
 		}
 	} else {
 		return nodeAverageSpeed[node]!;

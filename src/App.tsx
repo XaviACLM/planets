@@ -14,10 +14,11 @@ import InfoPopup from './InfoPopup.tsx'
 import { RulershipGraph } from './rulershipGraph.ts'
 import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
+import { type Aspect, deleteAspectFromMap } from './aspects.ts'
 import { Node } from './astroDefs.ts'
 import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
-import { findAspects, type Aspect, filterAspects, formatAspects, flattenSubaspectsToList, deleteAspectFromMap } from './aspects.ts'
 import { CitySelector } from './CitySelector'
+import { type CityData } from './CitySearchEngine.ts'
 import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme, HouseSystem } from './settingsDefs.ts'
@@ -123,7 +124,7 @@ function App() {
 	}, [nodePositions, zodiacSignPositions, dignityMode])
 
 	// filtered / formatted / flattened aspect objects synced to the chart
-	const { aspects, flattenedAspects } = useAspects(
+	const { aspects, setAspects, flattenedAspects } = useAspects(
 		nodePositions,
 		selectedNodes,
 		selectedAspectKinds,
@@ -210,10 +211,21 @@ function App() {
 			</Sidebar>
 
 			<main
-				className="flex-1 relative flex items-center justify-center overflow-hidden"
+				className="flex-1 relative overflow-hidden"
 				onClick={() => setHighlightedNode(null)}
 			>
-				<EsotericModePanel/>
+				{/* Layer 1: Chart + summary — always centered, behind table */}
+				<div className="absolute inset-0 flex items-center justify-center">
+					<ZodiacWheel
+						nodePositions={nodePositions}
+						zodiacSignPositions={zodiacSignPositions}
+						houseCuspPositions={houseCuspPositions}
+						aspects={flattenedAspects}
+						highlightedAspect={highlightedAspect}
+						highlightedNode={highlightedNode}
+						setHighlightedNode={setHighlightedNode}
+					/>
+				</div>
 				{nodePositions.hasSurfacePosition() && (
 					<ChartSummary
 						nodePositions={nodePositions}
@@ -221,67 +233,67 @@ function App() {
 						setHighlightedNode={setHighlightedNode}
 					/>
 				)}
-				<button
-					className="absolute top-4 right-4 text-theme-text bg-theme-bg border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4"
-					onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-				>
-					{menuOpen ? '✕' : '☰'}
-				</button>
-				
-				<ZodiacWheel
-					nodePositions={nodePositions}
-					zodiacSignPositions={zodiacSignPositions}
-					houseCuspPositions={houseCuspPositions}
-					aspects={flattenedAspects}
-					highlightedAspect={highlightedAspect}
-					highlightedNode={highlightedNode}
-					setHighlightedNode={setHighlightedNode}
-				/>
-				<PlanetTable
-					nodePositions={nodePositions}
-					nodeVelocities={nodeVelocities}
-					zodiacSignPositions={zodiacSignPositions}
-					fixedStarPositions={fixedStarPositions}
-					houseCuspPositions={houseCuspPositions}
-					aspects={aspects}
-					onNodeClick={(node) => {
-						setSelectedNode(node);
-						if (highlightedNode !== null) {
-							setHighlightedNode(node);
-						}
-					}}
-				/>
 
-				<div className="absolute bottom-5 right-5 z-[1000] flex flex-col gap-2 items-end">
-					{/* Note that these stay closed forever once X is pressed, even if some condition would force them to reappear */}
-					{/* This is expected */}
-					{houseCuspPositions !== null && !houseCuspPositions.areHouseCuspsWithinHouse() &&
-						<InfoPopup>
-							Selected house system ({houseSystem}) has narrow ({"<5º"}) houses for the selected time and location.{" "}
-							Since presweep is activated, this results in some house cusps being outside of their house.{" "}
-							Consider switching house system or {" "}
-							<button
-								onClick={() => setHousePresweep(false)}
-								className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
-							>
-								turning off presweep
-							</button>
-							.
-						</InfoPopup>
-					}
-					{houseSystemComputationFailed &&
-						<InfoPopup>
-							Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
-							Consider switching to another house system, e.g.{" "}
-							<button
-								onClick={() => setHouseSystem(HouseSystem.PORPHYRY)}
-								className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
-							>
-								switch to Porphyry
-							</button>
-							.
-						</InfoPopup>
-					}
+				{/* Layer 2: Scrollable table overlay */}
+				<div className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-none z-[50]">
+					<div style={{ height: '100%' }} />
+					<div className="flex justify-center px-4">
+						<PlanetTable
+							nodePositions={nodePositions}
+							nodeVelocities={nodeVelocities}
+							zodiacSignPositions={zodiacSignPositions}
+							fixedStarPositions={fixedStarPositions}
+							houseCuspPositions={houseCuspPositions}
+							aspects={aspects}
+							onNodeClick={(node) => {
+								setSelectedNode(node);
+								if (highlightedNode !== null) {
+									setHighlightedNode(node);
+								}
+							}}
+						/>
+					</div>
+					<div style={{ height: '100%' }} />
+				</div>
+
+				{/* Layer 3: Floating UI — always on top */}
+				<div className="absolute inset-0 pointer-events-none z-[100]">
+					<div className="pointer-events-auto"><EsotericModePanel/></div>
+					<button
+						className="absolute top-4 right-4 text-theme-text bg-theme-bg backdrop-blur-sm border border-theme-border hover:border-theme-border-light p-2 pl-4 pr-4 pointer-events-auto"
+						onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+					>
+						{menuOpen ? '✕' : '☰'}
+					</button>
+					<div className="absolute bottom-5 right-5 flex flex-col gap-2 items-end pointer-events-auto">
+						{houseCuspPositions !== null && !houseCuspPositions.areHouseCuspsWithinHouse() &&
+							<InfoPopup>
+								Selected house system ({houseSystem}) has narrow ({"<5º"}) houses for the selected time and location.{" "}
+								Since presweep is activated, this results in some house cusps being outside of their house.{" "}
+								Consider switching house system or {" "}
+								<button
+									onClick={() => setHousePresweep(false)}
+									className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
+								>
+									turning off presweep
+								</button>
+								.
+							</InfoPopup>
+						}
+						{houseSystemComputationFailed &&
+							<InfoPopup>
+								Selected house system ({houseSystem}) is not defined for the selected time and location.{" "}
+								Consider switching to another house system, e.g.{" "}
+								<button
+									onClick={() => setHouseSystem(HouseSystem.PORPHYRY)}
+									className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70 active:opacity-50"
+								>
+									switch to Porphyry
+								</button>
+								.
+							</InfoPopup>
+						}
+					</div>
 				</div>
 
 			</main>

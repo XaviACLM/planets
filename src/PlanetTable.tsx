@@ -1,8 +1,7 @@
-import { useMemo, type FC } from 'react';
+import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { Node, NodeType, nodeTypes, standardNodes, mainAngles, nodeDependsOnLocation, HouseAngularity } from './astroDefs';
 import { NodesToConsider } from './settingsDefs';
 import { getNodeAverageSpeed } from './astroData';
-import { RulershipGraph } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
 import {
 	getChartRuler, getHouseAngularities, getAngleProximity,
@@ -209,17 +208,22 @@ type PlanetTableProps = {
 	onNodeClick: (node: Node) => void;
 };
 
+const ROW_H = 30;
+const HEADER_H = 25;
+const FEATHERX_PX = 10;
+const FEATHERY_PX = 0;
+
 // Column widths (px) — easy to tweak
 const COL = {
-	node: 70,
-	sign: 50,
-	position: 40,
-	house: 50,
-	dignity: 35,
-	speed: 50,
-	aspects: 30,
-	configs: 30,
-	sect: 40,
+	node: 85,
+	sign: 55,
+	position: 45,
+	house: 65,
+	dignity: 45,
+	speed: 60,
+	aspects: 40,
+	configs: 40,
+	sect: 50,
 	face: 36,
 	bound: 36,
 	triplicity: 36,
@@ -227,7 +231,11 @@ const COL = {
 	angleProx: 50,
 };
 
-const ROW_H = 28;
+// matches renderPrimitives.ts (not that it needs to)
+const SMALL_TEXT_SIZE = 10;
+const TEXT_SIZE = 12;
+const SMALL_SYMBOL_SIZE = 18;
+const SYMBOL_SIZE = 20;
 
 const PlanetTable: FC<PlanetTableProps> = ({
 	nodePositions,
@@ -319,7 +327,6 @@ const PlanetTable: FC<PlanetTableProps> = ({
 		);
 	};
 
-	const HEADER_H = 48;
 	const HEADER_ANGLE = 0; // degrees
 	const HEADER_FORWARD_DISPL = 0; // px
 
@@ -329,7 +336,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 			style={{ width, height: HEADER_H }}
 		>
 			<span
-				className="text-theme-text opacity-50 text-[10px] uppercase tracking-wider whitespace-nowrap"
+				className={`text-theme-text opacity-50 text-[${TEXT_SIZE}px] uppercase tracking-wider whitespace-nowrap`}
 				style={{ transform: `translate(${HEADER_FORWARD_DISPL}px, 0) rotate(${HEADER_ANGLE}deg)`, transformOrigin: 'bottom left', display: 'inline-block' }}
 			>
 				{label}
@@ -347,6 +354,33 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	const showAngleProx = false && hasSurfacePosition;
 	const showSect = hasSurfacePosition;
 
+	// ── Scaling: shrink uniformly if container is too narrow ──
+
+	const naturalWidth = useMemo(() => {
+		let w = COL.node + COL.sign + COL.position + COL.dignity + COL.speed + COL.aspects + COL.configs;
+		if (showHouse) w += COL.house;
+		if (showSect) w += COL.sect;
+		if (showFace) w += COL.face;
+		if (showBound) w += COL.bound;
+		if (showTriplicity) w += COL.triplicity;
+		if (showStars) w += COL.stars;
+		if (showAngleProx) w += COL.angleProx;
+		return w + FEATHERX_PX * 2;
+	}, [showHouse, showSect, showFace, showBound, showTriplicity, showStars, showAngleProx]);
+
+	const [scale, setScale] = useState(1);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = containerRef.current;
+		if (!el) return;
+		const obs = new ResizeObserver(([entry]) => {
+			setScale(Math.min(1, entry.contentRect.width / naturalWidth));
+		});
+		obs.observe(el);
+		return () => obs.disconnect();
+	}, [naturalWidth]);
+
 	// ── Angularity abbreviations ──
 
 	const angularityLabel = (ang: string | null): string | null => {
@@ -358,9 +392,20 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	};
 
 	return (
-		<div className="text-theme-text text-xs select-none">
+		<div ref={containerRef} className="w-full flex justify-center">
+		<div
+			className="bg-theme-bg/10 backdrop-blur-sm text-theme-text text-xs select-none"
+			style={{
+				width: naturalWidth,
+				paddingTop: FEATHERY_PX,
+				paddingBottom: FEATHERY_PX,
+				zoom: scale,
+				maskImage: `linear-gradient(to right, transparent, black ${FEATHERX_PX}px, black calc(100% - ${FEATHERX_PX}px), transparent), linear-gradient(to bottom, transparent, black ${FEATHERY_PX}px, black calc(100% - ${FEATHERY_PX}px), transparent)`,
+				maskComposite: 'intersect',
+			}}
+		>
 			{/* Header */}
-			<div className="flex border-b border-theme-border">
+			<div className="flex border-b border-theme-border" style={{ paddingLeft: FEATHERX_PX, paddingRight: FEATHERX_PX }}>
 				<div style={{ width: COL.node, height: HEADER_H }} />
 				{headerCell("Sign", COL.sign)}
 				{headerCell("Pos", COL.position)}
@@ -389,27 +434,28 @@ const PlanetTable: FC<PlanetTableProps> = ({
 				return (
 					<div
 						key={row.node}
-						className={`flex border-b border-theme-border/30 hover:bg-theme-text/5 cursor-pointer ${row.isChartRuler ? "bg-theme-text/[0.04]" : ""}`}
+						className={`flex border-b border-theme-border/30 hover:bg-theme-text/5 cursor-pointer ${row.isChartRuler ? "bg-theme-text/[0.08]" : ""}`}
+						style={{ paddingLeft: FEATHERX_PX, paddingRight: FEATHERX_PX }}
 						onClick={(e) => { e.stopPropagation(); onNodeClick(row.node);}}
 					>
 						
 						{/* Node — right-justified with solid right border */}
 						<div
-							className="flex items-center justify-end pr-1.5 overflow-hidden border-r border-theme-border/50"
 							style={{ width: COL.node, height: ROW_H }}
+							className={`flex items-center justify-end pr-1.5 overflow-hidden border-r border-theme-border/50 ${row.isChartRuler ? "underline" : ""}`}
 						>
-							{renderNode(row.node, { size: 16, fontSize: 10, abbreviated: true })}
+							{renderNode(row.node, { size: SYMBOL_SIZE, fontSize: TEXT_SIZE, abbreviated: true })}
 						</div>
 
 						{/* Sign */}
 						{renderCell(
-							renderSign(row.sign, undefined, { size: 16, fontSize: 10, abbreviated: true }),
+							renderSign(row.sign, undefined, { size: SYMBOL_SIZE, fontSize: TEXT_SIZE, abbreviated: true }),
 							COL.sign,
 						)}
 
 						{/* Position in sign */}
 						{renderCell(
-							renderString(formatAngle(row.positionInSign), { fontSize: 10 }),
+							renderString(formatAngle(row.positionInSign), { fontSize: TEXT_SIZE }),
 							COL.position,
 						)}
 
@@ -417,11 +463,11 @@ const PlanetTable: FC<PlanetTableProps> = ({
 						{showHouse && renderCell(
 							row.houseNumber !== null ? (
 								<>
-									{renderString(String(row.houseNumber), { fontSize: 10 })}
+									{renderString(String(row.houseNumber), { fontSize: TEXT_SIZE })}
 									{angLabel && (
 										<>
-											{renderString("\u00A0·\u00A0", { fontSize: 10 })}
-											{renderString(angLabel, { fontSize: 10 })}
+											{renderString("\u00A0·\u00A0", { fontSize: TEXT_SIZE })}
+											{renderString(angLabel, { fontSize: TEXT_SIZE })}
 										</>
 									)}
 								</>
@@ -432,7 +478,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 
 						{/* Dignity */}
 						{renderCell(
-							row.dignityLabel ? renderString(row.dignityLabel, { fontSize: 10 }) : null,
+							row.dignityLabel ? renderString(row.dignityLabel, { fontSize: TEXT_SIZE }) : null,
 							COL.dignity,
 							app('dignity'),
 						)}
@@ -440,29 +486,29 @@ const PlanetTable: FC<PlanetTableProps> = ({
 						{/* Speed */}
 						{renderCell(
 							<span className={speedClass}>
-								{renderString(`${speedPrefix}${row.speedLabel}`, { fontSize: 10 })}
+								{renderString(`${speedPrefix}${row.speedLabel}`, { fontSize: TEXT_SIZE })}
 							</span>,
 							COL.speed,
 						)}
 
 						{/* Aspects count */}
 						{renderCell(
-							renderString(String(row.nAspects), { fontSize: 10 }),
+							renderString(String(row.nAspects), { fontSize: TEXT_SIZE }),
 							COL.aspects,
 						)}
 
 						{/* Configurations count */}
 						{renderCell(
 							row.nConfigurations > 0
-								? renderString(String(row.nConfigurations), { fontSize: 10 })
-								: <span className="opacity-30">{renderString("0", { fontSize: 10 })}</span>,
+								? renderString(String(row.nConfigurations), { fontSize: TEXT_SIZE })
+								: <span className="opacity-30">{renderString("0", { fontSize: TEXT_SIZE })}</span>,
 							COL.configs,
 						)}
 
 						{/* Sect */}
 						{showSect && renderCell(
 							row.inSect !== null
-								? renderString(row.inSect ? "In" : "Out", { fontSize: 10 })
+								? renderString(row.inSect ? "In" : "Out", { fontSize: TEXT_SIZE })
 								: null,
 							COL.sect,
 							app('sect'),
@@ -470,21 +516,21 @@ const PlanetTable: FC<PlanetTableProps> = ({
 
 						{/* Face lord */}
 						{showFace && renderCell(
-							row.faceLord ? renderNode(row.faceLord, { size: 14, fontSize: 9 }) : null,
+							row.faceLord ? renderNode(row.faceLord, { size: SMALL_SYMBOL_SIZE, fontSize: SMALL_TEXT_SIZE }) : null,
 							COL.face,
 							app('face'),
 						)}
 
 						{/* Bound lord */}
 						{showBound && renderCell(
-							row.boundLord ? renderNode(row.boundLord, { size: 14, fontSize: 9 }) : null,
+							row.boundLord ? renderNode(row.boundLord, { size: SMALL_SYMBOL_SIZE, fontSize: SMALL_TEXT_SIZE }) : null,
 							COL.bound,
 							app('bound'),
 						)}
 
 						{/* Triplicity role */}
 						{showTriplicity && renderCell(
-							row.triplicityRole ? renderString(row.triplicityRole.slice(0, 3), { fontSize: 10 }) : null,
+							row.triplicityRole ? renderString(row.triplicityRole.slice(0, 3), { fontSize: TEXT_SIZE }) : null,
 							COL.triplicity,
 							app('triplicity'),
 						)}
@@ -492,7 +538,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 						{/* Fixed stars */}
 						{showStars && renderCell(
 							row.fixedStars.size > 0
-								? renderString([...row.fixedStars.keys()].join(", "), { fontSize: 9 })
+								? renderString([...row.fixedStars.keys()].join(", "), { fontSize: SMALL_TEXT_SIZE })
 								: null,
 							COL.stars,
 						)}
@@ -502,7 +548,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 							row.angleProximity
 								? renderString(
 									`${renderNode(row.angleProximity.closestAngle, { size: 12, fontSize: 8 }) ? '' : ''}${formatAngle(row.angleProximity.distance)}`,
-									{ fontSize: 9 }
+									{ fontSize: SMALL_TEXT_SIZE }
 								)
 								: null,
 							COL.angleProx,
@@ -511,6 +557,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 					</div>
 				);
 			})}
+		</div>
 		</div>
 	);
 };

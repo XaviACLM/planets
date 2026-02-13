@@ -16,6 +16,7 @@ interface FixedStarPositionsConstructorArgs {
 
 class FixedStarPositions {
 	// dependencies
+	// @ts-expect-error
 	private readonly _date: Date;
 	
 	//logical state

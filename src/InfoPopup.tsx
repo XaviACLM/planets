@@ -11,7 +11,7 @@ const InfoPopup: FC<InfoPopupProps> = ({ children }) => {
 
 	return (
 		<div
-			className="bg-theme-bg text-theme-text px-4 py-3 font-mono text-sm border border-theme-border max-w-[400px] leading-relaxed relative"
+			className="bg-theme-bg backdrop-blur-sm text-theme-text px-4 py-3 font-mono text-sm border border-theme-border max-w-[400px] leading-relaxed relative"
 			onClick={(e) => e.stopPropagation()}
 		>
 			<button

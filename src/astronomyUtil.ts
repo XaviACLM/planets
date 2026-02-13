@@ -2,8 +2,7 @@ import { StateVector, Vector, Body, GeoVector, Ecliptic, GeoMoonState, MakeTime,
 
 import { normalizeAngleRad } from './util.ts'
 import { Node } from './astroDefs.ts';
-import { HamburgSchoolMode } from './settingsDefs.ts';
-import { stateFromKepler, type OrbitalState, positionFromKepler, type OrbitParams, smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts';
+import { type OrbitalState, positionFromKepler, type OrbitParams } from './astroFromOrbitalParams.ts';
 import { type vec3, toAstronomyVector } from './geometry.ts';
 
 export function orbitalParamsToGeocentricLongitude(params: OrbitParams, date: Date): number {
@@ -83,27 +82,10 @@ function heliocentricEQJToGeocentricECT(state: SimpleState, date: Date): SimpleS
 	};
 }
 
-// Convert geocentric EQJ state to geocentric ECT (for Moon which is already geocentric)
-function geocentricEQJToECT(state: StateVector, date: Date): SimpleState {
-	const rotation = Rotation_EQJ_ECT(date);
-	const geocentricECT = RotateState(rotation, state);
-	return {
-		x: geocentricECT.x, y: geocentricECT.y, z: geocentricECT.z,
-		vx: geocentricECT.vx, vy: geocentricECT.vy, vz: geocentricECT.vz
-	};
-}
-
 // Extract ecliptic longitude (radians) from position
 export function eclipticLongitudeFromPosition(pos: { x: number; y: number }): number {
 	const lon = Math.atan2(pos.y, pos.x);
 	return normalizeAngleRad(lon);
-}
-
-// Extract ecliptic longitude speed (radians/day) from state
-// Formula: d/dt(atan2(y, x)) = (x*vy - y*vx) / (x² + y²)
-function eclipticLongitudeSpeedFromState(state: SimpleState): number {
-	const { x, y, vx, vy } = state;
-	return (x * vy - y * vx) / (x * x + y * y);
 }
 
 // takes and returns radians

@@ -16,6 +16,7 @@ import { DignityMode } from './settingsDefs.ts'
 
 // nulls indicate we no longer have a position => should delete from map
 type PositionsUpdate = Map<Node, number | null>
+const positionsUpdate = (entries: [Node, number | null][]): PositionsUpdate => new Map(entries);
 
 // the deleting is handled by:
 function resolvePositionsUpdate(positionsUpdate: PositionsUpdate) {
@@ -55,7 +56,7 @@ function computeAxisAngles(date: Date, surfacePos: SurfacePosition): PositionsUp
 	const mcLon = getTodayEclipticLongitudeFromEQJ(date, mc);
 	const vxLon = getTodayEclipticLongitudeFromEQJ(date, vx);
 
-	return new Map<Node, number>([
+	return positionsUpdate([
 		[Node.ASCENDANT, normalizeAngleRad(ascLon)],
 		[Node.DESCENDANT, normalizeAngleRad(ascLon + Math.PI)],
 		[Node.MIDHEAVEN, normalizeAngleRad(mcLon)],
@@ -66,14 +67,14 @@ function computeAxisAngles(date: Date, surfacePos: SurfacePosition): PositionsUp
 }
 
 function computeEquinoxes(): PositionsUpdate {
-	return new Map<Node, number>([
+	return positionsUpdate([
 		[Node.VERNAL_EQUINOX, 0],
 		[Node.AUTUMNAL_EQUINOX, Math.PI]
 	]);
 }
 
 function computePhysicalNodePositions(date: Date): PositionsUpdate {
-	const nodeAngles = new Map<Node, number>();
+	const nodeAngles = positionsUpdate([]);
 	for ( const [node, body] of Object.entries(nodeToBody)) {
 		const lon = bodyToGeocentricLongitude(body, date);
 		nodeAngles.set(node as Node, lon);
@@ -82,7 +83,7 @@ function computePhysicalNodePositions(date: Date): PositionsUpdate {
 }
 
 function computeSmallObjectPositions(date: Date): PositionsUpdate {
-	const nodeAngles = new Map<Node, number>();
+	const nodeAngles = positionsUpdate([]);
 
 	for (const [node, params] of Object.entries(smallBodyParams)) {
 		const lon = orbitalParamsToGeocentricLongitude(params, date);
@@ -93,7 +94,7 @@ function computeSmallObjectPositions(date: Date): PositionsUpdate {
 }
 
 function computeHamburgSchoolObjectPositions(date: Date, hamburgSchoolMode: HamburgSchoolMode): PositionsUpdate {
-	const nodeAngles = new Map<Node, number>();
+	const nodeAngles = positionsUpdate([]);
 
 	const hamburgSchoolParams = hamburgSchoolMode == HamburgSchoolMode.NEELY ? hamburgSchoolParamsNeely : hamburgSchoolParamsWitte;
 	for (const [node, params] of Object.entries(hamburgSchoolParams)) {
@@ -109,10 +110,10 @@ function computeHighDependencyArabicPartPositions(
 	houseCuspPositions: HouseCuspPositions | null,
 	zodiacSignPositions: ZodiacSignPositions,
 	dignityMode: DignityMode,
-): PositionUpdate {
+): PositionsUpdate {
 
 	if (houseCuspPositions === null){
-		return new Map <Node, number>([
+		return positionsUpdate([
 			[Node.PART_OF_WEALTH, null],
 			[Node.PART_OF_DEATH, null],
 		]);
@@ -129,7 +130,7 @@ function computeHighDependencyArabicPartPositions(
 	const rulerships = dignityMode === DignityMode.CLASSICAL ? classicalRulerships : modernRulerships;
 	const hc2ruler = nodePositions.get(rulerships[hc2sign])!;
 	
-	return new Map <Node, number>([
+	return positionsUpdate([
 		[Node.PART_OF_WEALTH, asc + f*(hc2 - hc2ruler)],
 		[Node.PART_OF_DEATH, nodePositions.get(Node.SATURN)! + f*(hc8 - nodePositions.get(Node.MOON)!)],
 	]);
@@ -151,7 +152,7 @@ function computeArabicPartPositions(
 	const fortune = asc + f*(nodePositions.get(Node.MOON)! - nodePositions.get(Node.SUN)!);
 	const spirit = asc + f*(nodePositions.get(Node.SUN)! - nodePositions.get(Node.MOON)!);
 	
-	return new Map <Node, number>([
+	return positionsUpdate([
 		[Node.PART_OF_FORTUNE, fortune],
 		[Node.PART_OF_SPIRIT, spirit],
 		
@@ -176,7 +177,7 @@ function computeAllNodePositionsWithoutSurfacePosition(
 	lunarNodeMode: LunarNodeMode,
 	hamburgSchoolMode: HamburgSchoolMode
 ): PositionsUpdate{
-	return new Map<Node, number>([
+	return positionsUpdate([
 		...computePhysicalNodePositions(date),
 		...computeSmallObjectPositions(date),
 		...computeHamburgSchoolObjectPositions(date, hamburgSchoolMode),
@@ -195,13 +196,13 @@ function computeAllNodePositions(
 	zodiacSignPositions: ZodiacSignPositions,
 	dignityMode: DignityMode,
 ): PositionsUpdate{
-	let positions = new Map<Node, number>([
+	const posTemp = resolvePositionsUpdate(positionsUpdate([
 		...computeAllNodePositionsWithoutSurfacePosition(date, lunarNodeMode, hamburgSchoolMode),
 		...computeAxisAngles(date, surfacePosition),
-	]);
-	positions = new Map<Node, number>([
-		...positions,
-		...computeArabicPartPositions(positions, houseCuspPositions, zodiacSignPositions, dignityMode),
+	]));
+	const positions = positionsUpdate([
+		...posTemp,
+		...computeArabicPartPositions(posTemp, houseCuspPositions, zodiacSignPositions, dignityMode),
 	]);
 	return positions;
 }
@@ -290,7 +291,7 @@ class NodePositions {
 		}
 		const newLunarNodePositions = computeLunarNodes(this._date, newMode);
 		const newLilithSelenePositions = computeLunarApogeePerigee(this._date, newMode);
-		const newPositions = new Map<Node, number>([...this._positions, ...newLunarNodePositions, ...newLilithSelenePositions]);
+		const newPositions = positionsUpdate([...this._positions, ...newLunarNodePositions, ...newLilithSelenePositions]);
 		return this.copyWith({ lunarNodeMode: newMode, positions: resolvePositionsUpdate(newPositions) });
 	}
 
@@ -299,12 +300,12 @@ class NodePositions {
 			return this;
 		}
 		const newHamburgSchoolObjectPositions = computeHamburgSchoolObjectPositions(this._date, newMode);
-		const newPositions = new Map<Node, number>([...this._positions, ...newHamburgSchoolObjectPositions]);
+		const newPositions = positionsUpdate([...this._positions, ...newHamburgSchoolObjectPositions]);
 		return this.copyWith({ hamburgSchoolMode: newMode, positions: resolvePositionsUpdate(newPositions) });
 	}
 
 	public changeHouseCuspPositions(houseCuspPositions: HouseCuspPositions | null): NodePositions {
-		const newPositions = new Map<Node, number>([
+		const newPositions = positionsUpdate([
 			...this._positions,
 			...computeHighDependencyArabicPartPositions(this._positions, houseCuspPositions, this._zodiacSignPositions, this._dignityMode),
 		]);
@@ -315,7 +316,7 @@ class NodePositions {
 		zodiacSignPositions: ZodiacSignPositions,
 		houseCuspPositions: HouseCuspPositions | null
 	): NodePositions {
-		const newPositions = new Map<Node, number>([
+		const newPositions = positionsUpdate([
 			...this._positions,
 			...computeHighDependencyArabicPartPositions(this._positions, houseCuspPositions, zodiacSignPositions, this._dignityMode),
 		]);
@@ -323,7 +324,7 @@ class NodePositions {
 	}
 
 	public changeDignityMode(dignityMode: DignityMode): NodePositions {
-		const newPositions = new Map<Node, number>([
+		const newPositions = positionsUpdate([
 			...this._positions,
 			...computeHighDependencyArabicPartPositions(this._positions, this._houseCuspPositions, this._zodiacSignPositions, dignityMode),
 		]);
@@ -348,7 +349,10 @@ class NodePositions {
 		return this._surfacePosition !== null;
 	}
 
-	public getParams(): { date: Date, surfacePosition: SurfacePosition | null, lunarNodeMode: LunarNodeMode, hamburgSchoolMode: HamburgSchoolMode } {
+	public getParams(): {
+		date: Date, surfacePosition: SurfacePosition | null, lunarNodeMode: LunarNodeMode, hamburgSchoolMode: HamburgSchoolMode,
+		houseCuspPositions: HouseCuspPositions | null, zodiacSignPositions: ZodiacSignPositions, dignityMode: DignityMode
+	} {
 		return {
 			date: this._date,
 			surfacePosition: this._surfacePosition,

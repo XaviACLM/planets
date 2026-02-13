@@ -87,7 +87,7 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 
 	return (
 		<div
-			className="absolute top-4 left-4 text-theme-text text-sm z-[100] whitespace-nowrap"
+			className="absolute top-4 left-4 text-theme-text text-sm whitespace-nowrap"
 			style={{ visibility: measured ? 'visible' : 'hidden' }}
 		>
 			<div>

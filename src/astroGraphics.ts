@@ -231,7 +231,7 @@ export const modeSymbols: Record<Mode, string> = {
 	[Mode.MUTABLE] : mutableSymbol,
 }
 
-export const nodeSymbols: Record<Node, string> = {
+export const nodeSymbols: Partial<Record<Node, string>> = {
 	[Node.SUN] : sunSymbol,
 	[Node.MOON] : moonSymbol,
 	[Node.MERCURY] : mercurySymbol,
