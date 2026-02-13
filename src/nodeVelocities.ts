@@ -15,7 +15,7 @@ function computeVelocity(base: NodePositions, progressed: NodePositions, node: N
 	if (!(base.has(node) && progressed.has(node))){
 		return null; // meaning "remove this value"
 	}
-	return signedAngleDifference(lon1, lon2) / (timeDeltaMs / MS_PER_DAY);
+	return signedAngleDifference(base.get(node), progressed.get(node)) / (timeDeltaMs / MS_PER_DAY);
 }
 
 function recomputeVelocitiesForNodes(

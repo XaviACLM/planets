@@ -153,6 +153,8 @@ function App() {
 	}, [aspects])
 
 	/*
+	TODO remove this from here when we make that hook stuff
+	
 	dependencies. Starred if they have one or more change methods associated, = should NOT always cause full recompute
 	change methods only listed if nontrivial. Assume star implies unary change method
 	

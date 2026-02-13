@@ -40,6 +40,16 @@ as for the "nice little layout". Possibly just a tiny version of the aspect itse
 way, and on each side on each of the three nodes we write down who's who. Not even that bad of an idea: it would be definitely _not impossible_ to do this with a bunch of ad hoc svgs.
 yeah. I'm not 100% sold but it _is_ a way out. We'll think about it more, see if we come up with something better, or just stick to that.
 
+
+MINILIST
+- revamp aspect menu
+- fenagle things so that the app can handle the arabic parts while looking fine
+- PlanetTable
+
+- fuck it, try to make it work on the phone a bit
+- some sort of sharing functionality. try to make the links short + make it forwards-compatible
+
+
 TRIVIAL
 -
 
@@ -48,7 +58,7 @@ NOT TOO HARD, NOT TOO EASY
 - fill in the nodeAverageSpeed (or whatever it's called) record
 
 REQUIRES THINKING
-- maybe HCP should actually provide some information about presweep? Currently externally it just tells people where the houses are. ZodiacWheel actually infers where the cusps are from config values, which is slightly weird. Actually that's not quite true is it? readily tells you where cusps are, doesn't expose where limits are, but does tell you what house a longitude is in wrt limits - which is all we need, actually. Mb that's fine? Actually what we said about ZodiacWheel is still true, just reversed, so idk idk.
+-
 
 ETC
 -
@@ -64,6 +74,7 @@ ALREADY DONE BUT KEEP IN MIND
 -
 
 I'LL GET TO IT
+- maybe HCP should actually provide some information about presweep? Currently externally it just tells people where the houses are. ZodiacWheel actually infers where the cusps are from config values, which is slightly weird. Actually that's not quite true is it? readily tells you where cusps are, doesn't expose where limits are, but does tell you what house a longitude is in wrt limits - which is all we need, actually. Mb that's fine? Actually what we said about ZodiacWheel is still true, just reversed, so idk idk.
 - Variable presweep amounts (different from exactly 5 degrees)
 - dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
 - order files
@@ -80,4 +91,5 @@ I DONT FEEL LIKE IT
 
 ROADMAP
 - Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
+- the llm business
 - make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f

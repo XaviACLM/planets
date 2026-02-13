@@ -341,7 +341,7 @@ class NodePositions {
 	}
 
 	public has(node: Node): boolean {
-		return node in this._positions;
+		return this._positions.has(node);
 	}
 
 	public hasSurfacePosition(): boolean {
