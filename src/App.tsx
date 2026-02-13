@@ -244,7 +244,12 @@ function App() {
 					fixedStarPositions={fixedStarPositions}
 					houseCuspPositions={houseCuspPositions}
 					aspects={aspects}
-					setHighlightedNode={setHighlightedNode}
+					onNodeClick={(node) => {
+						setSelectedNode(node);
+						if (highlightedNode !== null) {
+							setHighlightedNode(node);
+						}
+					}}
 				/>
 
 				<div className="absolute bottom-5 right-5 z-[1000] flex flex-col gap-2 items-end">

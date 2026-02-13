@@ -206,7 +206,7 @@ type PlanetTableProps = {
 	fixedStarPositions: FixedStarPositions;
 	houseCuspPositions: HouseCuspPositions | null;
 	aspects: Map<Aspect, Aspect[]>;
-	setHighlightedNode: (node: Node) => void;
+	onNodeClick: (node: Node) => void;
 };
 
 // Column widths (px) — easy to tweak
@@ -236,7 +236,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	fixedStarPositions,
 	houseCuspPositions,
 	aspects,
-	setHighlightedNode,
+	onNodeClick,
 }) => {
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 	const houseAngularityMode = useSettingsStore(s => s.houseAngularityMode);
@@ -390,8 +390,9 @@ const PlanetTable: FC<PlanetTableProps> = ({
 					<div
 						key={row.node}
 						className={`flex border-b border-theme-border/30 hover:bg-theme-text/5 cursor-pointer ${row.isChartRuler ? "bg-theme-text/[0.04]" : ""}`}
-						onClick={() => setHighlightedNode(row.node)}
+						onClick={(e) => { e.stopPropagation(); onNodeClick(row.node);}}
 					>
+						
 						{/* Node — right-justified with solid right border */}
 						<div
 							className="flex items-center justify-end pr-1.5 overflow-hidden border-r border-theme-border/50"
