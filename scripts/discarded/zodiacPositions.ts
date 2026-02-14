@@ -1,16 +1,67 @@
+import { Body, GeoVector, Ecliptic, GeoMoonState, MakeTime, Vector, AstroTime, RotateVector, Rotation_EQJ_ECT } from "astronomy-engine";
+
 import { normalizeAngleRad, anglesLieInShortArc } from './util.ts'
-import { computeHouseCuspPositions, HouseSystem, ayanamsaDependantHouseSystems } from './houses.ts'
-import { smallBodyParams, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte } from './astroFromOrbitalParams.ts'
-import { ZodiacMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularZodiacModes } from './astroDefs.ts'
+import { computeHouseCuspPositions, HouseSystem, AyanamsaDependantHouseSystems } from './houses.ts'
+import { smallBodyParams, stateFromKepler, positionFromKepler, hamburgSchoolParamsNeely, hamburgSchoolParamsWitte, type OrbitalState } from './astroFromOrbitalParams.ts'
+import { AstrologyMode, Node, type SurfacePosition, Zodiac, standardZodiac, irregularAstrologyModes } from './astroDefs.ts'
 import { ayanamsas, zodiacLongitudeClosest, zodiacLongitudeIAU, fixedStars } from './astroData.ts'
-import { LunarNodeMode, HamburgSchoolMode } from './settingsDefs.ts'
-import { computeAllSignificantPoints } from './geometry.ts'
-import {
-	orbitalParamsToGeocentricLongitude, nodeToBody, bodyToGeocentricLongitude, addPrecession,
-	getTodayEclipticLongitudeFromEQJ,
-	computeLunarApogeePerigeeMeeus, computeLunarApogeePerigeeExact,
-	computeLunarNodesMeeus, computeLunarNodesExact
-} from './astronomyUtil.ts'
+import { LunarNodeMode, HamburgSchoolMode, DignityMode } from './settingsDefs.ts'
+import { type vec3, toAstronomyVector, computeAllSignificantPoints } from './geometry.ts'
+import { orbitalParamsToGeocentricLongitude, eclipticLongitudeFromPosition, nodeToBody, bodyToGeocentricLongitude, addPrecession } from './astronomyUtil.ts'
+
+function computeLunarApogeePerigeeMeeus(date: Date): Map<Node, number> {
+	const jd = (date.getTime() / 86400000) + 2440587.5;
+	const t = (jd - 2451545.0) / 36525.0;
+	
+	// again Meeus Ch. 47
+	const omega = 83.3532465 + 4069.0137287 * t - 0.0103200 * t*t - (t*t*t)/80053;
+	const perigee = (omega % 360) * Math.PI / 180;
+	
+	return new Map<Node, number>([
+		[Node.LUNAR_PERIGEE, normalizeAngleRad(perigee)],
+		[Node.LUNAR_APOGEE, normalizeAngleRad(perigee + Math.PI)]
+	]);
+}
+
+function computeLunarApogeePerigeeExact(date: Date): Map<Node, number> {
+	const s = GeoMoonState(date);
+	
+	const GM = 8.887692587023177e-10;  // earth's gravitational parameter in AU^3 / day^2
+	const r = Math.sqrt(s.x*s.x + s.y*s.y + s.z*s.z);
+	
+	// angular momentum
+	const h = {
+		x: s.y * s.vz - s.z * s.vy,
+		y: s.z * s.vx - s.x * s.vz,
+		z: s.x * s.vy - s.y * s.vx
+	};
+	
+	// eccentricity vector points toward perigee
+	const rVec = {x: s.x, y: s.y, z: s.z};
+	const vVec = {x: s.vx, y: s.vy, z: s.vz};
+	
+	// e = (v x h)/GM - r/mod(r)
+	const vxh = {
+		x: vVec.y * h.z - vVec.z * h.y,
+		y: vVec.z * h.x - vVec.x * h.z,
+		z: vVec.x * h.y - vVec.y * h.x
+	};
+	const e = {
+		x: vxh.x/GM - rVec.x/r,
+		y: vxh.y/GM - rVec.y/r,
+		z: vxh.z/GM - rVec.z/r,
+		t: MakeTime(date)
+	};
+	
+	
+	const eEcl = Ecliptic(new Vector(e.x, e.y, e.z, e.t)).vec;
+	const omega = Math.atan2(eEcl.y, eEcl.x);
+	
+	return new Map<Node, number>([
+		[Node.LUNAR_PERIGEE, normalizeAngleRad(omega)],
+		[Node.LUNAR_APOGEE, normalizeAngleRad(omega + Math.PI)]
+	]);
+}
 
 function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
@@ -20,12 +71,55 @@ function computeLunarApogeePerigee(date: Date, lunarNodeMode: LunarNodeMode): Ma
 	}
 }
 
+function computeLunarNodesMeeus(date: Date): Map<Node, number> {
+	const jd = (date.getTime() / 86400000) + 2440587.5; // Unix ms -> JD
+	const t = (jd - 2451545.0) / 36525.0;
+
+	// Meeus Ch. 47: mean longitude of ascending node of lunar orbit
+	const omega = 125.04452 - 1934.136261 * t + 0.0020708 * t*t + (t*t*t)/450000; // small correction
+
+	const ascending = (omega)/360*2*Math.PI;
+	
+	return new Map <Node, number>([
+		[Node.LUNAR_ASCENDING, normalizeAngleRad(ascending)],
+		[Node.LUNAR_DESCENDING, normalizeAngleRad(ascending + Math.PI)]
+	]);
+}
+
+function computeLunarNodesExact(date: Date): Map<Node, number>{
+	
+	const s = GeoMoonState(date);
+	
+	const r = { x: s.x, y: s.y, z: s.z };
+	const v = { x: s.vx, y: s.vy, z: s.vz };
+	const h = {
+		x: r.y * v.z - r.z * v.y,
+		y: r.z * v.x - r.x * v.z,
+		z: r.x * v.y - r.y * v.x,
+		t: new AstroTime(date)
+	};
+	
+	const hEcl = Ecliptic(new Vector(h.x, h.y, h.z, h.t)).vec; // { x, y, z } in ecliptic frame
+	const omega = Math.atan2(hEcl.x, -hEcl.y);
+	return new Map <Node, number>([
+		[Node.LUNAR_ASCENDING, normalizeAngleRad(omega)],
+		[Node.LUNAR_DESCENDING, normalizeAngleRad(omega + Math.PI)]
+	]);
+	
+}
+
 function computeLunarNodes(date: Date, lunarNodeMode: LunarNodeMode): Map<Node, number>{
 	if (lunarNodeMode == LunarNodeMode.MEAN) {
 		return computeLunarNodesMeeus(date);
 	} else {
 		return computeLunarNodesExact(date);
 	}
+}
+
+function getTodayEclipticLongitudeFromEQJ(date: Date, v: vec3): number {
+	const astroTime = new AstroTime(date);
+	const vECT = RotateVector(Rotation_EQJ_ECT(astroTime), toAstronomyVector(v));
+	return Math.atan2(vECT.y, vECT.x);
 }
 
 function computeAxisAngles(date: Date, surfacePos: SurfacePosition): Map<Node, number> {
@@ -152,32 +246,32 @@ function computeAllNodePositions(
 	return nodePositions;
 }
 
-function computeSiderealOffset(date: Date, zodiacMode: ZodiacMode): number {
-	if (zodiacMode === ZodiacMode.TROPICAL) { return 0; }
+function computeSiderealOffset(date: Date, astrologyMode: AstrologyMode): number {
+	if (astrologyMode === AstrologyMode.TROPICAL) { return 0; }
 	
-	const ayanamsaJ2000 = ayanamsas[zodiacMode];
+	const ayanamsaJ2000 = ayanamsas[astrologyMode];
 	if (ayanamsaJ2000 === undefined) {
-		throw new Error("Irregular zodiac mode passed to computeSiderealOffset");
+		throw new Error("Irregular astrology mode passed to computeSiderealOffset");
 	}
 	
 	return addPrecession(date, ayanamsaJ2000*Math.PI/180);
 }
 
-function computeSignPositionsFromSiderealOffset(siderealOffset: number): number[] {
+function computeZodiacSymbolPositionsFromSiderealOffset(siderealOffset: number): number[] {
 	return new Map(standardZodiac.map((zodiac, index) => 
 		[zodiac, siderealOffset + index * Math.PI / 6]
 	));
 }
 
-function computeSignPositionsForIrregularMode(date: Date, zodiacMode: ZodiacMode): number[] {
+function computeZodiacSymbolPositionsForIrregularMode(date: Date, astrologyMode: AstrologyMode): number[] {
 	let zodiacLongitudes = null;
 	
-	if (zodiacMode === ZodiacMode.CONSTELLATIONS_CLOSEST) {
+	if (astrologyMode === AstrologyMode.CONSTELLATIONS_CLOSEST) {
 		zodiacLongitudes = zodiacLongitudeClosest;
-	} else if (zodiacMode === ZodiacMode.CONSTELLATIONS_IAU) {
+	} else if (astrologyMode === AstrologyMode.CONSTELLATIONS_IAU) {
 		zodiacLongitudes = zodiacLongitudeIAU;
 	} else {
-		throw new Error("Regular zodiac mode passed to computeSignPositionsForIrregularMode");
+		throw new Error("Regular astrology mode passed to computeZodiacSymbolPositionsForIrregularMode");
 	}
 	
 	return new Map(
@@ -200,20 +294,20 @@ interface ZodiacPositionsConstructorArgs {
 	surfacePosition: SurfacePosition | null;
 	lunarNodeMode: LunarNodeMode;
 	houseSystem: HouseSystem;
-	zodiacMode: ZodiacMode;
+	astrologyMode: AstrologyMode;
 	hamburgSchoolMode: HamburgSchoolMode;
 	housePresweep: boolean;
 	nodePositions?: Map<Node, number>;
 	houseCuspPositions?: number[] | null;
 	siderealOffset?: number | null;
-	signPositions?: Map<Zodiac, number>;
+	zodiacSymbolPositions?: Map<Zodiac, number>;
 	fixedStarPositions?: Map<string, number>;
 }
 
 class ZodiacPositions {
 	private readonly _nodePositions: Map<Node, number>;
 	private readonly _houseCuspPositions: number[] | null;
-	private readonly _signPositions: Map<Zodiac, number>;
+	private readonly _zodiacSymbolPositions: Map<Zodiac, number>;
 	private readonly _fixedStarPositions: Map<string, number>;
 	
 	public readonly date: Date;
@@ -221,7 +315,7 @@ class ZodiacPositions {
 	public readonly lunarNodeMode: LunarNodeMode;
 	public readonly houseSystem: HouseSystem;
 	public readonly siderealOffset: number;
-	public readonly zodiacMode: ZodiacMode;
+	public readonly astrologyMode: AstrologyMode;
 	public readonly hamburgSchoolMode: HamburgSchoolMode;
 	public readonly housePresweep: boolean;
 	
@@ -230,7 +324,7 @@ class ZodiacPositions {
 		this.date = config.date;
 		this.lunarNodeMode = config.lunarNodeMode;
 		this.houseSystem = config.houseSystem;
-		this.zodiacMode = config.zodiacMode;
+		this.astrologyMode = config.astrologyMode;
 		this.hamburgSchoolMode = config.hamburgSchoolMode;
 		this.housePresweep = config.housePresweep;
 		
@@ -242,22 +336,22 @@ class ZodiacPositions {
 		
 		// best be explicit ab whether siderealOffset is undefined/null
 		if (config.siderealOffset === undefined) {
-			if (irregularZodiacModes.includes(this.zodiacMode)){
+			if (irregularAstrologyModes.includes(this.astrologyMode)){
 				this.siderealOffset = null;
 			} else {
-				this.siderealOffset = computeSiderealOffset(this.date, this.zodiacMode);
+				this.siderealOffset = computeSiderealOffset(this.date, this.astrologyMode);
 			}
 		} else {
 			this.siderealOffset = config.siderealOffset;
 		}
-		if (config.signPositions === undefined) {
+		if (config.zodiacSymbolPositions === undefined) {
 			if (this.siderealOffset === null) {
-				this._signPositions = computeSignPositionsForIrregularMode(this.date, this.zodiacMode);
+				this._zodiacSymbolPositions = computeZodiacSymbolPositionsForIrregularMode(this.date, this.astrologyMode);
 			} else {
-				this._signPositions = computeSignPositionsFromSiderealOffset(this.siderealOffset);
+				this._zodiacSymbolPositions = computeZodiacSymbolPositionsFromSiderealOffset(this.siderealOffset);
 			}
 		} else {
-			this._signPositions = config.signPositions;
+			this._zodiacSymbolPositions = config.zodiacSymbolPositions;
 		}
 		
 		if (config.nodePositions) {
@@ -265,7 +359,7 @@ class ZodiacPositions {
 			this._houseCuspPositions = config.houseCuspPositions || null;
 		} else if (this.surfacePosition !== null) {
 			this._nodePositions = computeAllNodePositions(this.date, this.surfacePosition, this.lunarNodeMode, this.hamburgSchoolMode);
-			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions, this._signPositions);
+			this._houseCuspPositions = computeHouseCuspPositions(this.date, this.surfacePosition, this.houseSystem, this._nodePositions, this._zodiacSymbolPositions);
 		} else {
 			this._nodePositions = computeAllNodePositionsWithoutSurfacePosition(this.date, this.lunarNodeMode, this.hamburgSchoolMode);
 			this._houseCuspPositions = null;
@@ -277,7 +371,7 @@ class ZodiacPositions {
 		surfacePosition: SurfacePosition | null,
 		lunarNodeMode: LunarNodeMode,
 		houseSystem: HouseSystem,
-		zodiacMode: ZodiacMode,
+		astrologyMode: AstrologyMode,
 		hamburgSchoolMode: HamburgSchoolMode,
 		housePresweep: boolean,
 	): ZodiacPositions {
@@ -286,7 +380,7 @@ class ZodiacPositions {
 			surfacePosition,
 			lunarNodeMode,
 			houseSystem,
-			zodiacMode,
+			astrologyMode,
 			hamburgSchoolMode,
 			housePresweep
 		});
@@ -298,13 +392,13 @@ class ZodiacPositions {
 			surfacePosition: this.surfacePosition,
 			lunarNodeMode: this.lunarNodeMode,
 			houseSystem: this.houseSystem,
-			zodiacMode: this.zodiacMode,
+			astrologyMode: this.astrologyMode,
 			hamburgSchoolMode: this.hamburgSchoolMode,
 			housePresweep: this.housePresweep,
 			nodePositions: this._nodePositions,
 			houseCuspPositions: this._houseCuspPositions,
 			siderealOffset: this.siderealOffset,
-			signPositions: this._signPositions,
+			zodiacSymbolPositions: this._zodiacSymbolPositions,
 			fixedStarPositions: this._fixedStarPositions,
 			...updates
 		});
@@ -325,7 +419,7 @@ class ZodiacPositions {
 			return this;
 		}
 		const newHouseCuspPositions = this.surfacePosition ? 
-			computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions, this._signPositions)
+			computeHouseCuspPositions(this.date, this.surfacePosition, newSystem, this._nodePositions, this._zodiacSymbolPositions)
 			: null;
 		return this.copyWith({houseSystem: newSystem, houseCuspPositions: newHouseCuspPositions});
 	}
@@ -334,57 +428,57 @@ class ZodiacPositions {
 		return this.copyWith({housePresweep: newHousePresweep});
 	}
 	
-	public changeZodiacMode(newZodiacMode: ZodiacMode): ZodiacPositions {
-		if (newZodiacMode == this.zodiacMode) {
+	public changeAstrologyMode(newAstrologyMode: AstrologyMode): ZodiacPositions {
+		if (newAstrologyMode == this.astrologyMode) {
 			return this;
 		}
 		
 		let newSiderealOffset: number;
-		let newSignPositions: Map<Zodiac, number>;
-		if (irregularZodiacModes.includes(newZodiacMode)){
+		let newZodiacSymbolPositions: Map<Zodiac, number>;
+		if (irregularAstrologyModes.includes(newAstrologyMode)){
 			newSiderealOffset = null;
-			newSignPositions = computeSignPositionsForIrregularMode(this.date, newZodiacMode);
+			newZodiacSymbolPositions = computeZodiacSymbolPositionsForIrregularMode(this.date, newAstrologyMode);
 		} else {
-			newSiderealOffset = computeSiderealOffset(this.date, newZodiacMode);
-			newSignPositions = computeSignPositionsFromSiderealOffset(newSiderealOffset);
+			newSiderealOffset = computeSiderealOffset(this.date, newAstrologyMode);
+			newZodiacSymbolPositions = computeZodiacSymbolPositionsFromSiderealOffset(newSiderealOffset);
 		}
 		
-		if (ayanamsaDependantHouseSystems.includes(this.houseSystem) && this.surfacePosition !== null) {
+		if (AyanamsaDependantHouseSystems.includes(this.houseSystem) && this.surfacePosition !== null) {
 			const newHouseCuspPositions = computeHouseCuspPositions(
 				this.date,
 				this.surfacePosition,
 				this.houseSystem,
 				this._nodePositions,
-				newSignPositions
+				newZodiacSymbolPositions
 			);
 			return this.copyWith({
-				zodiacMode: newZodiacMode,
+				astrologyMode: newAstrologyMode,
 				siderealOffset: newSiderealOffset,
-				signPositions: newSignPositions,
+				zodiacSymbolPositions: newZodiacSymbolPositions,
 				houseCuspPositions: newHouseCuspPositions
 			});
 		} else {
 			return this.copyWith({
-				zodiacMode: newZodiacMode,
+				astrologyMode: newAstrologyMode,
 				siderealOffset: newSiderealOffset,
-				signPositions: newSignPositions
+				zodiacSymbolPositions: newZodiacSymbolPositions
 			});
 		}
 	}
 	
-	public getSignPositions(): Map<Zodiac, number> {
-		return this._signPositions;
+	public getZodiacSymbolPositions(): Map<Zodiac, number> {
+		return this._zodiacSymbolPositions;
 	}
 	
 	public isZodiacModeRegular(): boolean {
 		return this.siderealOffset !== null;
 	}
 	
-	public _getSignAtLongitude(lon: number): Zodiac {
+	public _getSymbolAtLongitude(lon: number): Zodiac {
 		if (this.isZodiacModeRegular()){
 			return standardZodiac[Math.floor((((lon-this.siderealOffset)*6/Math.PI)%12+12)%12)];
 		} else {
-			const entries = Array.from(this.getSignPositions().entries());
+			const entries = Array.from(this.getZodiacSymbolPositions().entries());
 			const index = entries.findIndex(([_, zlon]) => zlon > lon);
 			if (index === -1 || index === 0) { // first is already bigger or all are smaller: last sign (the one across the v.equinox)
 				return entries[entries.length - 1][0];
@@ -394,10 +488,10 @@ class ZodiacPositions {
 		}
 	}
 	
-	public getSignOfNode(node: Node): Zodiac {
+	public getSymbolOfNode(node: Node): Zodiac {
 		// will error out if node is absent (intended)
 		const lon = this.getNodePosition(node);
-		return this._getSignAtLongitude(lon);
+		return this._getSymbolAtLongitude(lon);
 	}
 	
 	public getNodePositionWithinSign(node: Node): number {
@@ -407,8 +501,8 @@ class ZodiacPositions {
 			// this should give the same results as the next branch but something something faster/more readable
 			return normalizeAngleRad(lon - this.siderealOffset)%(Math.PI/6);
 		} else {
-			const sign = this._getSignAtLongitude(lon);
-			return lon - this._signPositions.get(sign);
+			const sign = this._getSymbolAtLongitude(lon);
+			return lon - this._zodiacSymbolPositions.get(sign);
 		}
 		
 	} 

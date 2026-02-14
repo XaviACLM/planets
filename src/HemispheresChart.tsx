@@ -184,14 +184,13 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 							const node = nodes[i];
 							const rowOffset = i - (nLeft-1)/2;
 							const label = nodeShortName[node] ?? nodePreferredName[node] ?? node;
-							const scaleFactor = 7/label.length;
-							const scaleTransform = scaleFactor < 1 ? `scale(${scaleFactor}, 1)` : ''
 							return (
 								<text
 									key={i}
 									{...svgTextProps}
 									textAnchor="end"
-									transform={`translate(${-textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3}) ${scaleTransform}`}
+									textLength={label.length > 6 ? "54px" : undefined}
+									transform={`translate(${-textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{label}
 								</text>
@@ -201,14 +200,13 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 							const node = nodes[i+nLeft];
 							const rowOffset = i - (nRight-1)/2;
 							const label = nodeShortName[node] ?? nodePreferredName[node] ?? node;
-							const scaleFactor = 7/label.length;
-							const scaleTransform = scaleFactor < 1 ? `scale(${scaleFactor}, 1)` : ''
 							return (
 								<text
 									key={i+nLeft}
 									{...svgTextProps}
 									textAnchor="start"
-									transform={`translate(${textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3}) ${scaleTransform}`}
+									textLength={label.length > 6 ? "54px" : undefined}
+									transform={`translate(${textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{label}
 								</text>

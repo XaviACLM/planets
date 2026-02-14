@@ -44,15 +44,55 @@ yeah. I'm not 100% sold but it _is_ a way out. We'll think about it more, see if
 
 MINILIST
 - revamp aspect menu
+	almost done. now we gotta do the part of whatever thing first. then
+	dial in font sizes
+	hovering can get weirdly stuck sometimes
+	maybe keep an option for the old menu
 - fenagle things so that the app can handle the arabic parts while looking fine
-- make planet table clickable, maybe
-- fit planetTable into the layout
-- make orientation chart text ever so slightly smaller
+	how is this gonna work exactly.
+	we already have the distinction nodesWithRedundantSymbols: can be drawn w/o symbol.
+	we have nodeShortName. Fortuna is already there. Used only for NodeSelector and the wheel chart.
+	we have but is probably not relevant:
+		nodePreferredName. This is only for stuff like Lilith, i.e. it makes sense for it to have a different name in the code.
+		nodesAdmittingArticle. Clearly not relevant but suggests maybe the parts should be treated separately.
+	Easiest solution is probably to keep Fortuna in nodeShortName, add Spiritus, and everything else w just P. Marriage (W) and the like.
+	Well, some thoughts.
+		A bit silly but I would like to have the nodeSelector be like - Arabic parts: of Fortune, of Spirit, of Eros, etc etc.
+		But this makes sense only there, nowhere else. New parameter for renderNode? some fuckass ad-hoc code in nodeSelector? Love neither option. First is clearly better though.
+		If these nodes don't have icons, which they don't, in large donut mode (showNodeLabels true), their entire name might fit. 
+			...so we'd have nodesWithoutIcons, and when a node is there, zodiacWheel draws the entire name? Sure, I guess.
+		but then in small donut mode we DO use the shortname. Well the logic is a bit complicated but we'll get there. We just need to know the distinctions.
+		- nodesWithoutSymbols (defined through nodeSymbols)
+		- give each part their shortname
+		- in zodiacWheel
+			if showNodeLabels
+				if redundantSymbol or has no symbol
+					draw the name. don't even think about the shortname, fuck it
+				else
+					draw the icon, and the shortname ?? name
+			else
+				if has symbol ( <- maybe we can skip nodes with redundant symbol? might be better if they fit. and if they dont mb we just have to make the donut wider, not that important)
+					draw symbol
+				else
+					draw shortname ?? name
+		and then we also have to worry about what to do for the rest of the app.
+			- aspect menu - we already worried about it
+			- nodeselector - that whole "of xyz" business, we'll see
+			- planetPanel - need to just add the text on the little circle. a bit odd. like nodeselector requires separating "part of"
+			- everywhere else: it's nbd, just make renderNode default to text if necessary. We'll look into if looks wrong anywhere specific, maybe in some contexts shortnames will be preferable.
+		oh yeah and maybe some specificity re "the" in "the father"/"the mother"
+
+- "scroll down" prompt. maybe reverse scroll direction?
 
 - fuck it, try to make it work on the phone a bit
 - some sort of sharing functionality. try to make the links short + make it forwards-compatible
 
 - do we want to dial back the smallcaps, actually?
+
+MINILIST EASY
+- separate NodePositionsConstructorArgs (and analogues) into dependencies and state, see how this affects function signatures. Particularly create may just take a bundle.
+- astroData getters keyed by stuff from settingsDefs
+- custom datepicker (just containing a normal datepicker, for now) that internally handles the timezone logic and etc etc
 
 - update help menus accordingly
 - search "TODO"

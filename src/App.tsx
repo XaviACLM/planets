@@ -202,6 +202,7 @@ function App() {
 				>
 					<AspectMenu
 						aspects={aspects}
+						nodePositions={nodePositions}
 						onHover={(aspect) => {setHighlightedAspect(aspect)}}
 						onDelete={handleAspectDeletion}
 						highlightedNode={highlightedNode}
@@ -253,7 +254,7 @@ function App() {
 							}}
 						/>
 					</div>
-					<div style={{ height: '100%' }} />
+					<div style={{ height: '5%' }} />
 				</div>
 
 				{/* Layer 3: Floating UI — always on top */}

@@ -394,7 +394,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	return (
 		<div ref={containerRef} className="w-full flex justify-center">
 		<div
-			className="bg-theme-bg/10 backdrop-blur-sm text-theme-text text-xs select-none"
+			className="bg-theme-bg/50 backdrop-blur-sm text-theme-text text-xs select-none border-y border-theme-border"
 			style={{
 				width: naturalWidth,
 				paddingTop: FEATHERY_PX,
