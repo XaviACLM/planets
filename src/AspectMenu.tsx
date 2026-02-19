@@ -5,7 +5,7 @@ import { Node } from './astroDefs.ts';
 import { nodeSymbols, nodeShortName, nodePreferredName, aspectKindColors, nodesWithoutSymbol } from './astroGraphics.ts'
 import NodePositions from './nodePositions.ts'
 import { useSettingsStore } from './settingsStore.ts'
-import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
+import { renderNode, renderString, renderAspectKind, svgHatchDefs } from './renderPrimitives.tsx'
 import { formatAngle, normalizeAngleRad } from './util';
 
 // Layout constants
@@ -233,21 +233,15 @@ function MiniAspectDiagram({
 	return (
 		<svg viewBox="0 0 100 100" className="w-full" style={{ maxHeight: CONFIG_MINI_DIAGRAM_HEIGHT }}>
 			{/* Hatched circle background */}
-			<defs>
-				<pattern id={"hatch"}
-					width="7" height="7"
-					patternUnits="userSpaceOnUse"
-					patternTransform="rotate(45)"
-				>
-					<rect width="2" height="2" fill="var(--color-text)" opacity="1" />
-				</pattern>
-			</defs>
-			<circle cx={cx} cy={cy} r={r}
-				fill={`url(#hatch)`}
-				stroke="var(--color-text)"
-				strokeWidth={1}
-				opacity={0.2}
-			/>
+			{(() => {
+				const { defs, fill } = svgHatchDefs({ dotSize: 2, spacing: 7 });
+				return <>{defs}<circle cx={cx} cy={cy} r={r}
+					fill={fill}
+					stroke="var(--color-text)"
+					strokeWidth={1}
+					opacity={0.2}
+				/></>;
+			})()}
 
 			{/* Aspect shape */}
 			<path

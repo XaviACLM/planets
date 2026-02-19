@@ -537,33 +537,44 @@ export const AspectKindSelectorButton = ({
 
 let dotPatternCounter = 0;
 
+export const svgHatchDefs = (options: {
+	dotSize?: number;
+	spacing?: number;
+} = {}): { defs: ReactNode; patternId: string; fill: string } => {
+	const { dotSize = 1.5, spacing = 10 } = options;
+	const patternId = `dot-pattern-${dotPatternCounter++}`;
+	const defs = (
+		<defs>
+			<pattern
+				id={patternId}
+				width={spacing}
+				height={spacing}
+				patternUnits="userSpaceOnUse"
+				patternTransform="rotate(45)"
+			>
+				<rect width={dotSize} height={dotSize} fill="var(--color-text)" />
+			</pattern>
+		</defs>
+	);
+	return { defs, patternId, fill: `url(#${patternId})` };
+};
+
 export const renderDotPattern = (options: {
 	dotSize?: number;
 	spacing?: number;
 } = {}): ReactNode => {
-	const { dotSize = 1.5, spacing = 10 } = options;
-	const id = `dot-pattern-${dotPatternCounter++}`;
+	const { defs, fill } = svgHatchDefs(options);
 	const isDarkTheme = useSettingsStore.getState().theme === 'Dark';
 
 	return (
 		<svg className="absolute inset-0 w-full h-full pointer-events-none"
 			preserveAspectRatio="none"
 		>
-			<defs>
-				<pattern
-					id={id}
-					width={spacing}
-					height={spacing}
-					patternUnits="userSpaceOnUse"
-					patternTransform="rotate(45)"
-				>
-					<rect width={dotSize} height={dotSize} fill="var(--color-text)" />
-				</pattern>
-			</defs>
+			{defs}
 			<rect
 				x="0%" width="100%" height="100%"
 				opacity={isDarkTheme ? "30%" : "75%"}
-				fill={`url(#${id})`}
+				fill={fill}
 			/>
 		</svg>
 	);

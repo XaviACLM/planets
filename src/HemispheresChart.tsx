@@ -5,7 +5,7 @@ import NodePositions from './nodePositions.ts'
 import { isNodeAboveHorizon, isNodeEastern } from './chartAnalysis.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { NodesToConsider } from './settingsDefs.ts'
-import { renderString } from './renderPrimitives.tsx'
+import { renderString, svgHatchDefs } from './renderPrimitives.tsx'
 
 type HemispheresChartProps = {
 	nodePositions: NodePositions,
@@ -259,15 +259,17 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	const hatchingWidth = 15;
 
 	const createHemispheresChart = (width: number) => {
+		const { defs: hatchDefs, fill: hatchFill } = svgHatchDefs({ dotSize: 1, spacing: 5 });
 		return (
 			<svg width={width} height={height}>
+				{hatchDefs}
 				<rect
 					x={0}
 					y={0}
 					width={width}
 					height={height}
 					strokeWidth={strokeWidth}
-					fill={"url(#hatch2)"}
+					fill={hatchFill}
 				/>
 				<rect
 					x={hatchingWidth}
@@ -324,56 +326,22 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 				<g transform={`translate(${0.75*width},${hTop+0.5*hBot})`}>
 					{renderNodeGroupSVG(nodesBelowWest, width/2)}
 				</g>
-				<defs>
-					<pattern id={"hatch2"}
-						width="5" height="5"
-						patternUnits="userSpaceOnUse"
-						patternTransform="rotate(45)"
-					>
-						<rect width="1" height="1" fill="var(--color-text)" opacity="0.7" />
-					</pattern>
-				</defs>
 			</svg>
 		);
 	};
 	
 	const createFillerRectangle = (width: number) => {
+		const { defs, fill } = svgHatchDefs({ dotSize: 1, spacing: 3.5 });
 		return (
 			<svg width={width} height={height}>
+				{defs}
 				<rect
 					x={0}
 					y={0}
 					width={width}
 					height={height}
-					fill="var(--color-text)"
-					stroke="var(--color-text)"
-					strokeWidth={strokeWidth}
-					mask={"url(#mask-stripe2)"}
+					fill={fill}
 				/>
-				<defs>
-					<pattern id="pattern-stripe2"
-						width="3.5"
-						height="3.5"
-						patternUnits="userSpaceOnUse"
-						patternTransform="rotate(45)"
-					>
-						<rect
-							width="1"
-							height="1"
-							transform="translate(0,0)"
-							fill="white"
-						/>
-					</pattern>
-					<mask id="mask-stripe2">
-						<rect
-							x="0"
-							y="0"
-							width="100%"
-							height="100%"
-							fill="url(#pattern-stripe2)"
-						/>
-					</mask>
-				</defs>
 			</svg>
 		);
 	};

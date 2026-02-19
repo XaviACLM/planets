@@ -33,8 +33,6 @@ NECESSARY FOR FIRST BUILD IN CV
 Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
 	maybe also do the larger text mode thing from misc
 
-make the node images in the planet panel a bit less silly (particularly the physicals without an image)
-
 order files
 
 

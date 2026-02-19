@@ -21,7 +21,7 @@ import ZodiacSignPositions from './zodiacSignPositions.ts'
 import { getSignOfNode } from './chartAnalysis.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { NodesToConsider } from './settingsDefs.ts'
-import { renderString, renderSmallcapsString, renderTitle, renderElement, renderMode, renderNode } from './renderPrimitives.tsx'
+import { renderString, renderSmallcapsString, renderTitle, renderElement, renderMode, renderNode, svgHatchDefs } from './renderPrimitives.tsx'
 const luminaries: Node[] = [Node.SUN, Node.MOON];
 
 type DominanceChartProps = {
@@ -217,8 +217,11 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 				showLabels ? `translate(${width-annotationSpacing+etcSpacing},14)` : `translate(${width-annotationSpacing+etcSpacing},0)`
 			);
 
+			const { defs, fill } = svgHatchDefs({ dotSize: 1, spacing: 3 });
+
 			return (
 				<svg width={width} height={height}>
+					{defs}
 					{Array.from(counts.entries()).map(([value, count], i) => {
 						const barWidth = Math.max(0.1, (width - labelSpacing - 1) * (count/totalNodes));
 						return (
@@ -237,10 +240,9 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 									y={symbolSize*0.15}
 									width={barWidth}
 									height={symbolSize*0.7}
-									fill="var(--color-text)"
+									fill={fill}
 									stroke="var(--color-text)"
 									strokeWidth={strokeWidth}
-									mask={"url(#mask-stripe)"}
 								/>
 								<line
 									x1={leftJustify ? annotationSpacing+barWidth : 0}
@@ -254,30 +256,6 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 							</g>
 						);
 					})}
-					<defs>
-						<pattern id="pattern-stripe"
-							width="3"
-							height="3"
-							patternUnits="userSpaceOnUse"
-							patternTransform="rotate(45)"
-						>
-							<rect
-								width="1"
-								height="1"
-								transform="translate(0,0)"
-								fill="white"
-							/>
-						</pattern>
-						<mask id="mask-stripe">
-							<rect
-								x="0"
-								y="0"
-								width="100%"
-								height="100%"
-								fill="url(#pattern-stripe)"
-							/>
-						</mask>
-					</defs>
 				</svg>
 			);
 		};
