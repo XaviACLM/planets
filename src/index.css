@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "flatpickr/dist/flatpickr.min.css";
 @source not "../project txts";
 
 @theme {
@@ -123,4 +124,137 @@ button:focus-visible {
 
 .grid-rows-expanded {
 	grid-template-rows: 1fr;
+}
+
+/* Flatpickr theme overrides — uses CSS variables to match both dark and parchment themes */
+.flatpickr-calendar {
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	font-family: inherit;
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-weekdays,
+span.flatpickr-weekday {
+	background: var(--color-bg);
+	color: var(--color-text);
+}
+
+.flatpickr-current-month input.cur-year,
+.flatpickr-current-month .flatpickr-monthDropdown-months option {
+	background: var(--color-bg);
+	color: var(--color-text);
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+	fill: var(--color-text);
+	color: var(--color-text);
+}
+
+.flatpickr-months .flatpickr-prev-month svg path,
+.flatpickr-months .flatpickr-next-month svg path {
+	fill: var(--color-text);
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+	color: var(--color-border-light);
+}
+
+.flatpickr-months .flatpickr-prev-month:hover svg path,
+.flatpickr-months .flatpickr-next-month:hover svg path {
+	fill: var(--color-border-light);
+}
+
+.flatpickr-day {
+	color: var(--color-text);
+	border-color: transparent;
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+	background: var(--color-border);
+	border-color: var(--color-border);
+	color: var(--color-text);
+}
+
+.flatpickr-day.today {
+	border-color: var(--color-border-light);
+}
+
+.flatpickr-day.today:hover,
+.flatpickr-day.today:focus {
+	background: var(--color-border);
+	border-color: var(--color-border-light);
+	color: var(--color-text);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected:focus {
+	background: var(--color-emphasis);
+	border-color: var(--color-emphasis);
+	color: var(--color-bg);
+}
+
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+	color: var(--color-border);
+}
+
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover {
+	background: var(--color-border);
+	border-color: var(--color-border);
+	color: var(--color-text);
+}
+
+.flatpickr-time {
+	border-top: 1px solid var(--color-border);
+}
+
+.flatpickr-time input,
+.flatpickr-time .flatpickr-am-pm {
+	color: var(--color-text);
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time .flatpickr-am-pm:focus {
+	background: var(--color-border);
+}
+
+.flatpickr-time .flatpickr-time-separator {
+	color: var(--color-text);
+}
+
+.numInputWrapper:hover {
+	background: var(--color-border);
+}
+
+.numInputWrapper span {
+	border-color: var(--color-border);
+}
+
+.numInputWrapper span:hover {
+	background: var(--color-border-light);
+}
+
+.numInputWrapper span svg path {
+	fill: var(--color-text);
+}
+
+/* Flash animation for proceed button */
+@keyframes buttonFlash {
+	0% { box-shadow: none; }
+	10% { box-shadow: 0 0 6px 0px var(--color-border-light); }
+	100% { box-shadow: none; }
+}
+
+.animate-flash {
+	animation: buttonFlash 0.6s ease-out;
 }

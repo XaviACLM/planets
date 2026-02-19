@@ -1,6 +1,6 @@
 OH NO
 
-main chart hovering/clicking stopped working.
+main chart hovering/clicking stopped working
 
 quincunx shows up as a subaspect of finger of yod even when it's not selected. why? are we doing filtering wrong?
 
@@ -21,12 +21,8 @@ typecheck
 
 NECESSARY FOR FIRST BUILD IN CV
 
-enter date / proceed without date
-
 Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
 	maybe also do the larger text mode thing from misc
-
-custom datepicker (just containing a normal datepicker, for now) that internally handles the timezone logic and etc etc and looks nicer
 
 make the node images in the planet panel a bit less silly (particularly the physicals without an image)
 

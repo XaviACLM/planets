@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 import { useEventChartPositions, useAspects } from './astroHooks.ts'
 import ZodiacWheel from './ZodiacWheel'
@@ -16,9 +16,10 @@ import Module from './Module'
 import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
 import { type Aspect, deleteAspectFromMap } from './aspects.ts'
 import { Node } from './astroDefs.ts'
-import { toZonedTime, fromZonedTime, toISOLocal } from './util.ts'
+import DateTimePicker from './DateTimePicker'
 import { CitySelector } from './CitySelector'
 import { type CityData } from './CitySearchEngine.ts'
+import WelcomeModal from './WelcomeModal'
 import { Sidebar } from './Sidebar'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme, HouseSystem } from './settingsDefs.ts'
@@ -87,6 +88,7 @@ function App() {
 	const [selectedDate, setSelectedDate] = useState(() => new Date());
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	const [showModal, setShowModal] = useState<boolean>(true);
 
 	// Node focus state
 	const [highlightedNode, setHighlightedNode] = useState<Node | null>(null);
@@ -144,17 +146,6 @@ function App() {
 		return selectedCity.timezone;
 	}, [selectedCity]);
 
-	// Debounced date input - local state updates immediately, actual state updates after delay
-	const [dateInputValue, setDateInputValue] = useState<string>(() =>
-		toISOLocal(toZonedTime(selectedDate, currentTimezone)).slice(0, 16)
-	);
-	const dateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	// Sync local input state when selectedDate or timezone changes externally
-	useEffect(() => {
-		setDateInputValue(toISOLocal(toZonedTime(selectedDate, currentTimezone)).slice(0, 16));
-	}, [selectedDate, currentTimezone]);
-
 	function handleAspectDeletion(aspect: Aspect, parentAspect: Aspect | null){
 		setAspects(deleteAspectFromMap(aspects, aspect, parentAspect));
 	}
@@ -164,33 +155,17 @@ function App() {
 			<Sidebar side="left">
 				<div className="w-full bg-theme-bg border border-theme-border text-theme-text px-1">
 					<CitySelector
-						startingQueryText={selectedCity}
+						selectedCity={selectedCity}
+						defaultString={"Enter location..."}
 						onSelect={(city) => {
 							setSelectedCity(city);
 						}}
 					/>
-					<input
-						aria-label="Date and time"
-						type="datetime-local"
-						className="text-sm"
-						value={dateInputValue}
-						onChange={(e) => {
-							const newValue = e.target.value;
-							setDateInputValue(newValue);
-
-							// Clear any pending debounce
-							if (dateDebounceRef.current) {
-								clearTimeout(dateDebounceRef.current);
-							}
-
-							// Update actual state after 300ms of no typing
-							dateDebounceRef.current = setTimeout(() => {
-								const parsed = new Date(newValue);
-								if (!isNaN(parsed.getTime())) {
-									setSelectedDate(fromZonedTime(parsed, currentTimezone));
-								}
-							}, 300);
-						}}
+					<DateTimePicker
+						timezone={currentTimezone}
+						value={selectedDate}
+						onChange={setSelectedDate}
+						className="w-full bg-transparent border-none py-1 outline-none text-theme-text text-sm"
 					/>
 				</div>
 				<Module
@@ -402,6 +377,16 @@ function App() {
 					</>
 				)}
 			</Sidebar>
+			{showModal && (
+				<WelcomeModal
+					timezone={currentTimezone}
+					date={selectedDate}
+					onDateChange={setSelectedDate}
+					onCityChange={setSelectedCity}
+					selectedCity={selectedCity}
+					onProceed={() => setShowModal(false)}
+				/>
+			)}
 		</div>
 	)
 

@@ -45,7 +45,7 @@ const InfoModal: FC<InfoModalProps> = ({ isOpen, onClose, title, children }) => 
 			onClick={onClose}
 		>
 			{/* Backdrop with blur */}
-			<div className="absolute inset-0 bg-theme-bg/10 backdrop-blur-xs" />
+			<div className="absolute inset-0 bg-black/5 backdrop-blur-xs" />
 
 			{/* Modal content */}
 			<div
