@@ -48,45 +48,86 @@ MINILIST
 	dial in font sizes
 	hovering can get weirdly stuck sometimes
 	maybe keep an option for the old menu
+	make sure it works correctly with node icons and stuff
 - fenagle things so that the app can handle the arabic parts while looking fine
-	how is this gonna work exactly.
-	we already have the distinction nodesWithRedundantSymbols: can be drawn w/o symbol.
-	we have nodeShortName. Fortuna is already there. Used only for NodeSelector and the wheel chart.
-	we have but is probably not relevant:
-		nodePreferredName. This is only for stuff like Lilith, i.e. it makes sense for it to have a different name in the code.
-		nodesAdmittingArticle. Clearly not relevant but suggests maybe the parts should be treated separately.
-	Easiest solution is probably to keep Fortuna in nodeShortName, add Spiritus, and everything else w just P. Marriage (W) and the like.
-	Well, some thoughts.
-		A bit silly but I would like to have the nodeSelector be like - Arabic parts: of Fortune, of Spirit, of Eros, etc etc.
-		But this makes sense only there, nowhere else. New parameter for renderNode? some fuckass ad-hoc code in nodeSelector? Love neither option. First is clearly better though.
-		If these nodes don't have icons, which they don't, in large donut mode (showNodeLabels true), their entire name might fit. 
-			...so we'd have nodesWithoutIcons, and when a node is there, zodiacWheel draws the entire name? Sure, I guess.
-		but then in small donut mode we DO use the shortname. Well the logic is a bit complicated but we'll get there. We just need to know the distinctions.
-		- nodesWithoutSymbols (defined through nodeSymbols)
-		- give each part their shortname
-		- in zodiacWheel
-			if showNodeLabels
-				if redundantSymbol or has no symbol
-					draw the name. don't even think about the shortname, fuck it
-				else
-					draw the icon, and the shortname ?? name
-			else
-				if has symbol ( <- maybe we can skip nodes with redundant symbol? might be better if they fit. and if they dont mb we just have to make the donut wider, not that important)
-					draw symbol
-				else
-					draw shortname ?? name
-		and then we also have to worry about what to do for the rest of the app.
-			- aspect menu - we already worried about it
-			- nodeselector - that whole "of xyz" business, we'll see
-			- planetPanel - need to just add the text on the little circle. a bit odd. like nodeselector requires separating "part of"
-			- everywhere else: it's nbd, just make renderNode default to text if necessary. We'll look into if looks wrong anywhere specific, maybe in some contexts shortnames will be preferable.
-		oh yeah and maybe some specificity re "the" in "the father"/"the mother"
 
+	[ ] FUCK: main chart hovering/clicking stopped working.
+	[X] WHAT?: open website, do nothing, click enter esoteric mode. Instant error re: position called for abscent ascendant. PlanetTable, computerowdata, gettriplicityrole, getchartsect, etc. Oh i get it.
+	[ ] WHAT?: quincunx shows up as a subaspect of finger of yod even when it's not selected. why? are we doing filtering wrong?
+	[ ] and by the way the header of planet info should always be text. can't believe i didn't notice that
+	[ ] some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
+	[ ] enter date / proceed without date
+	[ ] landing page
+	[ ] solve overlapping dimmed aspects thing by just removing colorcoding and making them all a fixed lighter color (from the theme)
+	[ ] maybe optimize stuff
+	[ ] hover background darkening on the configurations
+	[.] probably make showaspectlabels default. or maybe not tbh it's kinda comprehensible and more visual without
+	[ ] in retrospect i don't love the aspect path glow. maybe we just make the aspect thicker. give it a lil bg-color border
+	[.] no icons warning in hemispheres chart or a use kufics smmn smmn concept anyway. ok but thatss confusing and you're not gonna end up there unless you mess w settings
+	[ ] moon phases
+	[ ] aspect dOrb, applying/separating
+	[ ] void moon
+
+	compare to how it is right now. what do we want to change?
+	first let's think about how things are with showNodeLabels ON.
+	[X] in aspectmenu: binary aspects should use shortnames.
+	[X] in astroGraphics, which by the way should be graphicsDefs, define nodesWithoutSymbol: Node[] (from the nodeSymbols record)
+	[X] in zodiacWheel: nodes without symbol get drawn back. Like the nodes with redundant symbol.
+	[X] some names are too long now (P. Fortune). Do like in hemispheres and resize maybe?
+		this is a bit complex. "Makemake" is longer than "P. Fortune" but the latter has 2 more characters. + different criteria if no node, e.g. P. Marriage-W
+	[X] in node selector. The "of fortune", "of spirit", etc etc thing.
+		[ ] will that pass the typechecker?
+	[X] in hemisphere chart.
+		[X] Some shortnames are too long to be readable when compressed
+		[X] some longnames are long enough to need compression in single-column mode
+		[X] also thechart should be a bit higher. it can clip a bit. At least from the bottom.
+		[X] idk the small text still looks a bit weird. We should try to find another way. scale the text vertically if made small? just for visual uniformity
+	[X] in dominance chart
+		[X] idk why but in reduced mode - all nodes we get a bunch of minimenus, one for each point node. Weird!
+		[X] happens in expanded mode main angles too. Almost surely the same thing.
+	[X] in planetpanel. I'm just not too sure what to do with the little circle graphic for stuff that doesn't have an icon. Just "Spirit" there would look a bit silly.
+	what about showNodeLabels OFF.
+	[ ] in aspectMenu
+		[X] configurations should fall back to text if no icon
+		[X] binaries idem, though we can probably just write renderNode s.t. it automatically falls back if necessary
+		[X] ok but now both of them look weird bc text has way more visual weight. What to do? Unbold? Bigger symbols? etc etc
+			yeah I'm quite fond of giving up on the "bold everything" approach actually
+			[X] unbold hemispheres chart
+			[X] unbold dominance chart
+			[X] unbold aspect mini diagrams
+			[X] unbold zodiac wheel - maybe??
+		[ ] and really even without the parts the binaries look weird as shit. FAR too much empty space. We need to rethink that.
+			how about this. if showNodeLabels or showAspectLabels is true, keep as-is. Use some neat flex to ensure it "looks" right, i.e. justified w nodes centered in default case
+			if they're both false, then use an approach analogous to the subaspects. works nicely bc we can be sure they're all the same size
+			...except the arabic parts. man... you know what, whatever, it'll be good. let's give spirit a sign though.
+			also if !shownodeLabels && showAspectLabels it's a bit different.
+			if showNodeLabels:
+				aspect-nodes-error justified all normal
+			else:
+				if showAspectLabels:
+					aspects names on the left, other stuff fixed towards the right (but decently spaced, I suppose)
+				else:
+					o like the subaspects. parts will look weird but that's fine.
+	[X] in zodiacWheel. If no symbol then use the shortname. Get the position right
+		[X] did okay but some shortnames are still too long. these fucking parts man. these fucking p marriage m man.
+		[X] and by the way in this context nodes with reduntant icon/that prefer label/whatever should not show symbol either, if it fits. really I start to wonder if we need those symbols at all. but if we remove them what goes on the planetPanel? again the fixed star business etc etc.
+	[X] in orientation. Oh this is very problematic actually. Maybe just automatically fall back to showLabels if uniconed nodes are present. Painful but what can you do
+	[X] in element/mode balance. Same issue as without labels. Also just gotta have renderNode fall back to text. Lists will look ugly but we.
+		[X] not quite. In the list, if something does not have an icon, make sure it has a comma. ...sort of. I mean doesn't everything need a comma, then? Are dots preferable? Idk idk, think about this. I think dots with some logic to put them on each side of a no-symbol node (without repetition) should be enough.
+	[X] in planetpanel. same same, just renderNode fallback.
+
+- numeric input field: up/down arrows + suspport for ordinals (for returns)
+- probably shade all the node names in the wheel. again, fuck it, whatever
 - "scroll down" prompt. maybe reverse scroll direction?
+- mb permanently draw faint parallel line (highlight when relevant). makes sense what with the circles already there
+- node recolocator knows what doesn't have icons (needs less space)
 
 - fuck it, try to make it work on the phone a bit
 - some sort of sharing functionality. try to make the links short + make it forwards-compatible
 
+- it's kinda bullcrap how aspects need to recompute entirely even if only a few nodes change position
+	and honestly in retrospect I doubt that idea we had re: always compute all aspects filter later. Like changing selected nodes is not that big a deal
+	+ we can just introduce some debouncing type business to only recompute aspects when selectedNodes hasn't changed in a secondish.
 - do we want to dial back the smallcaps, actually?
 
 MINILIST EASY
@@ -95,6 +136,7 @@ MINILIST EASY
 - custom datepicker (just containing a normal datepicker, for now) that internally handles the timezone logic and etc etc
 
 - update help menus accordingly
+- check darkmode still works good
 - search "TODO"
 
 
@@ -102,13 +144,13 @@ TRIVIAL
 -
 
 NOT TOO HARD, NOT TOO EASY
-- PlanetTable
+-
 
 REQUIRES THINKING
 -
 
 ETC
--
+- stuff to do with declination
 
 OH NO 
 - it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
@@ -122,6 +164,7 @@ ALREADY DONE BUT KEEP IN MIND
 -
 
 I'LL GET TO IT
+- make longass node names (Part of Marriage (Women)) not look like shit in hemisphereschart. shortnames included
 - could the classes just be useeffects?
 - maybe HCP should actually provide some information about presweep? Currently externally it just tells people where the houses are. ZodiacWheel actually infers where the cusps are from config values, which is slightly weird. Actually that's not quite true is it? readily tells you where cusps are, doesn't expose where limits are, but does tell you what house a longitude is in wrt limits - which is all we need, actually. Mb that's fine? Actually what we said about ZodiacWheel is still true, just reversed, so idk idk.
 - Variable presweep amounts (different from exactly 5 degrees)

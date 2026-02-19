@@ -8,7 +8,7 @@ import { type Aspect } from './aspects.ts'
 import { Node, Zodiac } from './astroDefs.ts'
 import { AspectKind } from './aspectDefs.ts'
 import { spreadIcons, normalizeAngleDeg, normalizeAngleRad, interpolateShorterAngle, angleShortDistance } from './util.ts'
-import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName } from './astroGraphics.ts'
+import { nodesWithRedundantSymbols, zodiacSymbols, nodeSymbols, earthSymbol, nodeShortName, aspectKindColors, nodePreferredName, nodesWithoutSymbol } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { Theme } from './settingsDefs.ts'
 
@@ -74,10 +74,12 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 	const isDarkTheme = theme === Theme.DARK;
 	
 	const sectorRadius = 48;
-	const symbolRadius = 43.5;
-	const radius = 39; // percent of viewport
-	const aspectRadius = showNodeLabels ? 23 : 28;
-	const planetRadius = showNodeLabels ? 35 : (radius+aspectRadius)/2;
+	const symbolRadius = 44;
+	const radius = 40; // percent of viewport
+	const aspectRadius = showNodeLabels ? 23 : 27;
+	const planetRadius = showNodeLabels ? 36 : (radius+aspectRadius)/2;
+	
+	const nodeRingWidth = radius - aspectRadius;
 	
 	const minimumIconSpace = 0.12; // radial
 	
@@ -325,7 +327,7 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					Array.from(zodiac.entries()).map(([symbol, _], i, array) => {
 						const lon = array[(i+1)%array.length][1];
 						const a = lon - 0.01 + offset;
-						const rad = sectorRadius + 1.5*Number(symbol===Zodiac.SAGITTARIUS);
+						const rad = sectorRadius + 1*Number(symbol===Zodiac.SAGITTARIUS);
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = normalizeAngleDeg(-(a * 180) / Math.PI + 180);
@@ -336,7 +338,6 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 								x={x}
 								y={flip ? y+1 : y}
 								fontSize="1.5"
-								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}
 								transform={flip ? `rotate(${r+180}, ${x}, ${y})` : `rotate(${r}, ${x}, ${y})`}
 								style={{fontVariant: "small-caps"}}
@@ -350,15 +351,15 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				{/*Node symbols*/}
 				{adjustedNodeAngles != null &&
 					nodes.map((node, i) => {
+						if ( nodesWithoutSymbol.includes(node) || nodesWithRedundantSymbols.includes(node) ) {
+							return null;
+						}
 						const a = adjustedNodeAngles.get(node)!;
 						const z = getSignOfNode(node, nodePositions, zodiacSignPositions);
 						const rad = planetRadius;
 						const x = 50 + rad * Math.cos(a);
 						const y = 50 - rad * Math.sin(a);
 						const r = rotateSymbols ? -(a * 180) / Math.PI + 90 : 0;
-						if ( showNodeLabels && nodesWithRedundantSymbols.includes(node) ) {
-							return null;
-						}
 
 						const isHighlighted = z == hoveredZodiac || highlightedAspect?.nodes.includes(node) || visuallyHighlightedNode === node;
 						const filter = "var(--icon-filter)" + (isHighlighted ? "url(#shadow)" : "");
@@ -418,8 +419,9 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				}
 				
 				{/*Node labels*/}
-				{adjustedNodeAngles != null && showNodeLabels &&
+				{adjustedNodeAngles != null &&
 					nodes.map((node, i) => {
+						if (!showNodeLabels && !nodesWithoutSymbol.includes(node) && !nodesWithRedundantSymbols.includes(node)) return null;
 						const a = adjustedNodeAngles.get(node)!;
 						const x = 50 + planetRadius * Math.cos(a);
 						const y = 50 - planetRadius * Math.sin(a);
@@ -427,8 +429,12 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 						const flip = (r>90 && r<270) && flipText;
 						const nodeName = nodeShortName[node] || nodePreferredName[node] || node;
 						let px = x;
-						if ( nodesWithRedundantSymbols.includes(node) ) {
-							px += flip ? + 0.9 + symbolSize : 0.9 - symbolSize;
+						if ( nodesWithoutSymbol.includes(node) || nodesWithRedundantSymbols.includes(node) ) {
+							if (showNodeLabels) {
+								px += flip ? symbolSize : -symbolSize;
+							} else {
+								px += (flip ? -1 : 1) * (-symbolSize/2 + 1 + planetRadius - radius)
+							}
 						}
 						
 						const z = getSignOfNode(node, nodePositions, zodiacSignPositions);
@@ -440,6 +446,7 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 								key={i}
 								x={flip ? px-0.6-symbolSize/2 : px+0.6+symbolSize/2}
 								y={y+0.6}
+								textLength={nodeName.length >= nodeRingWidth-1 ? (nodeRingWidth)*0.8 : undefined}
 								fontSize="1.5"
 								fontWeight="bold"
 								textAnchor={flip ? "end" : "start"}

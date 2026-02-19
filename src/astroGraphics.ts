@@ -136,18 +136,49 @@ import junoImage from "./assets/planet-images/Juno.png"
 import pallasImage from "./assets/planet-images/Pallas.png"
 import vestaImage from "./assets/planet-images/Vesta.png"
 
+import fortuneComposition from "./assets/kufic-compositions/Fortune.png"
+import spiritComposition from "./assets/kufic-compositions/Spirit.png"
+import erosComposition from "./assets/kufic-compositions/Eros.png"
+import necessityComposition from "./assets/kufic-compositions/Necessity.png"
+import courageComposition from "./assets/kufic-compositions/Courage.png"
+import victoryComposition from "./assets/kufic-compositions/Victory.png"
+import nemesisComposition from "./assets/kufic-compositions/Nemesis.png"
+import husbandComposition from "./assets/kufic-compositions/Husband.png"
+import wifeComposition from "./assets/kufic-compositions/Wife.png"
+import childrenComposition from "./assets/kufic-compositions/Children.png"
+import wealthComposition from "./assets/kufic-compositions/Wealth.png"
+import deathComposition from "./assets/kufic-compositions/Death.png"
+import fatherComposition from "./assets/kufic-compositions/Father.png"
+import motherComposition from "./assets/kufic-compositions/Mother.png"
+
 export { earthSymbol, dotSymbol };
 
 export const nodeShortName: Partial<Record<Node, String>> = {
+	[Node.VERNAL_EQUINOX] : "Vernal Eq.",
+	[Node.AUTUMNAL_EQUINOX] : "Autumnal Eq.",
+	
 	[Node.LUNAR_ASCENDING] : "Lunar ▲",
 	[Node.LUNAR_DESCENDING] : "Lunar ▼",
 	[Node.LUNAR_APOGEE] : "Lilith",
 	[Node.LUNAR_PERIGEE] : "Selene",
-	[Node.PART_OF_FORTUNE] : "Fortuna",
+	
+	[Node.PART_OF_FORTUNE] : "P. Fortune",
+	[Node.PART_OF_SPIRIT] : "P. Spirit",
+	[Node.PART_OF_EROS] : "P. Eros",
+	[Node.PART_OF_NECESSITY] : "P. Necessity",
+	[Node.PART_OF_COURAGE] : "P. Courage",
+	[Node.PART_OF_VICTORY] : "P. Victory",
+	[Node.PART_OF_NEMESIS] : "P. Nemesis",
+	[Node.PART_OF_MARRIAGE_MEN] : "P. Marriage-M",
+	[Node.PART_OF_MARRIAGE_WOMEN] : "P. Marriage-W",
+	[Node.PART_OF_CHILDREN] : "P. Children",
+	[Node.PART_OF_WEALTH] : "P. Wealth",
+	[Node.PART_OF_DEATH] : "P. Death",
+	[Node.PART_OF_FATHER] : "P. Father",
+	[Node.PART_OF_MOTHER] : "P. Mother",
+	
 	[Node.RADAMANTHUS] : "R-manthus",
 	[Node.GKUNHOMDIMA] : "G-Hmdima",
-	[Node.VERNAL_EQUINOX] : "Vernal Eq.",
-	[Node.AUTUMNAL_EQUINOX] : "Autumnal Eq.",
 }
 
 export const nodePreferredName: Partial<Record<Node, String>> = {
@@ -292,6 +323,8 @@ export const nodeSymbols: Partial<Record<Node, string>> = {
 	[Node.GKUNHOMDIMA] : gkunhomdimaSymbol,
 }
 
+export const nodesWithoutSymbol: Node[] = Array.from(Object.values(Node)).filter(node => nodeSymbols[node] === undefined);
+
 export const nodeImages: Partial<Record<Node, string>> = {
 	[Node.SUN] : sunImage,
 	[Node.MOON] : moonImage,
@@ -310,6 +343,23 @@ export const nodeImages: Partial<Record<Node, string>> = {
 	[Node.JUNO] : junoImage,
 	[Node.PALLAS] : pallasImage,
 	[Node.VESTA] : vestaImage,
+}
+
+export const kuficCompositions: Partial<Record<Node, string>> = {
+	[Node.PART_OF_FORTUNE] : fortuneComposition,
+	[Node.PART_OF_SPIRIT] : spiritComposition,
+	[Node.PART_OF_EROS] : erosComposition,
+	[Node.PART_OF_NECESSITY] : necessityComposition,
+	[Node.PART_OF_COURAGE] : courageComposition,
+	[Node.PART_OF_VICTORY] : victoryComposition,
+	[Node.PART_OF_NEMESIS] : nemesisComposition,
+	[Node.PART_OF_MARRIAGE_MEN] : husbandComposition,
+	[Node.PART_OF_MARRIAGE_WOMEN] : wifeComposition,
+	[Node.PART_OF_CHILDREN] : childrenComposition,
+	[Node.PART_OF_WEALTH] : wealthComposition,
+	[Node.PART_OF_DEATH] : deathComposition,
+	[Node.PART_OF_FATHER] : fatherComposition,
+	[Node.PART_OF_MOTHER] : motherComposition,
 }
 
 export const aspectSymbols: Record<AspectKind, string> = {

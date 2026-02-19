@@ -1,6 +1,6 @@
 import { useMemo, type FC, type ReactNode } from 'react';
 import { Node, standardNodes, NodeType, nodeTypes, mainAngles } from './astroDefs';
-import { nodeSymbols, nodeShortName, nodePreferredName } from './astroGraphics.ts';
+import { nodeSymbols, nodeShortName, nodePreferredName, nodesWithoutSymbol } from './astroGraphics.ts';
 import NodePositions from './nodePositions.ts'
 import { isNodeAboveHorizon, isNodeEastern } from './chartAnalysis.ts'
 import { useSettingsStore } from './settingsStore.ts'
@@ -98,7 +98,7 @@ function generateNodesPerRow(nNodes: number): number[]{
 const HemispheresChart: FC<HemispheresChartProps> = ({
 	nodePositions,
 }) => {
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showNodeLabelsSetting = useSettingsStore(s => s.showNodeLabels);
 	const whichNodes = useSettingsStore(s => s.nodesInHemispheresChart);
 	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
@@ -154,13 +154,16 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		fill: "var(--color-text)",
 		fontSize: textSize,
 		fontVariant: "small-caps",
-		fontWeight: "bold",
 	} as const;
 	
-	const renderNodeGroupSVG = (nodes: Node[]): ReactNode => {
+	const allNodesHaveSymbols = nodesInConsideration.every(node => !nodesWithoutSymbol.includes(node));
+	const showNodeLabels = showNodeLabelsSetting || !allNodesHaveSymbols;
+	
+	const renderNodeGroupSVG = (nodes: Node[], width: number): ReactNode => {
 		if (showNodeLabels) {
 			const nNodes = nodes.length;
 			if (nNodes <= 5) {
+				const b = 0.14*width;
 				return nodes.map((node, i) => {
 					const rowOffset = i - (nNodes-1)/2;
 					const label = nodePreferredName[node] ?? node;
@@ -169,6 +172,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 							key={i}
 							{...svgTextProps}
 							textAnchor="middle"
+							textLength={label.length > b ? width*0.95 : undefined}
+							fontSize={label.length > b ? 2+textSize*b/label.length : textSize}
 							transform={`translate(0,${textInListSpacing*rowOffset+textSize/3})`}
 						>
 							{label}
@@ -176,6 +181,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					);
 				});
 			} else {
+				const b = 0.06*width;
 				const nLeft = Math.floor(nNodes/2);
 				const nRight = Math.ceil(nNodes/2);
 				return (
@@ -189,7 +195,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 									key={i}
 									{...svgTextProps}
 									textAnchor="end"
-									textLength={label.length > 6 ? "54px" : undefined}
+									textLength={label.length > b ? width*0.45 : undefined}
+									fontSize={label.length > b ? 2+textSize*b/label.length : textSize}
 									transform={`translate(${-textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{label}
@@ -205,7 +212,8 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 									key={i+nLeft}
 									{...svgTextProps}
 									textAnchor="start"
-									textLength={label.length > 6 ? "54px" : undefined}
+									textLength={label.length > b ? width*0.45 : undefined}
+									fontSize={label.length > b ? 2+textSize*b/label.length : textSize}
 									transform={`translate(${textInListSpacing/4},${textInListSpacing*rowOffset+textSize/3})`}
 								>
 									{label}
@@ -243,7 +251,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 			100 + nodeSpacing * (Math.ceil(Math.max(nodesAboveEast.length, nodesAboveWest.length)/4)-3)
 		))
 	
-	const hBot = Math.max(100, showNodeLabels ? (
+	const hBot = 20 + Math.max(100, showNodeLabels ? (
 			100 + textInListSpacing * (Math.ceil(Math.max(nodesBelowEast.length, nodesBelowWest.length)/2)-6)
 		):(
 			100 + nodeSpacing * (Math.ceil(Math.max(nodesBelowEast.length, nodesBelowWest.length)/4)-3)
@@ -253,7 +261,7 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 
 	const createHemispheresChart = (width: number) => {
 		return (
-			<svg width={width} height={height} className="my-1">
+			<svg width={width} height={height}>
 				{/*axes*/}
 				<line
 					x1={"50%"}
@@ -280,27 +288,44 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 					fill="var(--color-bg)"
 					stroke="none"
 				/>
-				<text x="50%" y={hTop+textSize*0.3} textAnchor="middle" {...svgTextProps}>
+				<text x="50%" y={hTop+textSize*0.3} textAnchor="middle" {...svgTextProps} fontWeight="bold">
 					{"Horizon"}
 				</text>
-				<text x="0%" y={hTop-textSize*0.3} textAnchor="start" {...svgTextProps}>
+				<text x="1%" y={hTop-textSize*0.3} textAnchor="start" {...svgTextProps} fontWeight="bold">
 					{"East"}
 				</text>
-				<text x="100%" y={hTop-textSize*0.3} textAnchor="end" {...svgTextProps}>
+				<text x="99%" y={hTop-textSize*0.3} textAnchor="end" {...svgTextProps} fontWeight="bold">
 					{"West"}
 				</text>
 				<g transform={`translate(${0.25*width},${0.5*hTop})`}>
-					{renderNodeGroupSVG(nodesAboveEast)}
+					{renderNodeGroupSVG(nodesAboveEast, width/2)}
 				</g>
 				<g transform={`translate(${0.75*width},${0.5*hTop})`}>
-					{renderNodeGroupSVG(nodesAboveWest)}
+					{renderNodeGroupSVG(nodesAboveWest, width/2)}
 				</g>
 				<g transform={`translate(${0.25*width},${hTop+0.5*hBot})`}>
-					{renderNodeGroupSVG(nodesBelowEast)}
+					{renderNodeGroupSVG(nodesBelowEast, width/2)}
 				</g>
 				<g transform={`translate(${0.75*width},${hTop+0.5*hBot})`}>
-					{renderNodeGroupSVG(nodesBelowWest)}
+					{renderNodeGroupSVG(nodesBelowWest, width/2)}
 				</g>
+				<rect
+					x={0}
+					y={0}
+					width={width}
+					height={height}
+					strokeWidth={strokeWidth}
+					fill={"url(#hatch2)"}
+				/>
+				<defs>
+					<pattern id={"hatch2"}
+						width="5" height="5"
+						patternUnits="userSpaceOnUse"
+						patternTransform="rotate(45)"
+					>
+						<rect width="1" height="1" fill="var(--color-text)" opacity="0.7" />
+					</pattern>
+				</defs>
 			</svg>
 		);
 	};
@@ -347,17 +372,20 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	};
 	
 	return (
-		<div className="text-theme-text p-4 pt-3" style={{ width: 330 }}>
+		<div className="text-theme-text p-4">
 		
 			{renderString(createEmphasisString(verticalDiff, horizontalDiff, nodesInConsideration.length))}
 			
 			<hr className="opacity-50 my-2"/>
 			
 			{/*quadrants chart*/}
-			<div className="flex justify-center gap-2">
-				{createFillerRectangle(15)}
-				{createHemispheresChart(250)}
-				{createFillerRectangle(15)}
+			<div className="flex justify-center gap-0">
+				{false && createFillerRectangle(15)}
+				{false && createHemispheresChart(250)}
+				{false && createFillerRectangle(15)}
+				{createFillerRectangle(0)}
+				{createHemispheresChart(310)}
+				{createFillerRectangle(0)}
 			</div>
 			
 		</div>

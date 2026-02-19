@@ -38,6 +38,7 @@ const Selector = <T extends string | number>({
 								key={item}
 								selected={selectedItems.has(item)}
 								onClick={() => handleToggle(item)}
+								options={{shortenArabics: true}}
 								item={item}
 							/>
 						))}

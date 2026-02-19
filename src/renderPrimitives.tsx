@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { Node, Zodiac, Mode, Element, mainAngles } from './astroDefs';
+import { Node, Zodiac, Mode, Element, mainAngles, arabicParts } from './astroDefs';
 import { AspectKind } from './aspectDefs';
 import { type DispositorChain, type FinalDispositors, getFinalDispositorsOfChain } from './rulershipGraph.ts'
 import {
@@ -13,7 +13,8 @@ import {
 	nodesWithRedundantSymbols,
 	nodesAdmittingArticle,
 	aspectKindColors,
-	aspectSymbols
+	aspectSymbols,
+	nodesWithoutSymbol,
 } from './astroGraphics';
 import { useSettingsStore } from './settingsStore';
 
@@ -36,8 +37,9 @@ export const renderSmallcapsString = (
 	options: TextRenderOptions = {}
 ): ReactNode => {
 	const { fontSize = DEFAULT_TEXT_SIZE } = options;
+	// TODO for a really long time this used font-bold. still unsure.
 	return (
-		<span className="small-caps font-bold" style={{ fontSize }}>
+		<span className="small-caps" style={{ fontSize }}>
 			{str}
 		</span>
 	);
@@ -72,6 +74,7 @@ interface RenderNodeOptions {
 	withArticle?: boolean;
 	forceText?: boolean; // force text for special nodes like Asc, etc.
 	abbreviated?: boolean;
+	shortenArabics?: boolean;
 	size?: number;
 	fontSize?: number;
 }
@@ -96,16 +99,21 @@ export const renderNode = (
 		withArticle = false,
 		forceText = false,
 		abbreviated = false,
+		shortenArabics = false,
 		size = DEFAULT_SYMBOL_SIZE,
 		fontSize = DEFAULT_TEXT_SIZE
 	} = options;
 	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showNodeLabels;
-	if (resolvedShowLabel || (forceText && nodesWithRedundantSymbols.includes(node))) {
+	if (resolvedShowLabel || (forceText && nodesWithRedundantSymbols.includes(node)) || nodesWithoutSymbol.includes(node)) {
 		const label = abbreviated
 			? (nodeShortName[node] || node)
 			: (nodePreferredName[node] || node);
 		if (shouldUseArticle(node, withArticle)) {
 			return <>{renderString("the ", { fontSize })}{renderSmallcapsString(String(label), { fontSize })}</>;
+		}
+		if (shortenArabics && arabicParts.includes(node)) {
+			if (abbreviated) throw new Error("renderNode was called with an arabic part, with both abbreviated and shortenArabics set to true");
+			return renderSmallcapsString(String(label.slice(5, label.length)), { fontSize });
 		}
 		return renderSmallcapsString(String(label), { fontSize });
 	}

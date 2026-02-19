@@ -108,7 +108,7 @@ function computeRowData(
 		? getFaceLord(node, nodePositions, zodiacSignPositions, faceMode as any) : null;
 	const boundLord = (useExtendedDignities && isRegular)
 		? getBoundLord(node, nodePositions, zodiacSignPositions, boundsMode as any) : null;
-	const triplicityRole = (useExtendedDignities && isRegular && isStandard)
+	const triplicityRole = (useExtendedDignities && isRegular && isStandard && hasSurfacePosition)
 		? getTriplicityRole(node, nodePositions, zodiacSignPositions, triplicityMode as any) : null;
 
 	// Fixed stars

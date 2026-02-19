@@ -12,9 +12,10 @@ import {
 	nodeDependsOnLocation,
 	standardNodes,
 	nodeTypes,
-	NodeType
+	NodeType,
+	mainAngles
 } from './astroDefs';
-import { elementSymbols, modeSymbols } from './astroGraphics.ts';
+import { elementSymbols, modeSymbols, nodesWithoutSymbol } from './astroGraphics.ts';
 import NodePositions from './nodePositions.ts'
 import ZodiacSignPositions from './zodiacSignPositions.ts'
 import { getSignOfNode } from './chartAnalysis.ts'
@@ -92,13 +93,14 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 			if (transpersonalPlanets.includes(node)){
 				validTranspersonalPlanets.push(node);
 			}
-			if (nodeDependsOnLocation[node]){
+			if (mainAngles[node]){
 				validMainAngles.push(node);
 			}
 			if (luminaries.includes(node)){
 				validLuminaries.push(node);
 			}
-			if (!nodeDependsOnLocation[node]){
+			
+			if (whichNodes === NodesToConsider.ALL || !nodeDependsOnLocation[node]){
 				allPlanets.push(node);
 			}
 
@@ -122,7 +124,6 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 				fontSize={textSize}
 				textAnchor={leftJustify ? "start" : "end"}
 				fontVariant="small-caps"
-				fontWeight="bold"
 			>
 				{elem}
 			</text>
@@ -143,7 +144,6 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 				fontSize={textSize}
 				textAnchor={leftJustify ? "start" : "end"}
 				fontVariant="small-caps"
-				fontWeight="bold"
 			>
 				{mode}
 			</text>
@@ -205,7 +205,7 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 			const totalNodes = nodes.length;
 
 			const width = 135;
-			const labelSpacing = textSize * 5.4;
+			const labelSpacing = textSize * 4.8;
 			const symbolSpacing = symbolSize * 1.5;
 			const annotationSpacing = showLabels ? labelSpacing : symbolSpacing;
 			const etcSpacing = 5; // annotation to bar
@@ -344,6 +344,11 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 	}
 
 	const listNodes = (nodes: Node[], forceText: boolean): ReactNode => {
+		const requiresDot = nodes.map(node => nodesWithoutSymbol.includes(node))
+		const followedByDot: boolean[] = [];
+		for (let i=0; i<nodes.length-1; i++) {
+			followedByDot.push(requiresDot[i] || requiresDot[i+1]);
+		}
 		return (
 			<>
 			{nodes.map((node, i) => {
@@ -351,6 +356,12 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node)}
 					{(forceText || showNodeLabels) && (i < nodes.length - 1)
 					&& <span style={{fontSize: textSize}}>, </span>
+					}
+					{!(forceText || showNodeLabels) && followedByDot[i] 
+					&& <span style={{fontSize: textSize}}> · </span>
+					}
+					{!(forceText || showNodeLabels) && !followedByDot[i] 
+					&& <span style={{fontSize: textSize}}> </span>
 					}
 				</span>;
 			})}
@@ -398,7 +409,7 @@ export const AbridgedDominanceChart: FC<DominanceChartProps> = ({ nodePositions,
 	} = useDominanceData(nodePositions, zodiacSignPositions);
 
 	return (
-		<div className="text-theme-text p-4 pt-2 pb-2" style={{ width: 330 }}>
+		<div className="text-theme-text p-4 pt-2 pb-2">
 			<div>
 				{dominanceString(allPlanets)}
 

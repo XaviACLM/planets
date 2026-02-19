@@ -1,10 +1,14 @@
 import { useMemo, type FC } from 'react';
-import { Node, mainAngles, NodeType, nodeTypes, standardNodes, Sect, nodeDependsOnLocation } from './astroDefs';
+import { Node, mainAngles, NodeType, nodeTypes, standardNodes, Sect, nodeDependsOnLocation, arabicParts } from './astroDefs';
 import { getNodeAverageSpeed } from './astroData';
 import { Theme } from './settingsDefs';
 import { RulershipGraph, getFinalDispositorsOfChain } from './rulershipGraph';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from './aspects';
-import { getChartSect, getChartRuler, getHouseAngularities, getAngleProximity, isInSect, getFixedStarsWithinLongitude, getSignOfNode, getNodePositionWithinSign, getHouseOfNode, type AngleProximityInfo } from './chartAnalysis';
+import {
+	getChartSect, getChartRuler, getHouseAngularities, getAngleProximity,
+	isInSect, getFixedStarsWithinLongitude, getSignOfNode, getNodePositionWithinSign,
+	getHouseOfNode, type AngleProximityInfo
+} from './chartAnalysis';
 import { getDignityState, getBoundLord, getFaceLord, getTriplicityRole, type DignityState, Dignity } from './dignities';
 import { formatAngle } from './util';
 import {
@@ -16,7 +20,7 @@ import {
 	renderFinalDispositors,
 	renderCommaSeparatedNodeList
 } from './renderPrimitives';
-import { nodeImages, nodeSymbols } from './astroGraphics.ts'
+import { nodeImages, nodeSymbols, kuficCompositions } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import NodePositions from './nodePositions';
 import NodeVelocities from './nodeVelocities';
@@ -289,6 +293,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 		return (
 			<svg width={planetImageWidth+2*padding} height={planetImageWidth+2*padding} overflow={"visible"} className="">
 				{(nodeImages[selectedNode] === undefined || standardNodes.includes(selectedNode)) &&
+					!arabicParts.includes(selectedNode) &&
 					<circle cx="50%" cy="50%" r={planetImageWidth/2+padding} fill="url(#outerShadow)" opacity="0.4"/>
 				}
 				<circle cx="50%" cy="50%" r={planetImageWidth*(0.5-0.01)} fill="var(--color-bg)"/>
@@ -305,26 +310,43 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						transform={imageTransform}
 					/>
 					<circle cx="50%" cy="50%" r={planetImageWidth/2} fill="url(#innerShadow)" filter="url(#boost-alpha)" opacity="1"/>
-				</>) : (<>
+				</>) : !arabicParts.includes(selectedNode) && (<>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5"
 						fill={nodeTypes[selectedNode] === NodeType.POINT ? "none" : "var(--color-text)"}/>
 				</>)}
-				<image
-					key={2}
-					x={padding}
-					y={padding}
-					href={nodeSymbols[selectedNode]}
-					width={largeSymbolWidth}
-					height={largeSymbolWidth}
-					filter={"var(--icon-filter) url(#glow)"}
-					transform={`translate(${(planetImageWidth-largeSymbolWidth)/2},${(planetImageWidth-largeSymbolWidth)/2})`}
-				/>
+				{arabicParts.includes(selectedNode) ? (
+					<image
+						key={2}
+						x={padding}
+						y={padding}
+						href={kuficCompositions[selectedNode]}
+						width={planetImageWidth}
+						height={planetImageWidth}
+						filter={isDarkTheme ? "" : "invert(1) var(--icon-filter) url(#subtleGlow)"}
+						transform={imageTransform}
+						opacity={1}
+					/>
+				) : (
+					<image
+						key={3}
+						x={padding}
+						y={padding}
+						href={nodeSymbols[selectedNode]}
+						width={largeSymbolWidth}
+						height={largeSymbolWidth}
+						filter={"var(--icon-filter) url(#glow)"}
+						transform={`translate(${(planetImageWidth-largeSymbolWidth)/2},${(planetImageWidth-largeSymbolWidth)/2})`}
+					/>
+				)}
 				<defs>
 					<filter id="glow" x="-200%" y="-200%" width="400%" height="400%">
 						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="var(--color-text)"/>
 						<feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="var(--color-text)"/>
+					</filter>
+					<filter id="subtleGlow" x="-200%" y="-200%" width="400%" height="400%">
+						<feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="var(--color-text)"/>
 					</filter>
 					<filter id="boost-alpha">
 						<feComponentTransfer>

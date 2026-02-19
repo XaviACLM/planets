@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { type Aspect, filterAspectsByNode } from './aspects.ts';
 import { configurationAspectsKinds } from './aspectDefs.ts';
 import { Node } from './astroDefs.ts';
-import { nodeSymbols, nodeShortName, nodePreferredName, aspectKindColors } from './astroGraphics.ts'
+import { nodeSymbols, nodeShortName, nodePreferredName, aspectKindColors, nodesWithoutSymbol } from './astroGraphics.ts'
 import NodePositions from './nodePositions.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import { renderNode, renderString, renderAspectKind } from './renderPrimitives.tsx'
@@ -14,10 +14,6 @@ const CONFIG_MINI_DIAGRAM_HEIGHT = 80;
 const CONFIG_RECT_PADDING = 0;
 const SUBASPECT_H = 24;
 const ERROR_FONT_SIZE = 13;
-
-function isConfiguration(aspect: Aspect, subaspects: Aspect[]): boolean {
-	return configurationAspectsKinds.includes(aspect.kind) || subaspects.length > 0;
-}
 
 // Compute the angle offset so ASC is on the left (pi radians)
 function getOffset(nodePositions: NodePositions): number {
@@ -61,7 +57,7 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
 function ErrorDisplay({ error }: { error: number | null }) {
 	if (error === null) return null;
 	return (
-		<span className="opacity-80 whitespace-nowrap w-10 flex justify-center" style={{ fontSize: ERROR_FONT_SIZE }}>
+		<span className="opacity-60 whitespace-nowrap w-10 flex justify-center" style={{ fontSize: ERROR_FONT_SIZE }}>
 			{"Δ"}{formatAngle(error)}
 		</span>
 	);
@@ -71,11 +67,75 @@ function BinaryAspectRow({
 	aspect,
 	onDelete,
 	onHover,
+	showNodeLabels,
+	showAspectLabels,
 }: {
 	aspect: Aspect,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void,
+	showNodeLabels: boolean,
+	showAspectLabels: boolean,
 }) {
+	
+	const nodeGap = showNodeLabels ? 8 : 12;
+
+	const aspectKind = (
+		<div className="flex-none flex items-center">
+			{renderAspectKind(aspect.kind, { size: 16, fontSize: 11 })}
+		</div>
+	);
+
+	const nodes = (
+		<div className="flex items-center gap-0.5 whitespace-nowrap overflow-hidden">
+			{renderNode(aspect.nodes[0], { size: 16, fontSize: 12, abbreviated: true })}
+			<span className="opacity-100 text-[15px] mx-1">{"\u2013"}</span>
+			{renderNode(aspect.nodes[1], { size: 16, fontSize: 12, abbreviated: true })}
+		</div>
+	);
+
+	const tail = (
+		<div className="flex items-center">
+			<div className="flex justify-end mr-2">
+				<ErrorDisplay error={aspect.error} />
+			</div>
+			<DeleteButton onClick={() => onDelete(aspect, null)} />
+		</div>
+	);
+
+	if (!showAspectLabels && !showNodeLabels) {
+		// Fixed spacing, no grow — row is inline-sized
+		return (
+			<div
+				className="inline-flex items-center px-2 cursor-pointer hover:bg-theme-text/10 transition-colors duration-300"
+				style={{ height: BINARY_ROW_H, gap: 8 }}
+				onMouseEnter={() => onHover(aspect)}
+				onMouseLeave={() => onHover(null)}
+			>
+				{aspectKind}
+				{nodes}
+				{tail}
+			</div>
+		);
+	}
+
+	if (showAspectLabels) {
+		// Nodes on right, before error/delete
+		return (
+			<div
+				className="flex items-center px-2 cursor-pointer hover:bg-theme-text/10 transition-colors duration-300"
+				style={{ height: BINARY_ROW_H }}
+				onMouseEnter={() => onHover(aspect)}
+				onMouseLeave={() => onHover(null)}
+			>
+				{aspectKind}
+				<div className="grow" />
+				<div style={{ marginRight: nodeGap }}>{nodes}</div>
+				{tail}
+			</div>
+		);
+	}
+
+	// !showAspectLabels && showNodeLabels — nodes on left, after aspect kind
 	return (
 		<div
 			className="flex items-center px-2 cursor-pointer hover:bg-theme-text/10 transition-colors duration-300"
@@ -83,18 +143,10 @@ function BinaryAspectRow({
 			onMouseEnter={() => onHover(aspect)}
 			onMouseLeave={() => onHover(null)}
 		>
-			<div className="shrink-0 mr-2 flex items-center">
-				{renderAspectKind(aspect.kind, { size: 16, fontSize: 11 })}
-			</div>
-			<div className="flex items-center gap-0.5 mr-2">
-				{renderNode(aspect.nodes[0], { size: 16, fontSize: 11 })}
-				<span className="opacity-40 text-[10px] mx-0.5">{"\u2013"}</span>
-				{renderNode(aspect.nodes[1], { size: 16, fontSize: 11 })}
-			</div>
-			<div className="grow flex justify-end mr-2">
-				<ErrorDisplay error={aspect.error} />
-			</div>
-			<DeleteButton onClick={() => onDelete(aspect, null)} />
+			{aspectKind}
+			<div style={{ marginLeft: 8 }}>{nodes}</div>
+			<div className="grow" />
+			{tail}
 		</div>
 	);
 }
@@ -115,7 +167,7 @@ function MiniAspectDiagram({
 	const cx = 50;
 	const cy = 50;
 	const r = 50;
-	const labelOffset = 30; // gap between circle edge and label anchor
+	const labelOffset = 25; // gap between circle edge and label anchor
 
 	// Compute label positions
 	const labelSpacing = showNodeLabels ? 25 : 25;
@@ -236,7 +288,7 @@ function MiniAspectDiagram({
 				return (
 					<path key={i}
 						d={`M ${d.px} ${d.py} Q ${ctrlX} ${d.py} ${d.labelX + (isLeft ? 3 : -3)} ${d.labelY}`}
-						d={`M ${d.px} ${d.py} ${0.6*(isLeft ? 0 : 100) + 0.3*d.px} ${d.py} ${isLeft ? -20 : 120} ${d.labelY} ${d.labelX + (isLeft ? 3 : -3)} ${d.labelY}`}
+						d={`M ${d.px} ${d.py} ${0.7*(isLeft ? 0 : 100) + 0.3*d.px} ${d.py} ${isLeft ? -15 : 115} ${d.labelY} ${d.labelX + (isLeft ? 3 : -3)} ${d.labelY}`}
 						fill="none"
 						stroke="var(--color-text)"
 						strokeWidth={1}
@@ -248,7 +300,7 @@ function MiniAspectDiagram({
 			{/* Labels */}
 			{allLabels.map((d, i) => {
 				const isLeft = d.isLeft;
-				if (showNodeLabels) {
+				if (showNodeLabels || nodesWithoutSymbol.includes(d.node)) {
 					const label = (nodeShortName[d.node] ?? nodePreferredName[d.node] ?? d.node) as string;
 					return (
 						<text key={i}
@@ -259,7 +311,6 @@ function MiniAspectDiagram({
 							fill="var(--color-text)"
 							fontSize={labelFontSize}
 							fontVariant="small-caps"
-							fontWeight="bold"
 						>
 							{label}
 						</text>
@@ -288,6 +339,7 @@ function ConfigurationCard({
 	offset,
 	onDelete,
 	onHover,
+	showNodeLabels,
 }: {
 	aspect: Aspect,
 	subaspects: Aspect[],
@@ -295,13 +347,13 @@ function ConfigurationCard({
 	offset: number,
 	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
 	onHover: (aspect: Aspect | null) => void,
+	showNodeLabels: boolean,
 }) {
-	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
 	const [highlightedNodes, setHighlightedNodes] = useState<Node[] | null>(null);
 
 	return (
 		<div
-			className="border-theme-border my-1 mx-1"
+			className="border-theme-border my-1 mx-1 hover:bg-theme-text/5"
 			style={{ borderRadius: 'var(--border-radius)' }}
 			onMouseEnter={() => onHover(aspect)}
 			onMouseLeave={() => { onHover(null); setHighlightedNodes(null); }}
@@ -360,18 +412,21 @@ function AspectMenu({ aspects, nodePositions, onDelete, onHover, highlightedNode
 	highlightedNode: Node | null,
 	clearHighlight: () => void
 }) {
-	useSettingsStore(s => s.showNodeLabels);
-	useSettingsStore(s => s.showAspectLabels);
+	const showNodeLabels = useSettingsStore(s => s.showNodeLabels);
+	const showAspectLabels = useSettingsStore(s => s.showAspectLabels);
 	useSettingsStore(s => s.aspectsColorcoded);
+
+	const compactBinaries = !showNodeLabels && !showAspectLabels;
 
 	const offset = useMemo(() => getOffset(nodePositions), [nodePositions]);
 
-	// Filter aspects if a node is highlighted
-	const displayedAspects = useMemo(() => {
-		if (highlightedNode === null) {
-			return aspects;
-		}
-		return filterAspectsByNode(aspects, highlightedNode);
+	const { displayedConfigurations, displayedBinaryAspects, noAspects } = useMemo(() => {
+		const displayedAspects = highlightedNode === null ? aspects : filterAspectsByNode(aspects, highlightedNode);
+        const entries = Array.from(displayedAspects.entries());
+		const displayedConfigurations = entries.filter(([aspect, _]) => configurationAspectsKinds.includes(aspect.kind));
+		const displayedBinaryAspects = entries.filter(([aspect, _]) => !configurationAspectsKinds.includes(aspect.kind));
+		const noAspects = displayedConfigurations.length === 0 && displayedBinaryAspects.length === 0;
+		return { displayedConfigurations, displayedBinaryAspects, noAspects };
 	}, [aspects, highlightedNode]);
 
 	return (
@@ -393,32 +448,47 @@ function AspectMenu({ aspects, nodePositions, onDelete, onHover, highlightedNode
 					</button>
 				</div>
 			)}
-			{displayedAspects != null && Array.from(displayedAspects.entries()).map(([aspect, subaspects], index) => {
-				if (isConfiguration(aspect, subaspects)) {
-					return (<div key={index}>
-						<ConfigurationCard
-							key={index}
-							aspect={aspect}
-							subaspects={subaspects}
-							nodePositions={nodePositions}
-							offset={offset}
-							onDelete={onDelete}
-							onHover={onHover}
-						/>
-						<hr className="opacity-50 pb-5 translate-y-2 mx-2"/>
-					</div>);
-				} else {
-					return (
+			{displayedConfigurations.map(([aspect, subaspects], index) => (
+				<div key={index}>
+					<ConfigurationCard
+						key={index}
+						aspect={aspect}
+						subaspects={subaspects}
+						nodePositions={nodePositions}
+						offset={offset}
+						onDelete={onDelete}
+						onHover={onHover}
+						showNodeLabels={showNodeLabels}
+					/>
+					<hr className="opacity-50 pb-5 translate-y-2 mx-2"/>
+				</div>
+			))}
+			{compactBinaries ? (
+				<div className="flex flex-wrap justify-center gap-x-1 gap-y-0">
+					{displayedBinaryAspects.map(([aspect, _], index) => (
 						<BinaryAspectRow
 							key={index}
 							aspect={aspect}
 							onDelete={onDelete}
 							onHover={onHover}
-						/>
-					);
-				}
-			})}
-			{displayedAspects.size === 0 && (renderString("No aspects.", { fontStyle: "italic" }))}
+							showNodeLabels={showNodeLabels}
+							showAspectLabels={showAspectLabels}
+						/>				
+					))}
+				</div>
+			) : (
+				displayedBinaryAspects.map(([aspect, _], index) => (
+					<BinaryAspectRow
+						key={index}
+						aspect={aspect}
+						onDelete={onDelete}
+						onHover={onHover}
+						showNodeLabels={showNodeLabels}
+						showAspectLabels={showAspectLabels}
+					/>
+				))
+			)}
+			{noAspects && (renderString("No aspects.", { fontStyle: "italic" }))}
 		</div>
 	);
 }
