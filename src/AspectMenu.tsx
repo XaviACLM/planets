@@ -438,7 +438,7 @@ function AspectMenu({ aspects, nodePositions, onDelete, onHover, highlightedNode
 			{highlightedNode !== null && (
 				<div className="pb-1 text-sm">
 					{renderString("Showing aspects for ")}
-					{renderNode(highlightedNode, { forceText: true, withArticle: true })}
+					{renderNode(highlightedNode, { preferText: true, withArticle: true })}
 					{renderString(". ")}
 					<button
 						className="bg-transparent border-none text-theme-text underline cursor-pointer p-0 m-0 font-[inherit] inline hover:opacity-70"

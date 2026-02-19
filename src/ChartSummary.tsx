@@ -60,7 +60,7 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 		setMeasured(true);
 	}, [nodePositions, zodiacSignPositions, showNodeLabels, showSymbolLabels]);
 
-	const renderClickableNode = (node: Node, showPosition: boolean = true, forceText: boolean = false) => {
+	const renderClickableNode = (node: Node, showPosition: boolean = true, preferText: boolean = false) => {
 		const sign = getSignOfNode(node, nodePositions, zodiacSignPositions);
 		const positionInSign = getNodePositionWithinSign(node, nodePositions, zodiacSignPositions);
 		const formattedPosition = formatAngle(positionInSign);
@@ -70,7 +70,7 @@ const ChartSummary: FC<ChartSummaryProps> = ({
 				className="cursor-pointer hover:opacity-70 whitespace-nowrap"
 				onClick={(e) => { e.stopPropagation(); setHighlightedNode(node); }}
 			>
-				{renderNode(node, {showLabel: forceText ? true : undefined, withArticle: forceText})}
+				{renderNode(node, {showLabel: preferText ? true : undefined, withArticle: preferText})}
 				{showPosition && (
 					<>
 						{renderString(" | ")}

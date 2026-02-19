@@ -331,7 +331,7 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 				{nodes.map((node) => {
 					return (
 						<div key={node} className="mx-2 flex items-center gap-1">
-							{renderNode(node, { forceText: true })}
+							{renderNode(node, { preferText: true })}
 							{" | "}
 							{renderElement(nodeElements.get(node)!)}
 							{" · "}
@@ -343,7 +343,7 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 		);
 	}
 
-	const listNodes = (nodes: Node[], forceText: boolean): ReactNode => {
+	const listNodes = (nodes: Node[], preferText: boolean): ReactNode => {
 		const requiresDot = nodes.map(node => nodesWithoutSymbol.includes(node))
 		const followedByDot: boolean[] = [];
 		for (let i=0; i<nodes.length-1; i++) {
@@ -353,14 +353,14 @@ const useDominanceData = (nodePositions: NodePositions, zodiacSignPositions: Zod
 			<>
 			{nodes.map((node, i) => {
 				return <span key={node}>
-					{forceText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node)}
-					{(forceText || showNodeLabels) && (i < nodes.length - 1)
+					{preferText || showNodeLabels ? renderSmallcapsString(node) : renderNode(node)}
+					{(preferText || showNodeLabels) && (i < nodes.length - 1)
 					&& <span style={{fontSize: textSize}}>, </span>
 					}
-					{!(forceText || showNodeLabels) && followedByDot[i] 
+					{!(preferText || showNodeLabels) && followedByDot[i] 
 					&& <span style={{fontSize: textSize}}> · </span>
 					}
-					{!(forceText || showNodeLabels) && !followedByDot[i] 
+					{!(preferText || showNodeLabels) && !followedByDot[i] 
 					&& <span style={{fontSize: textSize}}> </span>
 					}
 				</span>;

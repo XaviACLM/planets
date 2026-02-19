@@ -72,7 +72,7 @@ export const renderTitle = (
 interface RenderNodeOptions {
 	showLabel?: boolean;
 	withArticle?: boolean;
-	forceText?: boolean; // force text for special nodes like Asc, etc.
+	preferText?: boolean; // force text for special nodes like Asc, etc.
 	abbreviated?: boolean;
 	shortenArabics?: boolean;
 	size?: number;
@@ -97,6 +97,7 @@ export const renderNode = (
 	const {
 		showLabel,
 		withArticle = false,
+		preferText = false,
 		forceText = false,
 		abbreviated = false,
 		shortenArabics = false,
@@ -104,7 +105,7 @@ export const renderNode = (
 		fontSize = DEFAULT_TEXT_SIZE
 	} = options;
 	const resolvedShowLabel = showLabel ?? useSettingsStore.getState().showNodeLabels;
-	if (resolvedShowLabel || (forceText && nodesWithRedundantSymbols.includes(node)) || nodesWithoutSymbol.includes(node)) {
+	if (resolvedShowLabel || (preferText && nodesWithRedundantSymbols.includes(node)) || nodesWithoutSymbol.includes(node)) {
 		const label = abbreviated
 			? (nodeShortName[node] || node)
 			: (nodePreferredName[node] || node);

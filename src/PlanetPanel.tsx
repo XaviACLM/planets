@@ -18,9 +18,10 @@ import {
 	renderNode,
 	renderDispositorChain,
 	renderFinalDispositors,
-	renderCommaSeparatedNodeList
+	renderCommaSeparatedNodeList,
+	renderTitle
 } from './renderPrimitives';
-import { nodeImages, nodeSymbols, kuficCompositions } from './astroGraphics.ts'
+import { nodeImages, nodeSymbols, kuficCompositions, nodePreferredName } from './astroGraphics.ts'
 import { useSettingsStore } from './settingsStore.ts'
 import NodePositions from './nodePositions';
 import NodeVelocities from './nodeVelocities';
@@ -249,7 +250,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 			<div>
 				{renderString(verb)}
 				{renderString(` (${angleProximityDeg!.toFixed(1)}° ${preposition} `)}
-				{renderNode(angleProximityInfo.closestAngle, { forceText: true })}
+				{renderNode(angleProximityInfo.closestAngle, { preferText: true })}
 				{renderString(`).`)}
 			</div>
 		);
@@ -423,7 +424,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					◀
 				</button>
 				<div className="text-center">
-					{renderNode(selectedNode, { forceText: true })}
+					{renderTitle(nodePreferredName[selectedNode] || selectedNode)}
 				</div>
 				<button
 					className="bg-transparent border-none text-theme-text cursor-pointer p-1 text-xl hover:opacity-70"
