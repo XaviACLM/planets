@@ -6,6 +6,8 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 	might have been fixed when we didd the filtering subaspects thing
 	yeah i think we're good now... but let's be careful for a while
 
+make things not explode when location becomes null
+
 
 
 ETERNAL PRE-RELEASE CHECKLIST
@@ -25,6 +27,7 @@ update help menus
 		To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
 		DS, PA = Dorotheus of Sidon, Paulus of Alexandria
 	re aspects (probably just aspect panel)
+	also go through the others, stuff might be out of date. particularly the fact that hemispheres and dominance can select what nodes are in analysis.
 
 
 
@@ -53,6 +56,8 @@ allow configurations to always have their subaspects unfiltered. Menu may be a b
 
 
 MISC FOR LATER
+
+clean up the other project txts (that arabic stuff). Also make sure you didn't delete any tracked files. Rather, untrack them
 
 settings option to unbind planet table from the bottom
 
@@ -87,6 +92,8 @@ dominance chart: all sections should be discardable if everything is in ophiuchu
 
 param presets (copy astro.com defaults and other webpages, have as a button on top of the settings menu)
 	mb useful: https://www.astro.com/faq/fq_fh_owstyle_e.htm
+	
+rulership graph but an actual graph width d3js. Probably rerender a few times to make sure it works good... and/or have some custom code that lays it out in a way that facilitates it expanding into a normal layout ( separate components vertically, each gets the cycle radially in the center, other stuff in concentric rings fenagled to be close to their ruler - and with a half second of "loading" so the graph has time to settle into something normal-looking
 
 
 
@@ -152,6 +159,7 @@ SERIOUS, LONG-TERM
 the llm business
 
 make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f
+	also https://chatgpt.com/c/699795e9-193c-8388-b141-9bada3c594a8
 	bicharts
 	horary
 	vedic

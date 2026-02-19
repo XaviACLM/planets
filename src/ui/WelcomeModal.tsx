@@ -1,38 +1,22 @@
-import { useState, useCallback } from 'react';
-import DateTimePicker from './DateTimePicker';
-import { CitySelector } from './CitySelector';
-import { type CityData } from './CitySearchEngine';
+import { useState, useCallback, type ReactNode } from 'react';
 
 interface WelcomeModalProps {
-	timezone: string;
-	date: Date;
-	onDateChange: (date: Date) => void;
-	onCityChange: (city: CityData | null) => void;
-	selectedCity: CityData | null;
+	hasLocation: boolean;
 	onProceed: () => void;
+	children: ReactNode;
 }
 
 export default function WelcomeModal({
-	timezone,
-	date,
-	onDateChange,
-	onCityChange,
-	selectedCity,
+	hasLocation,
 	onProceed,
+	children,
 }: WelcomeModalProps) {
-	// The datetime always starts pre-filled with the current time.
-	// To start with an empty/null datetime instead, we would need to make `date` nullable
-	// (Date | null), add a "clear" button, grey out the proceed button when date is null,
-	// and pass null through to App.tsx (which would require selectedDate to become Date | null - very troublesome)
-
 	const [flash, setFlash] = useState(false);
 
 	const handleBackdropClick = useCallback(() => {
 		setFlash(true);
 		setTimeout(() => setFlash(false), 500);
 	}, []);
-
-	const hasLocation = selectedCity !== null;
 
 	return (
 		<div
@@ -49,26 +33,7 @@ export default function WelcomeModal({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex flex-col gap-4">
-
-					{/* Location picker */}
-					<div>
-						<label className="block text-theme-text text-sm mb-1 opacity-70 hidden">Location</label>
-						<CitySelector
-							selectedCity={selectedCity}
-							defaultString={"Enter location..."}
-							onSelect={onCityChange}
-						/>
-					</div>
-					{/* DateTime picker */}
-					<div>
-						<label className="block text-theme-text text-sm mb-1 opacity-70 hidden">Date & Time</label>
-						<DateTimePicker
-							timezone={timezone}
-							value={date}
-							onChange={onDateChange}
-							className="w-full bg-transparent border-b border-theme-text/50 py-1 outline-none text-theme-text text-sm"
-						/>
-					</div>
+					{children}
 
 					{/* Proceed button — aligned right */}
 					<div className="flex justify-end mt-2">
