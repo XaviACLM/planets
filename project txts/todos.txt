@@ -1,142 +1,258 @@
-some more arabic lots
+OH NO
 
-Fortune: asc + moon - sun
-Spirit: asc + sun - moon
-Eros: asc + spirit - fortune
-Necessity: asc + fortune - mercury
-Courage: asc + fortune - mars
-Victory: asc + jupiter - spirit
-Nemesis: asc + fortune - saturn
-Marriage - men: asc + venus - saturn
-Marriage - women: asc + saturn - venus
-Children: asc + saturn - jupiter
-Wealth: asc + 2nd - ruler 2nd.
-Death: saturn + 8th - moon
-Father: asc + saturn - sun
-Mother: asc + moon - venus
+main chart hovering/clicking stopped working.
 
-To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
+quincunx shows up as a subaspect of finger of yod even when it's not selected. why? are we doing filtering wrong?
 
-DS, PA = Dorotheus of Sidon, Paulus of Alexandria
-
-Formulas are straightforward, except that the signs on the last two terms flip on nocturnal charts. Easy enough.
-
-That 2nd / 8th / etc stuff: refers to house cusps, obvi ruler 2nd being the ruler of the 2nd cusp. A bit annoying, definitely, but we'll manage - nodePositions now depends on houseCuspPositions (no circular dependencies, so all is good). We'll want a method NodePositions.changeHouseCuspPositions. It's probably fine to NOT keep an internal NodePositions._houseCuspPositions - the semantic dependence really isn't very strong, once NodePositions knows where the lots are then we're all good.
-
-It does introduce a problem though which is that we can't cleanly define Lots as a triplet of Nodes, since house cusps aren't nodes, much less house cusp rulers. We could have a relatively complicated data model to work with this but... eh. We can just stick it all in a big function for now. Proper data model may become relevant later if we offer full arabic lot support. Oh yeah and remember they have self-dependencies, e.g. many depend on fortune or spirit
-
-okay, but what do we do now with the arabic lots? We don't have icons for them, man. We can't really get away with an ASC-type approach. ~maybe~ they can stay in text within the wheel w very short names, but what about the aspect menu? What's gonna happen there?
-
-anyway also todo commit this and update the info modal for the node selector.
-
-yeah, we need to rethink the look of the aspectMenu. It's not really... it's obtuse on purpose. It should be parseable.
-binary aspects are not much trouble, they probably fit side-by-side even with long names
-question is what we do about configurations, particularly grand sextiles, particularly when nodes-without-icons are involved, particularly when their names are long
-...like honestly, I'm not sure there _is_ a good solution?
-you know: configurations are already allowed to take up a ton of space via subaspects. Maybe we can make the configurations bigger in exchange for making the subaspects smaller.
-like. Grand sextile (vertical list or nodes, or just generally some nice little layout)
-and below. Subaspects: and a bunch of hoverable subaspectkind icons that highlight the corresponding subaspect in the main chart. Also tells you the orb somehow
-as for the "nice little layout". Possibly just a tiny version of the aspect itself with the nodes annotated. Like the grand sextile is a little grand sextile, drawn in the usual
-way, and on each side on each of the three nodes we write down who's who. Not even that bad of an idea: it would be definitely _not impossible_ to do this with a bunch of ad hoc svgs.
-yeah. I'm not 100% sold but it _is_ a way out. We'll think about it more, see if we come up with something better, or just stick to that.
+it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
+	something is actually weird with the aspect system :( square contains 3 t-squares, fourth t-square is outside for some reason, w orb 1.48 whereas other t-squares and general square has error 1.92. Yeah something doesn't work as intended here :(
 
 
 
-MINILIST
-- revamp aspect menu
-	almost done. now we gotta do the part of whatever thing first. then
-	dial in font sizes
-	hovering can get weirdly stuck sometimes
-	maybe keep an option for the old menu
-	make sure it works correctly with node icons and stuff
-- fenagle things so that the app can handle the arabic parts while looking fine
+ETERNAL PRE-RELEASE CHECKLIST
 
-	[ ] FUCK: main chart hovering/clicking stopped working.
-	[X] WHAT?: open website, do nothing, click enter esoteric mode. Instant error re: position called for abscent ascendant. PlanetTable, computerowdata, gettriplicityrole, getchartsect, etc. Oh i get it.
-	[ ] WHAT?: quincunx shows up as a subaspect of finger of yod even when it's not selected. why? are we doing filtering wrong?
-	[ ] and by the way the header of planet info should always be text. can't believe i didn't notice that
-	[ ] some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
-	[ ] enter date / proceed without date
-	[ ] landing page
-	[X] solve overlapping dimmed aspects thing by just removing colorcoding and making them all a fixed lighter color (from the theme)
-	[ ] maybe optimize stuff
-	[X] hover background darkening on the configurations
-	[.] probably make showaspectlabels default. or maybe not tbh it's kinda comprehensible and more visual without
-	[X] in retrospect i don't love the aspect path glow. maybe we just make the aspect thicker. give it a lil bg-color border
-	[.] no icons warning in hemispheres chart or a use kufics smmn smmn concept anyway. ok but thatss confusing and you're not gonna end up there unless you mess w settings
-	[ ] moon phases
-	[ ] aspect dOrb, applying/separating
-	[ ] void moon
-	[ ] make sure shit looks right in darkmode still
+make sure stuff still looks right in darkmode
 
-	[ ] typecheck
+search todo
 
-- numeric input field: up/down arrows + suspport for ordinals (for returns)
-- probably shade all the node names in the wheel. again, fuck it, whatever
-- "scroll down" prompt. maybe reverse scroll direction?
-- mb permanently draw faint parallel line (highlight when relevant). makes sense what with the circles already there
-- node recolocator knows what doesn't have icons (needs less space)
-
-- fuck it, try to make it work on the phone a bit
-- some sort of sharing functionality. try to make the links short + make it forwards-compatible
-
-- it's kinda bullcrap how aspects need to recompute entirely even if only a few nodes change position
-	and honestly in retrospect I doubt that idea we had re: always compute all aspects filter later. Like changing selected nodes is not that big a deal
-	+ we can just introduce some debouncing type business to only recompute aspects when selectedNodes hasn't changed in a secondish.
-- do we want to dial back the smallcaps, actually?
-
-MINILIST EASY
-- separate NodePositionsConstructorArgs (and analogues) into dependencies and state, see how this affects function signatures. Particularly create may just take a bundle.
-- astroData getters keyed by stuff from settingsDefs
-- custom datepicker (just containing a normal datepicker, for now) that internally handles the timezone logic and etc etc
-
-- update help menus accordingly
-- check darkmode still works good
-- search "TODO"
+typecheck
 
 
-TRIVIAL
--
 
-NOT TOO HARD, NOT TOO EASY
--
+NECESSARY FOR FIRST BUILD IN CV
 
-REQUIRES THINKING
--
+enter date / proceed without date
 
-ETC
-- stuff to do with declination
+Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
+	maybe also do the larger text mode thing from misc
 
-OH NO 
-- it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
-- something is actually weird with the aspect system :( square contains 3 t-squares, fourth t-square is outside for some reason, w orb 1.48 whereas other t-squares and general square has error 1.92. Yeah something doesn't work as intended here :(
+custom datepicker (just containing a normal datepicker, for now) that internally handles the timezone logic and etc etc and looks nicer
 
-DO THIS AT THE END
-- update help menus accordingly
-- search "TODO"
+make the node images in the planet panel a bit less silly (particularly the physicals without an image)
 
-ALREADY DONE BUT KEEP IN MIND
--
+order files
 
-I'LL GET TO IT
-- make longass node names (Part of Marriage (Women)) not look like shit in hemisphereschart. shortnames included
-- could the classes just be useeffects?
-- maybe HCP should actually provide some information about presweep? Currently externally it just tells people where the houses are. ZodiacWheel actually infers where the cusps are from config values, which is slightly weird. Actually that's not quite true is it? readily tells you where cusps are, doesn't expose where limits are, but does tell you what house a longitude is in wrt limits - which is all we need, actually. Mb that's fine? Actually what we said about ZodiacWheel is still true, just reversed, so idk idk.
-- Variable presweep amounts (different from exactly 5 degrees)
-- dominance chart: all sections should be discardable if everything is in ophiuchus. sort of the entire panel actually but come on
-- order files
-- annoying how low-opacity aspects that line up can overlap to look higher-opacity
-- fixed stars but more seriously (different star groups, parans, helical rising/setting, etc. Also touches upon "inverse astrology", which will be in the roadmap)
 
-I DONT FEEL LIKE IT
-- https://www.astro.com/faq/fq_fh_owstyle_e.htm
-- circles on the wheel depending on what binary aspects are selected (obs selectedAspects is mutable => does not force recomputation)
-- clean up the shadow stuff with the planet images
-- larger text mode
-- clear up the "just compute it" vs usememo thing
-- how about we just include every gd asteroid in the kuiper belt (We have eris, not eros. We could add eros, but it doesn't have a symbol. Not a standard one anyway.)
 
-ROADMAP
-- Make sure this looks reasonably normal on smaller screens (maybe move the columns around? Or something else - who knows?
-- the llm business
-- make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f
+NECESSARY FOR FIRST RELEASE
+
+landing page
+
+sharing mechanism
+	UI + extraction of params + state recreation from saved params
+	params to [0-9/] string, [0-9/] string to paramss
+	base 11 to base 62, base 62 to base 11
+
+natal vs event charts (completely trivial), return charts (easy but a bit of new UI and the return searching logic)
+	also knowing what nodes it is even valid to ask for the return of, to know if we have to worry abt oscillation (mb tag it too)
+
+
+
+MISC FOR NOW
+
+decide on how to draw the ecliptic line (label? only appear sometimes? param to decide if it appears? oh that's probably good!)
+
+"scroll down" prompt
+
+update help menus
+	re nodes (node selector, probably planet panel)
+		To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
+		DS, PA = Dorotheus of Sidon, Paulus of Alexandria
+	re aspects (probably just aspect panel)
+
+
+
+MISC FOR LATER
+
+some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
+
+moon phases (when is this relevant, if at all? and where? just planet panel or mb horary astrology wants it in the chart summary?)
+
+aspect dOrb, for horary eventually
+
+numeric input field: up/down arrows + suspport for ordinals (for returns)
+
+probably shade all the node names in the wheel. again, fuck it, whatever
+
+node relocator knows what doesn't have icons (needs less space)
+
+separate NodePositionsConstructorArgs (and analogues) into dependencies and state, see how this affects function signatures. Particularly create may just take a bundle.
+
+astroData getters keyed by stuff from settingsDefs
+
+larger text mode
+	I don't know, looks standard-sized to me. I'm mostly worried the website will not be able to handle everything being significantly bigger.
+	Maybe we can add a mode that literally just zooms in the screen with some hack - possibly enough to bump you up to the next size category (big screen -> small screen -> phone), since otherwise we risk the main chart getting _smaller_.
+	yeah that sounds good actually
+
+nobody other than the main objects (positions, velocity, aspects, rulershipgraph) should be accessing any logical parameter. I'm not 100% but it feels like they should be abstracted away
+	ZodiacWheel having to know presweep is an example. HCP should expose that
+	also happens a lot with dignities, I feel. Maybe we should have a main object for dignities too. That overrides the "astroData getters" idea.
+
+variable house presweep amount 
+
+dominance chart: all sections should be discardable if everything is in ophiuchus. with a little note.
+
+param presets (copy astro.com defaults and other webpages, have as a button on top of the settings menu)
+	mb useful: https://www.astro.com/faq/fq_fh_owstyle_e.htm
+
+
+
+MISC BUT NONTRIVIAL
+
+update aspects. two notes. in no longer works with all nodes but only those selected.
+	it is its own object with the ability to efficiently update itself in response to:
+		- new nodes being selected (several at a time)
+		- nodes being unselected (several at a time - trivial)
+		- positions of nodes changing (several at a time - probably already optimal to just do the two above in order)
+	also fuck it, ALL aspects have dOrb now, it gets computed when they're added. some light complications in the overall chart logic but it's literally whatever.
+	object keeps subaspect map and a map that tells it the "amt" of physical nodes in each aspect (actually just the enum element)
+		- note the latter changes wrt hamburg physicality param
+	one can do getAspects to it and it automatically handles the filtering (physicality criteria, aspect kinds - yes we do use all of them, at least for now, the atypical ones are cheap - bad later if we introduce custom aspects or someone wants to have a ton of nodes and not worry about configs, but w/e) and formatting and returns the thing. This return may even be cached, I'm not super sure if that's necessary.
+	and then: some sort of debouncing on the selected nodes. Probably lives inside the node selector itself, with (possibly null) timeout.
+		
+clean up the shadow stuff with the planet images. And the physical nodes
+
+
+
+MISC BUT NONTRIVIAL FOR ALMOST NO REWARD
+
+a new system of nodes that doesn't require a full list of them to be hardcoded
+	- probably will require significant changes across several of the main objects, possibly the entire codebase
+	
+possibility to use every gd tracked object in the solar system. requires searching UI
+	take into account: https://en.wikipedia.org/wiki/Astronomical_symbols
+	- what images will these get? do we just do the starmap thing first?
+
+possibility to use every gd arabic part. from https://horoscopes.astro-seek.com/astrology-arabic-lots-list
+	- have all this info saved somewhere
+	- ui and logic to filter through it
+	- logic to know what to recompute when
+	- also remember that wealth/livelihood thing
+	- also I'm not gonna do kufics for every single one of these so idk idk
+
+
+
+NAH
+
+could the classes just be useeffects?
+I don't think so, because we need more info than just "this param changed". Like the whole X updates itself in response to Y changing as a reponse to a change in Z
+
+warning if hemispheres chart cannot use nodes
+no, this is only relevant if the user is already messing with the settings. They'll be able to figure it out.
+
+
+
+PROBABLY NAH BUT I'M NOT SURE
+
+circles on the wheel depending on what binary aspects are selected (obs selectedAspects is mutable => does not force recomputation)
+	I feel this will be a bit silly, but might be ok if toggleable and used in esoteric mode
+	a bit weird that we keep the default binary aspect circles, then, though
+	I suppose it actually doesn't matter that much to just do this by default. again user will only find this after fiddling with the settings (selected aspects)
+	-> yeah I convinced myself
+	note equator line is probably still controlled by that other thing... "show equator line when parallel/contraparallel aspects are selected"
+	meridian and horizon are another thing bc they're not informative for aspects. They'll just be there for show on hover
+
+
+
+SERIOUS, LONG-TERM
+
+the llm business
+
+make a roadmap from https://chatgpt.com/c/6984c732-4ac0-832c-aee6-cb936aaa674f
+	bicharts
+	horary
+	vedic
+	possibly chinese
+	inverse astrology, below
+
+stars
+	parans
+	starmaps in the planet panel (this and the point below may be not so long-term. maybe)
+	different star groups (harcoded hipparchos-type constellations)
+	helical rising/setting
+	also. useful constellation symbols: https://en.wikipedia.org/wiki/Astronomical_symbols - fixed stars also have symbols
+
+inverse astrology
+	figure out what we really need - list the questions that we want to answer. incomplete:
+		given this chart and this node, when is the next date that it return to the same place? (careful w/ stuff that oscillates. do we care about it much?)
+		given this chart and this specific node, show me what it will be aspecting wrt time
+		and just a general constraint engine. variables are time/date, but what are the constraints and what are the optimizers?
+			c: (node) (aspect) (node) (all can be "any")
+				probably the above admits arbitrary aspects. thus can also be used to search just "chart contains kite"
+				mb with constraint-specified error
+			c: (node) in (sign)
+			c: (node) in (house)
+			c: (house cusp) in (sign)
+			c: (node) in (dignity state)
+				possibly with max distance constraint for dignities with exactness
+			c: [(element) / (mode)] dominant among (group - all six groups)
+			c: chart is (intensity) (orientation)
+			c: (node) is chart ruler
+			c: (node) conjunct (fixed star) (both can be "any")
+			c: (node) in [face / bound] of (node)
+			c: (node) in (triplicity dignity state)
+			c: (node) in (sect state)
+			c: chart in (sect state)
+			c: (x) < (node) speed < (z)
+			c: (node) is (direct / stationary / retrograde)
+			c: (node) in (angularity) house
+			c: (node) in [(element) / (mode)]
+			c: (node) is final dispositor
+			c: (node) rules [/transitively] (node)
+			c: (n aspects) > (x)
+			c: (n of a certain (aspect)) > (x)
+			c: (node) in (number) of [aspects / binary aspects / configurations]
+			c: (node) is within (error) of (main angle) (this is just the aspect constraint on conjunctions w a node being a main angle)
+			c?: void moon, maybe
+			c?: something to do with aspects applying or separating. idk how though. do we wanna count them or just expose the option on the general aspect constraint when binary?
+		oh, obligatory constraints on
+			dates: a range, or just a list?
+			locations: "within x distance of y place", or just a list? more complicated stuff like in x country? (oh that's easy actually)
+			obviously we prefer "just a list" approaches for computational simplicity but that's kinda meh. we might be able to get away with doing it only for locations, though
+			also good: see what constraints (depends on param) can be evaluated based just on dates, then iterate by dates first and discard any that don't work just based on that
+		and then, do we actually need optimizers? Like it seems like what we've laid out is already complex enough. but we can do a few cursory ones, i guess?
+			total number of aspects
+			some sort of dignity score
+			ýeah that's all I got tbh
+			
+		general ideas of how this works: search obv involves evaluating a bunch of positions. constraints are naturally ordered in a way that facilitates early elimination without wasting much computation, e.g. aspect stuff probably doesn't get computed until the end, or i.g. configuration stuff. we may have to experiment to optimize speed. also modify the components we got so they only compute what's necessary (not all nodes, all node speeds, etc etc) which will also be interesting for returns. note the above about separating constraints that only require date to evaluate those first.
+		
+		let's just worry about time for now. some constraints can be evaluated sort of intelligently, like binary aspects btw two fixed nodes, or node in sign, etc - you can use a brain to severely cull the pool of possible dates with each of these constraints. we probably go through those sorts of things first and end up with a object that's like a list of "possibly viable date ranges". working within these ranges we can forget about all of these first constraints.
+		
+		constraints that don't work this way: when we evaluate them, we also if possible ask them to give an estimation of more or less how long until it's true. 
+		actually yeah i'm a dummy. You just keep reducing the "viable dates" object. the nodes in the first category can do this easily. in the second category, the one we're doing now, you may need some slightly more complicated search, but we do fine. we do good. the idea, by the way, was that the constraints give you some idea of how long until it's true / how long until it's false so you can refine the scale of the jumps in your binary-ish search - but the goal is always to get an accurate (modulo artifacts) to-the-minute list of ranges of when the condition is valid. This search operates on a single range and returns a (possibly empty) list of ranges, we just map it on the current list of ranges and join the results.
+		
+		so if no constraints remain (i.e. nothing depended on location), then great. we got the date and the location is anywhere.
+		if there remain location-dependent constraints and we have a list of locations, then we run an analogous search for each location and return what we find.
+		
+		but what if there remain constraints and we have a potentially large list of locations, i.e. within these lats/lons, within distance x of y?
+		this is a much harder problem. Time isn't even fixed yet, so we have THREE! axes of search. is this even possible?
+		maybe if we give up on exactitude. Very general idea. 
+			- get some sort of evenly distributed list of points (datetime, location) over search space, using maxmin or something, stopping if either a certain resolution is reached or a maximum number of nodes is reached. resolution may have different scales in space vs time. maximum number of nodes is not "how many we can reasonably evaluate" but a lot closer to "how many we can reasonable have a list of"
+			- put all these nodes in a kdtree. again distance may have different scales in space vs time. Oh, actually, not at all, they're just different.
+				- this kdtree must have a function like "find me all the nodes within time t and distance d of this node". Yesyes manhattan. Also may have different scales on time too.
+			- then, the idea is that for a given node we can evaluate the constraints. if they're good we're good. if they're bad we ask that they give us an estimation of how much time, lat, and lon (or mb just dist) need to change for them to be good. important how strictly we do this to balance correctness vs speed.
+			- then we just iterate through the nodes and if we find something we good, if we don't we discard all the presumed-invalid area around it
+			
+		this may still be extremely unreasonable, it's unclear. some notes:
+			- very possible that the whole time/lat/lon estimates thing becomes postime/negtime/poslat/etc
+			- every constraint should, absent a time and location, give you an estimate of what sorts of resolutions it works at. With place-based, timewise resolutions probably won't get larger than a day, but place-based may (maybe? actually not sure) be decently large. So we do those first and hope to discard more stuff.
+		
+		Also: all constraints are time-based, right? I'm pretty sure yes, but if this is not the case then we can have some notion of nogoods that get transferred btw different time ranges in spacetime search.
+		
+		Also: I feel like we were not really assuming but "working with the mindset that" these constraints are basically convex time-wise, i.e. they always point you in a direction. this need not be the case, there will be some complicated faux-binary search involved.
+		
+		Also: re separating constraints, important to distinguish nodes that are time-based from those that aren't, nodes that osculate from those that don't, know scale of speed and oscillation, also scale of change in position wrt surface position, and... i think that's all but i'm probably wrong. From this for each constraint we know if it's position-dependent, we know its general "scale" in all dimensions, possibly around a given point. 
+		
+		Also: I guess it'd be good that for each specific constraint that gets written down the program auto-searches to see how often it happens and when's the next time and gives a quick summary of that to the user so they can know if they're asking for something reasonable. program estimates itself how reasonable the overall request is, too.
+		
+		Also: maaaaybe (maybe! this could be very annoying! allow us to just optimize over satisfied constraint count. User can tag constraints as 100% necessary or just give them a weight. There may be a good way to do this but I think we just run the obligatory constraints search normally, and over the stream of results we keep the one with the best "score" for all the other constraints.
+		This is not right, though, because if all the constraints are weighted then we're just doing exhaustive search. The search should be able to say "okay, let's say this constraint is forced". But actually if you think about it it's very unclear how this should work, right? Like you can constrain total score above a number but you don't know which constraints actually give you that score, and certainly doing separate searches would be ridiculous.
+		Maybe we take a similar but more general approach. We constrain the score to be larger than the current best score, and then we do some somewhat complicated math to obtain, analogously to before, error scales in each dimension. In this way all the weighted constraints are grouped into one standard constraint and search proceeds exactly as before.
+		And is the math complicated? If we were working over a single param (and unidirectionally), we'd just order by error scale and see how many constraints until we accumulate the desired score. Then the max error scale is the actual error scale. But with three directional params this is a lot more annoying. You can do shitty but correct answers, like [do the same process over each param/direction, even if the presumed constraints end up different], but that's a bit ehh... or not, actually, in retrospect that's literally the only correct approach. I guess that makes sense.
+		Remember also that you'll be working with scored constraints that are already true. It may be good to take this into account too somehow, the exact approach is unclear but they can have error scales too to esstimate when they'll be untrue and this can be naïvely (but does it work correctly?) aggregated onto the accumulation from above. This may result in a conclusion like "there is no solution around this area at the max length scale around these constraints". But this is actually not right: Imagine that early we "negatively accumulate" an originally true constraint with a small scale. Greater scales come after it, large enough that the constraint may reasonably be true again: but this is not counted anymore. How do we fix this?
+			- give up on negative accumulation (not that bad, I think)
+			- estimate "second change" scale (very annoying)
+			- estimate the above as just double the error scale (very dubious)
+		Yeah I think we just forget about negative accumulation tbh.

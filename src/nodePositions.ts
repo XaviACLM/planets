@@ -136,7 +136,6 @@ function computeHighDependencyArabicPartPositions(
 	]);
 }
 	
-
 function computeArabicPartPositions(
 	nodePositions: Map<Node, number>,
 	houseCuspPositions: HouseCuspPositions | null,

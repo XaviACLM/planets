@@ -149,7 +149,39 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
-
+				
+				{/*Equinox (equator) line for parallels*/}
+				{(() => {
+					const isHighlighted = highlightedAspect !== null && (
+						highlightedAspect.kind === AspectKind.PARALLEL
+						|| highlightedAspect.kind === AspectKind.CONTRAPARALLEL);
+					
+					// autumnal and vernal equinoxes
+					const rad = aspectRadius - 1;
+					const a1 = 0 + offset;
+					const a2 = Math.PI + offset;
+					const x1 = 50 + rad * Math.cos(a1);
+					const x2 = 50 + rad * Math.cos(a2);
+					const y1 = 50 - rad * Math.sin(a1);
+					const y2 = 50 - rad * Math.sin(a2);
+					const pathData = [
+						`M ${x1} ${y1}`,
+						`L ${x2} ${y2}`
+					].join(" ");
+					
+					return (
+						<path
+							key={10000}
+							d={pathData}
+							fill="none"
+							stroke="var(--color-text)"
+							strokeWidth={strokeWidthTertiary}
+						/>
+					);
+				})()}
+				
+				// earth icon, w clear radius
+				<circle cx="50%" cy="50%" r={symbolSize/2+1} fill="var(--color-bg)"/>
 				<image
 					key={0}
 					href={earthSymbol}
@@ -458,10 +490,14 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					})
 				}
 				
-				{/*Equinox (equator) line for parallels*/}
-				{ highlightedAspect != null
-				&& (([AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL] as AspectKind[]).includes(highlightedAspect.kind))
-				&& (() => {
+				{/*Equinox (equator) line highlighting*/}
+				{(() => {
+					const isHighlighted = highlightedAspect !== null && (
+						highlightedAspect.kind === AspectKind.PARALLEL
+						|| highlightedAspect.kind === AspectKind.CONTRAPARALLEL);
+					
+					if (!isHighlighted) return null;
+					
 					// autumnal and vernal equinoxes
 					const a1 = 0 + offset;
 					const a2 = Math.PI + offset;
@@ -472,11 +508,11 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					const pathData = [
 						`M ${x1} ${y1}`,
 						`L ${x2} ${y2}`
-					].join(" ");	
+					].join(" ");
 					
 					return (
 						<path
-							key={10000}
+							key={10001}
 							d={pathData}
 							fill="none"
 							stroke={"#fff"}
