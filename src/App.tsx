@@ -1,29 +1,29 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 
-import { useEventChartPositions, useAspects } from './astroHooks.ts'
-import ZodiacWheel from './ZodiacWheel'
-import AspectMenu from './AspectMenu'
-import { DominanceChart, AbridgedDominanceChart } from './DominanceChart'
-import HemispheresChart from './HemispheresChart'
-import RulershipPanel from './RulershipPanel'
-import EsotericModePanel from './EsotericModePanel'
-import ChartSummary from './ChartSummary'
-import PlanetPanel from './PlanetPanel.tsx'
-import PlanetTable from './PlanetTable.tsx'
-import InfoPopup from './InfoPopup.tsx'
-import { RulershipGraph } from './rulershipGraph.ts'
-import Module from './Module'
-import { NodeSelector, AspectKindSelector } from './CategorySelector.tsx'
-import { type Aspect, deleteAspectFromMap } from './aspects.ts'
-import { Node } from './astroDefs.ts'
-import DateTimePicker from './DateTimePicker'
-import { CitySelector } from './CitySelector'
-import { type CityData } from './CitySearchEngine.ts'
-import WelcomeModal from './WelcomeModal'
-import { Sidebar } from './Sidebar'
-import { renderDotPattern } from './renderPrimitives'
-import { useSettingsStore } from './settingsStore.ts'
-import { Theme, HouseSystem } from './settingsDefs.ts'
+import { useEventChartPositions, useAspects } from './model/astroHooks.ts'
+import ZodiacWheel from './ui/ZodiacWheel'
+import AspectMenu from './ui/AspectMenu'
+import { DominanceChart, AbridgedDominanceChart } from './ui/DominanceChart'
+import HemispheresChart from './ui/HemispheresChart'
+import RulershipPanel from './ui/RulershipPanel'
+import EsotericModePanel from './ui/EsotericModePanel'
+import ChartSummary from './ui/ChartSummary'
+import PlanetPanel from './ui/PlanetPanel.tsx'
+import PlanetTable from './ui/PlanetTable.tsx'
+import InfoPopup from './ui/InfoPopup.tsx'
+import { RulershipGraph } from './model/rulershipGraph.ts'
+import Module from './ui/Module'
+import { NodeSelector, AspectKindSelector } from './ui/CategorySelector.tsx'
+import { type Aspect, deleteAspectFromMap } from './model/aspects.ts'
+import { Node } from './defs/astroDefs.ts'
+import DateTimePicker from './ui/DateTimePicker'
+import { CitySelector } from './ui/CitySelector'
+import { type CityData } from './ui/CitySearchEngine.ts'
+import WelcomeModal from './ui/WelcomeModal'
+import { Sidebar } from './ui/Sidebar'
+import { renderDotPattern } from './ui/renderPrimitives'
+import { useSettingsStore } from './settings/settingsStore.ts'
+import { Theme, HouseSystem } from './defs/settingsDefs.ts'
 import {
 	MainSettingsMenu,
 	DominanceSettingsMenu,
@@ -33,7 +33,7 @@ import {
 	NodeSelectorSettingsMenu,
 	AspectSelectorSettingsMenu,
 	AspectMenuSettingsMenu
-} from './settingsMenus'
+} from './settings/settingsMenus'
 import {
 	PlanetInfoHelp,
 	DominanceChartHelp,
@@ -42,8 +42,8 @@ import {
 	NodeSelectorHelp,
 	GeneralSettingsHelp,
 	AspectMenuHelp,
-} from './helpContent'
-import AboutThisWebsite from './AboutThisWebsite.tsx'
+} from './ui/helpContent'
+import AboutThisWebsite from './ui/AboutThisWebsite.tsx'
 
 const SIDEBAR_MAX = 360;
 const BREAKPOINT_LARGE = 1000;
