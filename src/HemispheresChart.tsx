@@ -25,8 +25,6 @@ function createEmphasisString(verticalDiff: number, horizontalDiff: number, nNod
 	
 	// translating the old parameters from 10 to n. in terms of diffAbs/total
 	// starts at nth. slight from 0.2. normal from 0.4. strong from 0.6
-	
-	// considering we're working with 10 standard planets. nth if equal, slight if 2 (4 vs 6), av if 4 (3 vs 7), strong if 6/8/10 (0,1,2 vs 8,9,10)
 	const strengthsPerRelDiff = (diffRel: number) => {
 		if (diffRel >= 0.6) { return 3; }
 		else if (diffRel >= 0.4) { return 2; }
@@ -258,10 +256,27 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		))
 		
 	const height = hTop + hBot;
+	const hatchingWidth = 15;
 
 	const createHemispheresChart = (width: number) => {
 		return (
 			<svg width={width} height={height}>
+				<rect
+					x={0}
+					y={0}
+					width={width}
+					height={height}
+					strokeWidth={strokeWidth}
+					fill={"url(#hatch2)"}
+				/>
+				<rect
+					x={hatchingWidth}
+					y={hatchingWidth}
+					width={width-2*hatchingWidth}
+					height={height-2*hatchingWidth}
+					strokeWidth={strokeWidth}
+					fill={"var(--color-bg)"}
+				/>
 				{/*axes*/}
 				<line
 					x1={"50%"}
@@ -309,14 +324,6 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 				<g transform={`translate(${0.75*width},${hTop+0.5*hBot})`}>
 					{renderNodeGroupSVG(nodesBelowWest, width/2)}
 				</g>
-				<rect
-					x={0}
-					y={0}
-					width={width}
-					height={height}
-					strokeWidth={strokeWidth}
-					fill={"url(#hatch2)"}
-				/>
 				<defs>
 					<pattern id={"hatch2"}
 						width="5" height="5"
