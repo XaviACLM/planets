@@ -58,63 +58,18 @@ MINILIST
 	[ ] some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
 	[ ] enter date / proceed without date
 	[ ] landing page
-	[ ] solve overlapping dimmed aspects thing by just removing colorcoding and making them all a fixed lighter color (from the theme)
+	[X] solve overlapping dimmed aspects thing by just removing colorcoding and making them all a fixed lighter color (from the theme)
 	[ ] maybe optimize stuff
-	[ ] hover background darkening on the configurations
+	[X] hover background darkening on the configurations
 	[.] probably make showaspectlabels default. or maybe not tbh it's kinda comprehensible and more visual without
-	[ ] in retrospect i don't love the aspect path glow. maybe we just make the aspect thicker. give it a lil bg-color border
+	[X] in retrospect i don't love the aspect path glow. maybe we just make the aspect thicker. give it a lil bg-color border
 	[.] no icons warning in hemispheres chart or a use kufics smmn smmn concept anyway. ok but thatss confusing and you're not gonna end up there unless you mess w settings
 	[ ] moon phases
 	[ ] aspect dOrb, applying/separating
 	[ ] void moon
+	[ ] make sure shit looks right in darkmode still
 
-	compare to how it is right now. what do we want to change?
-	first let's think about how things are with showNodeLabels ON.
-	[X] in aspectmenu: binary aspects should use shortnames.
-	[X] in astroGraphics, which by the way should be graphicsDefs, define nodesWithoutSymbol: Node[] (from the nodeSymbols record)
-	[X] in zodiacWheel: nodes without symbol get drawn back. Like the nodes with redundant symbol.
-	[X] some names are too long now (P. Fortune). Do like in hemispheres and resize maybe?
-		this is a bit complex. "Makemake" is longer than "P. Fortune" but the latter has 2 more characters. + different criteria if no node, e.g. P. Marriage-W
-	[X] in node selector. The "of fortune", "of spirit", etc etc thing.
-		[ ] will that pass the typechecker?
-	[X] in hemisphere chart.
-		[X] Some shortnames are too long to be readable when compressed
-		[X] some longnames are long enough to need compression in single-column mode
-		[X] also thechart should be a bit higher. it can clip a bit. At least from the bottom.
-		[X] idk the small text still looks a bit weird. We should try to find another way. scale the text vertically if made small? just for visual uniformity
-	[X] in dominance chart
-		[X] idk why but in reduced mode - all nodes we get a bunch of minimenus, one for each point node. Weird!
-		[X] happens in expanded mode main angles too. Almost surely the same thing.
-	[X] in planetpanel. I'm just not too sure what to do with the little circle graphic for stuff that doesn't have an icon. Just "Spirit" there would look a bit silly.
-	what about showNodeLabels OFF.
-	[ ] in aspectMenu
-		[X] configurations should fall back to text if no icon
-		[X] binaries idem, though we can probably just write renderNode s.t. it automatically falls back if necessary
-		[X] ok but now both of them look weird bc text has way more visual weight. What to do? Unbold? Bigger symbols? etc etc
-			yeah I'm quite fond of giving up on the "bold everything" approach actually
-			[X] unbold hemispheres chart
-			[X] unbold dominance chart
-			[X] unbold aspect mini diagrams
-			[X] unbold zodiac wheel - maybe??
-		[ ] and really even without the parts the binaries look weird as shit. FAR too much empty space. We need to rethink that.
-			how about this. if showNodeLabels or showAspectLabels is true, keep as-is. Use some neat flex to ensure it "looks" right, i.e. justified w nodes centered in default case
-			if they're both false, then use an approach analogous to the subaspects. works nicely bc we can be sure they're all the same size
-			...except the arabic parts. man... you know what, whatever, it'll be good. let's give spirit a sign though.
-			also if !shownodeLabels && showAspectLabels it's a bit different.
-			if showNodeLabels:
-				aspect-nodes-error justified all normal
-			else:
-				if showAspectLabels:
-					aspects names on the left, other stuff fixed towards the right (but decently spaced, I suppose)
-				else:
-					o like the subaspects. parts will look weird but that's fine.
-	[X] in zodiacWheel. If no symbol then use the shortname. Get the position right
-		[X] did okay but some shortnames are still too long. these fucking parts man. these fucking p marriage m man.
-		[X] and by the way in this context nodes with reduntant icon/that prefer label/whatever should not show symbol either, if it fits. really I start to wonder if we need those symbols at all. but if we remove them what goes on the planetPanel? again the fixed star business etc etc.
-	[X] in orientation. Oh this is very problematic actually. Maybe just automatically fall back to showLabels if uniconed nodes are present. Painful but what can you do
-	[X] in element/mode balance. Same issue as without labels. Also just gotta have renderNode fall back to text. Lists will look ugly but we.
-		[X] not quite. In the list, if something does not have an icon, make sure it has a comma. ...sort of. I mean doesn't everything need a comma, then? Are dots preferable? Idk idk, think about this. I think dots with some logic to put them on each side of a no-symbol node (without repetition) should be enough.
-	[X] in planetpanel. same same, just renderNode fallback.
+	[ ] typecheck
 
 - numeric input field: up/down arrows + suspport for ordinals (for returns)
 - probably shade all the node names in the wheel. again, fuck it, whatever

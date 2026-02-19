@@ -145,11 +145,6 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				preserveAspectRatio="xMidYMid meet"
 				className="w-full h-full"
 			>
-				<circle cx="50%" cy="50%" r={radius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={radius-0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
-				
-				<circle cx="50%" cy="50%" r={aspectRadius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
-				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
 				
 				<circle cx="50%" cy="50%" r={aspectRadius * 1/2} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // trines
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
@@ -463,45 +458,6 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					})
 				}
 				
-				{/*Highlighted aspect*/}
-				{ highlightedAspect != null && (() => {
-						
-					if ( AspectKind.CONJUNCTION == highlightedAspect.kind ) {
-						return null;
-					}
-						
-					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
-		
-					const stroke = (() => {
-						const color = aspectKindColors[highlightedAspect.kind];
-						if (!aspectsColorcoded || color === undefined){
-							return "var(--color-text)";
-						}
-						const [r,g,b] =  color;
-						return `rgb(${r},${g},${b})`;
-					})();
-					
-					return (
-						<path
-							key={-1000-aspects.indexOf(highlightedAspect)}
-							d={pathData}
-							fill="none"
-							stroke={stroke}
-							strokeWidth={blurBaseWidth}
-							filter="url(#path-glow)"
-							opacity={0}
-							style={{ transition: 'opacity 0.6s ease' }}
-							ref={node => {
-								if (node) {
-									requestAnimationFrame(() => {
-										node.style.opacity = "1";
-									});
-								}
-							}}
-						/>
-					);
-				})()}
-				
 				{/*Equinox (equator) line for parallels*/}
 				{ highlightedAspect != null
 				&& (([AspectKind.PARALLEL, AspectKind.CONTRAPARALLEL] as AspectKind[]).includes(highlightedAspect.kind))
@@ -517,6 +473,77 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 						`M ${x1} ${y1}`,
 						`L ${x2} ${y2}`
 					].join(" ");	
+					
+					return (
+						<path
+							key={10000}
+							d={pathData}
+							fill="none"
+							stroke={"#fff"}
+							strokeWidth={blurBaseWidth}
+							filter="url(#path-glow)"
+							style={{ transition: 'opacity 0.6s ease' }}
+							ref={node => {
+								if (node) {
+									requestAnimationFrame(() => {
+										node.style.opacity = "1";
+									});
+								}
+							}}
+						/>
+					);
+				})()}
+				
+				{/*Aspects*/}
+				{aspects != null &&
+					[
+						...aspects.filter(aspect => !aspect.nodes.includes(visuallyHighlightedNode)),
+						...aspects.filter(aspect => aspect.nodes.includes(visuallyHighlightedNode)),
+					]
+					.map((aspect, i) => {
+						if ( AspectKind.CONJUNCTION == aspect.kind ){
+							return null;
+						}
+
+						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
+
+						const isIncidentOnHighlighted = visuallyHighlightedNode !== null && aspect.nodes.includes(visuallyHighlightedNode);
+						const isDeemphasized = visuallyHighlightedNode !== null && !isIncidentOnHighlighted;
+
+						const stroke = (() => {
+							if (isDeemphasized) return "var(--color-border)"
+							const color = aspectKindColors[aspect.kind];
+							if (!aspectsColorcoded || color === undefined){
+								return "var(--color-text)";
+							}
+							const [r,g,b] =  color;
+							return `rgb(${r},${g},${b})`;
+						})();
+
+						const strokeWidth = (aspectsColorcoded && !isDeemphasized) ? strokeWidthPrimary*2 : strokeWidthPrimary;
+
+						return (
+							<path
+								key={i}
+								d={pathData}
+								fill="none"
+								stroke={stroke}
+								strokeWidth={strokeWidth}
+							/>
+						);
+					})
+				}
+
+				{/*Highlighted aspect*/}
+				{ highlightedAspect != null && (() => {
+					
+					if ( highlightedAspect.kind === AspectKind.CONJUNCTION ) {
+						return null;
+					}
+						
+					const pathData = aspectPathData(highlightedAspect, nodeAngles, aspectRadius);
+
+					const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
 		
 					const stroke = (() => {
 						const color = aspectKindColors[highlightedAspect.kind];
@@ -528,77 +555,38 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					})();
 					
 					return (
-						<path
-							key={-1000000}
-							d={pathData}
-							fill="none"
-							stroke={stroke}
-							strokeWidth={blurBaseWidth}
-							filter="url(#path-glow)"
-							opacity={0}
-							style={{ transition: 'opacity 0.6s ease' }}
-							ref={node => {
-								if (node) {
-									requestAnimationFrame(() => {
-										node.style.opacity = "0.66";
-									});
-								}
-							}}
-						/>
-					);
-				})()}
-				
-				{/*Aspects*/}
-				{aspects != null &&
-					// Reorder aspects: non-highlighted first, highlighted last (so they render on top)
-					[...aspects].sort((a, b) => {
-						if (visuallyHighlightedNode === null) return 0;
-						const aIncident = a.nodes.includes(visuallyHighlightedNode);
-						const bIncident = b.nodes.includes(visuallyHighlightedNode);
-						if (aIncident && !bIncident) return 1;
-						if (!aIncident && bIncident) return -1;
-						return 0;
-					}).map((aspect, i) => {
-
-						if ( AspectKind.CONJUNCTION == aspect.kind ){
-							return null;
-						}
-
-						if ( !aspect.nodes.every(node => selectedNodes.has(node)) ){
-							return null;
-						}
-
-						const pathData = aspectPathData(aspect, nodeAngles, aspectRadius);
-
-						const stroke = (() => {
-							const color = aspectKindColors[aspect.kind];
-							if (!aspectsColorcoded || color === undefined){
-								return "var(--color-text)";
-							}
-							const [r,g,b] =  color;
-							return `rgb(${r},${g},${b})`;
-						})();
-
-						const strokeWidth = aspectsColorcoded ? strokeWidthPrimary*2 : strokeWidthPrimary;
-
-						// Reduce opacity for aspects not incident on the visually highlighted node
-						const isIncidentOnHighlighted = visuallyHighlightedNode !== null && aspect.nodes.includes(visuallyHighlightedNode);
-						const opacity = visuallyHighlightedNode === null ? 1 : (isIncidentOnHighlighted ? 1 : 0.2);
-
-						return (
+						<g key={1000}>
 							<path
-								key={i}
+								d={pathData}
+								fill="none"
+								stroke={"var(--color-bg)"}
+								strokeWidth={strokeWidth*5}
+							/>
+							<path
+								d={pathData}
+								fill="none"
+								stroke={"#fff"}
+								strokeWidth={blurBaseWidth}
+								filter="url(#path-glow)"
+								style={{ transition: 'opacity 0.6s ease' }}
+								ref={node => {
+									if (node) {
+										requestAnimationFrame(() => {
+											node.style.opacity = "1";
+										});
+									}
+								}}
+							/>
+							<path
 								d={pathData}
 								fill="none"
 								stroke={stroke}
-								strokeWidth={strokeWidth}
-								opacity={opacity}
-								style={{ transition: 'opacity 0.3s ease' }}
+								strokeWidth={strokeWidth*1}
 							/>
-						);
-					})
-				}
-
+						</g>
+					);
+				})()}
+				
 				{/* Zodiac sector highlighting */}
 				{Array.from(zodiac.entries()).map(([symbol, lon], i, array) => {
 					const nextLon = array[(i + 1)%array.length][1];
@@ -645,6 +633,13 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 						/>
 					);
 				})}
+				
+				<circle cx="50%" cy="50%" r={radius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={radius-0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
+				
+				<circle cx="50%" cy="50%" r={aspectRadius} stroke="var(--color-text)" strokeWidth={strokeWidthPrimary} fill="none"/>
+				<circle cx="50%" cy="50%" r={aspectRadius+0.5} stroke="var(--color-text)" strokeWidth={strokeWidthSecondary} fill="none"/>
+				
 				<defs>
 					// this radial gradient is from deepseek - I don't understand it too well.
 					<radialGradient id="hoverGradient" cx="50%" cy="50%" r={sectorRadius+"%"} gradientUnits="userSpaceOnUse">
@@ -653,7 +648,7 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 					</radialGradient>
 					<filter id="path-glow" x="-400%" y="-400%" width="800%" height="800%">
 						<feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
-						<feFlood floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={isDarkTheme ? 0.8 : 0.5} result="color"/>
+						<feFlood floodColor={isDarkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"} floodOpacity={isDarkTheme ? 0.8 : 0.25} result="color"/>
 						<feComposite in="color" in2="blur" operator="in" result="glow"/>
 						<feMerge>
 							<feMergeNode in="glow"/>

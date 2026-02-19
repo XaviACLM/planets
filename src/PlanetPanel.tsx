@@ -326,7 +326,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						height={planetImageWidth}
 						filter={isDarkTheme ? "" : "invert(1) var(--icon-filter) url(#subtleGlow)"}
 						transform={imageTransform}
-						opacity={1}
+						opacity={0.75}
 					/>
 				) : (
 					<image
