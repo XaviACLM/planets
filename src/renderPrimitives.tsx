@@ -534,3 +534,37 @@ export const AspectKindSelectorButton = ({
 		</SelectorButton>
 	);
 };
+
+let dotPatternCounter = 0;
+
+export const renderDotPattern = (options: {
+	dotSize?: number;
+	spacing?: number;
+} = {}): ReactNode => {
+	const { dotSize = 1.5, spacing = 10 } = options;
+	const id = `dot-pattern-${dotPatternCounter++}`;
+	const isDarkTheme = useSettingsStore.getState().theme === 'Dark';
+
+	return (
+		<svg className="absolute inset-0 w-full h-full pointer-events-none"
+			preserveAspectRatio="none"
+		>
+			<defs>
+				<pattern
+					id={id}
+					width={spacing}
+					height={spacing}
+					patternUnits="userSpaceOnUse"
+					patternTransform="rotate(45)"
+				>
+					<rect width={dotSize} height={dotSize} fill="var(--color-text)" />
+				</pattern>
+			</defs>
+			<rect
+				x="0%" width="100%" height="100%"
+				opacity={isDarkTheme ? "30%" : "75%"}
+				fill={`url(#${id})`}
+			/>
+		</svg>
+	);
+};

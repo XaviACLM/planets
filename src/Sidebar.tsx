@@ -2,20 +2,26 @@ import { type ReactNode } from 'react';
 import { useSettingsStore } from './settingsStore.ts';
 import { Theme } from './settingsDefs.ts'
 
+const SIDEBAR_DEFAULT_WIDTH = 360;
+
 interface SidebarProps {
 	side: 'left' | 'right';
 	children: ReactNode;
 	animationKey?: string;
+	zoom?: number;
 }
 
-export function Sidebar({ side, children, animationKey }: SidebarProps) {
+export function Sidebar({ side, children, animationKey, zoom = 1 }: SidebarProps) {
 	const animation = side === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right';
-	
+
 	const theme = useSettingsStore(s => s.theme);
 	const isDarkTheme = theme === Theme.DARK;
 
 	return (
-		<aside className="w-[360px] shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none relative">
+		<aside
+			className="shrink-0 flex flex-col gap-2 p-2 bg-theme-bg overflow-y-auto overflow-x-hidden scrollbar-none relative"
+			style={{ width: SIDEBAR_DEFAULT_WIDTH, zoom }}
+		>
 			{/* Dot lattice background */}
 			<svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
 				<defs>
@@ -43,7 +49,10 @@ export function Sidebar({ side, children, animationKey }: SidebarProps) {
 			</svg>
 
 			{/* Content */}
-			<div className={`flex flex-col gap-2 relative z-10 ${animation}`} key={animationKey}>
+			<div
+				className={`flex flex-col gap-2 relative z-10 ${animation}`}
+				key={animationKey}
+			>
 				{children}
 			</div>
 		</aside>

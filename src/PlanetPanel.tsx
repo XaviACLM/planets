@@ -312,10 +312,11 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					/>
 					<circle cx="50%" cy="50%" r={planetImageWidth/2} fill="url(#innerShadow)" filter="url(#boost-alpha)" opacity="1"/>
 				</>) : !arabicParts.includes(selectedNode) && (<>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5" fill="none"/>
+					{/* TODO account for hamburg / hamburg physical */}
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5"
+						fill="var(--color-text)" fillOpacity={nodeTypes[selectedNode] === NodeType.BODY ? "0.5" : "0"}/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="var(--color-text)" opacity="0.5" fill="none"/>
-					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5"
-						fill={nodeTypes[selectedNode] === NodeType.POINT ? "none" : "var(--color-text)"}/>
+					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 				</>)}
 				{arabicParts.includes(selectedNode) ? (
 					<image
