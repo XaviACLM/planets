@@ -90,6 +90,7 @@ function App() {
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [showModal, setShowModal] = useState<boolean>(true);
 	const tableScrollRef = useRef<HTMLDivElement>(null);
+	const [showScrollHint, setShowScrollHint] = useState(true);
 
 	// Node focus state
 	const [highlightedNode, setHighlightedNode] = useState<Node | null>(null);
@@ -193,6 +194,7 @@ function App() {
 				onWheel={(e) => {
 					if (tableScrollRef.current) {
 						tableScrollRef.current.scrollTop += e.deltaY;
+						if (e.deltaY > 0 && showScrollHint) setShowScrollHint(false);
 					}
 				}}
 			>
@@ -278,6 +280,13 @@ function App() {
 						}
 					</div>
 				</div>
+
+				{/* Scroll hint */}
+				{showScrollHint && (
+					<div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-[100] text-theme-text/70 text-sm pointer-events-none">
+						Scroll down for table
+					</div>
+				)}
 
 			</main>
 			<Sidebar side="right" animationKey={menuOpen ? 'settings' : 'main'}>

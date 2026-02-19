@@ -19,8 +19,6 @@ typecheck
 
 MISC FOR NOW
 
-"scroll down" prompt
-
 update help menus
 	re nodes (node selector, probably planet panel)
 		To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
