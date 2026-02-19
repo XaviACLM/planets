@@ -653,14 +653,11 @@ export function filterAspects(
 	maxMajorBAError: number,
 	maxMinorBAError: number
 ): Map<Aspect, Aspect[]>{
-	//deepcopy subaspect map
-	const newMap = new Map<Aspect, Aspect[]>();
-	for (const [aspect, subs] of subaspectMap.entries()) {
-		newMap.set(aspect, [...subs]);
-	}
 	
 	// tasks list
-	const entries: [Aspect, Aspect[]][] = Array.from(newMap.entries());
+	const entries: [Aspect, Aspect[]][] = Array.from(subaspectMap.entries());
+	
+	const newMap = new Map<Aspect, Aspect[]>();
 	
 	let i = 0;
 	while (i < entries.length) {
@@ -668,12 +665,15 @@ export function filterAspects(
 		i++;
 		// if the aspect survives filtering, keep it
 		if (filterAspect(aspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)) {
+			newMap.set(aspect, subaspects.filter(subaspect => filterAspect(subaspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)))
 			continue;
 		}
-		// Otherwise remove it from the new map
-		newMap.delete(aspect);
+		
 		// Insert its subaspects and queue them for later cleaning
 		for (const subaspect of subaspects) {
+			if (!filterAspect(subaspect, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical)) {
+				continue;
+			}
 			
 			const subsubaspects: Aspect[] = [];
 			for ( const s of subaspectsOf(subaspect, nodePositions) ){

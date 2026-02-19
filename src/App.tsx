@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 
 import { useEventChartPositions, useAspects } from './astroHooks.ts'
 import ZodiacWheel from './ZodiacWheel'
@@ -89,6 +89,7 @@ function App() {
 	const [highlightedAspect, setHighlightedAspect] = useState<Aspect | null>(null);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [showModal, setShowModal] = useState<boolean>(true);
+	const tableScrollRef = useRef<HTMLDivElement>(null);
 
 	// Node focus state
 	const [highlightedNode, setHighlightedNode] = useState<Node | null>(null);
@@ -189,6 +190,11 @@ function App() {
 			<main
 				className="flex-1 relative overflow-hidden"
 				onClick={() => setHighlightedNode(null)}
+				onWheel={(e) => {
+					if (tableScrollRef.current) {
+						tableScrollRef.current.scrollTop += e.deltaY;
+					}
+				}}
 			>
 				{/* Layer 1: Chart + summary — always centered, behind table */}
 				<div className="absolute inset-0 flex items-center justify-center">
@@ -210,10 +216,11 @@ function App() {
 					/>
 				)}
 
-				{/* Layer 2: Scrollable table overlay */}
-				<div className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-none z-[50]">
+				{/* Layer 2: Scrollable table overlay — pointer-events-none so Layer 1
+				 receives hover/click; scrolling is forwarded via onWheel on <main> */}
+				<div ref={tableScrollRef} className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-none z-[50] pointer-events-none">
 					<div style={{ height: '100%' }} />
-					<div className="flex justify-center px-4">
+					<div className="flex justify-center px-4 pointer-events-auto">
 						<PlanetTable
 							nodePositions={nodePositions}
 							nodeVelocities={nodeVelocities}

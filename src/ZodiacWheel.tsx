@@ -150,6 +150,16 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(2)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // squares
 				<circle cx="50%" cy="50%" r={aspectRadius * (Math.sqrt(3)/2)} stroke="var(--color-text)" strokeWidth={strokeWidthTertiary} fill="none"/> // sextiles
 				
+				<image
+					key={0}
+					href={earthSymbol}
+					x={50-symbolSize/2}
+					y={50-symbolSize/2}
+					width={symbolSize}
+					height={symbolSize}
+					style={{filter:"var(--icon-filter)"}}
+				/>
+				
 				{/*Equinox (equator) line for parallels*/}
 				{(() => {
 					const isHighlighted = highlightedAspect !== null && (
@@ -157,16 +167,23 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 						|| highlightedAspect.kind === AspectKind.CONTRAPARALLEL);
 					
 					// autumnal and vernal equinoxes
-					const rad = aspectRadius - 1;
+					const radOuter = aspectRadius - 1;
+					const radInner = symbolSize/2 + 0.5;
 					const a1 = 0 + offset;
 					const a2 = Math.PI + offset;
-					const x1 = 50 + rad * Math.cos(a1);
-					const x2 = 50 + rad * Math.cos(a2);
-					const y1 = 50 - rad * Math.sin(a1);
-					const y2 = 50 - rad * Math.sin(a2);
+					const x1 = 50 + radOuter * Math.cos(a1);
+					const y1 = 50 - radOuter * Math.sin(a1);
+					const x2 = 50 + radInner * Math.cos(a1);
+					const y2 = 50 - radInner * Math.sin(a1);
+					const x3 = 50 + radInner * Math.cos(a2);
+					const y3 = 50 - radInner * Math.sin(a2);
+					const x4 = 50 + radOuter * Math.cos(a2);
+					const y4 = 50 - radOuter * Math.sin(a2);
 					const pathData = [
 						`M ${x1} ${y1}`,
-						`L ${x2} ${y2}`
+						`L ${x2} ${y2}`,
+						`M ${x3} ${y3}`,
+						`L ${x4} ${y4}`,
 					].join(" ");
 					
 					return (
@@ -179,18 +196,6 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 						/>
 					);
 				})()}
-				
-				// earth icon, w clear radius
-				<circle cx="50%" cy="50%" r={symbolSize/2+1} fill="var(--color-bg)"/>
-				<image
-					key={0}
-					href={earthSymbol}
-					x={50-symbolSize/2}
-					y={50-symbolSize/2}
-					width={symbolSize}
-					height={symbolSize}
-					style={{filter:"var(--icon-filter)"}}
-				/>
 				
 				{/*Outer zodiac sector separators*/}
 				{zodiacLongitudes.map((lon, index) => {

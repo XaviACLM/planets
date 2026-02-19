@@ -53,6 +53,7 @@ export function useAspects(
 	// aspects, filtered, in the format imposed by the aspect menu mode
 	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(() => formatAspects(filteredAspects, aspectMenuMode));
 	useEffect(() => {
+		console.log(filteredAspects);
 		setAspects(formatAspects(filteredAspects, aspectMenuMode));
 	}, [filteredAspects, aspectMenuMode])
 

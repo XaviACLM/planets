@@ -1,11 +1,9 @@
 OH NO
 
-main chart hovering/clicking stopped working
-
-quincunx shows up as a subaspect of finger of yod even when it's not selected. why? are we doing filtering wrong?
-
 it's kinda weird that if we're in pointwise-max and we claim this is equivalent to pairwise-full-max that there'd be configs where not every subaspect shows up. whats up with that.
 	something is actually weird with the aspect system :( square contains 3 t-squares, fourth t-square is outside for some reason, w orb 1.48 whereas other t-squares and general square has error 1.92. Yeah something doesn't work as intended here :(
+	
+	might have been fixed when we didd the filtering subaspects thing
 
 
 
@@ -16,6 +14,18 @@ make sure stuff still looks right in darkmode
 search todo
 
 typecheck
+
+
+
+MISC FOR NOW
+
+"scroll down" prompt
+
+update help menus
+	re nodes (node selector, probably planet panel)
+		To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
+		DS, PA = Dorotheus of Sidon, Paulus of Alexandria
+	re aspects (probably just aspect panel)
 
 
 
@@ -42,23 +52,15 @@ sharing mechanism
 natal vs event charts (completely trivial), return charts (easy but a bit of new UI and the return searching logic)
 	also knowing what nodes it is even valid to ask for the return of, to know if we have to worry abt oscillation (mb tag it too)
 
-
-
-MISC FOR NOW
-
-decide on how to draw the ecliptic line (label? only appear sometimes? param to decide if it appears? oh that's probably good!)
-
-"scroll down" prompt
-
-update help menus
-	re nodes (node selector, probably planet panel)
-		To mention in the info modal: These are just the standard lots in modern astrological practice (cf. Chris Brennan, Robert Hand, Rober Schmidt). All from DS and PA. No conflicts except Eros, where we choose DS because it's more widely used. Wealth (DS) is actually called livelihood, but wealthy is more widely used.
-		DS, PA = Dorotheus of Sidon, Paulus of Alexandria
-	re aspects (probably just aspect panel)
+allow configurations to always have their subaspects unfiltered. Menu may be a bit confusing otherwise.
+	this is a bit complicated because the filtering doesn't only happen in filterAspects. they may be dropped beforehand
+	i'm not sure where, I'm just observing that verifiably that is what happens. We'll have to investigate, possible this may be more complicated than it seems
 
 
 
 MISC FOR LATER
+
+settings option to unbind planet table from the bottom
 
 some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
 
