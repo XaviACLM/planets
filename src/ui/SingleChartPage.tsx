@@ -431,7 +431,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 					onClick={() => setHighlightedNode(null)}
 					onWheel={(e) => {
 						if (tableScrollRef.current) {
-							tableScrollRef.current.scrollTop += e.deltaY;
+							tableScrollRef.current.scrollBy({top: e.deltaY, behavior: 'smooth'})
 							if (e.deltaY > 0 && showScrollHint) setShowScrollHint(false);
 						}
 					}}
@@ -470,7 +470,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 					onClick={() => setHighlightedNode(null)}
 					onWheel={(e) => {
 						if (tableScrollRef.current) {
-							tableScrollRef.current.scrollTop += e.deltaY;
+							tableScrollRef.current.scrollBy({top: e.deltaY, behavior: 'smooth'})
 							if (e.deltaY > 0 && showScrollHint) setShowScrollHint(false);
 						}
 					}}
