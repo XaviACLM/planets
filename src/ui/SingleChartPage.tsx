@@ -44,8 +44,8 @@ import AboutThisWebsite from './AboutThisWebsite.tsx'
 import type { ChartInputs } from '../hooks/chartInputTypes'
 
 const SIDEBAR_MAX = 360;
-const BREAKPOINT_LARGE = 1000;
-const BREAKPOINT_MEDIUM = 500;
+const BREAKPOINT_LARGE = 1200;
+const BREAKPOINT_MEDIUM = 650;
 
 function useWindowWidth() {
 	const [width, setWidth] = useState(window.innerWidth);
