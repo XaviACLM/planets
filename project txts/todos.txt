@@ -12,6 +12,8 @@ ETERNAL PRE-RELEASE CHECKLIST
 
 make sure stuff still looks right in darkmode
 
+make sure stuff doesn't break in 13 houses mode
+
 search todo
 
 typecheck
