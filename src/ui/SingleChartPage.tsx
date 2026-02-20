@@ -175,6 +175,17 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 
 	// TODO: PickerBar should be wrapped in a Module component
 
+	const pickerBarModule = (
+		<Module
+			title=""
+			initialDisplayIndex={1}
+			showArrows={false}
+			titlePosition={'hidden'}
+		>
+			<PickerBar />
+		</Module>
+	);
+
 	const aspectMenuModule = (
 		<Module
 			title="Aspects"
@@ -388,7 +399,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 
 	const normalSidebarContent = (
 		<>
-			<PickerBar />
+			{pickerBarModule}
 			{planetInfoModule}
 			{dominanceModule}
 			{orientationModule}
@@ -412,7 +423,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 		return (
 			<div className="flex h-screen w-screen overflow-hidden bg-theme-bg">
 				<Sidebar side="left" zoom={sidebarZoom}>
-					<PickerBar />
+					{pickerBarModule}
 					{aspectMenuModule}
 				</Sidebar>
 				<main

@@ -18,7 +18,7 @@ export function useEventChartInputs(): ChartInputs {
 	const locationPlaceholder = "Enter location...";
 
 	const PickerBar = useCallback(() => (
-		<div className="w-full bg-theme-bg border border-theme-border text-theme-text px-1">
+		<div className="px-3 py-1">
 			<CitySelector
 				selectedCity={selectedCity}
 				defaultString={locationPlaceholder}

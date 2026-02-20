@@ -5,7 +5,8 @@ import InfoModal from './InfoModal';
 type ModuleProps = {
 	title: string;
 	initialDisplayIndex?: number;
-	titlePosition?: 'top' | 'left' | 'right';
+	showArrows?: boolean;
+	titlePosition?: 'top' | 'left' | 'right' | 'hidden';
 	settingsMenu?: FC;
 	helpContent?: ReactNode;
 	children: ReactNode;
@@ -14,6 +15,7 @@ type ModuleProps = {
 const Module: FC<ModuleProps> = ({
 	title,
 	initialDisplayIndex,
+	showArrows=true,
 	titlePosition='top',
 	settingsMenu: SettingsMenu,
 	helpContent,
@@ -88,12 +90,14 @@ const Module: FC<ModuleProps> = ({
 				>
 					{title}
 				</span>
-			) : ( //top
+			) : titlePosition === 'top' ? ( //top
 				<span
 					className="absolute bg-theme-bg px-2 text-theme-text text-xs small-caps font-bold tracking-wide left-3 -translate-y-1/2"
 				>
 					{title}
 				</span>
+			) : ( //hidden
+				null
 			)}
 
 			{/* Button groups */}
@@ -120,7 +124,7 @@ const Module: FC<ModuleProps> = ({
 					</div>
 				)}
 			
-				<div>
+				{showArrows && (<div>
 					{showCollapseButton && (
 						<button className={buttonClass} onClick={handleCollapse}>
 							▲
@@ -131,14 +135,14 @@ const Module: FC<ModuleProps> = ({
 							▼
 						</button>
 					)}
-				</div>
+				</div>)}
 			</div>
 
 			{/* Content */}
 			<div className={`grid transition-[grid-template-rows] duration-300 ${
 				isCollapsed ? 'grid-rows-collapsed' : 'grid-rows-expanded'
 			}`}>
-				<div className="min-h-0 overflow-hidden">
+				<div className={`min-h-0 ${displayIndex === 0 ? "overflow-hidden" : ""}`}>
 					{/* Always put the near-collapsed state in the DOM - for the closing animation to work well */}
 					{childArray[Math.max(displayIndex - 1, 0)]}
 				</div>
