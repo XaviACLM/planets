@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <script>
+      // GitHub Pages SPA redirect: encode the path as a query param and redirect to index.html
+      var base = '/planets';
+      var path = window.location.pathname;
+      if (path.startsWith(base)) {
+        path = path.slice(base.length);
+      }
+      var search = window.location.search;
+      var hash = window.location.hash;
+      window.location.replace(base + '/?p=' + encodeURIComponent(path + search + hash));
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>

@@ -5,10 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/planets/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>planets</title>
-    <script type="module" crossorigin src="/planets/assets/index-C2pKPN3_.js"></script>
+    <script type="module" crossorigin src="/planets/assets/index-BFf5o8k4.js"></script>
     <link rel="stylesheet" crossorigin href="/planets/assets/index-BByV6awD.css">
   </head>
   <body>
+    <!-- GitHub Pages SPA redirect: restore real URL from 404.html query param -->
+    <script>
+      (function() {
+        var q = window.location.search;
+        if (q && q.startsWith('?p=')) {
+          var path = decodeURIComponent(q.slice(3));
+          window.history.replaceState(null, '', path);
+        }
+      })();
+    </script>
     <div id="root"></div>
   </body>
 </html>
