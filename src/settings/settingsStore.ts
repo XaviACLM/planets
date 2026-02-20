@@ -40,6 +40,8 @@ interface SettingsState {
 	setShowSignsInDispositorChains: (v: boolean) => void;
 	useArticleForMainAngles: boolean;
 	setUseArticleForMainAngles: (v: boolean) => void;
+	allowFloatingPlanetTable: boolean;
+	setAllowFloatingPlanetTable: (v: boolean) => void;
 
 	// Display options
 	theme: Theme;
@@ -135,6 +137,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 	setShowSignsInDispositorChains: (v) => set({ showSignsInDispositorChains: v }),
 	useArticleForMainAngles: false,
 	setUseArticleForMainAngles: (v) => set({ useArticleForMainAngles: v }),
+	allowFloatingPlanetTable: false,
+	setAllowFloatingPlanetTable: (v) => set({ allowFloatingPlanetTable: v }),
 
 	// Display options
 	theme: Theme.PARCHMENT,

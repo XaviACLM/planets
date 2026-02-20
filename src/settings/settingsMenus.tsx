@@ -57,6 +57,7 @@ const mainSettingsSpec: SettingsItem[] = [
 	checkbox('aspectsColorcoded', 'Colorcode aspects'),
 	checkbox('showSignsInDispositorChains', 'Show signs in dispositor chains'),
 	checkbox('useArticleForMainAngles', 'Use "the" for main angles'),
+	checkbox('allowFloatingPlanetTable', 'Allow Planet Table to detach from bottom of screen'),
 
 	separator(),
 

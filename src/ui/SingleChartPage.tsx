@@ -87,10 +87,14 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 	const zodiacMode = useSettingsStore(s => s.zodiacMode);
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 
+	// Selected nodes and aspect kinds - also settings
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	const setSelectedNodes = useSettingsStore(s => s.setSelectedNodes);
 	const selectedAspectKinds = useSettingsStore(s => s.selectedAspectKinds);
 	const setSelectedAspectKinds = useSettingsStore(s => s.setSelectedAspectKinds);
+
+	// Visual settings
+	const allowFloatingPlanetTable = useSettingsStore(s => s.allowFloatingPlanetTable);
 
 	const theme = useSettingsStore(s => s.theme);
 
@@ -107,6 +111,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [showModal, setShowModal] = useState<boolean>(true);
 	const tableScrollRef = useRef<HTMLDivElement>(null);
+	const tableScrollTarget = useRef<number>(0);
 	const [showScrollHint, setShowScrollHint] = useState(true);
 
 	// Node focus state
@@ -431,7 +436,9 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 					onClick={() => setHighlightedNode(null)}
 					onWheel={(e) => {
 						if (tableScrollRef.current) {
-							tableScrollRef.current.scrollBy({top: e.deltaY, behavior: 'smooth'})
+							tableScrollTarget.current += e.deltaY;
+							tableScrollTarget.current = Math.max(0, Math.min(tableScrollTarget.current, tableScrollRef.current.scrollHeight - tableScrollRef.current.clientHeight));
+							tableScrollRef.current.scrollTo({top: tableScrollTarget.current, behavior: 'smooth'});
 							if (e.deltaY > 0 && showScrollHint) setShowScrollHint(false);
 						}
 					}}
@@ -442,7 +449,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 						<div className="flex justify-center px-4 pointer-events-auto">
 							{planetTable}
 						</div>
-						<div style={{ height: '5%' }} />
+						<div style={{ height: allowFloatingPlanetTable ? '100%' : '5%' }} />
 					</div>
 					{floatingUI}
 					{scrollHint}
@@ -470,7 +477,9 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 					onClick={() => setHighlightedNode(null)}
 					onWheel={(e) => {
 						if (tableScrollRef.current) {
-							tableScrollRef.current.scrollBy({top: e.deltaY, behavior: 'smooth'})
+							tableScrollTarget.current += e.deltaY;
+							tableScrollTarget.current = Math.max(0, Math.min(tableScrollTarget.current, tableScrollRef.current.scrollHeight - tableScrollRef.current.clientHeight));
+							tableScrollRef.current.scrollTo({top: tableScrollTarget.current, behavior: 'smooth'});
 							if (e.deltaY > 0 && showScrollHint) setShowScrollHint(false);
 						}
 					}}
@@ -481,7 +490,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 						<div className="flex justify-center px-4 pointer-events-auto">
 							{planetTable}
 						</div>
-						<div style={{ height: '5%' }} />
+						<div style={{ height: allowFloatingPlanetTable ? '100%' : '5%' }} />
 					</div>
 					{floatingUI}
 					{scrollHint}
