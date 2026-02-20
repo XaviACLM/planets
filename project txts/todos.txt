@@ -6,8 +6,6 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 	might have been fixed when we didd the filtering subaspects thing
 	yeah i think we're good now... but let's be careful for a while
 
-make things not explode when location becomes null
-
 also things don't become null when i click enter on a no-results situation. What's up with that?
 
 

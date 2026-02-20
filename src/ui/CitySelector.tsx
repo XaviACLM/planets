@@ -10,7 +10,7 @@ interface CitySelectorProps {
 export function CitySelector({ selectedCity, defaultString, onSelect }: CitySelectorProps) {
 	const [ query, setQuery ] = useState<string>("");
 	const [ results, setResults ] = useState<CityData[]>([]);
-	const [ isLoading, setIsLoading ] = useState<boolean>(false);
+	//const [ isLoading, setIsLoading ] = useState<boolean>(false);
 	const [ localSelected, setLocalSelected ] = useState<CityData | null>(null);
 	const cseRef = useRef<CitySearchEngine|null>(null);
 
@@ -65,11 +65,15 @@ export function CitySelector({ selectedCity, defaultString, onSelect }: CitySele
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key !== 'Enter') return;
 		if (query.trim() === '') {
+			setQuery('');
 			setLocalSelected(null);
-			setResults([]);
 			onSelect(null);
 		} else if (results.length > 0) {
 			handleSelect(results[0]);
+		} else {
+			setQuery('');
+			setLocalSelected(null);
+			onSelect(null);
 		}
 	};
 
@@ -94,9 +98,11 @@ export function CitySelector({ selectedCity, defaultString, onSelect }: CitySele
 				onFocus={handleFocus}
 			/>
 
+			{/*
 			{isLoading && <div className="absolute top-full left-0 text-gray-500 text-sm pt-1">Loading...</div>}
+			*/}
 
-			{!isLoading && results.length>0 && (
+			{results.length>0 && (
 				<ul className="absolute top-full left-0 right-0 bg-theme-bg z-10 list-none m-0 p-0">
 					{results.map((r,i) => {
 						return (
