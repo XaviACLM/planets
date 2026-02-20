@@ -6,6 +6,7 @@ type ModuleProps = {
 	title: string;
 	initialDisplayIndex?: number;
 	showArrows?: boolean;
+	allowOverflow?: boolean;
 	titlePosition?: 'top' | 'left' | 'right' | 'hidden';
 	settingsMenu?: FC;
 	helpContent?: ReactNode;
@@ -16,6 +17,7 @@ const Module: FC<ModuleProps> = ({
 	title,
 	initialDisplayIndex,
 	showArrows=true,
+	allowOverflow=false,
 	titlePosition='top',
 	settingsMenu: SettingsMenu,
 	helpContent,
@@ -142,7 +144,7 @@ const Module: FC<ModuleProps> = ({
 			<div className={`grid transition-[grid-template-rows] duration-300 ${
 				isCollapsed ? 'grid-rows-collapsed' : 'grid-rows-expanded'
 			}`}>
-				<div className={`min-h-0 ${displayIndex === 0 ? "overflow-hidden" : ""}`}>
+				<div className={`min-h-0 ${displayIndex === 0 || !allowOverflow ? "overflow-hidden" : ""}`}>
 					{/* Always put the near-collapsed state in the DOM - for the closing animation to work well */}
 					{childArray[Math.max(displayIndex - 1, 0)]}
 				</div>

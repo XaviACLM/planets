@@ -185,6 +185,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 			title=""
 			initialDisplayIndex={1}
 			showArrows={false}
+			allowOverflow={true}
 			titlePosition={'hidden'}
 		>
 			<PickerBar />

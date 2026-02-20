@@ -6,7 +6,7 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 	might have been fixed when we didd the filtering subaspects thing
 	yeah i think we're good now... but let's be careful for a while
 
-TONIGHT saturn image in the PlanetPanel now clips weirdly because of how we changed that overflow stuff. We could change it in sidebar too but do we want to? Do we just have to expose an allowOverflow: boolean prop on the Module? Well, I guess that's fine.
+TONIGHT planetPanel right margin is wrong. check others, too.
 
 
 
