@@ -54,10 +54,11 @@ function aspectPathData(aspect: Aspect, nodeAngles: Map<Node, number>, aspectRad
 	}
 }
 
-function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, aspects, highlightedAspect, highlightedNode, setHighlightedNode }: {
+function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, highlightMainAxes, aspects, highlightedAspect, highlightedNode, setHighlightedNode }: {
 	nodePositions: NodePositions,
 	zodiacSignPositions: ZodiacSignPositions,
 	houseCuspPositions: HouseCuspPositions | null,
+	highlightMainAxes: boolean,
 	aspects: Aspect[],
 	highlightedAspect: Aspect | null,
 	highlightedNode: Node | null,
@@ -162,10 +163,6 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 				
 				{/*Equinox (equator) line for parallels*/}
 				{(() => {
-					const isHighlighted = highlightedAspect !== null && (
-						highlightedAspect.kind === AspectKind.PARALLEL
-						|| highlightedAspect.kind === AspectKind.CONTRAPARALLEL);
-					
 					// autumnal and vernal equinoxes
 					const radOuter = aspectRadius - 1;
 					const radInner = symbolSize/2 + 0.5;
@@ -193,6 +190,41 @@ function ZodiacWheel({ nodePositions, zodiacSignPositions, houseCuspPositions, a
 							fill="none"
 							stroke="var(--color-text)"
 							strokeWidth={strokeWidthTertiary}
+						/>
+					);
+				})()}
+
+				{/*Equinox (equator) line for parallels*/}
+				{(() => {
+					if (!highlightMainAxes || !nodePositions.hasSurfacePosition()){
+						return null;
+					}
+					
+					const aHor = nodeAngles.get(Node.ASCENDANT)!;
+					const aMer = nodeAngles.get(Node.IMUM_COELI)!;
+					
+					const xAsc = 50 + radius * Math.cos(aHor);
+					const yAsc = 50 - radius * Math.sin(aHor);
+					const xDsc = 50 + radius * Math.cos(aHor + Math.PI);
+					const yDsc = 50 - radius * Math.sin(aHor + Math.PI);
+					const xIc = 50 + radius * Math.cos(aMer);
+					const yIc = 50 - radius * Math.sin(aMer);
+					const xMc = 50 + radius * Math.cos(aMer + Math.PI);
+					const yMc = 50 - radius * Math.sin(aMer + Math.PI);
+					const pathData = [
+						`M ${xAsc} ${yAsc}`,
+						`L ${xDsc} ${yDsc}`,
+						`M ${xIc} ${yIc}`,
+						`L ${xMc} ${yMc}`,
+					].join(" ");
+					
+					return (
+						<path
+							key={100000}
+							d={pathData}
+							fill="none"
+							stroke="var(--color-text)"
+							strokeWidth={strokeWidthPrimary}
 						/>
 					);
 				})()}

@@ -113,6 +113,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 	const tableScrollRef = useRef<HTMLDivElement>(null);
 	const tableScrollTarget = useRef<number>(0);
 	const [showScrollHint, setShowScrollHint] = useState(true);
+	const [highlightMainAxes, setHighlightMainAxes] = useState(false);
 
 	// Node focus state
 	const [highlightedNode, setHighlightedNode] = useState<Node | null>(null);
@@ -260,7 +261,10 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 			settingsMenu={HemisphereSettingsMenu}
 			helpContent={<OrientationHelp />}
 		>
-			<HemispheresChart nodePositions={nodePositions} />
+			<HemispheresChart
+				nodePositions={nodePositions}
+				setIsChartHovered={setHighlightMainAxes}
+			/>
 		</Module>
 	) : null;
 
@@ -341,6 +345,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 					zodiacSignPositions={zodiacSignPositions}
 					houseCuspPositions={houseCuspPositions}
 					aspects={flattenedAspects}
+					highlightMainAxes={highlightMainAxes}
 					highlightedAspect={highlightedAspect}
 					highlightedNode={highlightedNode}
 					setHighlightedNode={setHighlightedNode}

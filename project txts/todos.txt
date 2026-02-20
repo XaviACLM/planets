@@ -20,7 +20,7 @@ typecheck
 
 MISC FOR NOW
 
-TONIGHT some way of highlighting the main axes on the chart. maybe the ecliptic also? maybe when hovering sth relevant, like hemispheres chart or this or that 
+-
 
 
 
@@ -51,6 +51,8 @@ maybe bicharts too tbh
 
 
 MISC FOR LATER
+
+the titles in the expanded dominance chart are a bit too loud
 
 moon phases (when is this relevant, if at all? and where? just planet panel or mb horary astrology wants it in the chart summary?)
 

@@ -7,10 +7,6 @@ import { useSettingsStore } from '../settings/settingsStore.ts'
 import { NodesToConsider } from '../defs/settingsDefs.ts'
 import { renderString, svgHatchDefs } from './renderPrimitives.tsx'
 
-type HemispheresChartProps = {
-	nodePositions: NodePositions,
-}
-
 function capitalize(sentence: string): string {
 	return String(sentence).charAt(0).toUpperCase() + String(sentence).slice(1);
 }
@@ -93,8 +89,16 @@ function generateNodesPerRow(nNodes: number): number[]{
 	return nodesPerRow;
 }
 
+type HemispheresChartProps = {
+	nodePositions: NodePositions,
+	setIsChartHovered?: (isHovered: boolean) => void,
+	onDelete: (aspect: Aspect, parentAspect: Aspect | null) => void,
+	onHover: (aspect: Aspect | null) => void,
+}
+
 const HemispheresChart: FC<HemispheresChartProps> = ({
 	nodePositions,
+	setIsChartHovered = (_:boolean) => {},
 }) => {
 	const showNodeLabelsSetting = useSettingsStore(s => s.showNodeLabels);
 	const whichNodes = useSettingsStore(s => s.nodesInHemispheresChart);
@@ -330,22 +334,6 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 		);
 	};
 	
-	const createFillerRectangle = (width: number) => {
-		const { defs, fill } = svgHatchDefs({ dotSize: 1, spacing: 3.5 });
-		return (
-			<svg width={width} height={height}>
-				{defs}
-				<rect
-					x={0}
-					y={0}
-					width={width}
-					height={height}
-					fill={fill}
-				/>
-			</svg>
-		);
-	};
-	
 	return (
 		<div className="text-theme-text p-4">
 		
@@ -354,13 +342,12 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 			<hr className="opacity-50 my-2"/>
 			
 			{/*quadrants chart*/}
-			<div className="flex justify-center gap-0">
-				{false && createFillerRectangle(15)}
-				{false && createHemispheresChart(250)}
-				{false && createFillerRectangle(15)}
-				{createFillerRectangle(0)}
+			<div
+				className="flex justify-center gap-0"
+				onMouseEnter={(e) => { setIsChartHovered(true); }}
+				onMouseLeave={(e) => { setIsChartHovered(false); }}
+			>
 				{createHemispheresChart(310)}
-				{createFillerRectangle(0)}
 			</div>
 			
 		</div>
