@@ -18,7 +18,7 @@ const RulershipPanel: FC<RulershipPanelProps> = ({
 	useSettingsStore(s => s.showSignsInDispositorChains);
 	
 	return (
-		<div className="text-theme-text p-4" style={{ width: 330 }}>
+		<div className="text-theme-text p-4">
 			<div>
 				{renderTitle("Final Dispositors")}
 				<div className="mt-2">

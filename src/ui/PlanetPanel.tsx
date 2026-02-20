@@ -414,7 +414,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	}
 
 	return (
-		<div className="text-theme-text p-4" style={{ width: 330 }}>
+		<div className="text-theme-text p-4">
 			{/* Planet Header with Navigation */}
 			<div className="flex items-center justify-between mb-2">
 				<button

@@ -6,8 +6,6 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 	might have been fixed when we didd the filtering subaspects thing
 	yeah i think we're good now... but let's be careful for a while
 
-TONIGHT planetPanel right margin is wrong. check others, too.
-
 
 
 ETERNAL PRE-RELEASE CHECKLIST
