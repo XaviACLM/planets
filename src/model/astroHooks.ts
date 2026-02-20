@@ -51,10 +51,13 @@ export function useAspects(
 	}, [fullAspects, selectedNodes, selectedAspectKinds, aspectPhysicalityFilter, hamburgPhysical]);
 
 	// aspects, filtered, in the format imposed by the aspect menu mode
-	const [aspects, setAspects] = useState<Map<Aspect, Aspect[]>>(() => formatAspects(filteredAspects, aspectMenuMode));
-	useEffect(() => {
-		setAspects(formatAspects(filteredAspects, aspectMenuMode));
-	}, [filteredAspects, aspectMenuMode])
+	const computedAspects = useMemo(() => formatAspects(filteredAspects, aspectMenuMode), [filteredAspects, aspectMenuMode]);
+	const [aspects, setAspects] = useState(computedAspects);
+	const [prevComputed, setPrevComputed] = useState(computedAspects);
+	if (computedAspects !== prevComputed) {
+		setPrevComputed(computedAspects);
+		setAspects(computedAspects);
+	}
 
 	// aspects, flattened down to a single list for processing in UI components
 	// (this might be possible to do w/ enforced redundancy but unnecessary and much too complicated, even considering the above)

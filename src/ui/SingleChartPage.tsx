@@ -153,7 +153,7 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 		return RulershipGraph.create(nodePositions, zodiacSignPositions, dignityMode);
 	}, [nodePositions, zodiacSignPositions, dignityMode])
 
-	// filtered / formatted / flattened aspect objects synced to the chart
+	// filtered + formatted / flattened aspect objects synced to the chart
 	const { aspects, setAspects, flattenedAspects } = useAspects(
 		nodePositions,
 		selectedNodes,

@@ -8,6 +8,8 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 
 make things not explode when location becomes null
 
+also things don't become null when i click enter on a no-results situation. What's up with that?
+
 
 
 ETERNAL PRE-RELEASE CHECKLIST
@@ -21,6 +23,8 @@ typecheck
 
 
 MISC FOR NOW
+
+make it so that the datetime/location picker uses module ( -> make it so that module allows for no title + no collapsability )
 
 update help menus
 	re nodes (node selector, probably planet panel)
