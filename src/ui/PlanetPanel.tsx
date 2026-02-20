@@ -65,6 +65,10 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 	const houseAngularityMode = useSettingsStore(s => s.houseAngularityMode);
 	const hamburgSchoolMode = useSettingsStore(s => s.hamburgSchoolMode);
+	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
+	
+	const isSelectedNodePhysical = nodeTypes[selectedNode] === NodeType.BODY
+		|| (nodeTypes[selectedNode] === NodeType.HYPOTHETICAL && hamburgPhysical);
 	
 	// locally unused, render dependency
 	// ( = these lines here to force rerender if these values change)
@@ -98,10 +102,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 
 	// Build ordered list of nodes by longitude for arrow navigation
 	const orderedNodes = useMemo(() => {
-		const nodes = Array.from(selectedNodes).filter(node => {
-			// Exclude nodes that depend on location if no surface position
-			return hasSurfacePosition || !nodeDependsOnLocation[node];
-		});
+		const nodes = Array.from(selectedNodes).filter(node => nodePositions.has(node));
 		return nodes.sort((a, b) => {
 			const lonA = nodePositions.get(a);
 			const lonB = nodePositions.get(b);
@@ -312,9 +313,8 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 					/>
 					<circle cx="50%" cy="50%" r={planetImageWidth/2} fill="url(#innerShadow)" filter="url(#boost-alpha)" opacity="1"/>
 				</>) : !arabicParts.includes(selectedNode) && (<>
-					{/* TODO account for hamburg / hamburg physical */}
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.50} stroke="var(--color-text)" opacity="0.5"
-						fill="var(--color-text)" fillOpacity={nodeTypes[selectedNode] === NodeType.BODY ? "0.5" : "0"}/>
+						fill="var(--color-text)" fillOpacity={isSelectedNodePhysical ? "0.5" : "0"}/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.45} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 					<circle cx="50%" cy="50%" r={planetImageWidth*0.40} stroke="var(--color-text)" opacity="0.5" fill="none"/>
 				</>)}
@@ -326,7 +326,7 @@ const PlanetPanel: FC<PlanetPanelProps> = ({
 						href={kuficCompositions[selectedNode]}
 						width={planetImageWidth}
 						height={planetImageWidth}
-						filter={isDarkTheme ? "" : "invert(1) var(--icon-filter) url(#subtleGlow)"}
+						filter={"invert(1) var(--icon-filter) url(#subtleGlow)"}
 						transform={imageTransform}
 						opacity={0.75}
 					/>

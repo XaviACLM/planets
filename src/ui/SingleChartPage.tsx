@@ -179,8 +179,6 @@ export default function SingleChartPage({ useChartInputs }: SingleChartPageProps
 
 	// ── Extracted component instances ──────────────────────────────────
 
-	// TODO: PickerBar should be wrapped in a Module component
-
 	const pickerBarModule = (
 		<Module
 			title=""

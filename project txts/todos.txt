@@ -5,8 +5,12 @@ it's kinda weird that if we're in pointwise-max and we claim this is equivalent 
 	
 	might have been fixed when we didd the filtering subaspects thing
 	yeah i think we're good now... but let's be careful for a while
+	
+	no, something is still wrong. finger of yod w error 2.59, all thresholds at 3, but no susbaspects. sextile is selected - why isn't it showing up? varuna-makemake
+	no like really. e.g. t-square appears bc error below 3 which should imply all subaspect errors are below 3 and all kinds are selected and at most 1 nonphys so it SHOULD appears
+	why doesn't it? we'll look into it
 
-
+	
 
 ETERNAL PRE-RELEASE CHECKLIST
 
@@ -14,9 +18,11 @@ make sure stuff still looks right in darkmode
 
 make sure stuff doesn't break in 13 houses mode
 
+make sure stuff doesn't break in surfaceposition but no houses but p.death mode
+
 search todo
 
-typecheck
+and then typecheck
 
 
 
@@ -89,7 +95,9 @@ param presets (copy astro.com defaults and other webpages, have as a button on t
 
 
 MISC BUT NONTRIVIAL
-	
+
+actually do the gd topocentric houses
+
 rulership graph but an actual graph width d3js. Probably rerender a few times to make sure it works good... and/or have some custom code that lays it out in a way that facilitates it expanding into a normal layout ( separate components vertically, each gets the cycle radially in the center, other stuff in concentric rings fenagled to be close to their ruler - and with a half second of "loading" so the graph has time to settle into something normal-looking
 
 update aspects. two notes. in no longer works with all nodes but only those selected.

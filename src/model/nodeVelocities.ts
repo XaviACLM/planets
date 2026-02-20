@@ -111,7 +111,6 @@ class NodeVelocities {
 		newProgressedPositions: NodePositions,
 		changedNodes: Node[],
 	): NodeVelocities {
-		// TODO will this error out if hdArabicParts passed but hcp null => no arabic part pos?
 		const newVelocities = recomputeVelocitiesForNodes(
 			newBasePositions, newProgressedPositions, this._timeDeltaMs,
 			this._velocities, changedNodes

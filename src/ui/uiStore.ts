@@ -9,7 +9,7 @@ interface UIState {
 
 export const useUIStore = create<UIState>((set) => ({
 	moduleDisplayStates: {},
-	setModuleDisplayState: (id, index) => set((state) => ({ //TODO do I need a ...state here?
+	setModuleDisplayState: (id, index) => set((state) => ({
 		moduleDisplayStates: {
 			...state.moduleDisplayStates,
 			[id]: index,

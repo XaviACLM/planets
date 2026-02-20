@@ -456,7 +456,7 @@ function computePolichPageCusp(c: number, p1: number, p2: number, tp1: number, t
 	}
 }
 
-// TODO works, but is not close to placidus. Are some of the calculations wrong?
+// works, but is not close to placidus. Are some of the calculations wrong?
 // ugh... another serious release blocker
 // tried three other ways, none worked. see scripts/discarded.ts
 // we'll just remove this from the options for now.

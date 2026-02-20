@@ -8,7 +8,6 @@ import FixedStarPositions from './fixedStarPositions.ts';
 
 // Will throw if no surface position (ASCENDANT/DESCENDANT absent from nodePositions)
 export function isNodeAboveHorizon(node: Node, nodePositions: NodePositions): boolean {
-	// TODO this and the function below are silly. You can do this in one line if you take advantage of the fact that asc/dsc (and mc/ic) are always 180º apart. dumbass.
 	const lon = nodePositions.get(node);
 	const asc = nodePositions.get(Node.ASCENDANT);
 	const dsc = nodePositions.get(Node.DESCENDANT);

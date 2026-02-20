@@ -37,7 +37,6 @@ export const renderSmallcapsString = (
 	options: TextRenderOptions = {}
 ): ReactNode => {
 	const { fontSize = DEFAULT_TEXT_SIZE } = options;
-	// TODO for a really long time this used font-bold. still unsure.
 	return (
 		<span className="small-caps" style={{ fontSize }}>
 			{str}

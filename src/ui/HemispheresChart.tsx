@@ -106,15 +106,20 @@ const HemispheresChart: FC<HemispheresChartProps> = ({
 	const selectedNodes = useSettingsStore(s => s.selectedNodes);
 	
 	const nodesInConsideration = useMemo(() => {
-		if (whichNodes === NodesToConsider.STANDARD) {
-			return standardNodes;
-		} else if (whichNodes === NodesToConsider.ALL) {
-			return Array.from(selectedNodes)
-				.filter(node => !mainAngles.includes(node));
-		} else {
-			return Array.from(selectedNodes)
-				.filter(node => nodeTypes[node] === NodeType.BODY || (hamburgPhysical && nodeTypes[node] === NodeType.HYPOTHETICAL))
-				.filter(node => !mainAngles.includes(node));
+		switch (whichNodes) {
+			case NodesToConsider.STANDARD:
+				return Array.from(selectedNodes)
+					.filter(node => standardNodes.includes(node))
+					.filter(node => nodePositions.has(node));
+			case NodesToConsider.PHYSICAL:
+				return Array.from(selectedNodes)
+					.filter(n => nodeTypes[n] === NodeType.BODY || (nodeTypes[n] === NodeType.HYPOTHETICAL && hamburgPhysical))
+					.filter(node => !mainAngles.includes(node))
+					.filter(node => nodePositions.has(node));
+			case NodesToConsider.ALL:
+				return Array.from(selectedNodes)
+					.filter(node => !mainAngles.includes(node))
+					.filter(node => nodePositions.has(node));
 		}
 	}, [whichNodes, selectedNodes, hamburgPhysical])
 	

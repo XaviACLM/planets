@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react';
-import { Node, NodeType, nodeTypes, standardNodes, mainAngles, nodeDependsOnLocation, HouseAngularity } from '../defs/astroDefs';
+import { Node, NodeType, nodeTypes, standardNodes, mainAngles, nodeDependsOnLocation, HouseAngularity, planetSects } from '../defs/astroDefs';
 import { NodesToConsider } from '../defs/settingsDefs';
 import { getNodeAverageSpeed } from '../defs/astroData';
 import { Aspect, filterAspectsByNode, getAspectsSummaryData } from '../model/aspects';
@@ -138,34 +138,22 @@ function computeRowData(
 function getNodesForMode(
 	mode: NodesToConsider,
 	selectedNodes: Set<Node>,
-	hasSurfacePosition: boolean,
+	nodePositions: NodePositions,
+	hamburgPhysical: boolean,
 ): Node[] {
-	let nodes: Node[];
 	switch (mode) {
 		case NodesToConsider.STANDARD:
-			nodes = [...standardNodes];
-			break;
+			return Array.from(selectedNodes)
+				.filter(node => standardNodes.includes(node) || node === Node.ASCENDANT || node === Node.MIDHEAVEN)
+				.filter(node => nodePositions.has(node));
 		case NodesToConsider.PHYSICAL:
-			nodes = Array.from(selectedNodes)
-				.filter(n => nodeTypes[n] === NodeType.BODY);
-			break;
+			return Array.from(selectedNodes)
+				.filter(n => nodeTypes[n] === NodeType.BODY || (nodeTypes[n] === NodeType.HYPOTHETICAL && hamburgPhysical))
+				.filter(node => nodePositions.has(node));
 		case NodesToConsider.ALL:
-			nodes = Array.from(selectedNodes);
-			break;
+			return Array.from(selectedNodes)
+				.filter(node => nodePositions.has(node));
 	}
-
-	// Always include ASC and MC if we have a surface position
-	if (hasSurfacePosition) {
-		if (!nodes.includes(Node.ASCENDANT)) nodes.push(Node.ASCENDANT);
-		if (!nodes.includes(Node.MIDHEAVEN)) nodes.push(Node.MIDHEAVEN);
-	}
-
-	// Filter out location-dependent nodes if no surface position
-	if (!hasSurfacePosition) {
-		nodes = nodes.filter(n => !nodeDependsOnLocation[n]);
-	}
-
-	return nodes;
 }
 
 // ============================================================================
@@ -182,8 +170,9 @@ function getCellApplicability(node: Node, column: string, hasSurfacePosition: bo
 		case 'face':
 		case 'bound':
 		case 'triplicity':
-		case 'sect':
 			return isStandard ? 'applicable' : 'not-applicable';
+		case 'sect':
+			return node in planetSects ? 'applicable' : 'not-applicable';
 		case 'house':
 			return hasSurfacePosition ? 'applicable' : 'no-data';
 		case 'angleProx':
@@ -249,6 +238,8 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	const dignityMode = useSettingsStore(s => s.dignityMode);
 	const houseAngularityMode = useSettingsStore(s => s.houseAngularityMode);
 	const lunarNodeMode = useSettingsStore(s => s.lunarNodeMode);
+	const hamburgPhysical = useSettingsStore(s => s.hamburgPhysical);
+	
 	const stationaryThreshold = useSettingsStore(s => s.stationarySpeedPercentageThreshold) / 100;
 	const useExtendedDignities = useSettingsStore(s => s.useExtendedDignities);
 	const faceMode = useSettingsStore(s => s.faceMode);
@@ -278,8 +269,8 @@ const PlanetTable: FC<PlanetTableProps> = ({
 	);
 
 	const nodes = useMemo(
-		() => getNodesForMode(nodesToConsider, selectedNodes, hasSurfacePosition),
-		[nodesToConsider, selectedNodes, hasSurfacePosition]
+		() => getNodesForMode(nodesToConsider, selectedNodes, nodePositions, hamburgPhysical),
+		[nodesToConsider, selectedNodes, nodePositions, hamburgPhysical]
 	);
 
 	const rows: NodeRowData[] = useMemo(() => {
@@ -304,7 +295,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 
 	const renderInapplicableCell = (width: number) => (
 		<div className={cellClass} style={{ width, height: ROW_H }}>
-			<span className="text-theme-text opacity-20 text-xs">—</span>
+			<span className="text-theme-text opacity-30 text-xs">N/A</span>
 		</div>
 	);
 
@@ -493,7 +484,9 @@ const PlanetTable: FC<PlanetTableProps> = ({
 
 						{/* Aspects count */}
 						{renderCell(
-							renderString(String(row.nAspects), { fontSize: TEXT_SIZE }),
+							row.nAspects > 0
+								? renderString(String(row.nAspects), { fontSize: TEXT_SIZE })
+								: <span className="opacity-40">{renderString("0", { fontSize: TEXT_SIZE })}</span>,
 							COL.aspects,
 						)}
 
@@ -501,7 +494,7 @@ const PlanetTable: FC<PlanetTableProps> = ({
 						{renderCell(
 							row.nConfigurations > 0
 								? renderString(String(row.nConfigurations), { fontSize: TEXT_SIZE })
-								: <span className="opacity-30">{renderString("0", { fontSize: TEXT_SIZE })}</span>,
+								: <span className="opacity-40">{renderString("0", { fontSize: TEXT_SIZE })}</span>,
 							COL.configs,
 						)}
 
