@@ -1,68 +1,37 @@
 *Planets* is an astrology website. Its main selling points are that it looks neat and has more configuration options than anyone could possibly need.
 
-![Screengrab image](https://i.imgur.com/qRixdfN.png "This is my birth chart - feel free to interpret it for me :)")
+![Screengrab image](https://i.imgur.com/4u3RcID.png "This is my birth chart - feel free to interpret it for me :)")
 
-**Features.** Standard zodiac wheel for any date/time/location. Customizable nodes - all planets, all relevant minor objects, all lunar nodes (true or mean, incl. Lilith and Selene), primary angles, and Fortuna. Tropical/sidereal toggle with all in-use ayanamsa. All major house systems excl. Placidus and derivates. Automatic aspect detection, incl. parallels/contraparallels in their own diagram. All behenian and persian royal stars. 
+**Features.** Standard zodiac wheel for any date/time/location. Summary (extensible) panels about chart orientation, element/mode dominance, and rulership graph. Fast+robust automatic aspect detection, incl. configurations. Panel & table with complete information about each node (all the above + dignity state, speed, sect status, house angularity, etc). Extensive visual & logical customization.
 
-**Conspicuously absent features.** There are two todos in the way of this being feature-complete - namely time-based house systems (placidus particularly) and a rework of aspects system. Neither of these are all that relevant to the end user (placidus is hardly distinguishable from porphyrius, and the current aspects system works *fine*), but I don't intend to call this project complete before these features are added.
+**Philosophy.** The website does *not* do any interpretation whatsoever re: the data it presents - it's oriented at users who intend to do this interpretation on their own. This is partly to limit the scope, partly because it aligns with the intended "dense, confusing dashboard" aesthetic.
 
-**Notes about implementation.** All the logic is written in typescript, and no external API calls are made. Most of the calculations that need to be done take place specifically in the repository's code, with the exception of the major celestial bodies that `astronomy-engine` gives you for free. There's no real reason to do this - typescript bindings of swissephemeris exist - but I figured it was more fun to do it this way.
+**Customizability.** The website can display any combination of the nodes its supports, with are as follows: luminaries, standard planets, angles (incl anti/vertex and equinoxes), arabic parts (all 14 in "standard" modern usage), lunar nodes (all 4, with mean/true calculation toggle), 27 minor TNOs, and all 8 Hamburg School objects ("hypothetical TNOs", toggleable Witte/Neely parameter sets). Aspects are also customizable, including all major configurations and binary aspects (incl. contra/parallels) and 16 minor binary aspects. The website offers a fair amount of visual customization options - see [this example](https://i.imgur.com/4BHmrcS.png). The website also offers extensive logical customization - all major house systems and [a bunch of other options](https://i.imgur.com/mVfzGHh.png).
+
+**Roadmap.** The website essentially works as well as I could've intended when I started making it. Obviously projects have a way of growing in their scope, though, and given how happy I am with the state of this one, I'd like to add a few more features to bring it to the point of actually being generally useful to the astrology community.
+
+- In the short term, this only really requires two significant additions: support for horary astrology and for bicharts. The codebase is modular enough that adding these two things should be relatively feasible. Tying it together with a little bit of new logic/UI for returns, transits, progressions, etc, and a nice landing page (and a name!) would comfortably bring the website to usable. It'd also be good to add mobile support: technically this already exists but it has a few bugs + could be better in general.
+
+- In the long term, who knows. There are several things I might want to pursue:
+
+	- The most obvious target is electional astrology. It'd be easy to add some rudimentary UI to explore different places/times, but this is hardly worthwhile to the end user. This is a long-term thing, though, because there is a lot up in the air about what an "electional astrology engine" should even _be,_ and whatever it is it will surely require a lot of new logic. There is a first draft re: how this might work in the todo file in project txts.
+
+	- It'd also be good to add support for more things that don't fall under the umbrella of standard modern western astrology. There's many of these all over the nicheness scale, e.g. from less to more niche one could add suport for Vedic astrology, fixed star business, Uranian astrology, or all 400+ preserved Arabic parts.
+
+	- LLMs: I think it'd be a fun idea to try to use all the model/logic of the website to build a harness for an LLM to actually be able to read these charts. This is pretty hairy though, not only re: implementation/integration complexity, but also because I'd need to work with someone who actually practices astrology to ensure that the output is good. Moreover this is all well and good as a fun side project, actually deploying it to users would require monetization - and turning this website into an income stream isn't on the horizon for now.
+
+And there are, of course, a million little todos. I keep thinking the rulership graph should be drawn as an actual graph. I still need to add the topocentric house system. I want to further optimize the aspect finding algorithm. Etc.
+
+### Notes
+
+**About robustness.** The website makes an effort to avoid putting any restrictions on how the customization options can be combined - so e.g. if you're working with Berg-style 13-sign astrology and decide you're using a whole-sign-style house system, that _will_ result in having 13 houses and the website is okay with and can work with it, e.g. assigning an angularity to this thirteenth house when required. The website does notice and react accordingly to actually invalid parameter sets, e.g. it will warn the user and offer another option if their house system is undefined for the given time/location.
+
+**About implementation.** There is no backend, all of the logic is local and written in typescript, no external API calls are involved. astronomy-engine handles most coordinate transforms and finding the positions of the major bodies. Everything is performant, but aspect calculation can take a second or so on mobile. The state (/updating) logic is a bit complex, but this is compartmentalized and by design. The main objects holding the data about the chart (e.g. node positions, node velocities...) are separate and immutable, but offer certain functions to produce update copies of themselves (e.g. node positions -> give me a copy of yourself which uses true instead of mean lunar node positions). React is not intended to detect fine-grained changes like this, so specific coupling logic is defined (in astroHooks.ts) that knows how to react (what to recompute, in what order) to any change in the parameters. This is relatively clean internally (every single parameter corresponds to a single useEffect that knows what to recompute, and these useEffects work simply by calling a few of the aforementioned updating functions, which are uncoupled from both the broader updating logic and the state object's own logic) and externally (client code only needs to call the main chart hook with all relevant state parameters, and it obtains a bunch of state objects that all efficiently and immediately update themselves in response to parameter changes within one render cycle). 
+
+**About Claude.** Claude has been used for this project, but only for relatively minor things and with constant oversight. I'm not opposed to letting Claude do most of the work (see [here](https://github.com/XaviACLM/isspiss)), but this would not really fit with the idea of this project, and I have no intention of maintaining the necessary spec.
 
 **About this project.** This started largely because I wanted to get more comfortable with React/ts. I chose to make an astrology website for no other reason than because I thought it would be funny to do so in the style I call [CIA dashboards.](https://i.imgur.com/nEAw7nd.png) In the process of doing this I had to learn about astrology (go figure), which led me to realize that there's loads of competing standards for almost everything and no website that accomodates all of them - so I set off in that direction and gradually grew to like the idea of doing this as a gift for a group of people who have absolutely nothing in common with me (namely, astrologers invested enough to care about the difference between Selene and Artha). The math is pretty neat, too.
 
-**About astrology.** No, I don't believe in it. I think it gets a bad rap - it's very interesting as a subject, and it's very easy to imagine how - before light pollution - you could've come up with something like this yourself, ascribing meaning to the few stars that wander across the celestial background. It's very natural - and interesting to observe in retrospect - how all major ancient civilizations with surviving records have their own interpretation re: the ecliptic, precession, retrograde, the constellations, etc, and how all these combine into modern astrological practice.
+**About astrology.** I don't think I believe in it. I do think it gets a bad rap - it's very interesting as a subject, and it's very easy to imagine how - before light pollution - you could've come up with something like this yourself, ascribing meaning to the few stars that wander across the celestial background. It's very natural - and interesting to observe in retrospect - how all major ancient civilizations with surviving records have their own interpretation re: the ecliptic, precession, retrograde, the constellations, etc, and how all these combine into modern astrological practice.
 
-**About the name.** Planets is just the name of the project folder. I'll give this a proper name if I ever put it on a standalone website.
-
-### TODOs
-
-#### Minor, corrections, double-checking
-
-- Figure out why datetime widget crashes when receiving keyboard input
-- Lunar apogee/perigee calculations - the difference from mean to true mode is larger than one would expect, at times. The Meeus polynomial or the calculations might have some typo.
-- Space-based house systems. Need to find a primary source for them.
-
-#### Major, required
-
-- Explainers - **?** icons next to anything nonobvious, with a toggle to hide them.
-- Time-based house systems (~Placidus~, ~Koch~, Topocentric, etc)
-- Aspects rework
-    - ~Standard format: All angles 0-2pi, all angles in order~
-    - Display errors (orbs) in degrees instead of radians
-    - ~All aspects~:
-        - ~Minor binary: quincunx (150º), semi-sextile (30º), quintile (72º), semi-square (45º), sesquiquadrate (135º), biquintile (144º), septile (2rad/7)~
-        - ~Others: T-Square, kite, yod, mystic rectangle~
-        - Will have to think about the symbols for these - [wikipedia](https://en.wikipedia.org/wiki/Astrological_symbols) has them, but without grands.
-    - Search takes max-non-physical params
-    - Menu to customize physical node requirements (w shortcuts)
-    - ~Subaspects~
-    - ~Lightweight node subset identifiers (for subaspect exclusion)~
-    - Subaspect menu
-    - Customizable diagram colorcoding
-    - Rethink the quantiles
-    - ~Decide on how to re/compute these~
-
-#### Later
-
-- True symbol ranges (with Ophiuchus)
-- ~Hamburg school objects ("trans-neptunian/hypothetical"). Would be easy if we go off some secondary source but it's very unclear how Witte originally defined these. No intent to make a fully customizable menu for harmonics, just Cupido, Hades, Admetos, etc.~
-- Full hamburg school support (but how, exactly?)
-- ~Really, no reason not to include every single small object [with an astrological symbol](https://en.wikipedia.org/wiki/Astrological_symbols) as long as we can find their orbital parameters in the jpl api (`scripts/small body parameter fetcher.py`).~
-- Other arabic parts. See [source](https://horoscopes.astro-seek.com/astrology-arabic-lots-list). As explained in `src/astro.ts`, we need to make some decisions about how/if to integrate other arabic parts.
-- Better fixed stars, conjunction indicator - integrate with the parallel diagram or put it in another.
-- ISS node (with the toilet api)
-- Mouseover on a node shows only aspects incident on that node
-- Toggle for nodes with multiple icons (e.g. Uranus) or names (e.g. all lunar nodes)
-- Better shadow: Fadein, and extend to no-icon-required nodes.
-- Draw some actual constellations (but where?)
-- Astrology for martians
-- Obliquity toggle (for pluto particularly - also ISS)
-    - This requires a lot of thinking. Will need to change the data model and how most of the graphs work.
-- More tiny graph widgets. This is the key part of the CIA aesthetic. Some ideas:
-    - Bar chart for amt of physical/nodes in each sign/house.
-    - Bar chart - aspects per node. Or dot matrix plot for aspects x nodes.
-    - Some graph to indicate what is/isn't in retrograde.
-    - Really, what we should be doing is thinking about what information is missing. We'll work out how to put it in graph form later. So:
-    - Rulership cycles (own sign, mutual reception, possibly higher order cycles?) (there's competing standards for rulership assignment)
-    - Which planets are asc/dsc. Possibly just a panel for specific information on a planet (node): sign, house, aspects, asc/dsc, retrograde, hemisphere & quadrant, sign of exaltation/detriment/fall.
-    - Elements/modes in dominance among the inner/outer planets.
+**About the name.** Planets is just the name of the project folder. I'll decide on the name when I get around to making the landing page.
